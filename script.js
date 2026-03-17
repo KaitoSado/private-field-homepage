@@ -17,7 +17,15 @@ const entranceSection = document.getElementById("entrance");
 const heroInteraction = document.getElementById("hero-interaction");
 const heroGlow = document.getElementById("hero-glow");
 const heroRippleLayer = document.getElementById("hero-ripple-layer");
-const storageKey = "private-field-content-v2";
+const draftStorageKey = "private-field-content-draft-v1";
+const legacyStorageKeys = ["private-field-content-v2"];
+const tokenStorageKey = "private-field-github-token";
+const repoConfig = {
+  owner: document.querySelector('meta[name="github-owner"]')?.content?.trim() || "",
+  repo: document.querySelector('meta[name="github-repo"]')?.content?.trim() || "",
+  branch: document.querySelector('meta[name="github-branch"]')?.content?.trim() || "main",
+  contentPath: document.querySelector('meta[name="content-path"]')?.content?.trim() || "content.json",
+};
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const lowPowerDevice =
@@ -26,6 +34,8 @@ const lowPowerDevice =
   (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
 
 let isEditMode = false;
+let isPublishing = false;
+let publishButtonResetId = 0;
 
 function setHeaderState() {
   header.classList.toggle("scrolled", window.scrollY > 14);
@@ -95,20 +105,232 @@ if (window.matchMedia("(pointer:fine)").matches && cursorOrbit) {
   });
 }
 
-function loadSavedContent() {
-  const raw = localStorage.getItem(storageKey);
+function applyEditableContent(content) {
+  if (!content || typeof content !== "object") return;
+
+  editableNodes.forEach((node) => {
+    const key = node.dataset.editable;
+    if (typeof content[key] === "string") {
+      setEditableValue(node, content[key]);
+    }
+  });
+}
+
+function collectEditableContent() {
+  const nextContent = {};
+  editableNodes.forEach((node) => {
+    nextContent[node.dataset.editable] = getEditableValue(node);
+  });
+  return nextContent;
+}
+
+function getEditableValue(node) {
+  const mode = node.dataset.editableAttr;
+  if (mode === "placeholder") {
+    return node.getAttribute("placeholder") || "";
+  }
+
+  if (mode === "options" && node instanceof HTMLSelectElement) {
+    return Array.from(node.options)
+      .map((option) => option.textContent || "")
+      .join("\n");
+  }
+
+  return node.innerHTML.trim();
+}
+
+function setEditableValue(node, value) {
+  const mode = node.dataset.editableAttr;
+  if (mode === "placeholder") {
+    node.setAttribute("placeholder", value);
+    return;
+  }
+
+  if (mode === "options" && node instanceof HTMLSelectElement) {
+    const lines = value
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    if (!lines.length) return;
+
+    node.innerHTML = "";
+    lines.forEach((line, index) => {
+      const option = document.createElement("option");
+      option.textContent = line;
+      option.value = index === 0 ? "" : line;
+      node.appendChild(option);
+    });
+    return;
+  }
+
+  node.innerHTML = value;
+  if (node.dataset.syncMailto === "true") {
+    node.setAttribute("href", `mailto:${node.textContent.trim()}`);
+  }
+}
+
+function syncEditableGroup(sourceNode) {
+  const key = sourceNode.dataset.editable;
+  if (!key) return;
+
+  const value = getEditableValue(sourceNode);
+  editableNodes.forEach((node) => {
+    if (node === sourceNode || node.dataset.editable !== key) return;
+    setEditableValue(node, value);
+  });
+}
+
+function loadDraftContent() {
+  const raw = localStorage.getItem(draftStorageKey);
   if (!raw) return;
 
   try {
-    const savedContent = JSON.parse(raw);
-    editableNodes.forEach((node) => {
-      const key = node.dataset.editable;
-      if (savedContent[key]) {
-        node.innerHTML = savedContent[key];
-      }
-    });
+    applyEditableContent(JSON.parse(raw));
   } catch {
-    localStorage.removeItem(storageKey);
+    clearDraft();
+  }
+}
+
+function clearLegacyStorage() {
+  legacyStorageKeys.forEach((key) => localStorage.removeItem(key));
+}
+
+function saveDraft() {
+  localStorage.setItem(draftStorageKey, JSON.stringify(collectEditableContent()));
+}
+
+function clearDraft() {
+  localStorage.removeItem(draftStorageKey);
+}
+
+function resetPublishLabel(delay = 1400) {
+  window.clearTimeout(publishButtonResetId);
+  publishButtonResetId = window.setTimeout(() => {
+    saveButton.textContent = "公開";
+  }, delay);
+}
+
+function setPublishButtonState(label, disabled) {
+  saveButton.textContent = label;
+  saveButton.disabled = disabled;
+}
+
+function encodeBase64Utf8(value) {
+  const bytes = new TextEncoder().encode(value);
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
+}
+
+async function readGitHubError(response) {
+  try {
+    const payload = await response.json();
+    return payload.message || `${response.status} ${response.statusText}`;
+  } catch {
+    return `${response.status} ${response.statusText}`;
+  }
+}
+
+async function loadPublishedContent() {
+  try {
+    const response = await fetch(`${repoConfig.contentPath}?v=${Date.now()}`, {
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      loadDraftContent();
+      return;
+    }
+
+    const content = await response.json();
+    applyEditableContent(content);
+    loadDraftContent();
+  } catch {
+    clearLegacyStorage();
+    loadDraftContent();
+  }
+}
+
+async function publishContent() {
+  if (isPublishing) return;
+  if (!repoConfig.owner || !repoConfig.repo) {
+    window.alert("GitHub の公開先設定が見つかりません。index.html の meta 設定を確認してください。");
+    return;
+  }
+
+  const savedToken = sessionStorage.getItem(tokenStorageKey) || "";
+  const token = window.prompt(
+    "GitHub Personal Access Token を入力してください。\n必要権限: Contents の read/write",
+    savedToken
+  );
+  if (!token) return;
+
+  sessionStorage.setItem(tokenStorageKey, token);
+
+  const defaultMessage = `Update homepage content ${new Date().toISOString().slice(0, 16).replace("T", " ")}`;
+  const commitMessage = window.prompt("コミットメッセージを入力してください。", defaultMessage);
+  if (!commitMessage) return;
+
+  const nextContent = collectEditableContent();
+  const serialized = `${JSON.stringify(nextContent, null, 2)}\n`;
+  const endpoint = `https://api.github.com/repos/${repoConfig.owner}/${repoConfig.repo}/contents/${repoConfig.contentPath}`;
+
+  isPublishing = true;
+  setPublishButtonState("公開中...", true);
+
+  try {
+    const currentResponse = await fetch(`${endpoint}?ref=${encodeURIComponent(repoConfig.branch)}`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    let sha;
+    if (currentResponse.ok) {
+      const currentPayload = await currentResponse.json();
+      sha = currentPayload.sha;
+    } else if (currentResponse.status !== 404) {
+      throw new Error(await readGitHubError(currentResponse));
+    }
+
+    const publishResponse = await fetch(endpoint, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        message: commitMessage,
+        content: encodeBase64Utf8(serialized),
+        branch: repoConfig.branch,
+        sha,
+      }),
+    });
+
+    if (!publishResponse.ok) {
+      throw new Error(await readGitHubError(publishResponse));
+    }
+
+    clearDraft();
+    setPublishButtonState("公開済み", false);
+    resetPublishLabel();
+    if (isEditMode) {
+      toggleEditMode();
+    }
+
+    window.alert("GitHub に反映しました。公開サイトへの反映は数十秒から数分かかることがあります。");
+  } catch (error) {
+    saveDraft();
+    setPublishButtonState("失敗", false);
+    resetPublishLabel(2200);
+    window.alert(`公開に失敗しました: ${error.message}`);
+  } finally {
+    isPublishing = false;
   }
 }
 
@@ -119,27 +341,51 @@ function toggleEditMode() {
   editToggle.textContent = isEditMode ? "編集終了" : "編集";
 
   editableNodes.forEach((node) => {
+    if (node.dataset.editableAttr) {
+      node.toggleAttribute(
+        "readonly",
+        isEditMode && (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement)
+      );
+      return;
+    }
+
     node.setAttribute("contenteditable", String(isEditMode));
     node.setAttribute("spellcheck", "false");
   });
 }
 
-function saveContent() {
-  const nextContent = {};
-  editableNodes.forEach((node) => {
-    nextContent[node.dataset.editable] = node.innerHTML.trim();
-  });
-
-  localStorage.setItem(storageKey, JSON.stringify(nextContent));
-  saveButton.textContent = "保存済み";
-
-  window.setTimeout(() => {
-    saveButton.textContent = "保存";
-  }, 1200);
-}
-
+clearLegacyStorage();
 editToggle?.addEventListener("click", toggleEditMode);
-saveButton?.addEventListener("click", saveContent);
+saveButton?.addEventListener("click", publishContent);
+
+editableNodes.forEach((node) => {
+  if (node.dataset.editableAttr) {
+    node.addEventListener("click", (event) => {
+      if (!isEditMode) return;
+
+      const attr = node.dataset.editableAttr;
+      const promptLabel =
+        attr === "options"
+          ? "改行区切りで選択肢を編集してください。"
+          : "表示テキストを編集してください。";
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const nextValue = window.prompt(promptLabel, getEditableValue(node));
+      if (nextValue === null) return;
+
+      setEditableValue(node, nextValue);
+      syncEditableGroup(node);
+      return;
+    });
+    return;
+  }
+
+  node.addEventListener("input", () => {
+    syncEditableGroup(node);
+  });
+});
 
 contactForm?.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -1022,5 +1268,5 @@ document.addEventListener("keydown", (event) => {
   if (isEditMode) toggleEditMode();
 });
 
-loadSavedContent();
+loadPublishedContent();
 setHeaderState();
