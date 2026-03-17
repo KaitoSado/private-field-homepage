@@ -1,8 +1,17 @@
 {
-  "name": "private-field-homepage",
-  "version": "1.0.0",
+  "name": "fieldcard-social",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node dev-server.js"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "preflight": "node scripts/preflight.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
   }
 }

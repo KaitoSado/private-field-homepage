@@ -1,3 +1,6 @@
 .DS_Store
 自分のホームページ/
 .github/
+node_modules/
+.next/
+.env.local

@@ -1,0 +1,770 @@
+create extension if not exists pgcrypto;
+
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  username text unique not null,
+  page_theme text not null default 'default',
+  display_name text,
+  headline text,
+  affiliation text,
+  focus_area text,
+  open_to text,
+  bio text,
+  location text,
+  website_url text,
+  x_url text,
+  github_url text,
+  note_url text,
+  avatar_url text,
+  role text not null default 'user',
+  account_status text not null default 'active',
+  discoverable boolean not null default false,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
+alter table public.profiles add column if not exists page_theme text not null default 'default';
+alter table public.profiles add column if not exists affiliation text;
+alter table public.profiles add column if not exists focus_area text;
+alter table public.profiles add column if not exists open_to text;
+alter table public.profiles add column if not exists x_url text;
+alter table public.profiles add column if not exists github_url text;
+alter table public.profiles add column if not exists note_url text;
+alter table public.profiles add column if not exists avatar_url text;
+alter table public.profiles add column if not exists role text not null default 'user';
+alter table public.profiles add column if not exists account_status text not null default 'active';
+alter table public.profiles add column if not exists discoverable boolean not null default false;
+
+create table if not exists public.posts (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  slug text not null,
+  title text not null,
+  excerpt text,
+  body text,
+  published boolean not null default false,
+  visibility text not null default 'public',
+  scheduled_for timestamptz,
+  allow_comments boolean not null default true,
+  tags text[] not null default '{}',
+  media_items jsonb not null default '[]'::jsonb,
+  cover_image_url text,
+  published_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  unique (author_id, slug)
+);
+
+alter table public.posts add column if not exists visibility text not null default 'public';
+alter table public.posts add column if not exists scheduled_for timestamptz;
+alter table public.posts add column if not exists allow_comments boolean not null default true;
+alter table public.posts add column if not exists tags text[] not null default '{}';
+alter table public.posts add column if not exists media_items jsonb not null default '[]'::jsonb;
+alter table public.posts add column if not exists cover_image_url text;
+
+create table if not exists public.follows (
+  follower_id uuid not null references public.profiles(id) on delete cascade,
+  following_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (follower_id, following_id)
+);
+
+create table if not exists public.blocks (
+  blocker_id uuid not null references public.profiles(id) on delete cascade,
+  blocked_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (blocker_id, blocked_id)
+);
+
+create table if not exists public.mutes (
+  muter_id uuid not null references public.profiles(id) on delete cascade,
+  muted_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (muter_id, muted_id)
+);
+
+create table if not exists public.post_likes (
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  post_id uuid not null references public.posts(id) on delete cascade,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (user_id, post_id)
+);
+
+create table if not exists public.post_bookmarks (
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  post_id uuid not null references public.posts(id) on delete cascade,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (user_id, post_id)
+);
+
+create table if not exists public.post_reposts (
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  post_id uuid not null references public.posts(id) on delete cascade,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (user_id, post_id)
+);
+
+create table if not exists public.post_comments (
+  id uuid primary key default gen_random_uuid(),
+  post_id uuid not null references public.posts(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  body text not null,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.notifications (
+  id uuid primary key default gen_random_uuid(),
+  recipient_id uuid not null references public.profiles(id) on delete cascade,
+  actor_id uuid not null references public.profiles(id) on delete cascade,
+  post_id uuid references public.posts(id) on delete cascade,
+  comment_id uuid references public.post_comments(id) on delete cascade,
+  type text not null,
+  read_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter_id uuid not null references public.profiles(id) on delete cascade,
+  target_profile_id uuid references public.profiles(id) on delete cascade,
+  target_post_id uuid references public.posts(id) on delete cascade,
+  reason text not null,
+  details text,
+  status text not null default 'pending',
+  reviewer_id uuid references public.profiles(id) on delete set null,
+  reviewed_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  constraint reports_target_check check (
+    (target_profile_id is not null and target_post_id is null)
+    or (target_profile_id is null and target_post_id is not null)
+  )
+);
+
+create table if not exists public.telemetry_page_views (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid references public.profiles(id) on delete set null,
+  path text not null,
+  referrer text,
+  user_agent text,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.telemetry_errors (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid references public.profiles(id) on delete set null,
+  level text not null default 'error',
+  message text not null,
+  pathname text,
+  source text,
+  stack text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.abuse_events (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid references public.profiles(id) on delete set null,
+  kind text not null,
+  description text,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.admin_alerts (
+  id uuid primary key default gen_random_uuid(),
+  level text not null default 'info',
+  type text not null,
+  title text not null,
+  body text,
+  metadata jsonb not null default '{}'::jsonb,
+  read_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create index if not exists posts_author_id_idx on public.posts(author_id);
+create index if not exists posts_visibility_idx on public.posts(visibility, published_at desc);
+create index if not exists posts_tags_gin_idx on public.posts using gin(tags);
+create index if not exists follows_following_idx on public.follows(following_id);
+create index if not exists follows_follower_idx on public.follows(follower_id);
+create index if not exists post_likes_post_idx on public.post_likes(post_id);
+create index if not exists post_reposts_post_idx on public.post_reposts(post_id);
+create index if not exists post_comments_post_idx on public.post_comments(post_id, created_at desc);
+create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
+create index if not exists reports_status_idx on public.reports(status, created_at desc);
+create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
+create index if not exists reports_target_post_idx on public.reports(target_post_id);
+create index if not exists telemetry_page_views_created_idx on public.telemetry_page_views(created_at desc);
+create index if not exists telemetry_errors_created_idx on public.telemetry_errors(created_at desc);
+create index if not exists abuse_events_created_idx on public.abuse_events(created_at desc);
+create index if not exists admin_alerts_created_idx on public.admin_alerts(created_at desc);
+create unique index if not exists notifications_follow_unique
+on public.notifications(recipient_id, actor_id, type)
+where type = 'follow';
+create unique index if not exists notifications_like_unique
+on public.notifications(recipient_id, actor_id, post_id, type)
+where type = 'like';
+create unique index if not exists notifications_repost_unique
+on public.notifications(recipient_id, actor_id, post_id, type)
+where type = 'repost';
+
+alter table public.profiles
+  drop constraint if exists profiles_headline_length_check,
+  add constraint profiles_headline_length_check check (headline is null or char_length(headline) <= 120),
+  drop constraint if exists profiles_bio_length_check,
+  add constraint profiles_bio_length_check check (bio is null or char_length(bio) <= 1000),
+  drop constraint if exists profiles_open_to_length_check,
+  add constraint profiles_open_to_length_check check (open_to is null or char_length(open_to) <= 280),
+  drop constraint if exists profiles_location_length_check,
+  add constraint profiles_location_length_check check (location is null or char_length(location) <= 80);
+
+alter table public.posts
+  drop constraint if exists posts_title_length_check,
+  add constraint posts_title_length_check check (char_length(title) <= 120),
+  drop constraint if exists posts_excerpt_length_check,
+  add constraint posts_excerpt_length_check check (excerpt is null or char_length(excerpt) <= 240),
+  drop constraint if exists posts_body_length_check,
+  add constraint posts_body_length_check check (body is null or char_length(body) <= 12000),
+  drop constraint if exists posts_media_count_check,
+  add constraint posts_media_count_check check (jsonb_array_length(media_items) <= 8),
+  drop constraint if exists posts_visibility_value_check,
+  add constraint posts_visibility_value_check check (visibility in ('public', 'unlisted', 'private'));
+
+alter table public.post_comments
+  drop constraint if exists post_comments_body_length_check,
+  add constraint post_comments_body_length_check check (char_length(body) <= 500);
+
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do update set public = excluded.public;
+
+insert into storage.buckets (id, name, public)
+values ('post-media', 'post-media', true)
+on conflict (id) do update set public = excluded.public;
+
+create or replace function public.handle_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = timezone('utc'::text, now());
+  return new;
+end;
+$$;
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  );
+$$;
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  base_username text;
+begin
+  base_username :=
+    coalesce(
+      nullif(regexp_replace(lower(split_part(new.email, '@', 1)), '[^a-z0-9_-]+', '-', 'g'), ''),
+      'user'
+    );
+
+  insert into public.profiles (id, username)
+  values (new.id, left(base_username || '-' || substring(new.id::text from 1 for 6), 30))
+  on conflict (id) do nothing;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute procedure public.handle_new_user();
+
+drop trigger if exists profiles_set_updated_at on public.profiles;
+create trigger profiles_set_updated_at
+before update on public.profiles
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists posts_set_updated_at on public.posts;
+create trigger posts_set_updated_at
+before update on public.posts
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists post_comments_set_updated_at on public.post_comments;
+create trigger post_comments_set_updated_at
+before update on public.post_comments
+for each row execute procedure public.handle_updated_at();
+
+create or replace view public.profile_stats as
+select
+  p.id as profile_id,
+  count(distinct follower_rows.follower_id) as follower_count,
+  count(distinct following_rows.following_id) as following_count,
+  count(
+    distinct case
+      when post_rows.published = true
+        and coalesce(post_rows.visibility, 'public') = 'public'
+        and (post_rows.scheduled_for is null or post_rows.scheduled_for <= timezone('utc'::text, now()))
+      then post_rows.id
+      else null
+    end
+  ) as public_post_count
+from public.profiles p
+left join public.follows follower_rows on follower_rows.following_id = p.id
+left join public.follows following_rows on following_rows.follower_id = p.id
+left join public.posts post_rows on post_rows.author_id = p.id
+group by p.id;
+
+create or replace view public.post_stats as
+select
+  p.id as post_id,
+  count(distinct like_rows.user_id) as like_count,
+  count(distinct repost_rows.user_id) as repost_count,
+  count(distinct comment_rows.id) as comment_count
+from public.posts p
+left join public.post_likes like_rows on like_rows.post_id = p.id
+left join public.post_reposts repost_rows on repost_rows.post_id = p.id
+left join public.post_comments comment_rows on comment_rows.post_id = p.id
+group by p.id;
+
+create or replace view public.tag_stats as
+select
+  lower(trim(tag_value)) as tag,
+  count(*) as use_count
+from public.posts p,
+unnest(coalesce(p.tags, '{}')) as tag_value
+where p.published = true
+  and coalesce(p.visibility, 'public') = 'public'
+  and (p.scheduled_for is null or p.scheduled_for <= timezone('utc'::text, now()))
+  and trim(tag_value) <> ''
+group by lower(trim(tag_value));
+
+alter table public.profiles enable row level security;
+alter table public.posts enable row level security;
+alter table public.follows enable row level security;
+alter table public.blocks enable row level security;
+alter table public.mutes enable row level security;
+alter table public.post_likes enable row level security;
+alter table public.post_bookmarks enable row level security;
+alter table public.post_reposts enable row level security;
+alter table public.post_comments enable row level security;
+alter table public.notifications enable row level security;
+alter table public.reports enable row level security;
+alter table public.telemetry_page_views enable row level security;
+alter table public.telemetry_errors enable row level security;
+alter table public.abuse_events enable row level security;
+alter table public.admin_alerts enable row level security;
+
+drop policy if exists "profiles are public readable" on public.profiles;
+create policy "profiles are public readable"
+on public.profiles
+for select
+using (account_status = 'active' or auth.uid() = id or public.is_admin());
+
+drop policy if exists "users can insert own profile" on public.profiles;
+create policy "users can insert own profile"
+on public.profiles
+for insert
+with check (auth.uid() = id);
+
+drop policy if exists "users can update own profile" on public.profiles;
+create policy "users can update own profile"
+on public.profiles
+for update
+using (auth.uid() = id)
+with check (auth.uid() = id);
+
+drop policy if exists "admins can update profiles" on public.profiles;
+create policy "admins can update profiles"
+on public.profiles
+for update
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "published posts are public readable" on public.posts;
+create policy "published posts are public readable"
+on public.posts
+for select
+using (
+  (
+    published = true
+    and coalesce(visibility, 'public') in ('public', 'unlisted')
+    and (scheduled_for is null or scheduled_for <= timezone('utc'::text, now()))
+    and exists (
+      select 1 from public.profiles
+      where profiles.id = posts.author_id
+        and profiles.account_status = 'active'
+    )
+  )
+  or auth.uid() = author_id
+  or public.is_admin()
+);
+
+drop policy if exists "users can insert own posts" on public.posts;
+create policy "users can insert own posts"
+on public.posts
+for insert
+with check (auth.uid() = author_id);
+
+drop policy if exists "users can update own posts" on public.posts;
+create policy "users can update own posts"
+on public.posts
+for update
+using (auth.uid() = author_id)
+with check (auth.uid() = author_id);
+
+drop policy if exists "users can delete own posts" on public.posts;
+create policy "users can delete own posts"
+on public.posts
+for delete
+using (auth.uid() = author_id);
+
+drop policy if exists "admins can update posts" on public.posts;
+create policy "admins can update posts"
+on public.posts
+for update
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "admins can delete posts" on public.posts;
+create policy "admins can delete posts"
+on public.posts
+for delete
+using (public.is_admin());
+
+drop policy if exists "follows are public readable" on public.follows;
+create policy "follows are public readable"
+on public.follows
+for select
+using (true);
+
+drop policy if exists "users can follow" on public.follows;
+create policy "users can follow"
+on public.follows
+for insert
+with check (auth.uid() = follower_id and follower_id <> following_id);
+
+drop policy if exists "users can unfollow" on public.follows;
+create policy "users can unfollow"
+on public.follows
+for delete
+using (auth.uid() = follower_id);
+
+drop policy if exists "likes are public readable" on public.post_likes;
+create policy "likes are public readable"
+on public.post_likes
+for select
+using (true);
+
+drop policy if exists "users can like posts" on public.post_likes;
+create policy "users can like posts"
+on public.post_likes
+for insert
+with check (auth.uid() = user_id);
+
+drop policy if exists "users can unlike posts" on public.post_likes;
+create policy "users can unlike posts"
+on public.post_likes
+for delete
+using (auth.uid() = user_id);
+
+drop policy if exists "reposts are public readable" on public.post_reposts;
+create policy "reposts are public readable"
+on public.post_reposts
+for select
+using (true);
+
+drop policy if exists "users can repost posts" on public.post_reposts;
+create policy "users can repost posts"
+on public.post_reposts
+for insert
+with check (auth.uid() = user_id);
+
+drop policy if exists "users can undo reposts" on public.post_reposts;
+create policy "users can undo reposts"
+on public.post_reposts
+for delete
+using (auth.uid() = user_id);
+
+drop policy if exists "bookmarks are private" on public.post_bookmarks;
+create policy "bookmarks are private"
+on public.post_bookmarks
+for select
+using (auth.uid() = user_id);
+
+drop policy if exists "users can bookmark posts" on public.post_bookmarks;
+create policy "users can bookmark posts"
+on public.post_bookmarks
+for insert
+with check (auth.uid() = user_id);
+
+drop policy if exists "users can remove bookmarks" on public.post_bookmarks;
+create policy "users can remove bookmarks"
+on public.post_bookmarks
+for delete
+using (auth.uid() = user_id);
+
+drop policy if exists "public comments are readable" on public.post_comments;
+create policy "public comments are readable"
+on public.post_comments
+for select
+using (true);
+
+drop policy if exists "users can comment on posts" on public.post_comments;
+create policy "users can comment on posts"
+on public.post_comments
+for insert
+with check (
+  auth.uid() = user_id
+  and exists (
+    select 1
+    from public.posts
+    where posts.id = post_comments.post_id
+      and (posts.allow_comments = true or posts.author_id = auth.uid())
+      and (
+        (
+          posts.published = true
+          and coalesce(posts.visibility, 'public') in ('public', 'unlisted')
+          and (posts.scheduled_for is null or posts.scheduled_for <= timezone('utc'::text, now()))
+        )
+        or posts.author_id = auth.uid()
+      )
+  )
+);
+
+drop policy if exists "users can update own comments" on public.post_comments;
+create policy "users can update own comments"
+on public.post_comments
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "users can delete own comments" on public.post_comments;
+create policy "users can delete own comments"
+on public.post_comments
+for delete
+using (auth.uid() = user_id);
+
+drop policy if exists "admins can delete comments" on public.post_comments;
+create policy "admins can delete comments"
+on public.post_comments
+for delete
+using (public.is_admin());
+
+drop policy if exists "blocks are private" on public.blocks;
+create policy "blocks are private"
+on public.blocks
+for select
+using (auth.uid() = blocker_id);
+
+drop policy if exists "users can block" on public.blocks;
+create policy "users can block"
+on public.blocks
+for insert
+with check (auth.uid() = blocker_id and blocker_id <> blocked_id);
+
+drop policy if exists "users can unblock" on public.blocks;
+create policy "users can unblock"
+on public.blocks
+for delete
+using (auth.uid() = blocker_id);
+
+drop policy if exists "mutes are private" on public.mutes;
+create policy "mutes are private"
+on public.mutes
+for select
+using (auth.uid() = muter_id);
+
+drop policy if exists "users can mute" on public.mutes;
+create policy "users can mute"
+on public.mutes
+for insert
+with check (auth.uid() = muter_id and muter_id <> muted_id);
+
+drop policy if exists "users can unmute" on public.mutes;
+create policy "users can unmute"
+on public.mutes
+for delete
+using (auth.uid() = muter_id);
+
+drop policy if exists "users can read own notifications" on public.notifications;
+create policy "users can read own notifications"
+on public.notifications
+for select
+using (auth.uid() = recipient_id);
+
+drop policy if exists "actors can insert notifications" on public.notifications;
+create policy "actors can insert notifications"
+on public.notifications
+for insert
+with check (auth.uid() = actor_id and actor_id <> recipient_id);
+
+drop policy if exists "recipients can update notifications" on public.notifications;
+create policy "recipients can update notifications"
+on public.notifications
+for update
+using (auth.uid() = recipient_id)
+with check (auth.uid() = recipient_id);
+
+drop policy if exists "actors or recipients can delete notifications" on public.notifications;
+create policy "actors or recipients can delete notifications"
+on public.notifications
+for delete
+using (auth.uid() = actor_id or auth.uid() = recipient_id);
+
+drop policy if exists "users can create reports" on public.reports;
+create policy "users can create reports"
+on public.reports
+for insert
+with check (auth.uid() = reporter_id);
+
+drop policy if exists "reporters can read own reports" on public.reports;
+create policy "reporters can read own reports"
+on public.reports
+for select
+using (auth.uid() = reporter_id or public.is_admin());
+
+drop policy if exists "admins can update reports" on public.reports;
+create policy "admins can update reports"
+on public.reports
+for update
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "admins can delete reports" on public.reports;
+create policy "admins can delete reports"
+on public.reports
+for delete
+using (public.is_admin());
+
+drop policy if exists "admins can read telemetry page views" on public.telemetry_page_views;
+create policy "admins can read telemetry page views"
+on public.telemetry_page_views
+for select
+using (public.is_admin());
+
+drop policy if exists "admins can read telemetry errors" on public.telemetry_errors;
+create policy "admins can read telemetry errors"
+on public.telemetry_errors
+for select
+using (public.is_admin());
+
+drop policy if exists "admins can read abuse events" on public.abuse_events;
+create policy "admins can read abuse events"
+on public.abuse_events
+for select
+using (public.is_admin());
+
+drop policy if exists "admins can read alerts" on public.admin_alerts;
+create policy "admins can read alerts"
+on public.admin_alerts
+for select
+using (public.is_admin());
+
+drop policy if exists "admins can update alerts" on public.admin_alerts;
+create policy "admins can update alerts"
+on public.admin_alerts
+for update
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "admins can delete alerts" on public.admin_alerts;
+create policy "admins can delete alerts"
+on public.admin_alerts
+for delete
+using (public.is_admin());
+
+drop policy if exists "avatars are public" on storage.objects;
+create policy "avatars are public"
+on storage.objects
+for select
+using (bucket_id = 'avatars');
+
+drop policy if exists "users can upload own avatars" on storage.objects;
+create policy "users can upload own avatars"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'avatars'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "users can update own avatars" on storage.objects;
+create policy "users can update own avatars"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and auth.uid()::text = (storage.foldername(name))[1]
+)
+with check (
+  bucket_id = 'avatars'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "users can delete own avatars" on storage.objects;
+create policy "users can delete own avatars"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'avatars'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "post media is public" on storage.objects;
+create policy "post media is public"
+on storage.objects
+for select
+using (bucket_id = 'post-media');
+
+drop policy if exists "users can upload own post media" on storage.objects;
+create policy "users can upload own post media"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'post-media'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "users can update own post media" on storage.objects;
+create policy "users can update own post media"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'post-media'
+  and auth.uid()::text = (storage.foldername(name))[1]
+)
+with check (
+  bucket_id = 'post-media'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "users can delete own post media" on storage.objects;
+create policy "users can delete own post media"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'post-media'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
