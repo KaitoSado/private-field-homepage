@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>森あかり | 個人ページ</title>
+    <meta
+      name="description"
+      content="研究者・開発者・表現者としての現在地を、作品のように体験できる特別仕様の個人ホームページ。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas class="network-bg" id="network-bg" aria-hidden="true"></canvas>
+    <div class="page-noise" aria-hidden="true"></div>
+    <div class="cursor-orbit" aria-hidden="true"></div>
+
+    <header class="site-header" id="top">
+      <div class="container header-inner">
+        <a class="brand" href="#entrance" aria-label="森あかり home">
+          <span class="brand-mark">AM</span>
+          <span class="brand-copy">
+            <strong>森あかり</strong>
+            <span>個人ページ</span>
+          </span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="Primary">
+          <a href="#identity">概要</a>
+          <a href="#works">作品</a>
+          <a href="#thinking">ノート</a>
+          <a href="#signals">近況</a>
+          <a href="#contact">連絡</a>
+        </nav>
+
+        <div class="header-meta">
+          <span class="live-dot"></span>
+          <span class="live-label">Open to collaboration</span>
+        </div>
+
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+        <nav class="mobile-nav" aria-label="Mobile">
+          <a href="#identity">概要</a>
+          <a href="#works">作品</a>
+          <a href="#thinking">ノート</a>
+          <a href="#signals">近況</a>
+          <a href="#contact">連絡</a>
+        </nav>
+        <div class="mobile-meta">
+          <p>Research, implementation, notes. その3つをまとめた個人ページです。</p>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section entrance" id="entrance">
+        <canvas class="hero-shader" id="hero-shader" aria-hidden="true"></canvas>
+        <div class="hero-vignette" aria-hidden="true"></div>
+        <div class="hero-interaction" id="hero-interaction" aria-hidden="true">
+          <div class="hero-glow" id="hero-glow"></div>
+          <div class="hero-ripple-layer" id="hero-ripple-layer"></div>
+        </div>
+        <div class="container entrance-grid">
+          <div class="entrance-copy reveal">
+            <div class="eyebrow-row">
+              <span class="status-badge">Open to collaboration</span>
+              <p class="kicker" data-editable="hero-kicker">Research / Development / Making</p>
+            </div>
+            <h1 data-editable="hero-title">考えながら、作る。</h1>
+            <p class="entrance-statement" data-editable="hero-statement">
+              研究、実装、記録をひとつの流れとして置いています。
+            </p>
+
+            <div class="hero-actions">
+              <a class="button button-primary" href="#works">作品を見る</a>
+              <a class="button button-secondary" href="#thinking">思考を読む</a>
+              <a class="button button-ghost" href="#contact">連絡する</a>
+            </div>
+
+            <div class="micro-links" aria-label="External links">
+              <a href="#">GitHub</a>
+              <a href="#">X</a>
+              <a href="#">researchmap</a>
+              <a href="#">Note</a>
+            </div>
+
+            <div class="scroll-invite">
+              <span class="scroll-line"></span>
+              <p>下へ</p>
+            </div>
+          </div>
+
+          <aside class="entrance-panel reveal">
+            <div class="profile-top">
+              <div class="avatar">AM</div>
+              <div>
+                <p class="label">Profile</p>
+                <h2>森あかり</h2>
+                <p>Researcher, Developer</p>
+              </div>
+            </div>
+            <div class="panel-block">
+              <p class="label">Current Coordinates</p>
+              <dl class="coordinates">
+                <div>
+                  <dt>Affiliation</dt>
+                  <dd data-editable="hero-affiliation">XX大学 / インターフェース研究室</dd>
+                </div>
+                <div>
+                  <dt>Focus</dt>
+                  <dd data-editable="hero-practice">HCI、UI設計、プロトタイピング</dd>
+                </div>
+                <div>
+                  <dt>Base</dt>
+                  <dd data-editable="hero-base">東京 / リモート対応</dd>
+                </div>
+              </dl>
+            </div>
+
+            <div class="panel-foot">
+              <p data-editable="hero-footnote">
+                このページだけは、少し自由に作っています。
+              </p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="identity">
+        <div class="container">
+          <div class="section-heading reveal">
+            <p class="kicker">About / 概要</p>
+            <h2 data-editable="identity-title">研究と実装を、同じ場所で進める。</h2>
+            <p data-editable="identity-lead">
+              観察して、試して、記録する。その往復の中でUIや作品を作っています。
+            </p>
+          </div>
+
+          <div class="identity-grid">
+            <article class="identity-text reveal">
+              <p data-editable="identity-body-1">
+                知覚、注意、身体感覚のように掴みにくいものを、
+                UIや記録の形にすることに関心があります。
+              </p>
+              <p data-editable="identity-body-2">
+                研究、実装、記録を分けずに進めるのが基本姿勢です。
+              </p>
+              <div class="keyword-cloud">
+                <span>脳波インターフェース</span>
+                <span>身体性</span>
+                <span>知覚</span>
+                <span>観察記録</span>
+                <span>試作</span>
+                <span>表現</span>
+                <span>信号の可視化</span>
+                <span>記憶とUI</span>
+              </div>
+            </article>
+
+            <aside class="identity-side reveal">
+              <div class="open-card">
+                <p class="label">Open to</p>
+                <ul>
+                  <li data-editable="open-1">研究プロトタイプの共同設計と実装</li>
+                  <li data-editable="open-2">iOS / Web アプリ制作と情報設計</li>
+                  <li data-editable="open-3">脳波・身体性を扱うインタラクションの実験</li>
+                  <li data-editable="open-4">研究紹介ページや思考アーカイブの構成相談</li>
+                </ul>
+              </div>
+              <div class="identity-faces">
+                <div class="face-card">
+                  <p class="label">研究</p>
+                  <h3>問いを設計する</h3>
+                  <p>HCI、脳波、身体性、観察、実験計画、知覚の記述。</p>
+                </div>
+                <div class="face-card">
+                  <p class="label">開発</p>
+                  <h3>動くものにする</h3>
+                  <p>iOS、Web、試作、データ可視化、センサー連携。</p>
+                </div>
+                <div class="face-card">
+                  <p class="label">記録</p>
+                  <h3>記録を残す</h3>
+                  <p>ブログ、メモ、フィールドノート、ログ、断片的な仮説。</p>
+                </div>
+                <div class="face-card">
+                  <p class="label">表現</p>
+                  <h3>空気を整える</h3>
+                  <p>静かな画面、余白、揺らぎ、触れた後に残る感触。</p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="works">
+        <div class="container">
+          <div class="section-heading reveal section-heading-split">
+            <div>
+              <p class="kicker">Works / 作品</p>
+              <h2 data-editable="works-title">作ったものと、考えていたこと。</h2>
+              <p data-editable="works-lead">
+                研究、アプリ、Web、実験作品をまとめています。
+              </p>
+            </div>
+            <a class="section-link" href="#">All Works</a>
+          </div>
+
+          <div class="filter-row reveal" role="tablist" aria-label="Work filters">
+            <button class="filter-button active" data-filter="all" type="button">全部</button>
+            <button class="filter-button" data-filter="research" type="button">研究</button>
+            <button class="filter-button" data-filter="app" type="button">App</button>
+            <button class="filter-button" data-filter="web" type="button">Web</button>
+            <button class="filter-button" data-filter="experiment" type="button">実験</button>
+          </div>
+
+          <div class="works-grid">
+            <article class="work-card reveal work-featured" data-category="research">
+              <div class="work-meta">
+                <span>研究</span>
+                <span>2026</span>
+              </div>
+              <h3 data-editable="work-1-title">Cortical Garden</h3>
+              <p class="work-question">問い: 脳波の変化を、穏やかに見返せるか。</p>
+              <p data-editable="work-1-description">
+                集中と拡散のリズムを、粒子の風景として可視化する研究プロトタイプ。
+              </p>
+              <div class="tag-row">
+                <span>EEG</span>
+                <span>HCI</span>
+                <span>WebGL</span>
+                <span>Experience Prototype</span>
+              </div>
+              <a class="work-link" href="#">詳細</a>
+            </article>
+
+            <article class="work-card reveal" data-category="app">
+              <div class="work-meta">
+                <span>アプリ</span>
+                <span>2025</span>
+              </div>
+              <h3 data-editable="work-2-title">Field Breath</h3>
+              <p class="work-question">問い: 身体の状態を軽く記録できるか。</p>
+              <p data-editable="work-2-description">
+                呼吸や姿勢、作業の切り替わりを静かに記録する iOS アプリ。
+              </p>
+              <div class="tag-row">
+                <span>SwiftUI</span>
+                <span>HealthKit</span>
+                <span>Data Logging</span>
+              </div>
+              <a class="work-link" href="#">詳細</a>
+            </article>
+
+            <article class="work-card reveal" data-category="web">
+              <div class="work-meta">
+                <span>Web</span>
+                <span>2026</span>
+              </div>
+              <h3 data-editable="work-3-title">Trace Atlas</h3>
+              <p class="work-question">問い: 研究記録を歩くように辿れるか。</p>
+              <p data-editable="work-3-description">
+                ノート、発表、展示、議論ログを横断する個人アーカイブ。
+              </p>
+              <div class="tag-row">
+                <span>Next.js</span>
+                <span>Content Design</span>
+                <span>Search</span>
+              </div>
+              <a class="work-link" href="#">詳細</a>
+            </article>
+
+            <article class="work-card reveal" data-category="experiment">
+              <div class="work-meta">
+                <span>実験</span>
+                <span>2024</span>
+              </div>
+              <h3 data-editable="work-4-title">Residual Touch</h3>
+              <p class="work-question">問い: 触覚の余韻を画面に残せるか。</p>
+              <p data-editable="work-4-description">
+                触れた場所に遅れて反応が残るインタラクション作品。
+              </p>
+              <div class="tag-row">
+                <span>TouchDesigner</span>
+                <span>Sensor</span>
+                <span>Installation</span>
+              </div>
+              <a class="work-link" href="#">詳細</a>
+            </article>
+
+            <article class="work-card reveal" data-category="research">
+              <div class="work-meta">
+                <span>研究</span>
+                <span>2025</span>
+              </div>
+              <h3 data-editable="work-5-title">Attention Drift Notebook</h3>
+              <p class="work-question">問い: 注意の揺れを観測対象にできるか。</p>
+              <p data-editable="work-5-description">
+                集中の乱れを否定せず、その推移を理解するための研究メモ支援システム。
+              </p>
+              <div class="tag-row">
+                <span>UX Research</span>
+                <span>React</span>
+                <span>Qualitative Data</span>
+              </div>
+              <a class="work-link" href="#">詳細</a>
+            </article>
+
+            <article class="work-card reveal" data-category="web">
+              <div class="work-meta">
+                <span>Web</span>
+                <span>2024</span>
+              </div>
+              <h3 data-editable="work-6-title">Quiet Essays</h3>
+              <p class="work-question">問い: 技術ブログを静かに読ませられるか。</p>
+              <p data-editable="work-6-description">
+                研究メモ、UI批評、制作記録を一つの空気で読ませるエッセイサイト。
+              </p>
+              <div class="tag-row">
+                <span>Astro</span>
+                <span>MDX</span>
+                <span>Typography</span>
+              </div>
+              <a class="work-link" href="#">詳細</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="thinking">
+        <div class="container">
+          <div class="section-heading reveal section-heading-split">
+            <div>
+              <p class="kicker">Notes / ノート</p>
+              <h2 data-editable="thinking-title">まとまっていない考えも残す。</h2>
+              <p data-editable="thinking-lead">
+                仮説、違和感、試作中のメモを置いています。
+              </p>
+            </div>
+            <a class="section-link" href="#">All Notes</a>
+          </div>
+
+          <div class="thought-grid">
+            <article class="thought-item reveal">
+              <div class="thought-meta">
+                <span>2026.03.14</span>
+                <span>HCI / EEG</span>
+              </div>
+              <h3 data-editable="thought-1-title">脳波を可視化する時、情報量を減らすほど身体に近づけるのか</h3>
+              <p data-editable="thought-1-description">
+                複雑さを残しつつ、読みやすくするためのメモ。
+              </p>
+              <a class="work-link" href="#">読む</a>
+            </article>
+            <article class="thought-item reveal">
+              <div class="thought-meta">
+                <span>2026.03.08</span>
+                <span>UI / Language</span>
+              </div>
+              <h3 data-editable="thought-2-title">静かなUIは、無口なのではなく話し方が丁寧なだけかもしれない</h3>
+              <p data-editable="thought-2-description">
+                タイポグラフィと余白の態度についてのノート。
+              </p>
+              <a class="work-link" href="#">読む</a>
+            </article>
+            <article class="thought-item reveal">
+              <div class="thought-meta">
+                <span>2026.02.27</span>
+                <span>Prototype</span>
+              </div>
+              <h3 data-editable="thought-3-title">速いプロトタイプより、速く確かめられるプロトタイプを作りたい</h3>
+              <p data-editable="thought-3-description">
+                問いの検証速度に焦点を当てたメモ。
+              </p>
+              <a class="work-link" href="#">読む</a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="signals">
+        <div class="container">
+          <div class="section-heading reveal">
+            <p class="kicker">Signals / 近況</p>
+            <h2 data-editable="signals-title">いま触れているもの。</h2>
+          </div>
+
+          <div class="signals-grid">
+            <div class="signal-console reveal">
+              <div class="console-bar">
+                <span></span>
+                <span></span>
+                <span></span>
+                <p>signals.log</p>
+              </div>
+              <div class="console-body">
+                <div class="signal-line">
+                  <span class="signal-date">2026-03-17</span>
+                  <span class="signal-tag">読書</span>
+                  <p data-editable="console-1">ジェームズ・ギブソン周辺を再読。知覚を「取得」ではなく「参加」として捉え直す。</p>
+                </div>
+                <div class="signal-line">
+                  <span class="signal-date">2026-03-16</span>
+                  <span class="signal-tag">観察</span>
+                  <p data-editable="console-2">医療計測のUIを見直し、冷たさと安心感の境界について考える。</p>
+                </div>
+                <div class="signal-line">
+                  <span class="signal-date">2026-03-15</span>
+                  <span class="signal-tag">音</span>
+                  <p data-editable="console-3">深夜の低い環境音と、文字を読む速度の相関を個人的に観察中。</p>
+                </div>
+                <div class="signal-line">
+                  <span class="signal-date">2026-03-14</span>
+                  <span class="signal-tag">制作</span>
+                  <p data-editable="console-4">タッチの残像を遅延表示する試作を改修。身体の記憶をどう画面上に残すか検証。</p>
+                </div>
+                <div class="signal-line current">
+                  <span class="signal-date">いま</span>
+                  <span class="signal-tag">更新中</span>
+                  <p>ノートのように読める個人ページを調整中。<span class="console-cursor"></span></p>
+                </div>
+              </div>
+            </div>
+
+            <aside class="signal-side reveal">
+              <div class="signal-card">
+                <p class="label">In Orbit</p>
+                <ul>
+                  <li data-editable="orbit-1">身体性とUIのあいだをつなぐ視覚言語</li>
+                  <li data-editable="orbit-2">神経信号を誇張しすぎない静かな可視化</li>
+                  <li data-editable="orbit-3">研究ノートと作品アーカイブの融合UI</li>
+                </ul>
+              </div>
+              <div class="signal-card">
+                <p class="label">Recent Inputs</p>
+                <p data-editable="inputs-body">
+                  本: Designing for the Senses / 音: 坂本龍一、Noto / 観察対象: 注意の揺れ、視線の滞在、疲労の手前。
+                </p>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="contact">
+        <div class="container">
+          <div class="section-heading reveal">
+            <p class="kicker">Contact / 連絡</p>
+            <h2 data-editable="contact-title">相談はこちらから。</h2>
+            <p data-editable="contact-lead">
+              研究コラボ、プロトタイプ開発、iOS / Web 制作、UI 設計などを受けています。
+            </p>
+          </div>
+
+          <div class="contact-grid">
+            <aside class="contact-panel reveal">
+              <div class="contact-block">
+                <p class="label">Open for</p>
+                <div class="keyword-cloud compact">
+                  <span>共同研究</span>
+                  <span>プロトタイプ開発</span>
+                  <span>iOS / Web制作</span>
+                  <span>UI / UX設計</span>
+                  <span>展示体験</span>
+                </div>
+              </div>
+
+              <div class="contact-block">
+                <p class="label">Direct Contact</p>
+                <a href="mailto:hello@akarimori.jp">hello@akarimori.jp</a>
+                <p data-editable="contact-meta">東京 / 通常24時間以内に返信</p>
+              </div>
+
+              <div class="contact-block">
+                <p class="label">Good to know</p>
+                <p data-editable="contact-note">
+                  やりたいこと、困っていること、必要な環境だけでも大丈夫です。
+                </p>
+              </div>
+            </aside>
+
+            <form class="contact-form reveal" id="contact-form">
+              <label>
+                <span>名前</span>
+                <input type="text" name="name" placeholder="お名前" required />
+              </label>
+              <label>
+                <span>所属 <em>任意</em></span>
+                <input type="text" name="organization" placeholder="大学 / 会社 / 団体など" />
+              </label>
+              <label>
+                <span>メールアドレス</span>
+                <input type="email" name="email" placeholder="name@example.com" required />
+              </label>
+              <label>
+                <span>相談の種類</span>
+                <select name="topic" required>
+                  <option value="">選択してください</option>
+                  <option>共同研究</option>
+                  <option>プロトタイプ開発</option>
+                  <option>iOS / Web 制作</option>
+                  <option>UI / UX 相談</option>
+                  <option>展示・表現</option>
+                  <option>その他</option>
+                </select>
+              </label>
+              <label>
+                <span>メッセージ</span>
+                <textarea name="message" rows="5" placeholder="相談内容を簡単に書いてください" required></textarea>
+              </label>
+              <button class="button button-primary submit-button" type="submit">
+                <span class="button-text">送信する</span>
+                <span class="button-loading">送信中...</span>
+              </button>
+              <p class="form-status" role="status" aria-live="polite"></p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <p class="footer-title">森あかり</p>
+          <p class="footer-copy">研究、試作、記録。</p>
+        </div>
+        <div class="footer-links">
+          <a href="#">プライバシー</a>
+          <a href="#">利用条件</a>
+          <a href="#">GitHub</a>
+          <a href="#">researchmap</a>
+          <a href="#">X</a>
+        </div>
+      </div>
+    </footer>
+
+    <button class="floating-button edit-toggle" id="edit-toggle" type="button">編集</button>
+    <button class="floating-button save-button" id="save-button" type="button" hidden>保存</button>
+    <button class="floating-button to-top" id="to-top" type="button" aria-label="Back to top">↑</button>
+
+    <script src="script.js"></script>
+  </body>
+</html>
