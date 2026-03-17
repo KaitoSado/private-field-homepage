@@ -1,0 +1,837 @@
+<html lang="ja"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kenji Nakamura — Keio Univ. / EEG × App Dev</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&amp;family=Outfit:wght@300;400;500&amp;family=JetBrains+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #ffffff;
+  --bg1:     #f8f9fa;
+  --bg2:     #f1f3f5;
+  --bg3:     #e9ecef;
+  --border:  rgba(0,0,0,0.1);
+  --border2: rgba(0,0,0,0.15);
+  --text:    #111111;
+  --sub:     #333333;
+  --muted:   #666666;
+  --gold:    #b08d40;
+  --gold2:   rgba(176,141,64,0.1);
+  --gold3:   rgba(176,141,64,0.05);
+  --cyan:    #0a7a8a;
+  --cyan2:   rgba(10,122,138,0.1);
+  --cyan3:   rgba(10,122,138,0.05);
+  --green:   #257a37;
+  --green2:  rgba(37,122,55,0.1);
+  --fh: 'Syne', sans-serif;
+  --fb: 'Outfit', sans-serif;
+  --fm: 'JetBrains Mono', monospace;
+  --ease: cubic-bezier(0.16,1,0.3,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);line-height:1.6;overflow-x:hidden;cursor:auto}
+h1,h2,h3,h4,h5,h6{color:var(--text)}
+p,span,li{color:inherit}
+::selection{background:var(--gold);color:#fff}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--gold)}
+
+/* ── CURSOR ── */
+#cur{position:fixed;width:8px;height:8px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);box-shadow: 0 0 8px rgba(176,141,64,0.5)}
+#cur-r{position:fixed;width:32px;height:32px;border:2px solid var(--gold);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .25s, background .2s;background: rgba(176,141,64,0.05)}
+body:has(a:hover) #cur-r,body:has(button:hover) #cur-r{width:48px;height:48px;border-color:var(--cyan);background: rgba(10,122,138,0.08)}
+body:has(a:hover) #cur,body:has(button:hover) #cur{background:var(--cyan);box-shadow: 0 0 8px rgba(10,122,138,0.5)}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid transparent;transition:all .3s}
+nav.on{background:rgba(255,255,255,0.88);backdrop-filter:blur(16px) saturate(160%);border-color:var(--border)}
+.n-logo{font-family:var(--fh);font-size:15px;font-weight:800;letter-spacing:.04em;text-decoration:none;color:var(--text)}
+.n-logo span{color:var(--gold)}
+.n-links{display:flex;align-items:center;gap:2px}
+.n-links a{font-size:11.5px;font-weight:500;letter-spacing:.08em;color:var(--sub);text-decoration:none;padding:5px 11px;border-radius:3px;transition:color .15s,background .15s}
+.n-links a:hover{color:var(--text);background:var(--bg3)}
+.n-contact{border:1px solid var(--gold)!important;color:var(--gold)!important;transition:background .15s,color .15s!important}
+.n-contact:hover{background:var(--gold)!important;color:#fff!important}
+.hbg{display:none;flex-direction:column;gap:4px;background:none;border:none;cursor:auto;padding:4px}
+.hbg span{display:block;width:18px;height:1px;background:var(--text);transition:transform .25s,opacity .25s}
+.mob-nav{display:none;position:fixed;inset:0;background:rgba(255,255,255,0.97);z-index:199;flex-direction:column;align-items:center;justify-content:center;gap:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+.mob-nav.on{opacity:1;pointer-events:all}
+.mob-nav a{font-family:var(--fh);font-size:2.2rem;font-weight:700;color:var(--text);text-decoration:none;transition:color .15s}
+.mob-nav a:hover{color:var(--gold)}
+@media(max-width:640px){.n-links{display:none}.hbg{display:flex}.mob-nav{display:flex}nav{padding:0 18px}}
+
+/* ── SECTION BASE ── */
+.wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+@media(max-width:640px){.wrap{padding:0 16px}}
+section{padding:40px 0;border-bottom:1px solid var(--border)}
+.s-tag{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.s-num{font-family:var(--fm);font-size:10px;color:var(--muted);letter-spacing:.12em}
+.s-label{font-family:var(--fm);font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.s-label::before{content:'//';margin-right:5px;color:var(--cyan);opacity:.7}
+h2{font-family:var(--fh);font-size:clamp(1.5rem,3vw,2.1rem);font-weight:700;line-height:1.15;letter-spacing:-.02em;margin-bottom:18px}
+h2 em{font-style:normal;color:var(--gold)}
+
+/* ── HERO ── */
+#hero{padding:60px 0 36px;border-bottom:1px solid var(--border)}
+.hero-inner{display:grid;grid-template-columns:1fr 210px;gap:32px;align-items:start}
+.h-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border:1px solid rgba(43,138,62,.3);border-radius:20px;background:var(--green2);font-family:var(--fm);font-size:10.5px;font-weight:500;color:var(--green);letter-spacing:.08em;margin-bottom:12px}
+.h-badge-dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(43,138,62,.4)}50%{opacity:.5;box-shadow:0 0 0 4px rgba(43,138,62,0)}}
+h1{font-family:var(--fh);font-size:clamp(2rem,4.5vw,3.2rem);font-weight:800;line-height:1.08;letter-spacing:-.03em;margin-bottom:10px}
+h1 em{font-style:normal;color:var(--gold)}
+h1 .cy{color:var(--cyan)}
+.h-sub{font-size:13px;color:var(--sub);max-width:380px;line-height:1.75;margin-bottom:20px}
+.h-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 18px;font-family:var(--fb);font-size:11.5px;font-weight:500;letter-spacing:.06em;border-radius:3px;text-decoration:none;cursor:auto;transition:all .2s var(--ease);border:none}
+.btn-g{background:var(--gold);color:#fff}.btn-g:hover{opacity:.88;transform:translateY(-1px)}
+.btn-o{border:1px solid var(--border2);color:var(--sub)}.btn-o:hover{border-color:var(--sub);color:var(--text);transform:translateY(-1px)}
+.h-socials{display:flex;gap:12px;align-items:center}
+.h-socials a{color:var(--muted);line-height:0;transition:color .15s}.h-socials a:hover{color:var(--gold)}
+.h-socials svg{width:15px;height:15px}
+
+/* Profile card */
+.p-card{background:var(--bg1);border:1px solid var(--border);border-radius:6px;overflow:hidden;position:relative}
+.p-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.p-card-top{padding:18px 16px 14px;text-align:center;border-bottom:1px solid var(--border)}
+.p-av{width:58px;height:58px;border-radius:50%;background:var(--bg);border:1px solid var(--border);margin:0 auto 9px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:1.1rem;font-weight:800;color:var(--gold);position:relative}
+.p-av::after{content:'';position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(176,141,64,.2);animation:spin 8s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.p-name{font-family:var(--fh);font-size:13px;font-weight:700;margin-bottom:2px}
+.p-role{font-family:var(--fm);font-size:9.5px;color:var(--cyan);letter-spacing:.1em;margin-bottom:0}
+.p-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.p-stat{padding:9px 6px;background:var(--bg1);text-align:center}
+.p-stat-n{font-family:var(--fh);font-size:1.1rem;font-weight:700;color:var(--gold);line-height:1}
+.p-stat-l{font-family:var(--fm);font-size:8.5px;color:var(--muted);letter-spacing:.08em;margin-top:2px}
+.p-status{padding:10px 12px;border-top:1px solid var(--border);background:var(--bg2)}
+.p-status-line{font-family:var(--fm);font-size:9.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.6}
+.p-status-line span{color:var(--cyan)}
+.p-status-line .gold{color:var(--gold)}
+@media(max-width:640px){.hero-inner{grid-template-columns:1fr}.p-card{display:none}}
+
+/* ── ABOUT ── */
+.ab-grid{display:grid;grid-template-columns:160px 1fr;gap:24px;align-items:start}
+.ab-img{width:160px;height:200px;background:var(--bg2);border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:2.2rem;font-weight:800;color:rgba(212,168,83,.1);position:relative;overflow:hidden;flex-shrink:0}
+.ab-img::after{content:'';position:absolute;bottom:0;left:0;right:0;height:50%;background:linear-gradient(to top,rgba(8,8,8,.6),transparent)}
+.ab-img-corner{position:absolute;top:6px;right:6px;width:8px;height:8px;border-top:1px solid var(--gold);border-right:1px solid var(--gold)}
+.ab-img-corner2{position:absolute;bottom:6px;left:6px;width:8px;height:8px;border-bottom:1px solid var(--gold);border-left:1px solid var(--gold)}
+.ab-text p{font-size:13px;color:var(--sub);line-height:1.8;margin-bottom:12px}
+.ab-text strong{color:var(--text);font-weight:500}
+.ab-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.ab-tag{font-family:var(--fm);font-size:10px;font-weight:500;padding:3px 10px;border:1px solid var(--border2);border-radius:2px;color:var(--sub);background:var(--bg2);transition:all .15s}
+.ab-tag:hover{border-color:var(--cyan);color:var(--cyan);background:var(--cyan3)}
+.open-to{margin-bottom:14px;padding:10px 12px;border:1px solid var(--border);border-left:2px solid var(--gold);background:var(--gold3);border-radius:0 3px 3px 0}
+.open-to-title{font-family:var(--fm);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.open-to-items{display:flex;flex-wrap:wrap;gap:4px}
+.open-to-item{font-size:11px;color:var(--sub);padding:2px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:2px}
+.ab-stats{display:flex;gap:22px;padding-top:12px;border-top:1px solid var(--border)}
+.ab-sn{font-family:var(--fh);font-size:1.35rem;font-weight:700;color:var(--gold);line-height:1}
+.ab-sl{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.08em;margin-top:2px}
+@media(max-width:640px){.ab-grid{grid-template-columns:1fr}.ab-img{width:100%;height:120px}}
+
+/* ── CLIENT BAND ── */
+#clients{padding:22px 0;border-bottom:1px solid var(--border)}
+.cl-label{font-family:var(--fm);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.cl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cl-badge{padding:5px 14px;border:1px solid var(--border);border-radius:3px;font-family:var(--fm);font-size:10px;letter-spacing:.1em;color:var(--muted);background:var(--bg2);transition:all .15s}
+.cl-badge:hover{border-color:var(--border2);color:var(--sub)}
+.cl-sep{width:1px;height:14px;background:var(--border)}
+
+/* ── PORTFOLIO ── */
+.pt-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.filters{display:flex;gap:2px;padding:3px;background:var(--bg2);border:1px solid var(--border);border-radius:4px}
+.ft{font-family:var(--fm);font-size:10px;font-weight:500;padding:4px 12px;background:none;border:none;color:var(--muted);border-radius:2px;cursor:auto;letter-spacing:.1em;transition:all .15s}
+.ft.on,.ft:hover{background:var(--bg3);color:var(--text)}
+.ft.on{color:var(--gold)}
+.pt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.pt-card{border:1px solid var(--border);border-radius:4px;background:var(--bg1);overflow:hidden;text-decoration:none;color:inherit;display:flex;flex-direction:column;transition:border-color .2s,transform .25s var(--ease);position:relative}
+.pt-card:hover{border-color:rgba(176,141,64,0.35);transform:translateY(-3px)}
+.pt-card:hover .pt-overlay{opacity:1}
+.pt-img{background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:2.2rem;font-weight:800;color:rgba(176,141,64,0.06);position:relative;overflow:hidden;height:140px}
+.pt-img-num{position:relative;z-index:1}
+.pt-img::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 25% 35%,rgba(10,122,138,.04),transparent 55%)}
+/* cyber grid on cards */
+.pt-img::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(176,141,64,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(176,141,64,.03) 1px,transparent 1px);background-size:24px 24px}
+.pt-overlay{position:absolute;inset:0;background:rgba(8,8,8,.65);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;z-index:2}
+.pt-overlay-btn{font-family:var(--fm);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:7px 18px;border:1px solid var(--gold);border-radius:2px;background:rgba(8,8,8,.7);transition:background .15s,color .15s}
+.pt-overlay-btn:hover{background:var(--gold);color:#000}
+.pt-body{padding:14px;flex:1;display:flex;flex-direction:column}
+.pt-meta{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.pt-cat{font-family:var(--fm);font-size:9px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);padding:2px 7px;border:1px solid rgba(10,122,138,0.2);border-radius:2px}
+.pt-yr{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.06em}
+.pt-title{font-family:var(--fh);font-size:13px;font-weight:600;line-height:1.3;margin-bottom:6px}
+.pt-desc{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px;flex:1}
+.pt-tags{display:flex;flex-wrap:wrap;gap:4px}
+.pt-tag{font-family:var(--fm);font-size:9px;padding:2px 7px;background:var(--bg3);color:var(--muted);border-radius:2px}
+.pt-link{display:inline-flex;align-items:center;gap:4px;font-family:var(--fm);font-size:9px;color:var(--gold);font-weight:500;margin-top:10px;letter-spacing:.08em}
+@media(max-width:960px){.pt-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:640px){.pt-grid{grid-template-columns:1fr}}
+
+/* ── PROCESS ── */
+.proc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.proc-step{padding:16px 14px;background:var(--bg1);transition:background .2s;position:relative}
+.proc-step:hover{background:var(--bg2)}
+.proc-step::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:transparent;transition:background .2s}
+.proc-step:hover::before{background:var(--gold)}
+.proc-n{font-family:var(--fm);font-size:1.5rem;font-weight:500;color:rgba(212,168,83,.08);line-height:1;margin-bottom:7px}
+.proc-icon{font-size:1.1rem;margin-bottom:7px}
+.proc-t{font-family:var(--fh);font-size:12.5px;font-weight:600;margin-bottom:4px}
+.proc-d{font-family:var(--fb);font-size:11.5px;color:var(--muted);line-height:1.6}
+@media(max-width:640px){.proc-grid{grid-template-columns:1fr 1fr}}
+
+/* ── SKILLS ── */
+.sk-cat{margin-bottom:18px}
+.sk-cat-h{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-family:var(--fm);font-size:9.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.sk-cat-h::before{content:'>';color:var(--cyan);margin-right:2px}
+.sk-tags{display:flex;flex-wrap:wrap;gap:5px}
+.sk-tag{display:flex;align-items:center;gap:5px;font-family:var(--fb);font-size:11.5px;font-weight:400;padding:6px 12px;border:1px solid var(--border);border-radius:3px;background:var(--bg1);color:var(--sub);transition:all .15s;cursor:default}
+.sk-tag:hover{border-color:var(--gold);background:var(--gold);color:#000}
+.sk-dot{width:3px;height:3px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .15s}
+.sk-tag:hover .sk-dot{background:#000}
+
+/* ── LOGGED ── */
+#logged{background:var(--bg)}
+.log-terminal{background:var(--bg1);border:1px solid var(--border);border-radius:4px;overflow:hidden;position:relative}
+.log-terminal::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:.5}
+.log-bar{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid var(--border);background:var(--bg2)}
+.log-dot{width:9px;height:9px;border-radius:50%}
+.log-dot:nth-child(1){background:#ff5f56}.log-dot:nth-child(2){background:#ffbd2e}.log-dot:nth-child(3){background:#27c93f}
+.log-title{font-family:var(--fm);font-size:10px;color:var(--muted);letter-spacing:.1em;margin-left:4px}
+.log-body{padding:16px 14px;display:flex;flex-direction:column;gap:4px}
+.log-line{font-family:var(--fm);font-size:11.5px;color:var(--sub);line-height:1.55;display:flex;align-items:baseline;gap:8px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.log-line:last-child{border-bottom:none}
+.log-time{color:var(--muted);font-size:10px;flex-shrink:0}
+.log-key{flex-shrink:0}
+.log-key.anime{color:var(--cyan)}
+.log-key.manga{color:#b48ead}
+.log-key.book{color:var(--gold)}
+.log-key.music{color:#a8d8a8}
+.log-key.game{color:#f28b82}
+.log-key.now{color:var(--green)}
+.log-val{color:var(--sub)}
+.log-cursor{display:inline-block;width:7px;height:1em;background:var(--cyan);animation:blink .9s step-end infinite;vertical-align:text-bottom;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* ── TESTIMONIALS ── */
+.t-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.t-card{padding:16px;border:1px solid var(--border);border-radius:4px;background:var(--bg1);transition:border-color .2s,transform .2s var(--ease);position:relative}
+.t-card::after{content:'"';position:absolute;top:10px;right:14px;font-size:2.5rem;color:rgba(212,168,83,.1);font-family:Georgia,serif;line-height:1}
+.t-card:hover{border-color:rgba(212,168,83,.22);transform:translateY(-2px)}
+.t-text{font-size:12px;color:var(--sub);line-height:1.75;font-style:italic;margin-bottom:12px}
+.t-auth{display:flex;align-items:center;gap:8px}
+.t-av{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0}
+.t-name{font-size:11.5px;font-weight:600}
+.t-role{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.06em;margin-top:1px}
+@media(max-width:640px){.t-grid{grid-template-columns:1fr}}
+
+/* ── BLOG ── */
+.bl-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.bl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bl-card{border:1px solid var(--border);border-radius:4px;background:var(--bg1);overflow:hidden;text-decoration:none;color:inherit;display:block;transition:border-color .2s,transform .25s var(--ease)}
+.bl-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.bl-img{height:100px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.8rem;position:relative;overflow:hidden}
+.bl-img::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(77,217,217,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(77,217,217,.03) 1px,transparent 1px);background-size:20px 20px}
+.bl-body{padding:12px}
+.bl-meta{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+.bl-cat{font-family:var(--fm);font-size:9.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan);padding:1px 7px;border:1px solid rgba(77,217,217,.2);border-radius:2px}
+.bl-date{font-family:var(--fm);font-size:9.5px;color:var(--muted);letter-spacing:.04em}
+.bl-title{font-family:var(--fh);font-size:12.5px;font-weight:600;line-height:1.35;margin-bottom:5px}
+.bl-ex{font-size:11px;color:var(--muted);line-height:1.65;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bl-more{display:inline-flex;align-items:center;gap:4px;font-family:var(--fm);font-size:10px;color:var(--gold);font-weight:500;margin-top:8px;letter-spacing:.08em;transition:gap .15s}
+.bl-card:hover .bl-more{gap:7px}
+@media(max-width:640px){.bl-grid{grid-template-columns:1fr}}
+
+/* ── CONTACT ── */
+.ct-grid{display:grid;grid-template-columns:240px 1fr;gap:32px;align-items:start}
+.ct-desc{font-size:12.5px;color:var(--sub);line-height:1.8;margin-bottom:14px}
+.ct-methods{margin-bottom:14px}
+.ct-method{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ct-icon{width:28px;height:28px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0}
+.ct-l{font-family:var(--fm);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.ct-v{font-size:12px;color:var(--sub)}
+.ct-rtime{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;background:var(--green2);border:1px solid rgba(63,207,108,.2);border-radius:3px;font-family:var(--fm);font-size:10px;color:var(--green)}
+.ct-form{display:flex;flex-direction:column;gap:9px}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field label{display:block;font-family:var(--fm);font-size:9.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:8px 11px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--fb);font-size:12.5px;font-weight:300;outline:none;transition:border-color .15s,background .15s;appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);background:var(--cyan3)}
+.field textarea{resize:vertical;min-height:85px}
+.field select option{background:var(--bg2)}
+.f-submit{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-sub{display:inline-flex;align-items:center;gap:6px;padding:9px 22px;background:var(--gold);color:#000;border:none;font-family:var(--fb);font-size:11.5px;font-weight:600;letter-spacing:.08em;cursor:auto;border-radius:3px;transition:opacity .15s,transform .2s var(--ease)}
+.btn-sub:hover{opacity:.85;transform:translateY(-1px)}
+.f-note{font-family:var(--fm);font-size:10px;color:var(--muted);line-height:1.55}
+@media(max-width:640px){.ct-grid{grid-template-columns:1fr;gap:22px}.f-row{grid-template-columns:1fr}}
+
+/* ── FOOTER ── */
+footer{padding:18px 28px;border-top:1px solid var(--border);max-width:1160px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.f-logo{font-family:var(--fh);font-size:13.5px;font-weight:800;text-decoration:none;color:var(--sub);letter-spacing:.04em}.f-logo span{color:var(--gold)}
+.f-links{display:flex;gap:12px}
+.f-links a{font-family:var(--fm);font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.06em;transition:color .15s}.f-links a:hover{color:var(--sub)}
+.f-soc{display:flex;gap:10px}
+.f-soc a{color:var(--muted);line-height:0;transition:color .15s}.f-soc a:hover{color:var(--gold)}
+.f-soc svg{width:13px;height:13px}
+.f-copy{width:100%;font-family:var(--fm);font-size:9.5px;color:var(--muted);letter-spacing:.08em;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between}
+@media(max-width:640px){footer{padding:14px 16px}.f-links,.f-copy span:last-child{display:none}}
+
+/* ── BACK TO TOP ── */
+#btt{position:fixed;bottom:24px;right:24px;width:36px;height:36px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--muted);font-size:14px;opacity:0;pointer-events:none;transition:all .25s;z-index:100}
+#btt.on{opacity:1;pointer-events:all}
+#btt:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-2px)}
+
+/* ── LINK ARROW ── */
+.larr{display:inline-flex;align-items:center;gap:5px;font-family:var(--fm);font-size:10.5px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-decoration:none;transition:gap .15s}
+.larr:hover{gap:9px}
+
+/* ── FADE IN ── */
+.fu{opacity:0;transform:translateY(12px);transition:opacity .4s var(--ease),transform .4s var(--ease)}
+.fu.v{opacity:1;transform:none}
+.fu:nth-child(2){transition-delay:.06s}.fu:nth-child(3){transition-delay:.12s}.fu:nth-child(4){transition-delay:.18s}
+
+/* ── GLOW ACCENT ── */
+.glow{text-shadow:0 0 20px rgba(77,217,217,0.35)}
+</style>
+</head>
+<body>
+
+<div id="cur" style="left: 224px; top: 748px;"></div>
+<div id="cur-r" style="left: 224.458805px; top: 746.649999px;"></div>
+<a href="#" id="btt" aria-label="トップへ" class="on">↑</a>
+
+<!-- Mobile Nav -->
+<div class="mob-nav" id="mobNav">
+  <a href="#about" onclick="closeMob()">About</a>
+  <a href="#portfolio" onclick="closeMob()">Portfolio</a>
+  <a href="#skills" onclick="closeMob()">Skills</a>
+  <a href="#logged" onclick="closeMob()">Logged</a>
+  <a href="#blog" onclick="closeMob()">Blog</a>
+  <a href="#contact" onclick="closeMob()">Contact</a>
+</div>
+
+<!-- Nav -->
+<nav id="nav" class="on">
+  <a href="#" class="n-logo">K<span contenteditable="false" style="outline-offset: 4px;">.</span>N</a>
+  <div class="n-links">
+    <a href="#about">About</a>
+    <a href="#portfolio">Work</a>
+    <a href="#skills">Skills</a>
+    <a href="#logged">Logged</a>
+    <a href="#blog">Blog</a>
+    <a href="#contact" class="n-contact">Contact</a>
+  </div>
+  <button class="hbg" id="hbg" onclick="toggleMob()"><span contenteditable="false" style="outline-offset: 4px;"></span><span contenteditable="false" style="outline-offset: 4px;"></span><span contenteditable="false" style="outline-offset: 4px;"></span></button>
+</nav>
+
+<!-- Hero -->
+<div style="border-bottom:1px solid var(--border)">
+<section id="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <div>
+        <div class="h-badge"><span class="h-badge-dot" contenteditable="false" style="outline-offset: 4px;"></span>Open to collaboration</div>
+        <h1 contenteditable="false" style="outline-offset: 4px;">2026/03/08<div>作ってみた</div></h1>
+        <p class="h-sub" contenteditable="false" style="outline-offset: 4px;">慶應義塾大学 環境情報学部。脳波解析(EEG)とHuman-Computer Interactionを軸に、デジタルと身体が溶け合う未来を実装しています。</p>
+        <div class="h-btns">
+          <a href="#portfolio" class="btn btn-g" contenteditable="false" style="outline-offset: 4px;">つくったもの →</a>
+          <a href="#contact" class="btn btn-o" contenteditable="false" style="outline-offset: 4px;">連絡する</a>
+        </div>
+        <div class="h-socials">
+          <a href="#" aria-label="X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
+          <a href="#" aria-label="GitHub"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg></a>
+          <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"></circle></svg></a>
+          <a href="#" aria-label="Zenn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M.264 23.771h4.984c.264 0 .498-.147.645-.352L19.614.874c.176-.293-.029-.645-.381-.645h-4.72c-.235 0-.44.117-.557.323L.03 23.361c-.088.176.029.41.234.41zM17.445 23.419l6.479-11.282c.176-.293-.029-.586-.381-.586h-4.691c-.205 0-.41.117-.527.323l-6.391 11.253c-.117.176.029.41.234.41h4.837c.234-.029.44-.147.44-.118z"></path></svg></a>
+        </div>
+      </div>
+      <!-- Profile Card -->
+      <div class="p-card">
+        <div class="p-card-top">
+          <div class="p-av">KN</div>
+          <div class="p-name">Kenji Nakamura</div>
+          <div class="p-role">Keio Univ. / EEG × Dev</div>
+        </div>
+        <div class="p-stats">
+          <div class="p-stat"><div class="p-stat-n">慶應</div><div class="p-stat-l">Univ.</div></div>
+          <div class="p-stat"><div class="p-stat-n">EEG</div><div class="p-stat-l">Research</div></div>
+          <div class="p-stat"><div class="p-stat-n">HCI</div><div class="p-stat-l">Lab</div></div>
+          <div class="p-stat"><div class="p-stat-n">App</div><div class="p-stat-l">Dev</div></div>
+        </div>
+        <div class="p-status">
+          <div class="p-status-line"><span contenteditable="false" style="outline-offset: 4px;">🎵</span> <span class="gold" contenteditable="false" style="outline-offset: 4px;">NOW:</span> Nujabes — Feather</div>
+          <div class="p-status-line"><span contenteditable="false" style="outline-offset: 4px;">📖</span> <span class="gold" contenteditable="false" style="outline-offset: 4px;">READ:</span> 脳がわかれば心がわかるか — 河野哲也</div>
+          <div class="p-status-line"><span contenteditable="false" style="outline-offset: 4px;">📍</span> Fujisawa, Kanagawa</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- About -->
+<section id="about">
+  <div class="wrap">
+    <div class="s-tag"><span class="s-num" contenteditable="false" style="outline-offset: 4px;">01</span><span class="s-label" contenteditable="false" style="outline-offset: 4px;">About</span></div>
+    <div class="ab-grid">
+      <div class="ab-img fu v">
+        KN
+        <div class="ab-img-corner"></div>
+        <div class="ab-img-corner2"></div>
+      </div>
+      <div class="fu v">
+        <h2 contenteditable="false" style="outline-offset: 4px;">研究と実装の<em>往復</em></h2>
+        <div class="ab-text">
+          <p contenteditable="false" style="outline-offset: 4px;">慶應義塾大学 徳田・河野・大越研究室に所属。<strong>脳波（EEG）を用いたヒューマンコンピュータインタラクション（HCI）</strong>を専門としています。人間の内面的な状態をセンシングし、それをデジタルの表現やフィードバックに落とし込むことで、新しい形の「知覚」や「コミュニケーション」を模索しています。</p>
+          <p contenteditable="false" style="outline-offset: 4px;">研究室で培った技術を論文で終わらせず、SwiftUIやReact Nativeを用いて実際に動作するアプリケーションとして社会に提示することに情熱を注いでいます。</p>
+        </div>
+        <div class="ab-tags">
+          <span class="ab-tag" contenteditable="false" style="outline-offset: 4px;">#EEG</span>
+          <span class="ab-tag" contenteditable="false" style="outline-offset: 4px;">#HCI</span>
+          <span class="ab-tag" contenteditable="false" style="outline-offset: 4px;">#Biosensing</span>
+          <span class="ab-tag" contenteditable="false" style="outline-offset: 4px;">#SFC</span>
+        </div>
+        <div class="open-to">
+          <div class="open-to-title">✦ Open to</div>
+          <div class="open-to-items">
+            <span class="open-to-item" contenteditable="false" style="outline-offset: 4px;">バイオセンシング開発</span>
+            <span class="open-to-item" contenteditable="false" style="outline-offset: 4px;">研究プロトタイプ制作</span>
+            <span class="open-to-item" contenteditable="false" style="outline-offset: 4px;">iOSアプリ受託開発</span>
+            <span class="open-to-item" contenteditable="false" style="outline-offset: 4px;">面白そうなコラボ</span>
+          </div>
+        </div>
+        <div class="ab-stats">
+          <div><div class="ab-sn">Keio SFC</div><div class="ab-sl">Environment &amp; Info</div></div>
+          <div><div class="ab-sn">TKO Lab</div><div class="ab-sl">Tokuda-Kono-Okoshi</div></div>
+          <div><div class="ab-sn">EEG</div><div class="ab-sl">Core Domain</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Todo List / Schedule -->
+<section id="todo">
+  <div class="wrap">
+    <div class="s-tag"><span class="s-num">02</span><span class="s-label">Schedule & Todo</span></div>
+    <div class="todo-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start;">
+      <!-- Schedule -->
+      <div class="todo-box" style="background:var(--bg1); border:1px solid var(--border); border-radius:8px; padding:20px;">
+        <h3 style="font-family:var(--fh); font-size:1.1rem; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+          📅 Weekly Schedule
+        </h3>
+        <div class="todo-items" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="todo-item" style="display:flex; gap:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+            <span class="todo-day" style="font-family:var(--fm); font-size:0.8rem; color:var(--cyan); min-width:40px;">MON</span>
+            <span class="todo-text">研究室ミーティング (13:00-)</span>
+          </div>
+          <div class="todo-item" style="display:flex; gap:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+            <span class="todo-day" style="font-family:var(--fm); font-size:0.8rem; color:var(--cyan); min-width:40px;">WED</span>
+            <span class="todo-text">HCI論文読み合わせ</span>
+          </div>
+          <div class="todo-item" style="display:flex; gap:12px; border-bottom:1px solid var(--border); padding-bottom:8px;">
+            <span class="todo-day" style="font-family:var(--fm); font-size:0.8rem; color:var(--cyan); min-width:40px;">FRI</span>
+            <span class="todo-text">受託案件 進捗報告</span>
+          </div>
+        </div>
+      </div>
+      <!-- Todo -->
+      <div class="todo-box" style="background:var(--bg1); border:1px solid var(--border); border-radius:8px; padding:20px;">
+        <h3 style="font-family:var(--fh); font-size:1.1rem; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+          ✅ Active Tasks
+        </h3>
+        <div class="todo-items" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="todo-item" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" checked style="accent-color:var(--gold);">
+            <span class="todo-text" style="text-decoration:line-through; color:var(--muted);">EEG前処理スクリプトの修正</span>
+          </div>
+          <div class="todo-item" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" style="accent-color:var(--gold);">
+            <span class="todo-text">ポートフォリオのライトテーマ化</span>
+          </div>
+          <div class="todo-item" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" style="accent-color:var(--gold);">
+            <span class="todo-text">学会予稿の初稿作成</span>
+          </div>
+          <div class="todo-item" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" style="accent-color:var(--gold);">
+            <span class="todo-text">React Nativeの新機能実装</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Portfolio -->
+<section id="portfolio">
+  <div class="wrap">
+    <div class="pt-head">
+      <div>
+        <div class="s-tag" style="margin-bottom:4px"><span class="s-num" contenteditable="false" style="outline-offset: 4px;">02</span><span class="s-label" contenteditable="false" style="outline-offset: 4px;">Portfolio</span></div>
+        <h2 style="margin-bottom: 0px; outline-offset: 4px;" contenteditable="false">つくった<em>もの</em></h2>
+      </div>
+      <div class="filters">
+        <button class="ft on">All</button>
+        <button class="ft">App</button>
+        <button class="ft">Research</button>
+        <button class="ft">Web</button>
+      </div>
+    </div>
+    <div class="pt-grid">
+      <a href="#" class="pt-card fu v">
+        <div class="pt-img"><span class="pt-img-num" contenteditable="false" style="outline-offset: 4px;">01</span></div>
+        <div class="pt-overlay"><span class="pt-overlay-btn" contenteditable="false" style="outline-offset: 4px;">View Project →</span></div>
+        <div class="pt-body">
+          <div class="pt-meta"><span class="pt-cat" contenteditable="false" style="outline-offset: 4px;">App</span><span class="pt-yr" contenteditable="false" style="outline-offset: 4px;">2024</span></div>
+          <div class="pt-title" contenteditable="false" style="outline-offset: 4px;">NeuroFocus: EEG可視化モバイルアプリ</div>
+          <div class="pt-desc" contenteditable="false" style="outline-offset: 4px;">脳波計からBluetooth経由でデータを取得し、リアルタイムで集中度をスコアリング・可視化するiOSアプリ。</div>
+          <div class="pt-tags"><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">SwiftUI</span><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">Python (MNE)</span><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">CoreBluetooth</span></div>
+          <span class="pt-link" contenteditable="false" style="outline-offset: 4px;">詳しく見る →</span>
+        </div>
+      </a>
+      <a href="#" class="pt-card fu v">
+        <div class="pt-img"><span class="pt-img-num" contenteditable="false" style="outline-offset: 4px;">02</span></div>
+        <div class="pt-overlay"><span class="pt-overlay-btn" contenteditable="false" style="outline-offset: 4px;">View Project →</span></div>
+        <div class="pt-body">
+          <div class="pt-meta"><span class="pt-cat" contenteditable="false" style="outline-offset: 4px;">Research</span><span class="pt-yr" contenteditable="false" style="outline-offset: 4px;">2024</span></div>
+          <div class="pt-title" contenteditable="false" style="outline-offset: 4px;">UIの複雑性と認知負荷の相関解析</div>
+          <div class="pt-desc" contenteditable="false" style="outline-offset: 4px;">視覚的な情報密度がユーザーの脳波（ERP）に与える影響を定量的に評価した研究。</div>
+          <div class="pt-tags"><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">EEG</span><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">Signal Processing</span><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">R</span></div>
+          <span class="pt-link" contenteditable="false" style="outline-offset: 4px;">詳しく見る →</span>
+        </div>
+      </a>
+      <a href="#" class="pt-card fu v">
+        <div class="pt-img"><span class="pt-img-num" contenteditable="false" style="outline-offset: 4px;">03</span></div>
+        <div class="pt-overlay"><span class="pt-overlay-btn" contenteditable="false" style="outline-offset: 4px;">View Project →</span></div>
+        <div class="pt-body">
+          <div class="pt-meta"><span class="pt-cat" contenteditable="false" style="outline-offset: 4px;">App</span><span class="pt-yr" contenteditable="false" style="outline-offset: 4px;">2023</span></div>
+          <div class="pt-title" contenteditable="false" style="outline-offset: 4px;">HabitStream: 習慣トラッカー</div>
+          <div class="pt-desc" contenteditable="false" style="outline-offset: 4px;">行動科学に基づき、継続率を最大化するための通知アルゴリズムを搭載した習慣管理ツール。</div>
+          <div class="pt-tags"><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">React Native</span><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">TypeScript</span><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">Supabase</span></div>
+          <span class="pt-link" contenteditable="false" style="outline-offset: 4px;">詳しく見る →</span>
+        </div>
+      </a>
+      <a href="#" class="pt-card fu v">
+        <div class="pt-img"><span class="pt-img-num" contenteditable="false" style="outline-offset: 4px;">04</span></div>
+        <div class="pt-overlay"><span class="pt-overlay-btn" contenteditable="false" style="outline-offset: 4px;">View Project →</span></div>
+        <div class="pt-body">
+          <div class="pt-meta"><span class="pt-cat" contenteditable="false" style="outline-offset: 4px;">Web</span><span class="pt-yr" contenteditable="false" style="outline-offset: 4px;">2023</span></div>
+          <div class="pt-title" contenteditable="false" style="outline-offset: 4px;">Experiment Data Explorer</div>
+          <div class="pt-desc" contenteditable="false" style="outline-offset: 4px;">研究室内の膨大なEEG実験データを一元管理し、チーム内での解析結果共有を容易にする Web プラットフォーム。</div>
+          <div class="pt-tags"><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">Next.js</span><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">TailwindCSS</span><span class="pt-tag" contenteditable="false" style="outline-offset: 4px;">Vercel</span></div>
+          <span class="pt-link" contenteditable="false" style="outline-offset: 4px;">詳しく見る →</span>
+        </div>
+      </a>
+    </div>
+    <div style="margin-top:14px"><a href="#" class="larr">All Works <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a></div>
+  </div>
+</section>
+
+<!-- Skills -->
+<section id="skills">
+  <div class="wrap">
+    <div class="s-tag"><span class="s-num" contenteditable="false" style="outline-offset: 4px;">03</span><span class="s-label" contenteditable="false" style="outline-offset: 4px;">Skills</span></div>
+    <h2 contenteditable="false" style="outline-offset: 4px;">できること</h2>
+    <div class="sk-cat fu v">
+      <div class="sk-cat-h">Research</div>
+      <div class="sk-tags">
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>EEG / 脳波解析</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>HCI</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>脳科学</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>MNE-Python</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>ユーザー実験設計</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>統計解析</div>
+      </div>
+    </div>
+    <div class="sk-cat fu v">
+      <div class="sk-cat-h">App / Dev</div>
+      <div class="sk-tags">
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>Swift / SwiftUI</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>React Native</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>TypeScript</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>React / Next.js</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>Python</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>Supabase</div>
+      </div>
+    </div>
+    <div class="sk-cat fu v">
+      <div class="sk-cat-h">Design &amp; Tools</div>
+      <div class="sk-tags">
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>Figma</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>Prototyping</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>Git / GitHub</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>Notion</div>
+        <div class="sk-tag" contenteditable="false" style="outline-offset: 4px;"><span class="sk-dot" contenteditable="false" style="outline-offset: 4px;"></span>Vercel</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Logged -->
+<section id="logged">
+  <div class="wrap">
+    <div class="s-tag"><span class="s-num" contenteditable="false" style="outline-offset: 4px;">05</span><span class="s-label" contenteditable="false" style="outline-offset: 4px;">Logged / Currently</span></div>
+    <h2 style="margin-bottom: 14px; outline-offset: 4px;" contenteditable="false">いまの<em>インプット</em></h2>
+    <div class="log-terminal fu v" style="margin-top:10px">
+      <div class="log-bar">
+        <div class="log-dot"></div><div class="log-dot"></div><div class="log-dot"></div>
+        <span class="log-title" contenteditable="false" style="outline-offset: 4px;">kenji@local ~ — activity_log.sh</span>
+      </div>
+      <div class="log-body">
+        <div class="log-line"><span class="log-time" contenteditable="false" style="outline-offset: 4px;">2026-03-07</span><span class="log-key now" contenteditable="false" style="outline-offset: 4px;">[NOW_PLAYING]</span><span class="log-val" contenteditable="false" style="outline-offset: 4px;">Nujabes — Feather (ft. Cise Starr &amp; Akin)</span></div>
+        <div class="log-line"><span class="log-time" contenteditable="false" style="outline-offset: 4px;">2026-03-05</span><span class="log-key book" contenteditable="false" style="outline-offset: 4px;">[PAPER]</span><span class="log-val" contenteditable="false" style="outline-offset: 4px;">Human-Computer Interaction: An Empirical Research Perspective</span></div>
+        <div class="log-line"><span class="log-time" contenteditable="false" style="outline-offset: 4px;">2026-03-01</span><span class="log-key book" contenteditable="false" style="outline-offset: 4px;">[BOOK]</span><span class="log-val" contenteditable="false" style="outline-offset: 4px;">脳がわかれば心がわかるか — 河野哲也 / 身体性について再考</span></div>
+        <div class="log-line"><span class="log-time" contenteditable="false" style="outline-offset: 4px;">2026-02-28</span><span class="log-key anime" contenteditable="false" style="outline-offset: 4px;">[ANIME]</span><span class="log-val" contenteditable="false" style="outline-offset: 4px;">葬送のフリーレン — 第28話 / 演出の緩急が素晴らしい</span></div>
+        <div class="log-line"><span class="log-time" contenteditable="false" style="outline-offset: 4px;">2026-02-25</span><span class="log-key game" contenteditable="false" style="outline-offset: 4px;">[GAME]</span><span class="log-val" contenteditable="false" style="outline-offset: 4px;">Hollow Knight — 達成率100%を目指して</span></div>
+        <div class="log-line"><span class="log-time" contenteditable="false" style="outline-offset: 4px;">NOW</span><span class="log-key now" contenteditable="false" style="outline-offset: 4px;">[STATUS]</span><span class="log-val" contenteditable="false" style="outline-offset: 4px;">ポートフォリオをライトテーマにリニューアル中<span class="log-cursor" contenteditable="false" style="outline-offset: 4px;"></span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials">
+  <div class="wrap">
+    <div class="s-tag"><span class="s-num" contenteditable="false" style="outline-offset: 4px;">06</span><span class="s-label" contenteditable="false" style="outline-offset: 4px;">Testimonials</span></div>
+    <h2 contenteditable="false" style="outline-offset: 4px;">一緒にやった人の<em>コメント</em></h2>
+    <div class="t-grid">
+      <div class="t-card fu v">
+        <p class="t-text" contenteditable="false" style="outline-offset: 4px;">脳波という抽象的なデータを、具体的で直感的なUIに落とし込むセンスが抜群。技術への深い理解に基づいた提案が助かります。</p>
+        <div class="t-auth"><div class="t-av">T</div><div><div class="t-name">Tanaka</div><div class="t-role">研究プロジェクト 同期</div></div></div>
+      </div>
+      <div class="t-card fu v">
+        <p class="t-text" contenteditable="false" style="outline-offset: 4px;">iOSアプリの実装をお願いしましたが、期待以上のパフォーマンスと使い勝手で仕上げてくれました。コードも非常に綺麗です。</p>
+        <div class="t-auth"><div class="t-av">S</div><div><div class="t-name">Sato</div><div class="t-role">共同開発パートナー</div></div></div>
+      </div>
+      <div class="t-card fu v">
+        <p class="t-text" contenteditable="false" style="outline-offset: 4px;">EEGの解析スクリプトからWeb管理ツールまで、幅広くこなしてくれる。研究室のDX推進に欠かせない存在です。</p>
+        <div class="t-auth"><div class="t-av">M</div><div><div class="t-name">Matsuda</div><div class="t-role">研究室 先輩</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Blog -->
+<section id="blog">
+  <div class="wrap">
+    <div class="bl-head">
+      <div>
+        <div class="s-tag" style="margin-bottom:4px"><span class="s-num" contenteditable="false" style="outline-offset: 4px;">07</span><span class="s-label" contenteditable="false" style="outline-offset: 4px;">Blog / Insights</span></div>
+        <h2 style="margin-bottom: 0px; outline-offset: 4px;" contenteditable="false">思考の<em>記録</em></h2>
+      </div>
+      <a href="#" class="larr">View All Articles <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+    </div>
+    <div class="bl-grid">
+      <a href="#" class="bl-card fu v">
+        <div class="bl-img">🧠</div>
+        <div class="bl-body">
+          <div class="bl-meta"><span class="bl-cat" contenteditable="false" style="outline-offset: 4px;">Research</span><span class="bl-date" contenteditable="false" style="outline-offset: 4px;">2024.02.10</span></div>
+          <div class="bl-title">脳波解析におけるノイズ除去の重要性</div>
+          <div class="bl-ex">MNE-Pythonを用いた前処理パイプラインの構築について。</div>
+          <span class="bl-more" contenteditable="false" style="outline-offset: 4px;">Read more →</span>
+        </div>
+      </a>
+      <a href="#" class="bl-card fu v">
+        <div class="bl-img">📱</div>
+        <div class="bl-body">
+          <div class="bl-meta"><span class="bl-cat" contenteditable="false" style="outline-offset: 4px;">Dev</span><span class="bl-date" contenteditable="false" style="outline-offset: 4px;">2024.01.15</span></div>
+          <div class="bl-title">SwiftUIでカスタムグラフを描画する</div>
+          <div class="bl-ex">Chartsフレームワークを使わずに、パフォーマンス重視の描画を実装。</div>
+          <span class="bl-more" contenteditable="false" style="outline-offset: 4px;">Read more →</span>
+        </div>
+      </a>
+      <a href="#" class="bl-card fu v">
+        <div class="bl-img">💭</div>
+        <div class="bl-body">
+          <div class="bl-meta"><span class="bl-cat" contenteditable="false" style="outline-offset: 4px;">HCI</span><span class="bl-date" contenteditable="false" style="outline-offset: 4px;">2023.12.05</span></div>
+          <div class="bl-title">「使いやすい」の正体を脳波で探る</div>
+          <div class="bl-ex">直感的な操作と認知負荷の低減をどう定義し、評価するか。</div>
+          <span class="bl-more" contenteditable="false" style="outline-offset: 4px;">Read more →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section id="contact">
+  <div class="wrap">
+    <div class="s-tag"><span class="s-num" contenteditable="false" style="outline-offset: 4px;">04</span><span class="s-label" contenteditable="false" style="outline-offset: 4px;">Contact</span></div>
+    <div class="ct-grid">
+      <div class="fu v">
+        <h2 contenteditable="false" style="outline-offset: 4px;">気軽に<em>連絡を</em></h2>
+        <p class="ct-desc" contenteditable="false" style="outline-offset: 4px;">研究コラボレーション、プロトタイプ制作の依頼、または技術的な雑談など、お気軽にお送りください。</p>
+        <div class="ct-methods">
+          <div class="ct-method"><div class="ct-icon">✉️</div><div><div class="ct-l">Email</div><div class="ct-v"><a href="mailto:kenji@example.com">kenji@example.com</a></div></div></div>
+          <div class="ct-method"><div class="ct-icon">📍</div><div><div class="ct-l">Location</div><div class="ct-v">Fujisawa / Tokyo（Remote OK）</div></div></div>
+          <div class="ct-method"><div class="ct-icon">🕐</div><div><div class="ct-l">Hours</div><div class="ct-v">Weekday 10:00 - 18:00</div></div></div>
+        </div>
+        <div class="ct-rtime">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"></circle><path d="M6 3.5v3l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path></svg>
+          Within 24 hours
+        </div>
+      </div>
+      <form class="ct-form fu v" onsubmit="onSub(event)">
+        <div class="f-row">
+          <div class="field"><label>お名前 *</label><input type="text" placeholder="山田 太郎" required=""></div>
+          <div class="field"><label>所属（任意）</label><input type="text" placeholder="慶應義塾大学 / 株式会社〇〇 など"></div>
+        </div>
+        <div class="field"><label>メールアドレス *</label><input type="email" placeholder="taro@example.com" required=""></div>
+        <div class="field">
+          <label>ご相談の種類</label>
+          <select><option value="">選択してください</option><option>アプリ開発の相談</option><option>研究コラボ・共同研究</option><option>UI/UXの相談</option><option>その他・雑談</option></select>
+        </div>
+        <div class="field"><label>メッセージ *</label><textarea placeholder="どんな内容でも。気軽に書いてください。" required=""></textarea></div>
+        <div class="f-submit">
+          <button type="submit" class="btn-sub" id="sbtn" contenteditable="false" style="outline-offset: 4px;">送信する →</button>
+          <p class="f-note" contenteditable="false" style="outline-offset: 4px;">送信内容は暗号化されます。<br>迅速に返信いたします。</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <a href="#" class="f-logo">K<span contenteditable="false" style="outline-offset: 4px;">.</span>Nakamura</a>
+  <div class="f-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms</a>
+  </div>
+  <div class="f-soc">
+    <a href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path></svg></a>
+    <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"></circle></svg></a>
+  </div>
+  <div class="f-copy">
+    <span contenteditable="false" style="outline-offset: 4px;">© 2026 Kenji Nakamura. All rights reserved.</span>
+    <span contenteditable="false" style="outline-offset: 4px;">Designed &amp; Built by K.Nakamura</span>
+  </div>
+</footer>
+
+<!-- ── CMS EDITOR UI ── -->
+<div id="cms-ui" style="position:fixed;bottom:24px;left:24px;z-index:10000;display:flex;gap:8px;">
+  <button id="cms-toggle" onclick="toggleEditMode()" style="padding: 10px 20px; background: rgb(17, 17, 17); color: rgb(255, 255, 255); border: medium; border-radius: 30px; font-family: Syne, sans-serif; font-weight: 700; cursor: pointer; box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 20px; display: flex; align-items: center; gap: 8px;">
+    <span id="cms-icon" contenteditable="false">✎</span> <span id="cms-text" contenteditable="false">Edit Content</span>
+  </button>
+  <button id="cms-save" onclick="saveChanges()" style="padding: 10px 20px; background: rgb(10, 122, 138); color: rgb(255, 255, 255); border: medium; border-radius: 30px; font-family: Syne, sans-serif; font-weight: 700; cursor: pointer; box-shadow: rgba(10, 122, 138, 0.3) 0px 4px 20px; display: none; align-items: center; gap: 8px;" disabled="">Saving...</button>
+</div>
+
+<script>
+let isEditing = false;
+
+function toggleEditMode() {
+  isEditing = !isEditing;
+  const toggleBtn = document.getElementById('cms-toggle');
+  const saveBtn = document.getElementById('cms-save');
+  const text = document.getElementById('cms-text');
+  
+  // ほぼすべてのテキスト要素をターゲットにする
+  const editableSelectors = [
+    'h1', 'h2', 'h3', 'p', 'span', 'a:not([href^="#"])',
+    '.n-logo', '.n-links a', '.p-name', '.p-role', '.p-stat-n', '.p-stat-l', 
+    '.p-status-line', '.ab-sn', '.ab-sl', '.pt-title', '.pt-desc', 
+    '.sk-tag', '.sk-cat-h', '.cl-badge', '.log-val', '.t-text', '.t-name', '.t-role',
+    '.bl-title', '.bl-ex', '.ct-v', '.f-logo', '.todo-day', '.todo-text'
+  ].join(', ');
+  
+  const elements = document.querySelectorAll(editableSelectors);
+
+  if (isEditing) {
+    elements.forEach(el => {
+      // CMS UI自体は編集不可にする
+      if (!el.closest('#cms-ui')) {
+        el.contentEditable = "true";
+        el.style.outline = "1px dashed #0a7a8a";
+        el.style.outlineOffset = "2px";
+        el.style.backgroundColor = "rgba(10,122,138,0.02)";
+      }
+    });
+    toggleBtn.style.background = "#333";
+    text.innerText = "Cancel Editing";
+    saveBtn.style.display = "flex";
+  } else {
+    elements.forEach(el => {
+      el.contentEditable = "false";
+      el.style.outline = "";
+      el.style.backgroundColor = "";
+    });
+    toggleBtn.style.background = "#111";
+    text.innerText = "Edit Content";
+    saveBtn.style.display = "none";
+  }
+}
+
+async function saveChanges() {
+  const saveBtn = document.getElementById('cms-save');
+  const originalHtml = document.documentElement.outerHTML;
+  
+  saveBtn.innerText = "Saving...";
+  saveBtn.disabled = true;
+
+  // 編集モードを解除してクリーンな状態にする
+  const isCurrentlyEditing = isEditing;
+  if (isCurrentlyEditing) toggleEditMode();
+
+  // 保存用のHTMLを取得（CMS UI自体は含めないようにするのが理想だが、
+  // シンプルにするため一度UIを非表示にしてから取得する手法をとる）
+  const cmsUi = document.getElementById('cms-ui');
+  cmsUi.style.display = 'none';
+  
+  const htmlToSave = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  
+  // UIを元に戻す
+  cmsUi.style.display = 'flex';
+  if (isCurrentlyEditing) toggleEditMode();
+
+  try {
+    const response = await fetch('http://127.0.0.1:8000/save-portfolio', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: htmlToSave })
+    });
+    
+    const result = await response.json();
+    if (result.status === 'success') {
+      alert('Changes saved successfully!');
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Connection failed. Make sure the backend is running.');
+  } finally {
+    saveBtn.innerText = "✓ Save Changes";
+    saveBtn.disabled = false;
+  }
+}
+
+// Custom cursor
+const cur = document.getElementById('cur'), curR = document.getElementById('cur-r');
+let rx = 0, ry = 0, cx = 0, cy = 0;
+document.addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; cur.style.left=cx+'px'; cur.style.top=cy+'px'; });
+(function loop(){ rx+=(cx-rx)*.13; ry+=(cy-ry)*.13; curR.style.left=rx+'px'; curR.style.top=ry+'px'; requestAnimationFrame(loop); })();
+
+// Nav
+const navEl = document.getElementById('nav');
+window.addEventListener('scroll', () => { navEl.classList.toggle('on', scrollY > 10); document.getElementById('btt').classList.toggle('on', scrollY > 300); });
+
+// Mobile nav
+const mob = document.getElementById('mobNav'), hbg = document.getElementById('hbg');
+let open = false;
+function toggleMob(){ open=!open; mob.classList.toggle('on',open); document.body.style.overflow=open?'hidden':''; const s=hbg.querySelectorAll('span'); if(open){s[0].style.transform='translateY(5px) rotate(45deg)';s[1].style.opacity='0';s[2].style.transform='translateY(-5px) rotate(-45deg)';}else{s.forEach(x=>{x.style.transform='';x.style.opacity='';});} }
+function closeMob(){ open=false; mob.classList.remove('on'); document.body.style.overflow=''; hbg.querySelectorAll('span').forEach(x=>{x.style.transform='';x.style.opacity='';}); }
+
+// Fade in
+const obs = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('v'); }),{threshold:.08});
+document.querySelectorAll('.fu').forEach(el=>obs.observe(el));
+
+// Filters
+document.querySelectorAll('.ft').forEach(t=>t.addEventListener('click',()=>{ document.querySelectorAll('.ft').forEach(x=>x.classList.remove('on')); t.classList.add('on'); }));
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{ a.addEventListener('click',e=>{ const t=document.querySelector(a.getAttribute('href')); if(t){e.preventDefault();window.scrollTo({top:t.offsetTop-50,behavior:'smooth'});} }); });
+
+// Form
+function onSub(e){ e.preventDefault(); const b=document.getElementById('sbtn'); b.innerText='Sending...'; setTimeout(()=>{ b.innerText='Sent Successfully ✓'; b.style.background='#257a37'; b.style.color='#fff'; },1500); }
+</script>
+
+</body></html>

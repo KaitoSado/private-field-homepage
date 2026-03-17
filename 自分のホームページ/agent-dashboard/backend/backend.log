@@ -1,0 +1,124 @@
+/Users/sadokaito/Downloads/自分のホームページ/agent-dashboard/backend/main.py:190: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Will watch for changes in these directories: ['/Users/sadokaito/Downloads/自分のホームページ/agent-dashboard/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [24360] using StatReload
+INFO:     Started server process [24362]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53263 - "WebSocket /ws" [accepted]
+INFO:     connection open
+WARNING:  StatReload detected changes in 'main.py'. Reloading...
+INFO:     Shutting down
+INFO:     connection closed
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [24362]
+INFO:     Started server process [25002]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:53897 - "POST /save-portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53925 - "WebSocket /ws" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:53978 - "POST /save-portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53982 - "POST /save-portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54050 - "OPTIONS /save-portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54050 - "POST /save-portfolio HTTP/1.1" 200 OK
+INFO:     45.156.87.70:51622 - "GET /global/health HTTP/1.1" 404 Not Found
+INFO:     45.156.87.70:51608 - "POST / HTTP/1.1" 404 Not Found
+INFO:     165.227.110.45:34906 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59495 - "GET /status.json?t=1772925036340 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63689 - "GET /status.json?t=1772939131925 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58897 - "GET /status.json?t=1772966976953 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64655 - "GET /status.json?t=1772972897328 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49907 - "GET /status.json?t=1772974803124 HTTP/1.1" 404 Not Found
+INFO:     204.76.203.18:42928 - "GET /backup/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52013 - "GET /status.json?t=1772989766113 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53101 - "GET /status.json?t=1772990768124 HTTP/1.1" 404 Not Found
+INFO:     198.235.24.108:57562 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57861 - "GET /status.json?t=1772994652616 HTTP/1.1" 404 Not Found
+INFO:     167.94.146.54:44782 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     167.94.146.54:33722 - "GET / HTTP/1.1" 404 Not Found
+INFO:     167.94.146.54:33740 - "PRI %2A HTTP/2.0" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     167.94.146.54:58024 - "GET /.well-known/security.txt HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64410 - "GET /status.json?t=1772999418398 HTTP/1.1" 404 Not Found
+INFO:     64.23.161.101:43652 - "GET / HTTP/1.1" 404 Not Found
+INFO:     64.23.161.101:43656 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     198.235.24.10:62330 - "GET /metrics HTTP/1.1" 404 Not Found
+INFO:     185.224.128.16:60902 - "CONNECT www.example.com%3A443 HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     127.0.0.1:57387 - "GET /status.json?t=1773009568442 HTTP/1.1" 404 Not Found
+INFO:     207.90.244.20:59902 - "GET / HTTP/1.1" 404 Not Found
+INFO:     207.90.244.20:59906 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:65403 - "GET /status.json?t=1773017065235 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49962 - "GET /status.json?t=1773018061931 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56962 - "GET /status.json?t=1773029933253 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59663 - "GET /status.json?t=1773035839522 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63229 - "GET /status.json?t=1773042406670 HTTP/1.1" 404 Not Found
+INFO:     178.128.32.203:40312 - "GET / HTTP/1.1" 404 Not Found
+INFO:     178.128.32.203:40326 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     185.247.137.163:49471 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     104.155.119.81:42020 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     204.76.203.73:50268 - "GET /../../../../../../etc/passwd HTTP/1.1" 404 Not Found
+INFO:     204.76.203.73:50280 - "GET /static/link/../../etc/passwd HTTP/1.1" 404 Not Found
+INFO:     204.76.203.73:50294 - "GET /../../../../../../../../etc/passwd HTTP/1.1" 404 Not Found
+INFO:     143.198.238.87:60472 - "GET / HTTP/1.1" 404 Not Found
+INFO:     143.198.238.87:34068 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     127.0.0.1:64252 - "GET /status.json?t=1773080985258 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49451 - "GET /status.json?t=1773084051336 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58394 - "GET /status.json?t=1773102901525 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:60095 - "GET /status.json?t=1773105250822 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:58791 - "GET /status.json?t=1773141102393 HTTP/1.1" 404 Not Found
+INFO:     34.38.83.65:50030 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49198 - "GET /status.json?t=1773151145975 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51713 - "GET /status.json?t=1773156813019 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:54390 - "GET /status.json?t=1773163060782 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:56419 - "GET /status.json?t=1773206028519 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57081 - "GET /status.json?t=1773282029952 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:65203 - "GET /status.json?t=1773300518416 HTTP/1.1" 404 Not Found
+INFO:     164.92.114.247:34106 - "GET / HTTP/1.1" 404 Not Found
+INFO:     164.92.114.247:34120 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     87.236.176.206:37851 - "GET / HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     47.237.177.222:57906 - "GET http%3A//passport.baidu.com/ HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     45.156.131.22:54194 - "GET / HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61344 - "GET /status.json?t=1773500886259 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62235 - "GET /status.json?t=1773506722554 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63743 - "GET /status.json?t=1773519546441 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63982 - "GET /status.json?t=1773521094367 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50547 - "GET /status.json?t=1773537504681 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50928 - "GET /status.json?t=1773539188811 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:52642 - "GET /status.json?t=1773579413075 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53268 - "GET /status.json?t=1773586499071 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:53536 - "GET /status.json?t=1773588259404 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:54881 - "GET /status.json?t=1773597146490 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:55447 - "GET /status.json?t=1773600270826 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:57710 - "GET /status.json?t=1773614439582 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61477 - "GET /status.json?t=1773627873485 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62506 - "GET /status.json?t=1773639715573 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:63933 - "GET /status.json?t=1773665844761 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51110 - "GET /status.json?t=1773676538441 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51112 - "GET /status.json?t=1773686756319 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:51762 - "GET /status.json?t=1773692272533 HTTP/1.1" 404 Not Found
+INFO:     connection closed
