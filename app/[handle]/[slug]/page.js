@@ -9,8 +9,9 @@ import { getCommentsByPostId, getPostByUsernameAndSlug } from "@/lib/data";
 export const revalidate = 0;
 
 export async function generateMetadata({ params }) {
-  const username = normalizeHandle(params.handle);
-  const post = username ? await getPostByUsernameAndSlug(username, params.slug) : null;
+  const resolvedParams = await params;
+  const username = normalizeHandle(resolvedParams.handle);
+  const post = username ? await getPostByUsernameAndSlug(username, resolvedParams.slug) : null;
 
   if (!post) {
     return { title: `記事が見つかりません | ${BRAND_NAME}` };
@@ -38,8 +39,9 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function PostPage({ params }) {
-  const username = normalizeHandle(params.handle);
-  const post = username ? await getPostByUsernameAndSlug(username, params.slug) : null;
+  const resolvedParams = await params;
+  const username = normalizeHandle(resolvedParams.handle);
+  const post = username ? await getPostByUsernameAndSlug(username, resolvedParams.slug) : null;
 
   if (!post) {
     notFound();

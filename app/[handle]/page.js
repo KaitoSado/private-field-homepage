@@ -11,7 +11,8 @@ import { sanitizeExternalUrl } from "@/lib/url";
 export const revalidate = 0;
 
 export async function generateMetadata({ params }) {
-  const username = normalizeHandle(params.handle);
+  const resolvedParams = await params;
+  const username = normalizeHandle(resolvedParams.handle);
   const profile = username ? await getProfileByUsername(username) : null;
 
   if (!profile) {
@@ -40,7 +41,8 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function ProfilePage({ params }) {
-  const username = normalizeHandle(params.handle);
+  const resolvedParams = await params;
+  const username = normalizeHandle(resolvedParams.handle);
   const profile = username ? await getProfileByUsername(username) : null;
 
   if (!profile) {
