@@ -105,6 +105,8 @@ function formatDate(value) {
 }
 
 function normalizeHandle(handle) {
-  if (!handle?.startsWith("@")) return null;
-  return handle.slice(1);
+  if (!handle) return null;
+  const decoded = decodeURIComponent(handle).trim();
+  const normalized = decoded.startsWith("@") ? decoded.slice(1) : decoded;
+  return normalized || null;
 }
