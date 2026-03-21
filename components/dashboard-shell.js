@@ -40,7 +40,7 @@ const emptyProfile = {
   note_url: "",
   avatar_url: "",
   account_status: "active",
-  discoverable: false
+  discoverable: true
 };
 
 const emptyPost = {
@@ -185,9 +185,10 @@ export function DashboardShell() {
         ...emptyProfile,
         username: buildUsernameFallback(email)
       };
+      const resolvedUsername = resolveUsername(nextProfile.username, email, userId);
 
       setProfile({
-        username: nextProfile.username || "",
+        username: resolvedUsername,
         page_theme: nextProfile.page_theme || "default",
         display_name: nextProfile.display_name || "",
         headline: nextProfile.headline || "",
@@ -202,7 +203,7 @@ export function DashboardShell() {
         note_url: nextProfile.note_url || "",
         avatar_url: nextProfile.avatar_url || "",
         account_status: nextProfile.account_status || "active",
-        discoverable: Boolean(nextProfile.discoverable)
+        discoverable: nextProfile.discoverable !== false
       });
       setPosts(postRows || []);
       setStatus("準備完了");
@@ -223,6 +224,7 @@ export function DashboardShell() {
       const { error } = await supabase.from("profiles").upsert(payload);
       if (error) throw error;
 
+      await loadData(session.user.id, session.user.email || "");
       setProfile((current) => ({ ...current, username: payload.username }));
       setStatus("プロフィールを保存しました。");
       router.refresh();
@@ -861,9 +863,11 @@ export function DashboardShell() {
 }
 
 function buildProfilePayload(profile, user) {
+  const username = resolveUsername(profile.username, user.email, user.id);
+
   return {
     id: user.id,
-    username: normalizeUsername(profile.username || buildUsernameFallback(user.email || "")),
+    username,
     page_theme: profile.page_theme || "default",
     display_name: profile.display_name.trim(),
     headline: profile.headline.trim(),
@@ -877,7 +881,7 @@ function buildProfilePayload(profile, user) {
     github_url: sanitizeExternalUrl(profile.github_url) || "",
     note_url: sanitizeExternalUrl(profile.note_url) || "",
     avatar_url: sanitizeHttpUrl(profile.avatar_url) || "",
-    discoverable: profile.discoverable
+    discoverable: profile.discoverable !== false
   };
 }
 
@@ -1003,6 +1007,17 @@ function normalizeUsername(value) {
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 30);
+}
+
+function resolveUsername(value, email = "", userId = "") {
+  const normalized = normalizeUsername(value || "");
+  if (normalized) return normalized;
+
+  const fallbackFromEmail = buildUsernameFallback(email || "");
+  if (fallbackFromEmail) return fallbackFromEmail;
+
+  const suffix = `${userId || ""}`.replace(/[^a-z0-9]/gi, "").slice(0, 6).toLowerCase();
+  return suffix ? `user-${suffix}` : "user";
 }
 
 function normalizeSlug(value) {

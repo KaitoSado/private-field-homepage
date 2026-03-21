@@ -18,7 +18,7 @@ create table if not exists public.profiles (
   avatar_url text,
   role text not null default 'user',
   account_status text not null default 'active',
-  discoverable boolean not null default false,
+  discoverable boolean not null default true,
   created_at timestamptz not null default timezone('utc'::text, now()),
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
@@ -33,7 +33,8 @@ alter table public.profiles add column if not exists note_url text;
 alter table public.profiles add column if not exists avatar_url text;
 alter table public.profiles add column if not exists role text not null default 'user';
 alter table public.profiles add column if not exists account_status text not null default 'active';
-alter table public.profiles add column if not exists discoverable boolean not null default false;
+alter table public.profiles add column if not exists discoverable boolean not null default true;
+alter table public.profiles alter column discoverable set default true;
 
 create table if not exists public.posts (
   id uuid primary key default gen_random_uuid(),
@@ -209,6 +210,8 @@ on public.notifications(recipient_id, actor_id, post_id, type)
 where type = 'repost';
 
 alter table public.profiles
+  drop constraint if exists profiles_username_not_blank_check,
+  add constraint profiles_username_not_blank_check check (char_length(btrim(username)) > 0),
   drop constraint if exists profiles_headline_length_check,
   add constraint profiles_headline_length_check check (headline is null or char_length(headline) <= 120),
   drop constraint if exists profiles_bio_length_check,
@@ -289,6 +292,19 @@ begin
   return new;
 end;
 $$;
+
+update public.profiles as p
+set
+  username = left(
+    coalesce(
+      nullif(regexp_replace(lower(split_part(u.email, '@', 1)), '[^a-z0-9_-]+', '-', 'g'), ''),
+      'user'
+    ) || '-' || substring(p.id::text from 1 for 6),
+    30
+  )
+from auth.users as u
+where u.id = p.id
+  and nullif(btrim(p.username), '') is null;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
