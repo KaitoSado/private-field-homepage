@@ -11,7 +11,8 @@ export const revalidate = 0;
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;
   const username = normalizeHandle(resolvedParams.handle);
-  const post = username ? await getPostByUsernameAndSlug(username, resolvedParams.slug) : null;
+  const slug = normalizeSlug(resolvedParams.slug);
+  const post = username && slug ? await getPostByUsernameAndSlug(username, slug) : null;
 
   if (!post) {
     return { title: `記事が見つかりません | ${BRAND_NAME}` };
@@ -41,7 +42,8 @@ export async function generateMetadata({ params }) {
 export default async function PostPage({ params }) {
   const resolvedParams = await params;
   const username = normalizeHandle(resolvedParams.handle);
-  const post = username ? await getPostByUsernameAndSlug(username, resolvedParams.slug) : null;
+  const slug = normalizeSlug(resolvedParams.slug);
+  const post = username && slug ? await getPostByUsernameAndSlug(username, slug) : null;
 
   if (!post) {
     notFound();
@@ -111,4 +113,10 @@ function normalizeHandle(handle) {
   const decoded = decodeURIComponent(handle).trim();
   const normalized = decoded.startsWith("@") ? decoded.slice(1) : decoded;
   return normalized || null;
+}
+
+function normalizeSlug(slug) {
+  if (!slug) return null;
+  const decoded = decodeURIComponent(slug).trim();
+  return decoded || null;
 }
