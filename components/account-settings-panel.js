@@ -29,34 +29,41 @@ export function AccountSettingsPanel() {
     let mounted = true;
 
     async function bootstrap() {
-      const {
-        data: { session: currentSession }
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session: currentSession }
+        } = await supabase.auth.getSession();
 
-      if (!mounted) return;
-      setSession(currentSession);
-      setEmail(currentSession?.user?.email || "");
+        if (!mounted) return;
+        setSession(currentSession);
+        setEmail(currentSession?.user?.email || "");
 
-      if (!currentSession) {
-        setStatus("ログインしてください。");
-        setLoading(false);
-        return;
+        if (!currentSession) {
+          setStatus("ログインしてください。");
+          return;
+        }
+
+        const { data: profileRow, error } = await supabase
+          .from("profiles")
+          .select("id, username, display_name, discoverable, account_status")
+          .eq("id", currentSession.user.id)
+          .maybeSingle();
+
+        if (!mounted) return;
+        if (error) {
+          setStatus(error.message);
+        } else {
+          setProfile(profileRow);
+          setStatus("設定を読み込みました。");
+        }
+      } catch (error) {
+        if (!mounted) return;
+        setStatus(error?.message || "アカウント設定の読み込みに失敗しました。");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
-
-      const { data: profileRow, error } = await supabase
-        .from("profiles")
-        .select("id, username, display_name, discoverable, account_status")
-        .eq("id", currentSession.user.id)
-        .maybeSingle();
-
-      if (!mounted) return;
-      if (error) {
-        setStatus(error.message);
-      } else {
-        setProfile(profileRow);
-        setStatus("設定を読み込みました。");
-      }
-      setLoading(false);
     }
 
     bootstrap();

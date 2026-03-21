@@ -26,23 +26,28 @@ export function NotificationsPanel() {
     let mounted = true;
 
     async function bootstrap() {
-      const {
-        data: { session: currentSession }
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session: currentSession }
+        } = await supabase.auth.getSession();
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      setSession(currentSession);
+        setSession(currentSession);
 
-      if (!currentSession) {
-        setStatus("ログインしてください。");
-        setLoading(false);
-        return;
-      }
+        if (!currentSession) {
+          setStatus("ログインしてください。");
+          return;
+        }
 
-      await loadNotifications(currentSession.user.id);
-      if (mounted) {
-        setLoading(false);
+        await loadNotifications(currentSession.user.id);
+      } catch (error) {
+        if (!mounted) return;
+        setStatus(error?.message || "通知の読み込みに失敗しました。");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
@@ -56,41 +61,45 @@ export function NotificationsPanel() {
   async function loadNotifications(userId) {
     if (!supabase) return;
 
-    const { data: rows, error } = await supabase
-      .from("notifications")
-      .select("id, actor_id, post_id, comment_id, type, read_at, created_at")
-      .eq("recipient_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(60);
+    try {
+      const { data: rows, error } = await supabase
+        .from("notifications")
+        .select("id, actor_id, post_id, comment_id, type, read_at, created_at")
+        .eq("recipient_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(60);
 
-    if (error) {
-      setStatus(error.message);
-      return;
-    }
+      if (error) {
+        setStatus(error.message);
+        return;
+      }
 
-    const actorIds = [...new Set((rows || []).map((row) => row.actor_id).filter(Boolean))];
-    const postIds = [...new Set((rows || []).map((row) => row.post_id).filter(Boolean))];
+      const actorIds = [...new Set((rows || []).map((row) => row.actor_id).filter(Boolean))];
+      const postIds = [...new Set((rows || []).map((row) => row.post_id).filter(Boolean))];
 
-    const [{ data: actors }, { data: posts }] = await Promise.all([
-      actorIds.length
-        ? supabase.from("profiles").select("id, username, display_name, avatar_url").in("id", actorIds)
-        : Promise.resolve({ data: [] }),
-      postIds.length
-        ? supabase.from("posts").select("id, slug, title, profiles!posts_author_id_fkey(username)").in("id", postIds)
-        : Promise.resolve({ data: [] })
-    ]);
+      const [{ data: actors }, { data: posts }] = await Promise.all([
+        actorIds.length
+          ? supabase.from("profiles").select("id, username, display_name, avatar_url").in("id", actorIds)
+          : Promise.resolve({ data: [] }),
+        postIds.length
+          ? supabase.from("posts").select("id, slug, title, profiles!posts_author_id_fkey(username)").in("id", postIds)
+          : Promise.resolve({ data: [] })
+      ]);
 
-    const actorMap = new Map((actors || []).map((actor) => [actor.id, actor]));
-    const postMap = new Map((posts || []).map((post) => [post.id, post]));
+      const actorMap = new Map((actors || []).map((actor) => [actor.id, actor]));
+      const postMap = new Map((posts || []).map((post) => [post.id, post]));
 
-    const normalized = (rows || []).map((row) => ({
+      const normalized = (rows || []).map((row) => ({
         ...row,
         actor: actorMap.get(row.actor_id) || null,
         post: postMap.get(row.post_id) || null
       }));
-    const { items, duplicates } = dedupeNotifications(normalized);
-    setNotifications(items);
-    setStatus(duplicates ? `${duplicates} 件の重複通知を圧縮して表示しています。` : "通知を更新しました。");
+      const { items, duplicates } = dedupeNotifications(normalized);
+      setNotifications(items);
+      setStatus(duplicates ? `${duplicates} 件の重複通知を圧縮して表示しています。` : "通知を更新しました。");
+    } catch (error) {
+      setStatus(error?.message || "通知の読み込みに失敗しました。");
+    }
   }
 
   async function markAllAsRead() {

@@ -87,23 +87,28 @@ export function DashboardShell() {
     let mounted = true;
 
     async function bootstrap() {
-      const {
-        data: { session: currentSession }
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session: currentSession }
+        } = await supabase.auth.getSession();
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      setSession(currentSession);
+        setSession(currentSession);
 
-      if (!currentSession) {
-        setStatus("ログインしてください。");
-        setLoading(false);
-        return;
-      }
+        if (!currentSession) {
+          setStatus("ログインしてください。");
+          return;
+        }
 
-      await loadData(currentSession.user.id, currentSession.user.email || "");
-      if (mounted) {
-        setLoading(false);
+        await loadData(currentSession.user.id, currentSession.user.email || "");
+      } catch (error) {
+        if (!mounted) return;
+        setStatus(error?.message || "ダッシュボードの読み込みに失敗しました。");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
@@ -112,23 +117,28 @@ export function DashboardShell() {
     const {
       data: { subscription }
     } = supabase.auth.onAuthStateChange(async (_event, nextSession) => {
-      if (!mounted) return;
+      try {
+        if (!mounted) return;
 
-      setSession(nextSession);
+        setSession(nextSession);
 
-      if (!nextSession) {
-        setProfile(emptyProfile);
-        setPosts([]);
-        setEditor(emptyPost);
-        setStatus("ログインしてください。");
-        setLoading(false);
-        return;
-      }
+        if (!nextSession) {
+          setProfile(emptyProfile);
+          setPosts([]);
+          setEditor(emptyPost);
+          setStatus("ログインしてください。");
+          return;
+        }
 
-      setLoading(true);
-      await loadData(nextSession.user.id, nextSession.user.email || "");
-      if (mounted) {
-        setLoading(false);
+        setLoading(true);
+        await loadData(nextSession.user.id, nextSession.user.email || "");
+      } catch (error) {
+        if (!mounted) return;
+        setStatus(error?.message || "ダッシュボードの更新に失敗しました。");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     });
 
@@ -141,46 +151,50 @@ export function DashboardShell() {
   async function loadData(userId, email = "") {
     if (!supabase) return;
 
-    const [{ data: profileRow, error: profileError }, { data: postRows, error: postsError }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabase.from("posts").select("*").eq("author_id", userId).order("updated_at", { ascending: false })
-    ]);
+    try {
+      const [{ data: profileRow, error: profileError }, { data: postRows, error: postsError }] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+        supabase.from("posts").select("*").eq("author_id", userId).order("updated_at", { ascending: false })
+      ]);
 
-    if (profileError) {
-      setStatus(profileError.message);
-      return;
+      if (profileError) {
+        setStatus(profileError.message);
+        return;
+      }
+
+      if (postsError) {
+        setStatus(postsError.message);
+        return;
+      }
+
+      const nextProfile = profileRow || {
+        ...emptyProfile,
+        username: buildUsernameFallback(email)
+      };
+
+      setProfile({
+        username: nextProfile.username || "",
+        page_theme: nextProfile.page_theme || "default",
+        display_name: nextProfile.display_name || "",
+        headline: nextProfile.headline || "",
+        affiliation: nextProfile.affiliation || "",
+        focus_area: nextProfile.focus_area || "",
+        open_to: nextProfile.open_to || "",
+        bio: nextProfile.bio || "",
+        location: nextProfile.location || "",
+        website_url: nextProfile.website_url || "",
+        x_url: nextProfile.x_url || "",
+        github_url: nextProfile.github_url || "",
+        note_url: nextProfile.note_url || "",
+        avatar_url: nextProfile.avatar_url || "",
+        account_status: nextProfile.account_status || "active",
+        discoverable: Boolean(nextProfile.discoverable)
+      });
+      setPosts(postRows || []);
+      setStatus("準備完了");
+    } catch (error) {
+      setStatus(error?.message || "ダッシュボードの読み込みに失敗しました。");
     }
-
-    if (postsError) {
-      setStatus(postsError.message);
-      return;
-    }
-
-    const nextProfile = profileRow || {
-      ...emptyProfile,
-      username: buildUsernameFallback(email)
-    };
-
-    setProfile({
-      username: nextProfile.username || "",
-      page_theme: nextProfile.page_theme || "default",
-      display_name: nextProfile.display_name || "",
-      headline: nextProfile.headline || "",
-      affiliation: nextProfile.affiliation || "",
-      focus_area: nextProfile.focus_area || "",
-      open_to: nextProfile.open_to || "",
-      bio: nextProfile.bio || "",
-      location: nextProfile.location || "",
-      website_url: nextProfile.website_url || "",
-      x_url: nextProfile.x_url || "",
-      github_url: nextProfile.github_url || "",
-      note_url: nextProfile.note_url || "",
-      avatar_url: nextProfile.avatar_url || "",
-      account_status: nextProfile.account_status || "active",
-      discoverable: Boolean(nextProfile.discoverable)
-    });
-    setPosts(postRows || []);
-    setStatus("準備完了");
   }
 
   async function saveProfile(event) {

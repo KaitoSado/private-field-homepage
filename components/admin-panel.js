@@ -35,37 +35,41 @@ export function AdminPanel() {
     let mounted = true;
 
     async function bootstrap() {
-      const {
-        data: { session: currentSession }
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session: currentSession }
+        } = await supabase.auth.getSession();
 
-      if (!mounted) return;
-      setSession(currentSession);
+        if (!mounted) return;
+        setSession(currentSession);
 
-      if (!currentSession) {
-        setStatus("ログインしてください。");
-        setLoading(false);
-        return;
-      }
+        if (!currentSession) {
+          setStatus("ログインしてください。");
+          return;
+        }
 
-      const { data: ownProfile } = await supabase
-        .from("profiles")
-        .select("id, username, display_name, role, account_status")
-        .eq("id", currentSession.user.id)
-        .maybeSingle();
+        const { data: ownProfile } = await supabase
+          .from("profiles")
+          .select("id, username, display_name, role, account_status")
+          .eq("id", currentSession.user.id)
+          .maybeSingle();
 
-      if (!mounted) return;
-      setAdminProfile(ownProfile);
+        if (!mounted) return;
+        setAdminProfile(ownProfile);
 
-      if (!ownProfile || ownProfile.role !== "admin") {
-        setStatus("管理者のみアクセスできます。");
-        setLoading(false);
-        return;
-      }
+        if (!ownProfile || ownProfile.role !== "admin") {
+          setStatus("管理者のみアクセスできます。");
+          return;
+        }
 
-      await loadAdminData();
-      if (mounted) {
-        setLoading(false);
+        await loadAdminData();
+      } catch (error) {
+        if (!mounted) return;
+        setStatus(error?.message || "管理画面の読み込みに失敗しました。");
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
@@ -79,74 +83,78 @@ export function AdminPanel() {
   async function loadAdminData() {
     if (!supabase) return;
 
-    const sinceIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    const [
-      { data: reportRows, error: reportError },
-      { data: profileRows, error: profileError },
-      { data: postRows, error: postError },
-      { data: commentRows, error: commentError },
-      { data: alertRows, error: alertError },
-      { count: pageViewsCount, error: pageViewError },
-      { count: errorsCount, error: telemetryError },
-      { count: abuseCount, error: abuseError }
-    ] = await Promise.all([
-      supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(60),
-      supabase
-        .from("profiles")
-        .select("id, username, display_name, headline, bio, avatar_url, role, account_status, discoverable")
-        .order("updated_at", { ascending: false })
-        .limit(60),
-      supabase
-        .from("posts")
-        .select("id, title, slug, excerpt, body, author_id, published, visibility, updated_at, profiles!posts_author_id_fkey(id, username, display_name)")
-        .order("updated_at", { ascending: false })
-        .limit(60),
-      supabase
-        .from("post_comments")
-        .select("id, body, created_at, post_id, user_id, profiles!post_comments_user_id_fkey(id, username, display_name), posts!post_comments_post_id_fkey(id, slug, title, profiles!posts_author_id_fkey(username))")
-        .order("created_at", { ascending: false })
-        .limit(60),
-      supabase.from("admin_alerts").select("*").order("created_at", { ascending: false }).limit(30),
-      supabase.from("telemetry_page_views").select("*", { count: "exact", head: true }).gte("created_at", sinceIso),
-      supabase.from("telemetry_errors").select("*", { count: "exact", head: true }).gte("created_at", sinceIso),
-      supabase.from("abuse_events").select("*", { count: "exact", head: true }).gte("created_at", sinceIso)
-    ]);
+    try {
+      const sinceIso = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const [
+        { data: reportRows, error: reportError },
+        { data: profileRows, error: profileError },
+        { data: postRows, error: postError },
+        { data: commentRows, error: commentError },
+        { data: alertRows, error: alertError },
+        { count: pageViewsCount, error: pageViewError },
+        { count: errorsCount, error: telemetryError },
+        { count: abuseCount, error: abuseError }
+      ] = await Promise.all([
+        supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(60),
+        supabase
+          .from("profiles")
+          .select("id, username, display_name, headline, bio, avatar_url, role, account_status, discoverable")
+          .order("updated_at", { ascending: false })
+          .limit(60),
+        supabase
+          .from("posts")
+          .select("id, title, slug, excerpt, body, author_id, published, visibility, updated_at, profiles!posts_author_id_fkey(id, username, display_name)")
+          .order("updated_at", { ascending: false })
+          .limit(60),
+        supabase
+          .from("post_comments")
+          .select("id, body, created_at, post_id, user_id, profiles!post_comments_user_id_fkey(id, username, display_name), posts!post_comments_post_id_fkey(id, slug, title, profiles!posts_author_id_fkey(username))")
+          .order("created_at", { ascending: false })
+          .limit(60),
+        supabase.from("admin_alerts").select("*").order("created_at", { ascending: false }).limit(30),
+        supabase.from("telemetry_page_views").select("*", { count: "exact", head: true }).gte("created_at", sinceIso),
+        supabase.from("telemetry_errors").select("*", { count: "exact", head: true }).gte("created_at", sinceIso),
+        supabase.from("abuse_events").select("*", { count: "exact", head: true }).gte("created_at", sinceIso)
+      ]);
 
-    if (reportError || profileError || postError || commentError || alertError || pageViewError || telemetryError || abuseError) {
-      setStatus(
-        reportError?.message ||
-          profileError?.message ||
-          postError?.message ||
-          commentError?.message ||
-          alertError?.message ||
-          pageViewError?.message ||
-          telemetryError?.message ||
-          abuseError?.message ||
-          "読み込みに失敗しました。"
+      if (reportError || profileError || postError || commentError || alertError || pageViewError || telemetryError || abuseError) {
+        setStatus(
+          reportError?.message ||
+            profileError?.message ||
+            postError?.message ||
+            commentError?.message ||
+            alertError?.message ||
+            pageViewError?.message ||
+            telemetryError?.message ||
+            abuseError?.message ||
+            "読み込みに失敗しました。"
+        );
+        return;
+      }
+
+      const profileMap = new Map((profileRows || []).map((profile) => [profile.id, profile]));
+      const postMap = new Map((postRows || []).map((post) => [post.id, post]));
+
+      setReports(
+        (reportRows || []).map((report) => ({
+          ...report,
+          targetProfile: report.target_profile_id ? profileMap.get(report.target_profile_id) || null : null,
+          targetPost: report.target_post_id ? postMap.get(report.target_post_id) || null : null
+        }))
       );
-      return;
+      setProfiles(profileRows || []);
+      setPosts(postRows || []);
+      setComments(commentRows || []);
+      setAlerts(alertRows || []);
+      setOpsSummary({
+        pageViews24h: pageViewsCount || 0,
+        errors24h: errorsCount || 0,
+        abuse24h: abuseCount || 0
+      });
+      setStatus("管理データを更新しました。");
+    } catch (error) {
+      setStatus(error?.message || "管理画面の読み込みに失敗しました。");
     }
-
-    const profileMap = new Map((profileRows || []).map((profile) => [profile.id, profile]));
-    const postMap = new Map((postRows || []).map((post) => [post.id, post]));
-
-    setReports(
-      (reportRows || []).map((report) => ({
-        ...report,
-        targetProfile: report.target_profile_id ? profileMap.get(report.target_profile_id) || null : null,
-        targetPost: report.target_post_id ? postMap.get(report.target_post_id) || null : null
-      }))
-    );
-    setProfiles(profileRows || []);
-    setPosts(postRows || []);
-    setComments(commentRows || []);
-    setAlerts(alertRows || []);
-    setOpsSummary({
-      pageViews24h: pageViewsCount || 0,
-      errors24h: errorsCount || 0,
-      abuse24h: abuseCount || 0
-    });
-    setStatus("管理データを更新しました。");
   }
 
   async function updateReport(reportId, nextStatus) {
