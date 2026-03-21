@@ -63,19 +63,8 @@ export function NotificationsPanel() {
 
     bootstrap();
 
-    function handleVisibilityOrFocus() {
-      if (!mounted || document.visibilityState === "hidden") return;
-      setLoading(true);
-      void bootstrap();
-    }
-
-    window.addEventListener("focus", handleVisibilityOrFocus);
-    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
-
     return () => {
       mounted = false;
-      window.removeEventListener("focus", handleVisibilityOrFocus);
-      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
     };
   }, [supabase, reloadToken]);
 
