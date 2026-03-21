@@ -20,6 +20,7 @@ import {
   PROFILE_OPEN_TO_LIMIT
 } from "@/lib/limits";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { withBrowserTimeout } from "@/lib/browser-timeout";
 import { getAvatarBucket, getPostMediaBucket, uploadPublicFile } from "@/lib/storage";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 
@@ -76,6 +77,7 @@ export function DashboardShell() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     if (!supabase) {
@@ -90,7 +92,11 @@ export function DashboardShell() {
       try {
         const {
           data: { session: currentSession }
-        } = await supabase.auth.getSession();
+        } = await withBrowserTimeout(
+          supabase.auth.getSession(),
+          8000,
+          "セッションの確認がタイムアウトしました。ページを再読み込みしてください。"
+        );
 
         if (!mounted) return;
 
@@ -101,7 +107,11 @@ export function DashboardShell() {
           return;
         }
 
-        await loadData(currentSession.user.id, currentSession.user.email || "");
+        await withBrowserTimeout(
+          loadData(currentSession.user.id, currentSession.user.email || ""),
+          8000,
+          "プロフィールの読み込みがタイムアウトしました。再試行してください。"
+        );
       } catch (error) {
         if (!mounted) return;
         setStatus(error?.message || "ダッシュボードの読み込みに失敗しました。");
@@ -131,7 +141,11 @@ export function DashboardShell() {
         }
 
         setLoading(true);
-        await loadData(nextSession.user.id, nextSession.user.email || "");
+        await withBrowserTimeout(
+          loadData(nextSession.user.id, nextSession.user.email || ""),
+          8000,
+          "プロフィールの同期がタイムアウトしました。再試行してください。"
+        );
       } catch (error) {
         if (!mounted) return;
         setStatus(error?.message || "ダッシュボードの更新に失敗しました。");
@@ -142,11 +156,22 @@ export function DashboardShell() {
       }
     });
 
+    function handleVisibilityOrFocus() {
+      if (!mounted || document.visibilityState === "hidden") return;
+      setLoading(true);
+      void bootstrap();
+    }
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
     };
-  }, [supabase]);
+  }, [supabase, reloadToken]);
 
   async function loadData(userId, email = "") {
     if (!supabase) return;
@@ -426,7 +451,15 @@ export function DashboardShell() {
   }
 
   if (loading) {
-    return <div className="surface empty-state">読み込み中...</div>;
+    return (
+      <div className="surface empty-state">
+        <h1>読み込み中...</h1>
+        <p>{status}</p>
+        <button type="button" className="button button-secondary" onClick={() => setReloadToken((current) => current + 1)}>
+          再試行
+        </button>
+      </div>
+    );
   }
 
   if (!session) {

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { withBrowserTimeout } from "@/lib/browser-timeout";
 
 export function AccountSettingsPanel() {
   const hasSupabaseConfig = Boolean(
@@ -18,6 +19,7 @@ export function AccountSettingsPanel() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingEmail, setSavingEmail] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     if (!supabase) {
@@ -32,7 +34,11 @@ export function AccountSettingsPanel() {
       try {
         const {
           data: { session: currentSession }
-        } = await supabase.auth.getSession();
+        } = await withBrowserTimeout(
+          supabase.auth.getSession(),
+          8000,
+          "セッションの確認がタイムアウトしました。再試行してください。"
+        );
 
         if (!mounted) return;
         setSession(currentSession);
@@ -43,11 +49,15 @@ export function AccountSettingsPanel() {
           return;
         }
 
-        const { data: profileRow, error } = await supabase
-          .from("profiles")
-          .select("id, username, display_name, discoverable, account_status")
-          .eq("id", currentSession.user.id)
-          .maybeSingle();
+        const { data: profileRow, error } = await withBrowserTimeout(
+          supabase
+            .from("profiles")
+            .select("id, username, display_name, discoverable, account_status")
+            .eq("id", currentSession.user.id)
+            .maybeSingle(),
+          8000,
+          "アカウント設定の取得がタイムアウトしました。再試行してください。"
+        );
 
         if (!mounted) return;
         if (error) {
@@ -68,10 +78,21 @@ export function AccountSettingsPanel() {
 
     bootstrap();
 
+    function handleVisibilityOrFocus() {
+      if (!mounted || document.visibilityState === "hidden") return;
+      setLoading(true);
+      void bootstrap();
+    }
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
     return () => {
       mounted = false;
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
     };
-  }, [supabase]);
+  }, [supabase, reloadToken]);
 
   async function saveProfileSettings(event) {
     event.preventDefault();
@@ -127,7 +148,15 @@ export function AccountSettingsPanel() {
   }
 
   if (loading) {
-    return <section className="surface empty-state">読み込み中...</section>;
+    return (
+      <section className="surface empty-state">
+        <h1>読み込み中...</h1>
+        <p>{status}</p>
+        <button type="button" className="button button-secondary" onClick={() => setReloadToken((current) => current + 1)}>
+          再試行
+        </button>
+      </section>
+    );
   }
 
   if (!session) {

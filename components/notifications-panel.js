@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AvatarMark } from "@/components/avatar-mark";
+import { withBrowserTimeout } from "@/lib/browser-timeout";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export function NotificationsPanel() {
@@ -15,6 +16,7 @@ export function NotificationsPanel() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState("読み込み中...");
   const [filter, setFilter] = useState("all");
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     if (!supabase) {
@@ -29,7 +31,11 @@ export function NotificationsPanel() {
       try {
         const {
           data: { session: currentSession }
-        } = await supabase.auth.getSession();
+        } = await withBrowserTimeout(
+          supabase.auth.getSession(),
+          8000,
+          "セッションの確認がタイムアウトしました。再試行してください。"
+        );
 
         if (!mounted) return;
 
@@ -40,7 +46,11 @@ export function NotificationsPanel() {
           return;
         }
 
-        await loadNotifications(currentSession.user.id);
+        await withBrowserTimeout(
+          loadNotifications(currentSession.user.id),
+          8000,
+          "通知の取得がタイムアウトしました。再試行してください。"
+        );
       } catch (error) {
         if (!mounted) return;
         setStatus(error?.message || "通知の読み込みに失敗しました。");
@@ -53,10 +63,21 @@ export function NotificationsPanel() {
 
     bootstrap();
 
+    function handleVisibilityOrFocus() {
+      if (!mounted || document.visibilityState === "hidden") return;
+      setLoading(true);
+      void bootstrap();
+    }
+
+    window.addEventListener("focus", handleVisibilityOrFocus);
+    document.addEventListener("visibilitychange", handleVisibilityOrFocus);
+
     return () => {
       mounted = false;
+      window.removeEventListener("focus", handleVisibilityOrFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
     };
-  }, [supabase]);
+  }, [supabase, reloadToken]);
 
   async function loadNotifications(userId) {
     if (!supabase) return;
@@ -150,7 +171,15 @@ export function NotificationsPanel() {
   }
 
   if (loading) {
-    return <section className="surface empty-state">読み込み中...</section>;
+    return (
+      <section className="surface empty-state">
+        <h1>読み込み中...</h1>
+        <p>{status}</p>
+        <button type="button" className="button button-secondary" onClick={() => setReloadToken((current) => current + 1)}>
+          再試行
+        </button>
+      </section>
+    );
   }
 
   if (!session) {
