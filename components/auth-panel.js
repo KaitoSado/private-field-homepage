@@ -15,15 +15,17 @@ export function AuthPanel() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState("default");
   const [loading, setLoading] = useState(false);
   const [sendingReset, setSendingReset] = useState(false);
-  const [website, setWebsite] = useState("");
+  const [contactTrap, setContactTrap] = useState("");
 
   async function handleSubmit(event) {
     event.preventDefault();
     if (!supabase) return;
-    if (website.trim()) {
+    if (contactTrap.trim()) {
       setMessage("送信できませんでした。");
+      setMessageTone("error");
       await reportAbuseClient({
         kind: "auth_honeypot_hit",
         description: `honeypot field filled during ${mode}`,
@@ -38,6 +40,7 @@ export function AuthPanel() {
     const limit = checkRateLimit(`auth-${mode}`, { windowMs: 15 * 60 * 1000, max: 5 });
     if (!limit.allowed) {
       setMessage(`試行回数が多すぎます。${formatRetryAfter(limit.retryAfterMs)}後に再試行してください。`);
+      setMessageTone("error");
       await reportAbuseClient({
         kind: "auth_rate_limited",
         description: `auth ${mode} rate limited`,
@@ -52,6 +55,7 @@ export function AuthPanel() {
 
     setLoading(true);
     setMessage("");
+    setMessageTone("default");
 
     try {
       if (mode === "signup") {
@@ -65,22 +69,30 @@ export function AuthPanel() {
         });
         if (error) throw error;
         if (data.session) {
+          setMessage("アカウントを作成しました。ダッシュボードへ移動します。");
+          setMessageTone("success");
           markRateLimitAction(`auth-${mode}`);
           router.push("/dashboard");
           router.refresh();
+          window.location.assign("/dashboard");
           return;
         }
         markRateLimitAction(`auth-${mode}`);
         setMessage("確認メールを送信しました。メール内リンクから認証を完了してください。");
+        setMessageTone("success");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        setMessage("ログインしました。ダッシュボードへ移動します。");
+        setMessageTone("success");
         markRateLimitAction(`auth-${mode}`);
         router.push("/dashboard");
         router.refresh();
+        window.location.assign("/dashboard");
       }
     } catch (error) {
-      setMessage(error.message);
+      setMessage(error.message || "認証に失敗しました。");
+      setMessageTone("error");
     } finally {
       setLoading(false);
     }
@@ -89,19 +101,23 @@ export function AuthPanel() {
   async function handleResetPassword() {
     if (!supabase || !email) {
       setMessage("パスワード再設定メールを送るには、先にメールアドレスを入力してください。");
+      setMessageTone("error");
       return;
     }
 
     setSendingReset(true);
     setMessage("");
+    setMessageTone("default");
 
     try {
       const redirectTo = `${window.location.origin}/auth/reset`;
       const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
       if (error) throw error;
       setMessage("パスワード再設定メールを送信しました。");
+      setMessageTone("success");
     } catch (error) {
-      setMessage(error.message);
+      setMessage(error.message || "パスワード再設定メールの送信に失敗しました。");
+      setMessageTone("error");
     } finally {
       setSendingReset(false);
     }
@@ -134,8 +150,14 @@ export function AuthPanel() {
 
       <form className="form-stack" onSubmit={handleSubmit}>
         <label className="field honeypot-field" aria-hidden="true">
-          <span>website</span>
-          <input value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" />
+          <span>leave empty</span>
+          <input
+            value={contactTrap}
+            onChange={(event) => setContactTrap(event.target.value)}
+            name="contact_me_by_fax_only"
+            tabIndex={-1}
+            autoComplete="new-password"
+          />
         </label>
 
         <label className="field">
@@ -170,7 +192,7 @@ export function AuthPanel() {
         </button>
       ) : null}
 
-      <p className="status-text">{message || "登録後はダッシュボードでプロフィールを作成できます。"}</p>
+      <p className={`status-text status-${messageTone}`}>{message || "登録後はダッシュボードでプロフィールを作成できます。"}</p>
     </div>
   );
 }

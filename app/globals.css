@@ -234,6 +234,14 @@ textarea {
   color: var(--muted);
 }
 
+.status-success {
+  color: #0f766e;
+}
+
+.status-error {
+  color: #b42318;
+}
+
 .hero-actions,
 .profile-meta,
 .tab-row {
