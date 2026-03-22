@@ -60,6 +60,7 @@ export function SignatureProfilePage({ profile, posts }) {
 
   const featuredPosts = posts.slice(0, 3);
   const recentPosts = posts.slice(0, 4);
+  const latestPost = recentPosts[0] || null;
   const leadCopy = draft.headline || "Researching interaction, building thoughtful systems.";
   const identityBody =
     draft.bio ||
@@ -85,15 +86,13 @@ export function SignatureProfilePage({ profile, posts }) {
       body: "問いを立てながら試作し、観察しながら構造へ戻す。その中心にある関心です。"
     },
     {
-      eyebrow: "Open to",
-      key: "open_to",
-      title: draft.open_to || "Collaboration",
-      body:
-        draft.open_to ||
-        "研究プロトタイプ、実験用UI、文化系プロジェクト、個人開発の技術相談などを静かに受けています。"
+      eyebrow: "Base",
+      key: "location",
+      title: draft.location || "Tokyo / Remote",
+      body: "いま日々の制作や研究が立ち上がっている場所です。"
     }
   ];
-  const currentSignals = buildCurrentSignals(draft);
+  const currentSignals = buildCurrentSignals(draft, recentPosts);
 
   async function saveProfile() {
     if (!canEdit) return;
@@ -281,57 +280,24 @@ export function SignatureProfilePage({ profile, posts }) {
           <p className="eyebrow">Current Coordinates</p>
           <dl className="signature-coordinates">
             <div>
-              <dt>Affiliation</dt>
-              <dd>
-                {isEditing ? (
-                  <input value={draft.affiliation || ""} onChange={(event) => updateField("affiliation", event.target.value)} />
-                ) : (
-                  draft.affiliation || "Not set"
-                )}
-              </dd>
-            </div>
-            <div>
               <dt>Handle</dt>
               <dd>@{draft.username}</dd>
             </div>
             <div>
-              <dt>Focus</dt>
-              <dd>
-                {isEditing ? (
-                  <input value={draft.focus_area || ""} onChange={(event) => updateField("focus_area", event.target.value)} />
-                ) : (
-                  draft.focus_area || "Not set"
-                )}
-              </dd>
-            </div>
-            <div>
               <dt>Base</dt>
-              <dd>
-                {isEditing ? (
-                  <input
-                    value={draft.location || ""}
-                    onChange={(event) => updateField("location", event.target.value)}
-                    maxLength={PROFILE_LOCATION_LIMIT}
-                  />
-                ) : (
-                  draft.location || "Tokyo / Remote"
-                )}
-              </dd>
+              <dd>{draft.location || "Tokyo / Remote"}</dd>
             </div>
             <div>
-              <dt>Available for</dt>
-              <dd>
-                {isEditing ? (
-                  <textarea
-                    rows="3"
-                    value={draft.open_to || ""}
-                    onChange={(event) => updateField("open_to", event.target.value)}
-                    maxLength={PROFILE_OPEN_TO_LIMIT}
-                  />
-                ) : (
-                  draft.open_to || "Research prototyping / design engineering"
-                )}
-              </dd>
+              <dt>Published</dt>
+              <dd>{posts.length} posts</dd>
+            </div>
+            <div>
+              <dt>Latest</dt>
+              <dd>{latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "Updating quietly"}</dd>
+            </div>
+            <div>
+              <dt>Links</dt>
+              <dd>{links.length ? `${links.length} destinations` : "No external links yet"}</dd>
             </div>
           </dl>
           <div className="signature-panel-note">
@@ -374,8 +340,8 @@ export function SignatureProfilePage({ profile, posts }) {
               <>
                 <p className="signature-body">{identityBody}</p>
                 <p className="signature-body">
-                  {draft.focus_area
-                    ? `${draft.focus_area} を軸に、研究の仮説と実装の手触りが途切れない形を探しています。`
+                  {latestPost
+                    ? `最近は「${latestPost.title}」を足場に、観察と試作の往復をもう一段深くしています。`
                     : "曖昧な感覚をどう観測し、どう設計へ変換するか。そのあいだにある実践を大切にしています。"}
                 </p>
               </>
@@ -403,23 +369,10 @@ export function SignatureProfilePage({ profile, posts }) {
           <h2>This week, in motion</h2>
         </div>
         <div className="signature-current-grid">
-          {currentSignals.map((signal, index) => (
+          {currentSignals.map((signal) => (
             <article key={signal.label} className="signature-current-card">
               <p className="eyebrow">{signal.label}</p>
-              {isEditing && index === 0 ? (
-                <input value={draft.location || ""} onChange={(event) => updateField("location", event.target.value)} />
-              ) : isEditing && index === 1 ? (
-                <input value={draft.focus_area || ""} onChange={(event) => updateField("focus_area", event.target.value)} />
-              ) : isEditing ? (
-                <textarea
-                  rows="3"
-                  value={draft.open_to || ""}
-                  onChange={(event) => updateField("open_to", event.target.value)}
-                  maxLength={PROFILE_OPEN_TO_LIMIT}
-                />
-              ) : (
-                <h3>{signal.title}</h3>
-              )}
+              <h3>{signal.title}</h3>
               <p>{signal.body}</p>
             </article>
           ))}
@@ -544,22 +497,25 @@ export function SignatureProfilePage({ profile, posts }) {
   );
 }
 
-function buildCurrentSignals(profile) {
+function buildCurrentSignals(profile, recentPosts) {
+  const latestPost = recentPosts[0] || null;
+  const latestTag = latestPost?.tags?.[0] || null;
+
   return [
     {
-      label: "Base",
-      title: profile.location || "Tokyo / Remote",
-      body: "現在の活動拠点や、日々の制作と研究が動いている場所。"
+      label: "Latest note",
+      title: latestPost?.title || "新しい公開ノートを準備中",
+      body: latestPost ? "直近で更新した記録。ここからいまの関心が見えます。" : "次の公開記事がここに出ます。"
     },
     {
-      label: "Focus",
-      title: profile.focus_area || "Perception / Interfaces / Prototyping",
-      body: "いま一番エネルギーを使っている領域。"
+      label: "Signal",
+      title: latestTag ? `#${latestTag}` : profile.focus_area || "Perception / Interfaces / Prototyping",
+      body: latestTag ? "いま繰り返し現れているキーワード。" : "現在の制作や研究を貫いている軸。"
     },
     {
-      label: "Open to",
-      title: profile.open_to || "Research prototyping / technical direction",
-      body: "相談できること、いま開いている接点。"
+      label: "Cadence",
+      title: latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "Updating quietly",
+      body: latestPost ? "最後にページが動いたタイミング。" : "いまは次の更新に向けて整えています。"
     }
   ];
 }
