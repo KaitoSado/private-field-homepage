@@ -181,6 +181,7 @@ export function AccountSettingsPanel() {
             <h2>公開設定</h2>
           </div>
           <p className="status-text">現在のアカウント状態: {profile?.account_status || "unknown"}</p>
+          <p className="field-hint">初期状態では Explore とおすすめに表示されます。非公開にしたい場合だけここで外してください。</p>
           <label className="checkbox-row">
             <input
               type="checkbox"
@@ -192,7 +193,7 @@ export function AccountSettingsPanel() {
                 }))
               }
             />
-            <span>Explore とおすすめ一覧に表示する</span>
+            <span>プロフィールを公開表示する</span>
           </label>
           <button type="submit" className="button button-primary" disabled={savingProfile}>
             {savingProfile ? "保存中..." : "表示設定を保存"}

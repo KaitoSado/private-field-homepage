@@ -519,15 +519,6 @@ export function DashboardShell() {
             <small className="field-hint">`signature` はあなた専用の個人ページ風レイアウトです。</small>
           </label>
 
-          <label className="checkbox-row">
-            <input
-              type="checkbox"
-              checked={profile.discoverable}
-              onChange={(event) => setProfile((current) => ({ ...current, discoverable: event.target.checked }))}
-            />
-            <span>Explore とおすすめ一覧に表示する</span>
-          </label>
-
           <p className="status-text">アカウント状態: {profile.account_status}</p>
 
           <label className="field">
