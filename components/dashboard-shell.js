@@ -508,7 +508,7 @@ export function DashboardShell() {
           </label>
 
           <label className="field">
-            <span>ページテーマ</span>
+            <span>公開プロフィールのテーマ</span>
             <select
               value={profile.page_theme}
               onChange={(event) => setProfile((current) => ({ ...current, page_theme: event.target.value }))}
@@ -516,7 +516,7 @@ export function DashboardShell() {
               <option value="default">Default</option>
               <option value="signature">Signature</option>
             </select>
-            <small className="field-hint">`signature` はあなた専用の個人ページ風レイアウトです。</small>
+            <small className="field-hint">公開ページ `/@username` にだけ反映されます。ダッシュボードの見た目は変わりません。</small>
           </label>
 
           <p className="status-text">アカウント状態: {profile.account_status}</p>
