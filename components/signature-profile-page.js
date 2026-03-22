@@ -3,6 +3,7 @@ import { AvatarMark } from "@/components/avatar-mark";
 import { SignatureHeroShader } from "@/components/signature-hero-shader";
 import { SignatureHeroStage } from "@/components/signature-hero-stage";
 import { SignatureInteractiveSection } from "@/components/signature-interactive-section";
+import { SignaturePageShell } from "@/components/signature-page-shell";
 import { SignaturePostShelf } from "@/components/signature-post-shelf";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
@@ -44,7 +45,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const currentSignals = buildCurrentSignals(profile);
 
   return (
-    <main className="signature-page">
+    <SignaturePageShell>
       <div className="signature-noise" aria-hidden="true" />
       <div className="signature-glow signature-glow-a" aria-hidden="true" />
       <div className="signature-glow signature-glow-b" aria-hidden="true" />
@@ -264,7 +265,7 @@ export function SignatureProfilePage({ profile, posts }) {
           </div>
         </div>
       </SignatureInteractiveSection>
-    </main>
+    </SignaturePageShell>
   );
 }
 
