@@ -1036,6 +1036,33 @@ textarea {
   transform: translateY(-1px);
 }
 
+.signature-owner-toolbar {
+  position: sticky;
+  top: 18px;
+  z-index: 8;
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border: 1px solid rgba(31, 111, 120, 0.18);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.88);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 18px 34px rgba(29, 35, 40, 0.08);
+}
+
+.signature-owner-toolbar strong {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #204a51;
+}
+
+.signature-owner-toolbar span {
+  color: #566369;
+}
+
 .signature-hero {
   --hero-pointer-x: 50%;
   --hero-pointer-y: 42%;
@@ -1227,6 +1254,92 @@ textarea {
   line-height: 1.95;
   max-width: 58ch;
   margin-bottom: 20px;
+}
+
+.signature-edit-inline,
+.signature-edit-link,
+.signature-edit-link-card {
+  display: grid;
+  gap: 8px;
+}
+
+.signature-edit-inline input,
+.signature-edit-inline textarea,
+.signature-info-card input,
+.signature-current-card input,
+.signature-current-card textarea,
+.signature-panel dd input,
+.signature-panel dd textarea,
+.signature-edit-block {
+  width: 100%;
+  border: 1px solid rgba(34, 49, 58, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #1d2328;
+  padding: 12px 14px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.signature-edit-inline input:focus,
+.signature-edit-inline textarea:focus,
+.signature-info-card input:focus,
+.signature-current-card input:focus,
+.signature-current-card textarea:focus,
+.signature-panel dd input:focus,
+.signature-panel dd textarea:focus,
+.signature-edit-block:focus {
+  outline: none;
+  border-color: rgba(31, 111, 120, 0.28);
+  box-shadow: 0 0 0 4px rgba(31, 111, 120, 0.08);
+}
+
+.signature-edit-handle {
+  display: inline-grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  max-width: 340px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+
+.signature-edit-prefix {
+  min-height: 50px;
+  display: grid;
+  place-items: center;
+  padding-left: 14px;
+  border: 1px solid rgba(34, 49, 58, 0.12);
+  border-right: 0;
+  border-radius: 18px 0 0 18px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #6b7276;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.signature-edit-handle input {
+  border-radius: 0 18px 18px 0;
+}
+
+.signature-edit-title input {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(3.1rem, 6vw, 5.6rem);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+}
+
+.signature-edit-lead textarea,
+.signature-edit-block {
+  resize: vertical;
+  line-height: 1.8;
+}
+
+.signature-edit-link input,
+.signature-edit-link-card input {
+  min-width: 180px;
 }
 
 .signature-hero-actions {
