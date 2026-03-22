@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SignaturePageAmbient } from "@/components/signature-page-ambient";
 
 let pageRippleSeed = 0;
 
@@ -60,6 +61,9 @@ export function SignaturePageShell({ children }) {
   return (
     <main ref={shellRef} className="signature-page signature-page-shell" onClick={handleClick}>
       <div className="signature-page-depth-glow" aria-hidden="true" />
+      <div className="signature-page-ambient-shell" aria-hidden="true">
+        <SignaturePageAmbient />
+      </div>
       <div className="signature-page-ripple-layer" aria-hidden="true">
         {ripples.map((ripple) => (
           <span
