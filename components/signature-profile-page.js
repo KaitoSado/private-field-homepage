@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AvatarMark } from "@/components/avatar-mark";
 import { SignatureHeroShader } from "@/components/signature-hero-shader";
+import { SignatureHeroStage } from "@/components/signature-hero-stage";
 import { SignaturePostShelf } from "@/components/signature-post-shelf";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
@@ -54,7 +55,7 @@ export function SignatureProfilePage({ profile, posts }) {
         <a href="#signature-contact">Contact</a>
       </nav>
 
-      <section className="signature-hero">
+      <SignatureHeroStage>
         <SignatureHeroShader />
         <div className="signature-hero-copy">
           <div className="signature-topline">
@@ -118,7 +119,7 @@ export function SignatureProfilePage({ profile, posts }) {
             <p>観察し、試作し、言葉に戻す。その往復のログとしてこのページを置いています。</p>
           </div>
         </aside>
-      </section>
+      </SignatureHeroStage>
 
       <ProfileSocialActions
         profileId={profile.id}

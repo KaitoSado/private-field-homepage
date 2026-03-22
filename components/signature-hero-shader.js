@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-const PARTICLE_COUNT = 34;
-const FIELD_LINE_COUNT = 8;
+const PARTICLE_COUNT = 72;
+const FIELD_LINE_COUNT = 12;
 
 export function SignatureHeroShader() {
   const canvasRef = useRef(null);
@@ -47,9 +47,11 @@ export function SignatureHeroShader() {
 
       context.clearRect(0, 0, width, height);
 
+      drawSweep(context, width, height, time, motionScale);
       drawFieldLines(context, width, height, time, pointerRef.current, motionScale);
       drawRipples(context, width, height, time, pointerRef.current, motionScale);
       drawParticles(context, width, height, particles, elapsed, pointerRef.current, motionScale);
+      drawConnections(context, width, height, particles, pointerRef.current);
 
       animationFrame = window.requestAnimationFrame(render);
     }
@@ -90,8 +92,8 @@ export function SignatureHeroShader() {
     <div className="signature-shader-shell" aria-hidden="true">
       <canvas ref={canvasRef} className="signature-shader-canvas" />
       <div className="signature-shader-meta">
-        <span>Quiet ripples</span>
-        <span>Drift particles</span>
+        <span>Reactive ripples</span>
+        <span>Particle storm</span>
         <span>Field lines</span>
       </div>
     </div>
@@ -103,10 +105,22 @@ function createParticles() {
     x: Math.random(),
     y: Math.random(),
     radius: 0.8 + Math.random() * 2.6,
-    speedX: (Math.random() - 0.5) * 0.012,
-    speedY: (Math.random() - 0.5) * 0.01,
+    speedX: (Math.random() - 0.5) * 0.018,
+    speedY: (Math.random() - 0.5) * 0.016,
     phase: Math.random() * Math.PI * 2
   }));
+}
+
+function drawSweep(context, width, height, time, motionScale) {
+  const sweepX = ((Math.sin(time * 0.22 * motionScale) + 1) * 0.5) * width;
+  const gradient = context.createLinearGradient(sweepX - 220, 0, sweepX + 220, height);
+  gradient.addColorStop(0, "rgba(168, 215, 218, 0)");
+  gradient.addColorStop(0.45, "rgba(168, 215, 218, 0.08)");
+  gradient.addColorStop(0.55, "rgba(178, 149, 94, 0.12)");
+  gradient.addColorStop(1, "rgba(178, 149, 94, 0)");
+
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, width, height);
 }
 
 function drawFieldLines(context, width, height, time, pointer, motionScale) {
@@ -116,15 +130,15 @@ function drawFieldLines(context, width, height, time, pointer, motionScale) {
     const ratio = index / Math.max(FIELD_LINE_COUNT - 1, 1);
     const baseY = height * (0.2 + ratio * 0.62);
     const hue = index % 2 === 0 ? "168, 215, 218" : "178, 149, 94";
-    const alpha = index % 2 === 0 ? 0.22 : 0.15;
+    const alpha = index % 2 === 0 ? 0.3 : 0.2;
 
     context.beginPath();
 
     for (let x = 0; x <= width; x += 8) {
       const wave =
-        Math.sin(x * 0.011 + time * (0.5 + ratio * 0.22) * motionScale + index) * (8 + ratio * 12) +
-        Math.cos(x * 0.005 + time * 0.27 * motionScale + index * 0.5) * 6;
-      const pull = pointerInfluence * Math.exp(-Math.abs(x - width * pointer.x) / 240);
+        Math.sin(x * 0.011 + time * (0.72 + ratio * 0.28) * motionScale + index) * (10 + ratio * 18) +
+        Math.cos(x * 0.005 + time * 0.4 * motionScale + index * 0.5) * 8;
+      const pull = pointerInfluence * Math.exp(-Math.abs(x - width * pointer.x) / 180);
       const y = baseY + wave + pull;
 
       if (x === 0) {
@@ -135,7 +149,7 @@ function drawFieldLines(context, width, height, time, pointer, motionScale) {
     }
 
     context.strokeStyle = `rgba(${hue}, ${alpha})`;
-    context.lineWidth = index % 3 === 0 ? 1.4 : 1;
+    context.lineWidth = index % 3 === 0 ? 1.8 : 1.15;
     context.stroke();
   }
 }
@@ -151,16 +165,16 @@ function drawRipples(context, width, height, time, pointer, motionScale) {
   ];
 
   rippleCenters.forEach((center, centerIndex) => {
-    for (let ring = 0; ring < 3; ring += 1) {
+    for (let ring = 0; ring < 4; ring += 1) {
       const radius =
         42 +
-        ring * 38 +
-        Math.sin(time * (0.55 + centerIndex * 0.2) * motionScale + ring) * 9;
+        ring * 34 +
+        Math.sin(time * (0.85 + centerIndex * 0.24) * motionScale + ring) * 14;
 
       context.beginPath();
       context.arc(center.x, center.y, radius, 0, Math.PI * 2);
-      context.strokeStyle = `rgba(${center.color}, ${0.09 - ring * 0.018})`;
-      context.lineWidth = 1;
+      context.strokeStyle = `rgba(${center.color}, ${0.14 - ring * 0.022})`;
+      context.lineWidth = ring === 0 ? 1.8 : 1;
       context.stroke();
     }
   });
@@ -179,13 +193,41 @@ function drawParticles(context, width, height, particles, elapsed, pointer, moti
     const px = particle.x * width;
     const py = particle.y * height;
     const distance = Math.hypot(px - width * pointer.x, py - height * pointer.y);
-    const glow = pointer.active ? Math.max(0, 1 - distance / 220) : 0;
-    const opacity = 0.16 + ((Math.sin(index + particle.phase) + 1) * 0.5 + glow * 0.6) * 0.18;
-    const radius = particle.radius + glow * 1.8;
+    const glow = pointer.active ? Math.max(0, 1 - distance / 180) : 0;
+    const pulse = (Math.sin(index + particle.phase + elapsed * 14) + 1) * 0.5;
+    const opacity = 0.16 + (pulse + glow * 1.2) * 0.22;
+    const radius = particle.radius + glow * 3.2;
 
     context.beginPath();
     context.arc(px, py, radius, 0, Math.PI * 2);
     context.fillStyle = index % 3 === 0 ? `rgba(178, 149, 94, ${opacity})` : `rgba(168, 215, 218, ${opacity})`;
     context.fill();
   });
+}
+
+function drawConnections(context, width, height, particles, pointer) {
+  const maxDistance = pointer.active ? 120 : 92;
+
+  for (let index = 0; index < particles.length; index += 1) {
+    const left = particles[index];
+    const leftX = left.x * width;
+    const leftY = left.y * height;
+
+    for (let inner = index + 1; inner < particles.length; inner += 1) {
+      const right = particles[inner];
+      const rightX = right.x * width;
+      const rightY = right.y * height;
+      const distance = Math.hypot(leftX - rightX, leftY - rightY);
+
+      if (distance > maxDistance) continue;
+
+      const alpha = (1 - distance / maxDistance) * (pointer.active ? 0.18 : 0.08);
+      context.beginPath();
+      context.moveTo(leftX, leftY);
+      context.lineTo(rightX, rightY);
+      context.strokeStyle = inner % 2 === 0 ? `rgba(168, 215, 218, ${alpha})` : `rgba(178, 149, 94, ${alpha})`;
+      context.lineWidth = 0.8;
+      context.stroke();
+    }
+  }
 }
