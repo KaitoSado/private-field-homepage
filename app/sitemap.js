@@ -42,13 +42,17 @@ export default async function sitemap() {
 
   return [
     ...staticRoutes,
-    ...(profiles || []).map((profile) => ({
-      url: `${baseUrl}/@${profile.username}`,
-      lastModified: profile.updated_at || new Date()
-    })),
-    ...(posts || []).map((post) => ({
-      url: `${baseUrl}/@${post.profiles.username}/${post.slug}`,
-      lastModified: post.updated_at || new Date()
-    }))
+    ...(profiles || [])
+      .filter((profile) => `${profile.username || ""}`.trim())
+      .map((profile) => ({
+        url: `${baseUrl}/@${profile.username}`,
+        lastModified: profile.updated_at || new Date()
+      })),
+    ...(posts || [])
+      .filter((post) => `${post.profiles?.username || ""}`.trim())
+      .map((post) => ({
+        url: `${baseUrl}/@${post.profiles.username}/${post.slug}`,
+        lastModified: post.updated_at || new Date()
+      }))
   ];
 }
