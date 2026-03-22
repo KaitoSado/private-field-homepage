@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AvatarMark } from "@/components/avatar-mark";
 import { SignatureHeroShader } from "@/components/signature-hero-shader";
 import { SignatureHeroStage } from "@/components/signature-hero-stage";
+import { SignatureInteractiveSection } from "@/components/signature-interactive-section";
 import { SignaturePostShelf } from "@/components/signature-post-shelf";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
@@ -128,7 +129,7 @@ export function SignatureProfilePage({ profile, posts }) {
       />
       <ReportAction targetProfileId={profile.id} label="プロフィールを通報" />
 
-      <section className="signature-section" id="signature-identity">
+      <SignatureInteractiveSection id="signature-identity">
         <div className="signature-section-head">
           <p className="eyebrow">Identity</p>
           <h2>研究し、つくり、観察し続ける。</h2>
@@ -152,9 +153,9 @@ export function SignatureProfilePage({ profile, posts }) {
             ))}
           </div>
         </div>
-      </section>
+      </SignatureInteractiveSection>
 
-      <section className="signature-section" id="signature-current">
+      <SignatureInteractiveSection id="signature-current">
         <div className="signature-section-head">
           <p className="eyebrow">Current</p>
           <h2>This week, in motion</h2>
@@ -168,9 +169,9 @@ export function SignatureProfilePage({ profile, posts }) {
             </article>
           ))}
         </div>
-      </section>
+      </SignatureInteractiveSection>
 
-      <section className="signature-section" id="signature-works">
+      <SignatureInteractiveSection id="signature-works">
         <div className="signature-section-head">
           <p className="eyebrow">Works</p>
           <h2>Works shaped by questions</h2>
@@ -182,12 +183,12 @@ export function SignatureProfilePage({ profile, posts }) {
           <div className="signature-post-card empty-state">
             <h3>まだ記事がありません</h3>
             <p>最初の公開記事を追加するとここに出ます。</p>
-          </div>
-        )}
-      </section>
+            </div>
+          )}
+      </SignatureInteractiveSection>
 
       {links.length ? (
-        <section className="signature-section">
+        <SignatureInteractiveSection id="signature-links">
           <div className="signature-section-head">
             <p className="eyebrow">Links</p>
             <h2>Outside the page</h2>
@@ -199,10 +200,10 @@ export function SignatureProfilePage({ profile, posts }) {
               </a>
             ))}
           </div>
-        </section>
+        </SignatureInteractiveSection>
       ) : null}
 
-      <section className="signature-section" id="signature-thinking">
+      <SignatureInteractiveSection id="signature-thinking">
         <div className="signature-section-head">
           <p className="eyebrow">Thinking</p>
           <h2>Current signals</h2>
@@ -236,9 +237,9 @@ export function SignatureProfilePage({ profile, posts }) {
             </div>
           )}
         </div>
-      </section>
+      </SignatureInteractiveSection>
 
-      <section className="signature-section" id="signature-contact">
+      <SignatureInteractiveSection id="signature-contact">
         <div className="signature-section-head">
           <p className="eyebrow">Collaboration</p>
           <h2>静かに対話へ開く</h2>
@@ -262,7 +263,7 @@ export function SignatureProfilePage({ profile, posts }) {
             )}
           </div>
         </div>
-      </section>
+      </SignatureInteractiveSection>
     </main>
   );
 }
