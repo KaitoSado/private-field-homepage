@@ -494,18 +494,10 @@ export function DashboardShell() {
           <div>
             <p className="eyebrow">Profile</p>
             <h2>プロフィール編集</h2>
+            <p className="field-hint">完成形に近いプレビューへ直接書き込みながら整えます。</p>
           </div>
 
-          <label className="field">
-            <span>username</span>
-            <input
-              value={profile.username}
-              onChange={(event) => setProfile((current) => ({ ...current, username: event.target.value }))}
-              placeholder="your-name"
-              required
-            />
-            <small className="field-hint">公開URLは `/@username` になります。</small>
-          </label>
+          <ProfileCanvasEditor profile={profile} setProfile={setProfile} />
 
           <label className="field">
             <span>公開プロフィールのテーマ</span>
@@ -520,6 +512,7 @@ export function DashboardShell() {
           </label>
 
           <p className="status-text">アカウント状態: {profile.account_status}</p>
+          <p className="field-hint">公開URLは `/@username` になります。</p>
 
           <label className="field">
             <span>プロフィール画像 URL</span>
@@ -534,75 +527,6 @@ export function DashboardShell() {
                 <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
               </label>
             </div>
-          </label>
-
-          <label className="field">
-            <span>表示名</span>
-            <input
-              value={profile.display_name}
-              onChange={(event) => setProfile((current) => ({ ...current, display_name: event.target.value }))}
-              placeholder="佐藤海斗"
-            />
-          </label>
-
-          <label className="field">
-            <span>肩書き</span>
-            <input
-              value={profile.headline}
-              onChange={(event) => setProfile((current) => ({ ...current, headline: event.target.value }))}
-              placeholder="デザイナー / 開発者 / 研究者"
-              maxLength={PROFILE_HEADLINE_LIMIT}
-            />
-          </label>
-
-          <label className="field">
-            <span>所属</span>
-            <input
-              value={profile.affiliation}
-              onChange={(event) => setProfile((current) => ({ ...current, affiliation: event.target.value }))}
-              placeholder="〇〇大学 / フリーランス / 会社名"
-            />
-          </label>
-
-          <label className="field">
-            <span>フォーカス</span>
-            <input
-              value={profile.focus_area}
-              onChange={(event) => setProfile((current) => ({ ...current, focus_area: event.target.value }))}
-              placeholder="HCI, UI設計, Webアプリ, 執筆"
-            />
-          </label>
-
-          <label className="field">
-            <span>募集内容 / 相談歓迎</span>
-            <textarea
-              rows="3"
-              value={profile.open_to}
-              onChange={(event) => setProfile((current) => ({ ...current, open_to: event.target.value }))}
-              placeholder="共同研究、プロトタイプ制作、サイト設計、登壇依頼など"
-              maxLength={PROFILE_OPEN_TO_LIMIT}
-            />
-          </label>
-
-          <label className="field">
-            <span>自己紹介</span>
-            <textarea
-              rows="5"
-              value={profile.bio}
-              onChange={(event) => setProfile((current) => ({ ...current, bio: event.target.value }))}
-              placeholder="このページで何を伝えたいかを書いてください。"
-              maxLength={PROFILE_BIO_LIMIT}
-            />
-          </label>
-
-          <label className="field">
-            <span>場所</span>
-            <input
-              value={profile.location}
-              onChange={(event) => setProfile((current) => ({ ...current, location: event.target.value }))}
-              placeholder="Tokyo / Remote"
-              maxLength={PROFILE_LOCATION_LIMIT}
-            />
           </label>
 
           <label className="field">
@@ -874,6 +798,104 @@ function buildProfilePayload(profile, user) {
     avatar_url: sanitizeHttpUrl(profile.avatar_url) || "",
     discoverable: profile.discoverable !== false
   };
+}
+
+function ProfileCanvasEditor({ profile, setProfile }) {
+  function updateField(key, value) {
+    setProfile((current) => ({ ...current, [key]: value }));
+  }
+
+  return (
+    <section className="profile-canvas-editor">
+      <div className="profile-canvas-hero">
+        <AvatarMark profile={profile} size="lg" />
+        <div className="profile-canvas-copy">
+          <label className="profile-inline-field profile-inline-handle">
+            <span className="sr-only">username</span>
+            <div className="profile-inline-prefix">@</div>
+            <input
+              value={profile.username}
+              onChange={(event) => updateField("username", event.target.value)}
+              placeholder="your-name"
+              required
+            />
+          </label>
+
+          <label className="profile-inline-field profile-inline-title">
+            <span className="sr-only">表示名</span>
+            <input
+              value={profile.display_name}
+              onChange={(event) => updateField("display_name", event.target.value)}
+              placeholder="表示名"
+            />
+          </label>
+
+          <label className="profile-inline-field profile-inline-headline">
+            <span className="sr-only">肩書き</span>
+            <textarea
+              rows="2"
+              value={profile.headline}
+              onChange={(event) => updateField("headline", event.target.value)}
+              placeholder="デザイナー / 開発者 / 研究者"
+              maxLength={PROFILE_HEADLINE_LIMIT}
+            />
+          </label>
+        </div>
+      </div>
+
+      <div className="profile-canvas-grid">
+        <label className="profile-canvas-card">
+          <span className="eyebrow">Affiliation</span>
+          <input
+            value={profile.affiliation}
+            onChange={(event) => updateField("affiliation", event.target.value)}
+            placeholder="〇〇大学 / フリーランス / 会社名"
+          />
+        </label>
+
+        <label className="profile-canvas-card">
+          <span className="eyebrow">Focus</span>
+          <input
+            value={profile.focus_area}
+            onChange={(event) => updateField("focus_area", event.target.value)}
+            placeholder="HCI, UI設計, Webアプリ, 執筆"
+          />
+        </label>
+
+        <label className="profile-canvas-card">
+          <span className="eyebrow">Location</span>
+          <input
+            value={profile.location}
+            onChange={(event) => updateField("location", event.target.value)}
+            placeholder="Tokyo / Remote"
+            maxLength={PROFILE_LOCATION_LIMIT}
+          />
+        </label>
+
+        <label className="profile-canvas-card profile-canvas-card-wide">
+          <span className="eyebrow">Open to</span>
+          <textarea
+            rows="3"
+            value={profile.open_to}
+            onChange={(event) => updateField("open_to", event.target.value)}
+            placeholder="共同研究、プロトタイプ制作、サイト設計、登壇依頼など"
+            maxLength={PROFILE_OPEN_TO_LIMIT}
+          />
+        </label>
+      </div>
+
+      <label className="profile-canvas-bio">
+        <span className="eyebrow">About</span>
+        <textarea
+          rows="6"
+          value={profile.bio}
+          onChange={(event) => updateField("bio", event.target.value)}
+          placeholder="このページで何を伝えたいかを書いてください。"
+          maxLength={PROFILE_BIO_LIMIT}
+        />
+      </label>
+    </section>
+  );
 }
 
 function buildPostPayload(editor, userId) {

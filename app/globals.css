@@ -464,6 +464,18 @@ textarea {
   gap: 8px;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .honeypot-field {
   position: absolute;
   width: 1px;
@@ -547,6 +559,154 @@ textarea {
   display: grid;
   grid-template-columns: 420px 1fr;
   gap: 24px;
+}
+
+.profile-canvas-editor {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(168, 215, 218, 0.18), transparent 28%),
+    radial-gradient(circle at 90% 10%, rgba(184, 154, 93, 0.12), transparent 24%),
+    rgba(255, 255, 255, 0.6);
+}
+
+.profile-canvas-hero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.profile-canvas-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-inline-field,
+.profile-canvas-card,
+.profile-canvas-bio {
+  display: grid;
+  gap: 8px;
+}
+
+.profile-inline-field input,
+.profile-inline-field textarea,
+.profile-canvas-card input,
+.profile-canvas-card textarea,
+.profile-canvas-bio textarea {
+  width: 100%;
+  border: 1px solid rgba(34, 49, 58, 0.08);
+  border-radius: 20px;
+  background: rgba(255, 253, 248, 0.78);
+  color: var(--ink);
+  padding: 14px 16px;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.profile-inline-field input:focus,
+.profile-inline-field textarea:focus,
+.profile-canvas-card input:focus,
+.profile-canvas-card textarea:focus,
+.profile-canvas-bio textarea:focus {
+  outline: none;
+  border-color: rgba(31, 111, 120, 0.28);
+  box-shadow: 0 0 0 4px rgba(31, 111, 120, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.profile-inline-handle {
+  display: inline-grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  max-width: 360px;
+}
+
+.profile-inline-prefix {
+  display: grid;
+  place-items: center;
+  min-height: 54px;
+  padding: 0 0 0 16px;
+  border: 1px solid rgba(34, 49, 58, 0.08);
+  border-right: 0;
+  border-radius: 20px 0 0 20px;
+  background: rgba(255, 253, 248, 0.78);
+  color: #667277;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.profile-inline-handle input {
+  border-radius: 0 20px 20px 0;
+}
+
+.profile-inline-title input {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+
+.profile-inline-headline textarea {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  color: #46555c;
+  resize: vertical;
+  font-size: 1.02rem;
+  line-height: 1.7;
+}
+
+.profile-canvas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.profile-canvas-card {
+  padding: 16px;
+  border: 1px solid rgba(34, 49, 58, 0.08);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.profile-canvas-card-wide {
+  grid-column: 1 / -1;
+}
+
+.profile-canvas-card input,
+.profile-canvas-card textarea {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.profile-canvas-bio {
+  padding: 18px;
+  border: 1px solid rgba(34, 49, 58, 0.08);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.profile-canvas-bio textarea {
+  min-height: 132px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  resize: vertical;
+  line-height: 1.9;
 }
 
 .checkbox-row {
@@ -1452,6 +1612,7 @@ textarea {
   .signature-identity-grid,
   .signature-about-grid,
   .signature-current-grid,
+  .profile-canvas-grid,
   .media-gallery.has-grid,
   .social-stats,
   .feature-strip,
@@ -1517,6 +1678,10 @@ textarea {
   .signature-topline {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .profile-canvas-hero {
+    grid-template-columns: 1fr;
   }
 
   .signature-local-nav {
