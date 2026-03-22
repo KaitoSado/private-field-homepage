@@ -813,6 +813,47 @@ textarea {
   align-items: stretch;
   min-height: 72vh;
   padding-top: 34px;
+  position: relative;
+  overflow: hidden;
+}
+
+.signature-shader-shell {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.signature-shader-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0.96;
+}
+
+.signature-shader-meta {
+  position: absolute;
+  left: 22px;
+  bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.signature-shader-meta span {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 253, 248, 0.7);
+  border: 1px solid rgba(184, 154, 93, 0.12);
+  color: #6d7478;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .signature-hero-copy,
@@ -1201,5 +1242,11 @@ textarea {
 
   .signature-local-nav {
     top: 66px;
+  }
+
+  .signature-shader-meta {
+    left: 16px;
+    right: 16px;
+    bottom: 14px;
   }
 }

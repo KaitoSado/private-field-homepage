@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AvatarMark } from "@/components/avatar-mark";
+import { SignatureHeroShader } from "@/components/signature-hero-shader";
 import { SignaturePostShelf } from "@/components/signature-post-shelf";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
@@ -54,6 +55,7 @@ export function SignatureProfilePage({ profile, posts }) {
       </nav>
 
       <section className="signature-hero">
+        <SignatureHeroShader />
         <div className="signature-hero-copy">
           <div className="signature-topline">
             <p className="signature-kicker">A Quiet Field Between Research and Making</p>
