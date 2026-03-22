@@ -1272,12 +1272,15 @@ textarea {
 .signature-panel dd textarea,
 .signature-edit-block {
   width: 100%;
-  border: 1px solid rgba(34, 49, 58, 0.12);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.8);
+  border: 0;
+  border-bottom: 1px dashed rgba(34, 49, 58, 0.18);
+  border-radius: 0;
+  background: transparent;
   color: #1d2328;
-  padding: 12px 14px;
-  transition: border-color 180ms ease, box-shadow 180ms ease;
+  padding: 0 0 8px;
+  box-shadow: none;
+  transition: border-color 180ms ease, background 180ms ease;
+  font: inherit;
 }
 
 .signature-edit-inline input:focus,
@@ -1289,8 +1292,8 @@ textarea {
 .signature-panel dd textarea:focus,
 .signature-edit-block:focus {
   outline: none;
-  border-color: rgba(31, 111, 120, 0.28);
-  box-shadow: 0 0 0 4px rgba(31, 111, 120, 0.08);
+  border-bottom-color: rgba(31, 111, 120, 0.42);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .signature-edit-handle {
@@ -1303,20 +1306,16 @@ textarea {
 }
 
 .signature-edit-prefix {
-  min-height: 50px;
+  min-height: 38px;
   display: grid;
   place-items: center;
-  padding-left: 14px;
-  border: 1px solid rgba(34, 49, 58, 0.12);
-  border-right: 0;
-  border-radius: 18px 0 0 18px;
-  background: rgba(255, 255, 255, 0.8);
+  padding-right: 6px;
   color: #6b7276;
   font-family: "IBM Plex Mono", monospace;
 }
 
 .signature-edit-handle input {
-  border-radius: 0 18px 18px 0;
+  border-radius: 0;
 }
 
 .signature-edit-title input {
@@ -1335,6 +1334,10 @@ textarea {
 .signature-edit-block {
   resize: vertical;
   line-height: 1.8;
+}
+
+.signature-edit-inline textarea {
+  min-height: 0;
 }
 
 .signature-edit-link input,
