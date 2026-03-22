@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AvatarMark } from "@/components/avatar-mark";
+import { SignaturePostShelf } from "@/components/signature-post-shelf";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
 import { sanitizeExternalUrl } from "@/lib/url";
@@ -44,6 +45,13 @@ export function SignatureProfilePage({ profile, posts }) {
       <div className="signature-noise" aria-hidden="true" />
       <div className="signature-glow signature-glow-a" aria-hidden="true" />
       <div className="signature-glow signature-glow-b" aria-hidden="true" />
+      <nav className="signature-local-nav" aria-label="Profile sections">
+        <a href="#signature-identity">Identity</a>
+        <a href="#signature-current">Current</a>
+        <a href="#signature-works">Works</a>
+        <a href="#signature-thinking">Thinking</a>
+        <a href="#signature-contact">Contact</a>
+      </nav>
 
       <section className="signature-hero">
         <div className="signature-hero-copy">
@@ -117,7 +125,7 @@ export function SignatureProfilePage({ profile, posts }) {
       />
       <ReportAction targetProfileId={profile.id} label="プロフィールを通報" />
 
-      <section className="signature-section">
+      <section className="signature-section" id="signature-identity">
         <div className="signature-section-head">
           <p className="eyebrow">Identity</p>
           <h2>研究し、つくり、観察し続ける。</h2>
@@ -143,7 +151,7 @@ export function SignatureProfilePage({ profile, posts }) {
         </div>
       </section>
 
-      <section className="signature-section">
+      <section className="signature-section" id="signature-current">
         <div className="signature-section-head">
           <p className="eyebrow">Current</p>
           <h2>This week, in motion</h2>
@@ -165,34 +173,14 @@ export function SignatureProfilePage({ profile, posts }) {
           <h2>Works shaped by questions</h2>
           <p>完成品ではなく、どんな問いを持って作ったかが見えるように並べています。</p>
         </div>
-        <div className="signature-post-grid">
-          {featuredPosts.length ? (
-            featuredPosts.map((post) => (
-              <Link key={post.id} href={`/@${profile.username}/${post.slug}`} className="signature-post-card">
-                <div className="post-card-head">
-                  <span>{formatDate(post.published_at || post.updated_at)}</span>
-                  <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
-                </div>
-                <h3>{post.title}</h3>
-                <p>{post.excerpt || "制作の意図や問いを添えると、ここに表示されます。"}</p>
-                {post.tags.length ? (
-                  <div className="tag-row">
-                    {post.tags.map((tag) => (
-                      <span key={tag} className="tag-chip">
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </Link>
-            ))
-          ) : (
-            <div className="signature-post-card empty-state">
-              <h3>まだ記事がありません</h3>
-              <p>最初の公開記事を追加するとここに出ます。</p>
-            </div>
-          )}
-        </div>
+        {featuredPosts.length ? (
+          <SignaturePostShelf username={profile.username} posts={featuredPosts} />
+        ) : (
+          <div className="signature-post-card empty-state">
+            <h3>まだ記事がありません</h3>
+            <p>最初の公開記事を追加するとここに出ます。</p>
+          </div>
+        )}
       </section>
 
       {links.length ? (

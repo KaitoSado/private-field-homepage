@@ -775,6 +775,37 @@ textarea {
   background: rgba(168, 215, 218, 0.2);
 }
 
+.signature-local-nav {
+  position: sticky;
+  top: 78px;
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 10px 12px;
+  border: 1px solid rgba(184, 154, 93, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 253, 248, 0.78);
+  backdrop-filter: blur(14px);
+}
+
+.signature-local-nav a {
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: #647074;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.signature-local-nav a:hover {
+  background: rgba(178, 149, 94, 0.1);
+  color: #22313a;
+}
+
 .signature-hero {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -953,6 +984,35 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+
+.signature-shelf {
+  display: grid;
+  gap: 16px;
+}
+
+.signature-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.signature-filter-chip {
+  border: 1px solid rgba(184, 154, 93, 0.18);
+  background: rgba(255, 253, 248, 0.88);
+  color: #5e676b;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.signature-filter-chip.is-active {
+  background: #22313a;
+  color: #f8f5ee;
+  border-color: #22313a;
 }
 
 .signature-identity-grid {
@@ -1137,5 +1197,9 @@ textarea {
   .signature-topline {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .signature-local-nav {
+    top: 66px;
   }
 }
