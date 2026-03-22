@@ -7,33 +7,77 @@ import { sanitizeExternalUrl } from "@/lib/url";
 export function SignatureProfilePage({ profile, posts }) {
   const featuredPosts = posts.slice(0, 3);
   const recentPosts = posts.slice(0, 4);
+  const leadCopy = profile.headline || "Researching interaction, building thoughtful systems.";
+  const identityBody =
+    profile.bio ||
+    "知覚、身体、記録、インターフェース。そのあいだを研究と実装の両方から往復しながら、触れる思考と残る体験をつくっています。";
+  const collaborationLabel = profile.open_to ? "Open to collaboration" : "Quietly building";
   const links = [
     { label: "Website", href: sanitizeExternalUrl(profile.website_url) },
     { label: "X", href: sanitizeExternalUrl(profile.x_url) },
     { label: "GitHub", href: sanitizeExternalUrl(profile.github_url) },
     { label: "note", href: sanitizeExternalUrl(profile.note_url) }
   ].filter((item) => item.href);
+  const infoCards = [
+    {
+      eyebrow: "Affiliation",
+      title: profile.affiliation || "Independent / research-linked",
+      body: "所属やいま身を置いている場の輪郭をここに置きます。"
+    },
+    {
+      eyebrow: "Focus",
+      title: profile.focus_area || "HCI / Prototyping / Experimental Web",
+      body: "問いを立てながら試作し、観察しながら構造へ戻す。その中心にある関心です。"
+    },
+    {
+      eyebrow: "Open to",
+      title: "Collaboration",
+      body:
+        profile.open_to ||
+        "研究プロトタイプ、実験用UI、文化系プロジェクト、個人開発の技術相談などを静かに受けています。"
+    }
+  ];
+  const currentSignals = buildCurrentSignals(profile);
 
   return (
     <main className="signature-page">
       <div className="signature-noise" aria-hidden="true" />
+      <div className="signature-glow signature-glow-a" aria-hidden="true" />
+      <div className="signature-glow signature-glow-b" aria-hidden="true" />
 
       <section className="signature-hero">
         <div className="signature-hero-copy">
-          <p className="signature-kicker">Personal Field</p>
-          <AvatarMark profile={profile} size="lg" />
-          <h1>{profile.display_name || profile.username}</h1>
-          <p className="signature-lead">{profile.headline || "肩書きはまだ未設定です。"}</p>
-          <p className="signature-body">{profile.bio || "このページはまだ準備中です。"}</p>
-
-          <div className="hero-actions">
-            <a className="button button-primary" href="#signature-posts">
-              投稿を見る
-            </a>
-            <Link className="button button-secondary" href="/dashboard">
-              管理画面
-            </Link>
+          <div className="signature-topline">
+            <p className="signature-kicker">A Quiet Field Between Research and Making</p>
+            <span className="signature-status-pill">{collaborationLabel}</span>
           </div>
+          <AvatarMark profile={profile} size="lg" />
+          <p className="signature-eyebrow">@{profile.username}</p>
+          <h1>{profile.display_name || profile.username}</h1>
+          <p className="signature-lead">{leadCopy}</p>
+          <p className="signature-body">{identityBody}</p>
+
+          <div className="hero-actions signature-hero-actions">
+            <a className="button button-primary" href="#signature-works">
+              作品を見る
+            </a>
+            <a className="button button-secondary" href="#signature-thinking">
+              思考を読む
+            </a>
+            <a className="button button-ghost" href="#signature-contact">
+              連絡する
+            </a>
+          </div>
+
+          {links.length ? (
+            <div className="signature-inline-links">
+              {links.map((link) => (
+                <a key={link.label} href={link.href} target="_blank" rel="noreferrer">
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          ) : null}
         </div>
 
         <aside className="signature-panel">
@@ -51,7 +95,18 @@ export function SignatureProfilePage({ profile, posts }) {
               <dt>Focus</dt>
               <dd>{profile.focus_area || "Not set"}</dd>
             </div>
+            <div>
+              <dt>Base</dt>
+              <dd>{profile.location || "Tokyo / Remote"}</dd>
+            </div>
+            <div>
+              <dt>Available for</dt>
+              <dd>{profile.open_to || "Research prototyping / design engineering"}</dd>
+            </div>
           </dl>
+          <div className="signature-panel-note">
+            <p>観察し、試作し、言葉に戻す。その往復のログとしてこのページを置いています。</p>
+          </div>
         </aside>
       </section>
 
@@ -64,27 +119,51 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <section className="signature-section">
         <div className="signature-section-head">
-          <p className="eyebrow">About</p>
-          <h2>概要</h2>
+          <p className="eyebrow">Identity</p>
+          <h2>研究し、つくり、観察し続ける。</h2>
         </div>
-        <div className="signature-about-grid">
-          <article className="signature-info-card">
-            <p className="eyebrow">Base</p>
-            <h3>{profile.location || "Location not set"}</h3>
-            <p>{profile.focus_area || "関心領域を追加するとここに表示されます。"}</p>
+        <div className="signature-identity-grid">
+          <article className="signature-statement-card">
+            <p className="signature-body">{identityBody}</p>
+            <p className="signature-body">
+              {profile.focus_area
+                ? `${profile.focus_area} を軸に、研究の仮説と実装の手触りが途切れない形を探しています。`
+                : "曖昧な感覚をどう観測し、どう設計へ変換するか。そのあいだにある実践を大切にしています。"}
+            </p>
           </article>
-          <article className="signature-info-card">
-            <p className="eyebrow">Open to</p>
-            <h3>相談歓迎</h3>
-            <p>{profile.open_to || "募集内容や受けたい相談を書くと、ここに表示されます。"}</p>
-          </article>
+          <div className="signature-about-grid">
+            {infoCards.map((card) => (
+              <article key={card.eyebrow} className="signature-info-card">
+                <p className="eyebrow">{card.eyebrow}</p>
+                <h3>{card.title}</h3>
+                <p>{card.body}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
       <section className="signature-section">
         <div className="signature-section-head">
+          <p className="eyebrow">Current</p>
+          <h2>This week, in motion</h2>
+        </div>
+        <div className="signature-current-grid">
+          {currentSignals.map((signal) => (
+            <article key={signal.label} className="signature-current-card">
+              <p className="eyebrow">{signal.label}</p>
+              <h3>{signal.title}</h3>
+              <p>{signal.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="signature-section" id="signature-works">
+        <div className="signature-section-head">
           <p className="eyebrow">Works</p>
-          <h2>注目記事</h2>
+          <h2>Works shaped by questions</h2>
+          <p>完成品ではなく、どんな問いを持って作ったかが見えるように並べています。</p>
         </div>
         <div className="signature-post-grid">
           {featuredPosts.length ? (
@@ -92,10 +171,10 @@ export function SignatureProfilePage({ profile, posts }) {
               <Link key={post.id} href={`/@${profile.username}/${post.slug}`} className="signature-post-card">
                 <div className="post-card-head">
                   <span>{formatDate(post.published_at || post.updated_at)}</span>
-                  <span>{post.stats.like_count} likes</span>
+                  <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
                 </div>
                 <h3>{post.title}</h3>
-                <p>{post.excerpt || "本文から紹介文を追加してください。"}</p>
+                <p>{post.excerpt || "制作の意図や問いを添えると、ここに表示されます。"}</p>
                 {post.tags.length ? (
                   <div className="tag-row">
                     {post.tags.map((tag) => (
@@ -120,7 +199,7 @@ export function SignatureProfilePage({ profile, posts }) {
         <section className="signature-section">
           <div className="signature-section-head">
             <p className="eyebrow">Links</p>
-            <h2>外部リンク</h2>
+            <h2>Outside the page</h2>
           </div>
           <div className="link-list">
             {links.map((link) => (
@@ -132,10 +211,11 @@ export function SignatureProfilePage({ profile, posts }) {
         </section>
       ) : null}
 
-      <section className="signature-section" id="signature-posts">
+      <section className="signature-section" id="signature-thinking">
         <div className="signature-section-head">
-          <p className="eyebrow">Signals</p>
-          <h2>最近の更新</h2>
+          <p className="eyebrow">Thinking</p>
+          <h2>Current signals</h2>
+          <p>最近の記録や途中経過を、ログの断片のように並べています。</p>
         </div>
 
         <div className="signature-signals">
@@ -167,13 +247,16 @@ export function SignatureProfilePage({ profile, posts }) {
         </div>
       </section>
 
-      <section className="signature-section">
+      <section className="signature-section" id="signature-contact">
         <div className="signature-section-head">
-          <p className="eyebrow">Contact</p>
-          <h2>連絡</h2>
+          <p className="eyebrow">Collaboration</p>
+          <h2>静かに対話へ開く</h2>
         </div>
         <div className="signature-contact-card">
-          <p>{profile.open_to || "相談歓迎の内容を入れると、ここが連絡導線になります。"}</p>
+          <p>
+            {profile.open_to ||
+              "研究プロトタイプ、実験用UI、文化系プロジェクト、個人開発の技術相談などを受けています。"}
+          </p>
           <div className="link-list">
             {links.length ? (
               links.map((link) => (
@@ -191,6 +274,26 @@ export function SignatureProfilePage({ profile, posts }) {
       </section>
     </main>
   );
+}
+
+function buildCurrentSignals(profile) {
+  return [
+    {
+      label: "Base",
+      title: profile.location || "Tokyo / Remote",
+      body: "現在の活動拠点や、日々の制作と研究が動いている場所。"
+    },
+    {
+      label: "Focus",
+      title: profile.focus_area || "Perception / Interfaces / Prototyping",
+      body: "いま一番エネルギーを使っている領域。"
+    },
+    {
+      label: "Open to",
+      title: profile.open_to || "Research prototyping / technical direction",
+      body: "相談できること、いま開いている接点。"
+    }
+  ];
 }
 
 function formatDate(value) {
