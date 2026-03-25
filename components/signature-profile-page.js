@@ -15,7 +15,7 @@ import { PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROF
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 
-const DEFAULT_IDENTITY_HEADING = "研究し、つくり、観察し続ける。";
+const DEFAULT_IDENTITY_HEADING = "肩書き・関心・活動";
 const IDENTITY_MARKER = "[[identity-heading::";
 
 export function SignatureProfilePage({ profile, posts }) {
@@ -64,7 +64,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const featuredPosts = posts.slice(0, 3);
   const recentPosts = posts.slice(0, 4);
   const latestPost = recentPosts[0] || null;
-  const leadCopy = draft.headline || "Researching interaction, building thoughtful systems.";
+  const leadCopy = draft.headline || "Role / focus / what you do";
   const identityBody =
     draft.bio ||
     "知覚、身体、記録、インターフェース。そのあいだを研究と実装の両方から往復しながら、触れる思考と残る体験をつくっています。";
@@ -96,7 +96,7 @@ export function SignatureProfilePage({ profile, posts }) {
     }
   ];
   const currentSignals = buildCurrentSignals(draft, recentPosts);
-  const defaultLeadCopy = "Researching interaction, building thoughtful systems.";
+  const defaultLeadCopy = "Role / focus / what you do";
 
   async function saveProfile() {
     if (!canEdit) return;
@@ -232,7 +232,7 @@ export function SignatureProfilePage({ profile, posts }) {
                   value={draft.headline || ""}
                   onChange={(event) => updateField("headline", event.target.value)}
                   maxLength={PROFILE_HEADLINE_LIMIT}
-                  placeholder="Researching interaction, building thoughtful systems."
+                  placeholder="Role / focus / what you do"
                 />
               </label>
               <label className="signature-edit-inline">
