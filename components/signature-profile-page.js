@@ -334,7 +334,11 @@ export function SignatureProfilePage({ profile, posts }) {
               <article key={card.eyebrow} className="signature-info-card">
                 <p className="eyebrow">{card.eyebrow}</p>
                 {isEditing ? (
-                  <input value={draft[card.key] || ""} onChange={(event) => updateField(card.key, event.target.value)} />
+                  <textarea
+                    rows="2"
+                    value={draft[card.key] || ""}
+                    onChange={(event) => updateField(card.key, event.target.value)}
+                  />
                 ) : (
                   <h3>{card.title}</h3>
                 )}

@@ -212,6 +212,7 @@ textarea {
   color: var(--muted);
   font-size: 1.05rem;
   line-height: 1.8;
+  white-space: pre-wrap;
 }
 
 .eyebrow,
@@ -438,6 +439,10 @@ textarea {
 
 .profile-meta {
   margin-top: 12px;
+}
+
+.profile-meta span {
+  white-space: pre-wrap;
 }
 
 .link-list {
@@ -1315,6 +1320,7 @@ textarea {
   line-height: 1.95;
   max-width: 58ch;
   margin-bottom: 20px;
+  white-space: pre-wrap;
 }
 
 .signature-edit-inline,
@@ -1667,10 +1673,17 @@ textarea {
   margin-bottom: 10px;
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   font-size: 1.4rem;
+  white-space: pre-wrap;
 }
 
 .signature-statement-card {
   padding: 30px;
+}
+
+.signature-info-card p,
+.signature-contact-card p,
+.signature-panel dd {
+  white-space: pre-wrap;
 }
 
 .signature-current-grid {
