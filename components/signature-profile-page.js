@@ -364,7 +364,7 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-works">
         <div className="signature-section-head">
           <p className="eyebrow">Works</p>
-          <h2>Works shaped by questions</h2>
+          <h2>記事</h2>
         </div>
         {featuredPosts.length ? (
           <SignaturePostShelf username={draft.username} posts={featuredPosts} />
@@ -442,7 +442,7 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-contact">
         <div className="signature-section-head">
           <p className="eyebrow">Collaboration</p>
-          <h2>静かに対話へ開く</h2>
+          <h2>チャット・トーク</h2>
         </div>
         <div className="signature-contact-card">
           {isEditing ? (
