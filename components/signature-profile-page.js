@@ -93,6 +93,7 @@ export function SignatureProfilePage({ profile, posts }) {
     }
   ];
   const currentSignals = buildCurrentSignals(draft, recentPosts);
+  const defaultLeadCopy = "Researching interaction, building thoughtful systems.";
 
   async function saveProfile() {
     if (!canEdit) return;
@@ -144,6 +145,14 @@ export function SignatureProfilePage({ profile, posts }) {
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
+  function startEditing() {
+    setDraft((current) => ({
+      ...current,
+      headline: current.headline || defaultLeadCopy
+    }));
+    setIsEditing(true);
+  }
+
   return (
     <SignaturePageShell>
       <div className="signature-noise" aria-hidden="true" />
@@ -173,7 +182,7 @@ export function SignatureProfilePage({ profile, posts }) {
                 </button>
               </>
             ) : (
-              <button type="button" className="button button-primary" onClick={() => setIsEditing(true)}>
+              <button type="button" className="button button-primary" onClick={startEditing}>
                 このページを編集
               </button>
             )}
