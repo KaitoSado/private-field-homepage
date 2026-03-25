@@ -15,10 +15,13 @@ import { PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROF
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 
+const DEFAULT_IDENTITY_HEADING = "研究し、つくり、観察し続ける。";
+const IDENTITY_MARKER = "[[identity-heading::";
+
 export function SignatureProfilePage({ profile, posts }) {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
-  const [draft, setDraft] = useState(profile);
+  const [draft, setDraft] = useState(() => inflateSignatureProfile(profile));
   const [session, setSession] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState("");
@@ -26,7 +29,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const canEdit = session?.user?.id === profile.id;
 
   useEffect(() => {
-    setDraft(profile);
+    setDraft(inflateSignatureProfile(profile));
   }, [profile]);
 
   useEffect(() => {
@@ -108,7 +111,7 @@ export function SignatureProfilePage({ profile, posts }) {
       page_theme: draft.page_theme || "signature",
       display_name: `${draft.display_name || ""}`.trim(),
       headline: `${draft.headline || ""}`.trim(),
-      affiliation: `${draft.affiliation || ""}`.trim(),
+      affiliation: packSignatureAffiliation(draft.affiliation, draft.identity_heading),
       focus_area: `${draft.focus_area || ""}`.trim(),
       open_to: `${draft.open_to || ""}`.trim(),
       bio: `${draft.bio || ""}`.trim(),
@@ -148,7 +151,8 @@ export function SignatureProfilePage({ profile, posts }) {
   function startEditing() {
     setDraft((current) => ({
       ...current,
-      headline: current.headline || defaultLeadCopy
+      headline: current.headline || defaultLeadCopy,
+      identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING
     }));
     setIsEditing(true);
   }
@@ -322,7 +326,16 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-identity">
         <div className="signature-section-head">
           <p className="eyebrow">Identity</p>
-          <h2>研究し、つくり、観察し続ける。</h2>
+          {isEditing ? (
+            <textarea
+              className="signature-edit-title-block"
+              rows="2"
+              value={draft.identity_heading || ""}
+              onChange={(event) => updateField("identity_heading", event.target.value)}
+            />
+          ) : (
+            <h2>{draft.identity_heading || DEFAULT_IDENTITY_HEADING}</h2>
+          )}
         </div>
         <div className="signature-identity-grid">
           <article className="signature-statement-card">
@@ -532,4 +545,47 @@ function normalizeUsername(value) {
     .replace(/-{2,}/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 32);
+}
+
+function inflateSignatureProfile(profile) {
+  const { heading, affiliation } = unpackSignatureAffiliation(profile.affiliation);
+
+  return {
+    ...profile,
+    affiliation,
+    identity_heading: heading || DEFAULT_IDENTITY_HEADING
+  };
+}
+
+function unpackSignatureAffiliation(value) {
+  const raw = `${value || ""}`;
+  if (!raw.startsWith(IDENTITY_MARKER)) {
+    return {
+      heading: "",
+      affiliation: raw
+    };
+  }
+
+  const markerEnd = raw.indexOf("]]");
+  if (markerEnd === -1) {
+    return {
+      heading: "",
+      affiliation: raw
+    };
+  }
+
+  const heading = raw.slice(IDENTITY_MARKER.length, markerEnd);
+  const affiliation = raw.slice(markerEnd + 2).replace(/^\s+/, "");
+
+  return {
+    heading,
+    affiliation
+  };
+}
+
+function packSignatureAffiliation(affiliation, heading) {
+  const trimmedAffiliation = `${affiliation || ""}`.trim();
+  const trimmedHeading = `${heading || ""}`.trim() || DEFAULT_IDENTITY_HEADING;
+
+  return `${IDENTITY_MARKER}${trimmedHeading}]]${trimmedAffiliation ? `\n${trimmedAffiliation}` : ""}`;
 }
