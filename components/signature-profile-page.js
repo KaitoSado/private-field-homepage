@@ -77,19 +77,19 @@ export function SignatureProfilePage({ profile, posts }) {
       eyebrow: "Affiliation",
       key: "affiliation",
       title: draft.affiliation || "Independent / research-linked",
-      body: "所属やいま身を置いている場の輪郭をここに置きます。"
+      body: ""
     },
     {
       eyebrow: "Focus",
       key: "focus_area",
       title: draft.focus_area || "HCI / Prototyping / Experimental Web",
-      body: "問いを立てながら試作し、観察しながら構造へ戻す。その中心にある関心です。"
+      body: ""
     },
     {
       eyebrow: "Base",
       key: "location",
       title: draft.location || "Tokyo / Remote",
-      body: "いま日々の制作や研究が立ち上がっている場所です。"
+      body: ""
     }
   ];
   const currentSignals = buildCurrentSignals(draft, recentPosts);
@@ -300,9 +300,6 @@ export function SignatureProfilePage({ profile, posts }) {
               <dd>{links.length ? `${links.length} destinations` : "No external links yet"}</dd>
             </div>
           </dl>
-          <div className="signature-panel-note">
-            <p>観察し、試作し、言葉に戻す。その往復のログとしてこのページを置いています。</p>
-          </div>
         </aside>
       </SignatureHeroStage>
 
@@ -321,30 +318,15 @@ export function SignatureProfilePage({ profile, posts }) {
         <div className="signature-identity-grid">
           <article className="signature-statement-card">
             {isEditing ? (
-              <>
-                <textarea
-                  className="signature-edit-block"
-                  rows="5"
-                  value={draft.bio || ""}
-                  onChange={(event) => updateField("bio", event.target.value)}
-                  maxLength={PROFILE_BIO_LIMIT}
-                />
-                <textarea
-                  className="signature-edit-block"
-                  rows="3"
-                  value={draft.focus_area || ""}
-                  onChange={(event) => updateField("focus_area", event.target.value)}
-                />
-              </>
+              <textarea
+                className="signature-edit-block"
+                rows="5"
+                value={draft.bio || ""}
+                onChange={(event) => updateField("bio", event.target.value)}
+                maxLength={PROFILE_BIO_LIMIT}
+              />
             ) : (
-              <>
-                <p className="signature-body">{identityBody}</p>
-                <p className="signature-body">
-                  {latestPost
-                    ? `最近は「${latestPost.title}」を足場に、観察と試作の往復をもう一段深くしています。`
-                    : "曖昧な感覚をどう観測し、どう設計へ変換するか。そのあいだにある実践を大切にしています。"}
-                </p>
-              </>
+              <p className="signature-body">{identityBody}</p>
             )}
           </article>
           <div className="signature-about-grid">
@@ -356,7 +338,7 @@ export function SignatureProfilePage({ profile, posts }) {
                 ) : (
                   <h3>{card.title}</h3>
                 )}
-                <p>{card.body}</p>
+                {card.body ? <p>{card.body}</p> : null}
               </article>
             ))}
           </div>
@@ -383,7 +365,6 @@ export function SignatureProfilePage({ profile, posts }) {
         <div className="signature-section-head">
           <p className="eyebrow">Works</p>
           <h2>Works shaped by questions</h2>
-          <p>完成品ではなく、どんな問いを持って作ったかが見えるように並べています。</p>
         </div>
         {featuredPosts.length ? (
           <SignaturePostShelf username={draft.username} posts={featuredPosts} />
