@@ -91,11 +91,6 @@ export function SignatureHeroShader() {
   return (
     <div className="signature-shader-shell" aria-hidden="true">
       <canvas ref={canvasRef} className="signature-shader-canvas" />
-      <div className="signature-shader-meta">
-        <span>Reactive ripples</span>
-        <span>Particle storm</span>
-        <span>Field lines</span>
-      </div>
     </div>
   );
 }

@@ -83,7 +83,6 @@ export function SignatureProfilePage({ profile, posts }) {
   const identityBody =
     draft.bio ||
     "知覚、身体、記録、インターフェース。そのあいだを研究と実装の両方から往復しながら、触れる思考と残る体験をつくっています。";
-  const collaborationLabel = draft.open_to ? "Open to collaboration" : "Quietly building";
   const links = [
     { label: "Website", href: sanitizeExternalUrl(draft.website_url), key: "website_url" },
     { label: "X", href: sanitizeExternalUrl(draft.x_url), key: "x_url" },
@@ -249,10 +248,6 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureHeroStage>
         <SignatureHeroShader />
         <div className="signature-hero-copy">
-          <div className="signature-topline">
-            <p className="signature-kicker">A Quiet Field Between Research and Making</p>
-            <span className="signature-status-pill">{collaborationLabel}</span>
-          </div>
           <AvatarMark profile={draft} size="lg" />
           {isEditing ? (
             <>
@@ -465,7 +460,6 @@ export function SignatureProfilePage({ profile, posts }) {
             <div className="signature-schedule-head">
               <p className="eyebrow">Week</p>
               <h3>今週の予定</h3>
-              <p>大学の時間割みたいに、一週間の流れをざっくり置いておけます。</p>
             </div>
             <div className="signature-schedule-wrap">
               <table className="signature-schedule-table">
@@ -557,7 +551,6 @@ export function SignatureProfilePage({ profile, posts }) {
         <div className="signature-section-head">
           <p className="eyebrow">Thinking</p>
           <h2>Current signals</h2>
-          <p>最近の記録や途中経過を、ログの断片のように並べています。</p>
         </div>
 
         <div className="signature-signals">
