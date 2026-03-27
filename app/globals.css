@@ -103,6 +103,65 @@ body {
   color: var(--muted);
 }
 
+.mobile-nav {
+  display: none;
+}
+
+.mobile-nav summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.mobile-nav summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-nav summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mobile-nav[open] summary {
+  background: rgba(34, 49, 58, 0.92);
+  color: #f8f5ee;
+  border-color: rgba(34, 49, 58, 0.92);
+}
+
+.mobile-nav-panel {
+  margin-top: 10px;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  min-width: min(76vw, 280px);
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(250, 247, 242, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.mobile-nav-panel a {
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.mobile-nav-panel a:hover {
+  background: rgba(31, 111, 120, 0.1);
+  color: var(--ink);
+}
+
 .footer-copy {
   color: var(--muted);
   max-width: 42ch;
@@ -2183,8 +2242,6 @@ textarea {
   .site-header-inner,
   .site-footer-inner {
     width: min(100vw - 20px, 100%);
-    flex-direction: column;
-    align-items: flex-start;
     padding: 16px 0;
   }
 
@@ -2194,6 +2251,41 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  .site-header {
+    position: static;
+    backdrop-filter: blur(10px);
+  }
+
+  .site-header-inner {
+    min-height: auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .site-nav-desktop {
+    display: none;
+  }
+
+  .mobile-nav {
+    display: block;
+  }
+
+  .brand-lockup {
+    gap: 10px;
+    font-size: 0.84rem;
+  }
+
+  .brand-lockup small {
+    display: none;
+  }
+
+  .brand-cube {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+  }
+
   .shell {
     width: min(100vw - 20px, 100%);
     padding-top: 18px;

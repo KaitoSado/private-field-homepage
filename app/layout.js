@@ -57,7 +57,7 @@ export default function RootLayout({ children }) {
               </span>
             </Link>
 
-            <nav className="site-nav">
+            <nav className="site-nav site-nav-desktop">
               <Link href="/">Home</Link>
               <Link href="/explore">Explore</Link>
               <Link href="/notifications">Notifications</Link>
@@ -67,6 +67,20 @@ export default function RootLayout({ children }) {
               <Link href="/admin">Admin</Link>
               <Link href="/ops">Ops</Link>
             </nav>
+
+            <details className="mobile-nav">
+              <summary>Menu</summary>
+              <nav className="mobile-nav-panel">
+                <Link href="/">Home</Link>
+                <Link href="/explore">Explore</Link>
+                <Link href="/notifications">Notifications</Link>
+                <Link href="/auth">Auth</Link>
+                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/settings">Settings</Link>
+                <Link href="/admin">Admin</Link>
+                <Link href="/ops">Ops</Link>
+              </nav>
+            </details>
           </div>
         </header>
 
