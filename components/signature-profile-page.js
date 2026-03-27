@@ -16,6 +16,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 
 const DEFAULT_IDENTITY_HEADING = "なんか書ける";
+const SIGNATURE_META_MARKER = "[[signature-meta::";
 const IDENTITY_MARKER = "[[identity-heading::";
 
 export function SignatureProfilePage({ profile, posts }) {
@@ -95,7 +96,7 @@ export function SignatureProfilePage({ profile, posts }) {
       body: ""
     }
   ];
-  const currentSignals = buildCurrentSignals(draft, recentPosts);
+  const currentEntries = mergeCurrentEntries(draft.current_entries, buildDefaultCurrentEntries(draft, recentPosts));
   const defaultLeadCopy = "なんか書ける";
 
   async function saveProfile() {
@@ -111,7 +112,7 @@ export function SignatureProfilePage({ profile, posts }) {
       page_theme: draft.page_theme || "signature",
       display_name: `${draft.display_name || ""}`.trim(),
       headline: `${draft.headline || ""}`.trim(),
-      affiliation: packSignatureAffiliation(draft.affiliation, draft.identity_heading),
+      affiliation: packSignatureAffiliation(draft.affiliation, draft.identity_heading, currentEntries),
       focus_area: `${draft.focus_area || ""}`.trim(),
       open_to: `${draft.open_to || ""}`.trim(),
       bio: `${draft.bio || ""}`.trim(),
@@ -148,11 +149,22 @@ export function SignatureProfilePage({ profile, posts }) {
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
+  function updateCurrentEntry(index, key, value) {
+    setDraft((current) => {
+      const nextEntries = mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries(current, recentPosts)).map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, [key]: value } : entry
+      );
+
+      return { ...current, current_entries: nextEntries };
+    });
+  }
+
   function startEditing() {
     setDraft((current) => ({
       ...current,
       headline: current.headline || defaultLeadCopy,
-      identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING
+      identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING,
+      current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries(current, recentPosts))
     }));
     setIsEditing(true);
   }
@@ -177,7 +189,7 @@ export function SignatureProfilePage({ profile, posts }) {
                   type="button"
                   className="button button-ghost"
                   onClick={() => {
-                    setDraft(profile);
+                    setDraft(inflateSignatureProfile(profile));
                     setIsEditing(false);
                     setStatus("");
                   }}
@@ -374,14 +386,35 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-current">
         <div className="signature-section-head">
           <p className="eyebrow">Current</p>
-          <h2>This week, in motion</h2>
+          <h2>何してる？</h2>
         </div>
         <div className="signature-current-grid">
-          {currentSignals.map((signal) => (
-            <article key={signal.label} className="signature-current-card">
-              <p className="eyebrow">{signal.label}</p>
-              <h3>{signal.title}</h3>
-              <p>{signal.body}</p>
+          {currentEntries.map((entry, index) => (
+            <article key={entry.label} className="signature-current-card">
+              <p className="eyebrow">{entry.label}</p>
+              {isEditing ? (
+                <>
+                  <textarea
+                    rows="2"
+                    value={entry.title || ""}
+                    onChange={(event) => updateCurrentEntry(index, "title", event.target.value)}
+                    maxLength={PROFILE_HEADLINE_LIMIT}
+                    placeholder="ひとこと見出し"
+                  />
+                  <textarea
+                    rows="4"
+                    value={entry.body || ""}
+                    onChange={(event) => updateCurrentEntry(index, "body", event.target.value)}
+                    maxLength={PROFILE_BIO_LIMIT}
+                    placeholder="最近やっていることやメモ"
+                  />
+                </>
+              ) : (
+                <>
+                  <h3>{entry.title}</h3>
+                  <p>{entry.body}</p>
+                </>
+              )}
             </article>
           ))}
         </div>
@@ -504,27 +537,38 @@ export function SignatureProfilePage({ profile, posts }) {
   );
 }
 
-function buildCurrentSignals(profile, recentPosts) {
+function buildDefaultCurrentEntries(profile, recentPosts) {
   const latestPost = recentPosts[0] || null;
   const latestTag = latestPost?.tags?.[0] || null;
 
   return [
     {
-      label: "Latest note",
-      title: latestPost?.title || "新しい公開ノートを準備中",
-      body: latestPost ? "直近で更新した記録。ここからいまの関心が見えます。" : "次の公開記事がここに出ます。"
+      label: "いま",
+      title: latestPost?.title || "今日やっていること",
+      body: latestPost ? "直近の記事や制作の延長にある動き。" : "いま進めていることを短く書けます。"
     },
     {
-      label: "Signal",
-      title: latestTag ? `#${latestTag}` : profile.focus_area || "Perception / Interfaces / Prototyping",
-      body: latestTag ? "いま繰り返し現れているキーワード。" : "現在の制作や研究を貫いている軸。"
+      label: "観察",
+      title: latestTag ? `#${latestTag}` : profile.focus_area || "気になっていること",
+      body: latestTag ? "最近よく出てくるキーワードや気づき。" : "観察したことや考え中のこと。"
     },
     {
-      label: "Cadence",
-      title: latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "Updating quietly",
-      body: latestPost ? "最後にページが動いたタイミング。" : "いまは次の更新に向けて整えています。"
+      label: "次",
+      title: latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "次にやること",
+      body: latestPost ? "次の更新に向けて触っていること。" : "このあと試すことや続けること。"
     }
   ];
+}
+
+function mergeCurrentEntries(currentEntries, defaults) {
+  return defaults.map((fallback, index) => {
+    const current = currentEntries?.[index] || {};
+    return {
+      label: fallback.label,
+      title: `${current.title || ""}`.trim() || fallback.title,
+      body: `${current.body || ""}`.trim() || fallback.body
+    };
+  });
 }
 
 function formatDate(value) {
@@ -548,21 +592,43 @@ function normalizeUsername(value) {
 }
 
 function inflateSignatureProfile(profile) {
-  const { heading, affiliation } = unpackSignatureAffiliation(profile.affiliation);
+  const { heading, affiliation, currentEntries } = unpackSignatureAffiliation(profile.affiliation);
 
   return {
     ...profile,
     affiliation,
-    identity_heading: heading || DEFAULT_IDENTITY_HEADING
+    identity_heading: heading || DEFAULT_IDENTITY_HEADING,
+    current_entries: currentEntries
   };
 }
 
 function unpackSignatureAffiliation(value) {
   const raw = `${value || ""}`;
+  if (raw.startsWith(SIGNATURE_META_MARKER)) {
+    const markerEnd = raw.indexOf("]]");
+    if (markerEnd !== -1) {
+      try {
+        const meta = JSON.parse(decodeURIComponent(raw.slice(SIGNATURE_META_MARKER.length, markerEnd)));
+        return {
+          heading: meta.identity_heading || "",
+          affiliation: raw.slice(markerEnd + 2).replace(/^\s+/, ""),
+          currentEntries: Array.isArray(meta.current_entries) ? meta.current_entries : []
+        };
+      } catch {
+        return {
+          heading: "",
+          affiliation: raw,
+          currentEntries: []
+        };
+      }
+    }
+  }
+
   if (!raw.startsWith(IDENTITY_MARKER)) {
     return {
       heading: "",
-      affiliation: raw
+      affiliation: raw,
+      currentEntries: []
     };
   }
 
@@ -570,7 +636,8 @@ function unpackSignatureAffiliation(value) {
   if (markerEnd === -1) {
     return {
       heading: "",
-      affiliation: raw
+      affiliation: raw,
+      currentEntries: []
     };
   }
 
@@ -579,13 +646,23 @@ function unpackSignatureAffiliation(value) {
 
   return {
     heading,
-    affiliation
+    affiliation,
+    currentEntries: []
   };
 }
 
-function packSignatureAffiliation(affiliation, heading) {
+function packSignatureAffiliation(affiliation, heading, currentEntries) {
   const trimmedAffiliation = `${affiliation || ""}`.trim();
   const trimmedHeading = `${heading || ""}`.trim() || DEFAULT_IDENTITY_HEADING;
+  const meta = encodeURIComponent(
+    JSON.stringify({
+      identity_heading: trimmedHeading,
+      current_entries: mergeCurrentEntries(currentEntries, buildDefaultCurrentEntries({}, [])).map((entry) => ({
+        title: `${entry.title || ""}`.trim(),
+        body: `${entry.body || ""}`.trim()
+      }))
+    })
+  );
 
-  return `${IDENTITY_MARKER}${trimmedHeading}]]${trimmedAffiliation ? `\n${trimmedAffiliation}` : ""}`;
+  return `${SIGNATURE_META_MARKER}${meta}]]${trimmedAffiliation ? `\n${trimmedAffiliation}` : ""}`;
 }
