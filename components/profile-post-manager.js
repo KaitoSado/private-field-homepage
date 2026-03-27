@@ -31,7 +31,16 @@ const emptyPost = {
   cover_image_url: ""
 };
 
-export function ProfilePostManager({ supabase, session, username, posts, onPostsChange, title = "記事を管理" }) {
+export function ProfilePostManager({
+  supabase,
+  session,
+  username,
+  posts,
+  onPostsChange,
+  title = "記事を管理",
+  hideToolbar = false,
+  createSignal = 0
+}) {
   const [editor, setEditor] = useState(emptyPost);
   const [status, setStatus] = useState("");
   const [savingPost, setSavingPost] = useState(false);
@@ -48,6 +57,11 @@ export function ProfilePostManager({ supabase, session, username, posts, onPosts
       setComposerOpen(false);
     }
   }, [posts, editor.id]);
+
+  useEffect(() => {
+    if (!createSignal) return;
+    openNewComposer();
+  }, [createSignal]);
 
   async function reloadPosts() {
     if (!supabase || !session) return;
@@ -220,30 +234,32 @@ export function ProfilePostManager({ supabase, session, username, posts, onPosts
 
   return (
     <div className="post-manager-embedded">
-      <div className="post-manager-toolbar">
-        <div className="post-manager-copy">
-          <strong>{title}</strong>
-          <span>{status || "このページの編集モード内で記事を管理できます。"}</span>
-        </div>
+      {hideToolbar ? (status ? <div className="post-manager-inline-status">{status}</div> : null) : (
+        <div className="post-manager-toolbar">
+          <div className="post-manager-copy">
+            <strong>{title}</strong>
+            <span>{status || "このページの編集モード内で記事を管理できます。"}</span>
+          </div>
 
-        <div className="hero-actions">
-          <button type="button" className="button button-primary" onClick={openNewComposer}>
-            新規記事
-          </button>
-          {composerOpen ? (
-            <button
-              type="button"
-              className="button button-ghost"
-              onClick={() => {
-                setComposerOpen(false);
-                setEditor(emptyPost);
-              }}
-            >
-              閉じる
+          <div className="hero-actions">
+            <button type="button" className="button button-primary" onClick={openNewComposer}>
+              新規記事
             </button>
-          ) : null}
+            {composerOpen ? (
+              <button
+                type="button"
+                className="button button-ghost"
+                onClick={() => {
+                  setComposerOpen(false);
+                  setEditor(emptyPost);
+                }}
+              >
+                閉じる
+              </button>
+            ) : null}
+          </div>
         </div>
-      </div>
+      )}
 
       {composerOpen ? (
         <form className="surface form-stack post-manager-composer" onSubmit={savePost}>

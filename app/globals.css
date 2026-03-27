@@ -1660,8 +1660,15 @@ textarea {
 
 .signature-section-head {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
   gap: 8px;
   margin-bottom: 18px;
+}
+
+.signature-section-head > div {
+  display: grid;
+  gap: 8px;
 }
 
 .signature-section-head h2 {
@@ -1674,6 +1681,13 @@ textarea {
 .signature-section-head p:last-child {
   color: #657075;
   max-width: 58ch;
+}
+
+.button-small {
+  min-height: auto;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.78rem;
 }
 
 .signature-interactive-section .signature-section-head,
@@ -2098,6 +2112,12 @@ textarea {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #6b7276;
+}
+
+.post-manager-inline-status {
+  margin-bottom: 14px;
+  color: #657075;
+  font-size: 0.94rem;
 }
 
 .signature-signal-date {

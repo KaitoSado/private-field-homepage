@@ -48,6 +48,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const [saving, setSaving] = useState(false);
   const [expandedCurrentEntries, setExpandedCurrentEntries] = useState({});
   const [expandedRecordItems, setExpandedRecordItems] = useState({});
+  const [postCreateSignal, setPostCreateSignal] = useState(0);
   const canEdit = session?.user?.id === profile.id;
 
   useEffect(() => {
@@ -219,6 +220,13 @@ export function SignatureProfilePage({ profile, posts }) {
 
       return { ...current, record_items: nextRecords };
     });
+  }
+
+  function addRecordItem() {
+    setDraft((current) => ({
+      ...current,
+      record_items: [...mergeRecordItems(current.record_items, buildDefaultRecordItems()), { title: "", body: "" }]
+    }));
   }
 
   function startEditing() {
@@ -555,8 +563,15 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <SignatureInteractiveSection id="signature-works">
         <div className="signature-section-head">
-          <p className="eyebrow">Works</p>
-          <h2>記事</h2>
+          <div>
+            <p className="eyebrow">Works</p>
+            <h2>記事</h2>
+          </div>
+          {isEditing ? (
+            <button type="button" className="button button-secondary button-small" onClick={() => setPostCreateSignal((current) => current + 1)}>
+              新規記事
+            </button>
+          ) : null}
         </div>
         {isEditing ? (
           <ProfilePostManager
@@ -566,6 +581,8 @@ export function SignatureProfilePage({ profile, posts }) {
             posts={postItems}
             onPostsChange={setPostItems}
             title="記事を管理"
+            hideToolbar
+            createSignal={postCreateSignal}
           />
         ) : postItems.length ? (
           <SignaturePostShelf username={draft.username} posts={postItems} />
@@ -606,19 +623,26 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <SignatureInteractiveSection id="signature-thinking">
         <div className="signature-section-head">
-          <p className="eyebrow">Records</p>
+          <div>
+            <p className="eyebrow">Records</p>
+            {isEditing ? (
+              <textarea
+                className="signature-edit-section-title"
+                rows="1"
+                value={draft.record_heading || ""}
+                onChange={(event) => updateField("record_heading", event.target.value)}
+                maxLength={PROFILE_HEADLINE_LIMIT}
+                placeholder={DEFAULT_RECORD_HEADING}
+              />
+            ) : (
+              <h2>{draft.record_heading || DEFAULT_RECORD_HEADING}</h2>
+            )}
+          </div>
           {isEditing ? (
-            <textarea
-              className="signature-edit-section-title"
-              rows="1"
-              value={draft.record_heading || ""}
-              onChange={(event) => updateField("record_heading", event.target.value)}
-              maxLength={PROFILE_HEADLINE_LIMIT}
-              placeholder={DEFAULT_RECORD_HEADING}
-            />
-          ) : (
-            <h2>{draft.record_heading || DEFAULT_RECORD_HEADING}</h2>
-          )}
+            <button type="button" className="button button-secondary button-small" onClick={addRecordItem}>
+              追加
+            </button>
+          ) : null}
         </div>
 
         <div className="signature-record-grid">
@@ -774,7 +798,7 @@ function mergeWeeklySchedule(weeklySchedule) {
 }
 
 function mergeRecordItems(recordItems, defaults) {
-  return defaults.map((fallback, index) => {
+  const mergedDefaults = defaults.map((fallback, index) => {
     const current = recordItems?.[index] || {};
     const hasTitle = Object.prototype.hasOwnProperty.call(current, "title");
     const hasBody = Object.prototype.hasOwnProperty.call(current, "body");
@@ -783,6 +807,15 @@ function mergeRecordItems(recordItems, defaults) {
       body: hasBody ? `${current.body ?? ""}` : fallback.body
     };
   });
+
+  const extraItems = Array.isArray(recordItems)
+    ? recordItems.slice(defaults.length).map((item) => ({
+        title: `${item?.title ?? ""}`,
+        body: `${item?.body ?? ""}`
+      }))
+    : [];
+
+  return [...mergedDefaults, ...extraItems];
 }
 
 function formatDate(value) {
