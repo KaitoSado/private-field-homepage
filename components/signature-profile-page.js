@@ -626,19 +626,19 @@ export function SignatureProfilePage({ profile, posts }) {
 function buildDefaultCurrentEntries() {
   return [
     {
-      label: "日付",
-      title: "見出し",
-      body: "内容"
+      label: "",
+      title: "",
+      body: ""
     },
     {
-      label: "日付",
-      title: "見出し",
-      body: "内容"
+      label: "",
+      title: "",
+      body: ""
     },
     {
-      label: "日付",
-      title: "見出し",
-      body: "内容"
+      label: "",
+      title: "",
+      body: ""
     }
   ];
 }
