@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostEngagementPanel } from "@/components/post-engagement-panel";
@@ -96,7 +97,16 @@ function renderParagraphs(body) {
     return <p>本文はまだありません。</p>;
   }
 
-  return body.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>);
+  return body.split(/\n{2,}/).map((paragraph, index) => (
+    <p key={index}>
+      {paragraph.split("\n").map((line, lineIndex) => (
+        <Fragment key={`${index}-${lineIndex}`}>
+          {lineIndex ? <br /> : null}
+          {line}
+        </Fragment>
+      ))}
+    </p>
+  ));
 }
 
 function formatDate(value) {

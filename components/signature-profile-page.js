@@ -17,6 +17,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 
 const DEFAULT_IDENTITY_HEADING = "なんか書ける";
+const DEFAULT_RECORD_HEADING = "記録したいこと";
 const SIGNATURE_META_MARKER = "[[signature-meta::";
 const IDENTITY_MARKER = "[[identity-heading::";
 const SCHEDULE_DAYS = [
@@ -135,7 +136,14 @@ export function SignatureProfilePage({ profile, posts }) {
       page_theme: draft.page_theme || "signature",
       display_name: `${draft.display_name || ""}`.trim(),
       headline: `${draft.headline || ""}`.trim(),
-      affiliation: packSignatureAffiliation(draft.affiliation, draft.identity_heading, currentEntries, weeklySchedule, recordItems),
+      affiliation: packSignatureAffiliation(
+        draft.affiliation,
+        draft.identity_heading,
+        currentEntries,
+        weeklySchedule,
+        recordItems,
+        draft.record_heading
+      ),
       focus_area: `${draft.focus_area || ""}`.trim(),
       open_to: `${draft.open_to || ""}`.trim(),
       bio: `${draft.bio || ""}`.trim(),
@@ -213,6 +221,7 @@ export function SignatureProfilePage({ profile, posts }) {
       ...current,
       headline: current.headline || defaultLeadCopy,
       identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING,
+      record_heading: current.record_heading || DEFAULT_RECORD_HEADING,
       current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()),
       weekly_schedule: mergeWeeklySchedule(current.weekly_schedule),
       record_items: mergeRecordItems(current.record_items, buildDefaultRecordItems())
@@ -579,7 +588,18 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-thinking">
         <div className="signature-section-head">
           <p className="eyebrow">Records</p>
-          <h2>記録したいこと</h2>
+          {isEditing ? (
+            <textarea
+              className="signature-edit-section-title"
+              rows="1"
+              value={draft.record_heading || ""}
+              onChange={(event) => updateField("record_heading", event.target.value)}
+              maxLength={PROFILE_HEADLINE_LIMIT}
+              placeholder={DEFAULT_RECORD_HEADING}
+            />
+          ) : (
+            <h2>{draft.record_heading || DEFAULT_RECORD_HEADING}</h2>
+          )}
         </div>
 
         <div className="signature-record-grid">
@@ -751,12 +771,15 @@ function normalizeUsername(value) {
 }
 
 function inflateSignatureProfile(profile) {
-  const { heading, affiliation, currentEntries, weeklySchedule, recordItems } = unpackSignatureAffiliation(profile.affiliation);
+  const { heading, recordHeading, affiliation, currentEntries, weeklySchedule, recordItems } = unpackSignatureAffiliation(
+    profile.affiliation
+  );
 
   return {
     ...profile,
     affiliation,
     identity_heading: heading || DEFAULT_IDENTITY_HEADING,
+    record_heading: recordHeading || DEFAULT_RECORD_HEADING,
     current_entries: currentEntries,
     weekly_schedule: weeklySchedule,
     record_items: recordItems
@@ -772,6 +795,7 @@ function unpackSignatureAffiliation(value) {
         const meta = JSON.parse(decodeURIComponent(raw.slice(SIGNATURE_META_MARKER.length, markerEnd)));
         return {
           heading: meta.identity_heading || "",
+          recordHeading: meta.record_heading || "",
           affiliation: raw.slice(markerEnd + 2).replace(/^\s+/, ""),
           currentEntries: Array.isArray(meta.current_entries) ? meta.current_entries : [],
           weeklySchedule: meta.weekly_schedule && typeof meta.weekly_schedule === "object" ? meta.weekly_schedule : {},
@@ -780,6 +804,7 @@ function unpackSignatureAffiliation(value) {
       } catch {
         return {
           heading: "",
+          recordHeading: "",
           affiliation: raw,
           currentEntries: [],
           weeklySchedule: {},
@@ -792,6 +817,7 @@ function unpackSignatureAffiliation(value) {
   if (!raw.startsWith(IDENTITY_MARKER)) {
     return {
       heading: "",
+      recordHeading: "",
       affiliation: raw,
       currentEntries: [],
       weeklySchedule: {},
@@ -803,6 +829,7 @@ function unpackSignatureAffiliation(value) {
   if (markerEnd === -1) {
     return {
       heading: "",
+      recordHeading: "",
       affiliation: raw,
       currentEntries: [],
       weeklySchedule: {},
@@ -815,6 +842,7 @@ function unpackSignatureAffiliation(value) {
 
   return {
     heading,
+    recordHeading: "",
     affiliation,
     currentEntries: [],
     weeklySchedule: {},
@@ -822,12 +850,14 @@ function unpackSignatureAffiliation(value) {
   };
 }
 
-function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule, recordItems) {
+function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule, recordItems, recordHeading) {
   const trimmedAffiliation = `${affiliation || ""}`.trim();
   const trimmedHeading = `${heading || ""}`.trim() || DEFAULT_IDENTITY_HEADING;
+  const trimmedRecordHeading = `${recordHeading || ""}`.trim() || DEFAULT_RECORD_HEADING;
   const meta = encodeURIComponent(
     JSON.stringify({
       identity_heading: trimmedHeading,
+      record_heading: trimmedRecordHeading,
       current_entries: mergeCurrentEntries(currentEntries, buildDefaultCurrentEntries()).map((entry) => ({
         label: `${entry.label || ""}`.trim(),
         title: `${entry.title || ""}`.trim(),

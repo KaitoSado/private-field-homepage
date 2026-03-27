@@ -1471,7 +1471,29 @@ textarea {
   resize: vertical;
 }
 
+.signature-edit-section-title {
+  width: 100%;
+  padding: 0 0 8px;
+  border: 0;
+  border-bottom: 1px dashed rgba(34, 49, 58, 0.18);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #1d2328;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  resize: vertical;
+}
+
 .signature-edit-title-block:focus {
+  outline: none;
+  border-bottom-color: rgba(31, 111, 120, 0.42);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.signature-edit-section-title:focus {
   outline: none;
   border-bottom-color: rgba(31, 111, 120, 0.42);
   background: rgba(255, 255, 255, 0.18);
