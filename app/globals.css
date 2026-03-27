@@ -1685,13 +1685,15 @@ textarea {
 .signature-info-card,
 .signature-contact-card,
 .signature-current-card,
-.signature-statement-card {
+.signature-statement-card,
+.signature-schedule-card {
   padding: 24px;
   background: rgba(255, 253, 248, 0.92);
 }
 
 .signature-info-card h3,
-.signature-current-card h3 {
+.signature-current-card h3,
+.signature-schedule-card h3 {
   margin-bottom: 10px;
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   font-size: 1.4rem;
@@ -1708,10 +1710,121 @@ textarea {
   white-space: pre-wrap;
 }
 
+.signature-current-layout {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(420px, 1.2fr);
+  gap: 18px;
+  align-items: start;
+}
+
 .signature-current-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
+}
+
+.signature-current-label-input {
+  margin-top: 18px;
+  margin-bottom: 10px;
+  font-family: "IBM Plex Mono", monospace;
+  color: #6b7276;
+  letter-spacing: 0.06em;
+}
+
+.signature-schedule-card {
+  display: grid;
+  gap: 18px;
+  padding: 28px;
+}
+
+.signature-schedule-head {
+  display: grid;
+  gap: 8px;
+}
+
+.signature-schedule-head p:last-child {
+  color: #657075;
+  max-width: 54ch;
+}
+
+.signature-schedule-wrap {
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.signature-schedule-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.signature-schedule-table th,
+.signature-schedule-table td {
+  border: 1px solid rgba(184, 154, 93, 0.12);
+  vertical-align: top;
+}
+
+.signature-schedule-table thead th {
+  background: rgba(244, 239, 228, 0.82);
+  padding: 14px 12px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.signature-schedule-table thead th span,
+.signature-schedule-table tbody th span {
+  display: block;
+}
+
+.signature-schedule-table thead th small,
+.signature-schedule-table tbody th small {
+  display: block;
+  margin-top: 4px;
+  color: #6b7276;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.signature-schedule-table tbody th {
+  width: 112px;
+  padding: 14px 12px;
+  background: rgba(248, 245, 238, 0.9);
+  text-align: left;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+}
+
+.signature-schedule-table td {
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.signature-schedule-table td span {
+  display: block;
+  min-height: 48px;
+  color: #22313a;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.signature-schedule-table td textarea {
+  width: 100%;
+  min-height: 62px;
+  resize: vertical;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #22313a;
+  font: inherit;
+  line-height: 1.55;
+  padding: 0;
+}
+
+.signature-schedule-table td textarea:focus {
+  outline: none;
 }
 
 .signature-post-card {
@@ -1750,6 +1863,7 @@ textarea {
 .signature-contact-card:hover,
 .signature-current-card:hover,
 .signature-statement-card:hover,
+.signature-schedule-card:hover,
 .signature-signal-line:hover {
   transform: translateY(-6px) scale(1.01);
   border-color: rgba(168, 215, 218, 0.32);
@@ -1823,7 +1937,7 @@ textarea {
   .signature-hero,
   .signature-identity-grid,
   .signature-about-grid,
-  .signature-current-grid,
+  .signature-current-layout,
   .profile-canvas-grid,
   .media-gallery.has-grid,
   .social-stats,

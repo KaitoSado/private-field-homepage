@@ -18,6 +18,20 @@ import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 const DEFAULT_IDENTITY_HEADING = "なんか書ける";
 const SIGNATURE_META_MARKER = "[[signature-meta::";
 const IDENTITY_MARKER = "[[identity-heading::";
+const SCHEDULE_DAYS = [
+  { key: "mon", label: "Mon", short: "月" },
+  { key: "tue", label: "Tue", short: "火" },
+  { key: "wed", label: "Wed", short: "水" },
+  { key: "thu", label: "Thu", short: "木" },
+  { key: "fri", label: "Fri", short: "金" }
+];
+const SCHEDULE_PERIODS = [
+  { key: "period1", label: "1限", time: "09:00 - 10:30" },
+  { key: "period2", label: "2限", time: "10:40 - 12:10" },
+  { key: "period3", label: "3限", time: "13:00 - 14:30" },
+  { key: "period4", label: "4限", time: "14:45 - 16:15" },
+  { key: "period5", label: "5限", time: "16:30 - 18:00" }
+];
 
 export function SignatureProfilePage({ profile, posts }) {
   const router = useRouter();
@@ -97,6 +111,7 @@ export function SignatureProfilePage({ profile, posts }) {
     }
   ];
   const currentEntries = mergeCurrentEntries(draft.current_entries, buildDefaultCurrentEntries());
+  const weeklySchedule = mergeWeeklySchedule(draft.weekly_schedule);
   const defaultLeadCopy = "なんか書ける";
 
   async function saveProfile() {
@@ -112,7 +127,7 @@ export function SignatureProfilePage({ profile, posts }) {
       page_theme: draft.page_theme || "signature",
       display_name: `${draft.display_name || ""}`.trim(),
       headline: `${draft.headline || ""}`.trim(),
-      affiliation: packSignatureAffiliation(draft.affiliation, draft.identity_heading, currentEntries),
+      affiliation: packSignatureAffiliation(draft.affiliation, draft.identity_heading, currentEntries, weeklySchedule),
       focus_area: `${draft.focus_area || ""}`.trim(),
       open_to: `${draft.open_to || ""}`.trim(),
       bio: `${draft.bio || ""}`.trim(),
@@ -159,12 +174,29 @@ export function SignatureProfilePage({ profile, posts }) {
     });
   }
 
+  function updateScheduleCell(dayKey, periodKey, value) {
+    setDraft((current) => {
+      const nextSchedule = mergeWeeklySchedule(current.weekly_schedule);
+      return {
+        ...current,
+        weekly_schedule: {
+          ...nextSchedule,
+          [dayKey]: {
+            ...nextSchedule[dayKey],
+            [periodKey]: value
+          }
+        }
+      };
+    });
+  }
+
   function startEditing() {
     setDraft((current) => ({
       ...current,
       headline: current.headline || defaultLeadCopy,
       identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING,
-      current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries())
+      current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()),
+      weekly_schedule: mergeWeeklySchedule(current.weekly_schedule)
     }));
     setIsEditing(true);
   }
@@ -388,44 +420,94 @@ export function SignatureProfilePage({ profile, posts }) {
           <p className="eyebrow">Current</p>
           <h2>何してる？</h2>
         </div>
-        <div className="signature-current-grid">
-          {currentEntries.map((entry, index) => (
-            <article key={`current-entry-${index}`} className="signature-current-card">
-              {isEditing ? (
-                <input
-                  className="signature-current-label-input eyebrow"
-                  value={entry.label || ""}
-                  onChange={(event) => updateCurrentEntry(index, "label", event.target.value)}
-                  maxLength={PROFILE_LOCATION_LIMIT}
-                  placeholder="日付"
-                />
-              ) : (
-                <p className="eyebrow">{entry.label}</p>
-              )}
-              {isEditing ? (
-                <>
+        <div className="signature-current-layout">
+          <div className="signature-current-grid">
+            {currentEntries.map((entry, index) => (
+              <article key={`current-entry-${index}`} className="signature-current-card">
+                {isEditing ? (
                   <input
-                    value={entry.title || ""}
-                    onChange={(event) => updateCurrentEntry(index, "title", event.target.value)}
-                    maxLength={PROFILE_HEADLINE_LIMIT}
-                    placeholder="見出し"
+                    className="signature-current-label-input eyebrow"
+                    value={entry.label || ""}
+                    onChange={(event) => updateCurrentEntry(index, "label", event.target.value)}
+                    maxLength={PROFILE_LOCATION_LIMIT}
+                    placeholder="日付"
                   />
-                  <textarea
-                    rows="4"
-                    value={entry.body || ""}
-                    onChange={(event) => updateCurrentEntry(index, "body", event.target.value)}
-                    maxLength={PROFILE_BIO_LIMIT}
-                    placeholder="内容"
-                  />
-                </>
-              ) : (
-                <>
-                  <h3>{entry.title}</h3>
-                  <p>{entry.body}</p>
-                </>
-              )}
-            </article>
-          ))}
+                ) : (
+                  <p className="eyebrow">{entry.label}</p>
+                )}
+                {isEditing ? (
+                  <>
+                    <input
+                      value={entry.title || ""}
+                      onChange={(event) => updateCurrentEntry(index, "title", event.target.value)}
+                      maxLength={PROFILE_HEADLINE_LIMIT}
+                      placeholder="見出し"
+                    />
+                    <textarea
+                      rows="4"
+                      value={entry.body || ""}
+                      onChange={(event) => updateCurrentEntry(index, "body", event.target.value)}
+                      maxLength={PROFILE_BIO_LIMIT}
+                      placeholder="内容"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <h3>{entry.title}</h3>
+                    <p>{entry.body}</p>
+                  </>
+                )}
+              </article>
+            ))}
+          </div>
+
+          <article className="signature-schedule-card">
+            <div className="signature-schedule-head">
+              <p className="eyebrow">Week</p>
+              <h3>今週の予定</h3>
+              <p>大学の時間割みたいに、一週間の流れをざっくり置いておけます。</p>
+            </div>
+            <div className="signature-schedule-wrap">
+              <table className="signature-schedule-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    {SCHEDULE_DAYS.map((day) => (
+                      <th key={day.key}>
+                        <span>{day.short}</span>
+                        <small>{day.label}</small>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {SCHEDULE_PERIODS.map((period) => (
+                    <tr key={period.key}>
+                      <th>
+                        <span>{period.label}</span>
+                        <small>{period.time}</small>
+                      </th>
+                      {SCHEDULE_DAYS.map((day) => (
+                        <td key={`${day.key}-${period.key}`}>
+                          {isEditing ? (
+                            <textarea
+                              rows="2"
+                              value={weeklySchedule[day.key]?.[period.key] || ""}
+                              onChange={(event) => updateScheduleCell(day.key, period.key, event.target.value)}
+                              maxLength={PROFILE_HEADLINE_LIMIT}
+                              placeholder="授業 / 制作 / 移動"
+                            />
+                          ) : (
+                            <span>{weeklySchedule[day.key]?.[period.key] || "空き"}</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </article>
         </div>
       </SignatureInteractiveSection>
 
@@ -566,6 +648,46 @@ function buildDefaultCurrentEntries() {
   ];
 }
 
+function buildDefaultWeeklySchedule() {
+  return {
+    mon: {
+      period1: "ゼミ",
+      period2: "講義",
+      period3: "制作",
+      period4: "移動 / 打ち合わせ",
+      period5: "課題整理"
+    },
+    tue: {
+      period1: "講義",
+      period2: "講義",
+      period3: "リサーチ",
+      period4: "制作",
+      period5: "空き"
+    },
+    wed: {
+      period1: "読書 / メモ",
+      period2: "ゼミ準備",
+      period3: "講義",
+      period4: "制作",
+      period5: "バイト / 部活"
+    },
+    thu: {
+      period1: "講義",
+      period2: "空き",
+      period3: "フィールドワーク",
+      period4: "制作",
+      period5: "振り返り"
+    },
+    fri: {
+      period1: "講義",
+      period2: "資料整理",
+      period3: "制作",
+      period4: "打ち合わせ",
+      period5: "次週準備"
+    }
+  };
+}
+
 function mergeCurrentEntries(currentEntries, defaults) {
   return defaults.map((fallback, index) => {
     const current = currentEntries?.[index] || {};
@@ -575,6 +697,21 @@ function mergeCurrentEntries(currentEntries, defaults) {
       body: `${current.body || ""}`.trim() || fallback.body
     };
   });
+}
+
+function mergeWeeklySchedule(weeklySchedule) {
+  const defaults = buildDefaultWeeklySchedule();
+  return Object.fromEntries(
+    SCHEDULE_DAYS.map((day) => [
+      day.key,
+      Object.fromEntries(
+        SCHEDULE_PERIODS.map((period) => [
+          period.key,
+          `${weeklySchedule?.[day.key]?.[period.key] ?? defaults[day.key][period.key] ?? ""}`
+        ])
+      )
+    ])
+  );
 }
 
 function formatDate(value) {
@@ -598,13 +735,14 @@ function normalizeUsername(value) {
 }
 
 function inflateSignatureProfile(profile) {
-  const { heading, affiliation, currentEntries } = unpackSignatureAffiliation(profile.affiliation);
+  const { heading, affiliation, currentEntries, weeklySchedule } = unpackSignatureAffiliation(profile.affiliation);
 
   return {
     ...profile,
     affiliation,
     identity_heading: heading || DEFAULT_IDENTITY_HEADING,
-    current_entries: currentEntries
+    current_entries: currentEntries,
+    weekly_schedule: weeklySchedule
   };
 }
 
@@ -618,13 +756,15 @@ function unpackSignatureAffiliation(value) {
         return {
           heading: meta.identity_heading || "",
           affiliation: raw.slice(markerEnd + 2).replace(/^\s+/, ""),
-          currentEntries: Array.isArray(meta.current_entries) ? meta.current_entries : []
+          currentEntries: Array.isArray(meta.current_entries) ? meta.current_entries : [],
+          weeklySchedule: meta.weekly_schedule && typeof meta.weekly_schedule === "object" ? meta.weekly_schedule : {}
         };
       } catch {
         return {
           heading: "",
           affiliation: raw,
-          currentEntries: []
+          currentEntries: [],
+          weeklySchedule: {}
         };
       }
     }
@@ -634,7 +774,8 @@ function unpackSignatureAffiliation(value) {
     return {
       heading: "",
       affiliation: raw,
-      currentEntries: []
+      currentEntries: [],
+      weeklySchedule: {}
     };
   }
 
@@ -643,7 +784,8 @@ function unpackSignatureAffiliation(value) {
     return {
       heading: "",
       affiliation: raw,
-      currentEntries: []
+      currentEntries: [],
+      weeklySchedule: {}
     };
   }
 
@@ -653,11 +795,12 @@ function unpackSignatureAffiliation(value) {
   return {
     heading,
     affiliation,
-    currentEntries: []
+    currentEntries: [],
+    weeklySchedule: {}
   };
 }
 
-function packSignatureAffiliation(affiliation, heading, currentEntries) {
+function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule) {
   const trimmedAffiliation = `${affiliation || ""}`.trim();
   const trimmedHeading = `${heading || ""}`.trim() || DEFAULT_IDENTITY_HEADING;
   const meta = encodeURIComponent(
@@ -667,7 +810,8 @@ function packSignatureAffiliation(affiliation, heading, currentEntries) {
         label: `${entry.label || ""}`.trim(),
         title: `${entry.title || ""}`.trim(),
         body: `${entry.body || ""}`.trim()
-      }))
+      })),
+      weekly_schedule: mergeWeeklySchedule(weeklySchedule)
     })
   );
 
