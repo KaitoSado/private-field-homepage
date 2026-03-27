@@ -188,7 +188,15 @@ export function PublicProfilePage({ profile, posts }) {
       ) : null}
 
       <section className="surface profile-hero">
-        <AvatarMark profile={draft} size="lg" />
+        {isEditing ? (
+          <label className={`avatar-upload-trigger ${uploadingAvatar ? "is-uploading" : ""}`}>
+            <AvatarMark profile={draft} size="lg" />
+            <span>{uploadingAvatar ? "アップロード中..." : "画像を変更"}</span>
+            <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+          </label>
+        ) : (
+          <AvatarMark profile={draft} size="lg" />
+        )}
         <div className="profile-hero-copy">
           {isEditing ? (
             <>

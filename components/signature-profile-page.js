@@ -12,8 +12,9 @@ import { ProfilePostManager } from "@/components/profile-post-manager";
 import { SignaturePostShelf } from "@/components/signature-post-shelf";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
-import { PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROFILE_OPEN_TO_LIMIT } from "@/lib/limits";
+import { AVATAR_MAX_BYTES, PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROFILE_OPEN_TO_LIMIT } from "@/lib/limits";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getAvatarBucket, uploadPublicFile } from "@/lib/storage";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 
 const DEFAULT_IDENTITY_HEADING = "なんか書ける";
@@ -46,6 +47,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [expandedCurrentEntries, setExpandedCurrentEntries] = useState({});
   const [expandedRecordItems, setExpandedRecordItems] = useState({});
   const [postCreateSignal, setPostCreateSignal] = useState(0);
@@ -189,6 +191,37 @@ export function SignatureProfilePage({ profile, posts }) {
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
+  async function handleAvatarUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file || !canEdit) return;
+    if (file.size > AVATAR_MAX_BYTES) {
+      setStatus("プロフィール画像は 5MB 以下にしてください。");
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setStatus("プロフィール画像をアップロードしています...");
+
+    try {
+      const publicUrl = await uploadPublicFile({
+        supabase,
+        bucket: getAvatarBucket(),
+        userId: profile.id,
+        file,
+        folder: "avatars"
+      });
+
+      setDraft((current) => ({ ...current, avatar_url: publicUrl }));
+      setStatus("プロフィール画像をアップロードしました。保存すると公開ページに反映されます。");
+    } catch (error) {
+      setStatus(error.message || "プロフィール画像のアップロードに失敗しました。");
+    } finally {
+      setUploadingAvatar(false);
+      event.target.value = "";
+    }
+  }
+
   function updateCurrentEntry(index, key, value) {
     setDraft((current) => {
       const nextEntries = mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()).map((entry, entryIndex) =>
@@ -314,7 +347,15 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureHeroStage>
         <SignatureHeroShader />
         <div className="signature-hero-copy">
-          <AvatarMark profile={draft} size="lg" />
+          {isEditing ? (
+            <label className={`avatar-upload-trigger ${uploadingAvatar ? "is-uploading" : ""}`}>
+              <AvatarMark profile={draft} size="lg" />
+              <span>{uploadingAvatar ? "アップロード中..." : "画像を変更"}</span>
+              <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+            </label>
+          ) : (
+            <AvatarMark profile={draft} size="lg" />
+          )}
           {isEditing ? (
             <>
               <label className="signature-edit-inline signature-edit-handle">
