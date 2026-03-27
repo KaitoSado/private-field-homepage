@@ -743,9 +743,11 @@ function mergeWeeklySchedule(weeklySchedule) {
 function mergeRecordItems(recordItems, defaults) {
   return defaults.map((fallback, index) => {
     const current = recordItems?.[index] || {};
+    const hasTitle = Object.prototype.hasOwnProperty.call(current, "title");
+    const hasBody = Object.prototype.hasOwnProperty.call(current, "body");
     return {
-      title: `${current.title || ""}`.trim() || fallback.title,
-      body: `${current.body || ""}`.trim() || fallback.body
+      title: hasTitle ? `${current.title ?? ""}` : fallback.title,
+      body: hasBody ? `${current.body ?? ""}` : fallback.body
     };
   });
 }
