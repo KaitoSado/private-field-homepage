@@ -23,7 +23,9 @@ const SCHEDULE_DAYS = [
   { key: "tue", label: "Tue", short: "火" },
   { key: "wed", label: "Wed", short: "水" },
   { key: "thu", label: "Thu", short: "木" },
-  { key: "fri", label: "Fri", short: "金" }
+  { key: "fri", label: "Fri", short: "金" },
+  { key: "sat", label: "Sat", short: "土" },
+  { key: "sun", label: "Sun", short: "日" }
 ];
 const SCHEDULE_PERIODS = [
   { key: "period1", label: "1限", time: "09:00 - 10:30" },
@@ -459,7 +461,7 @@ export function SignatureProfilePage({ profile, posts }) {
           <article className="signature-schedule-card">
             <div className="signature-schedule-head">
               <p className="eyebrow">Week</p>
-              <h3>今週の予定</h3>
+              <h3>デフォルト予定</h3>
             </div>
             <div className="signature-schedule-wrap">
               <table className="signature-schedule-table">
@@ -643,41 +645,13 @@ function buildDefaultCurrentEntries() {
 
 function buildDefaultWeeklySchedule() {
   return {
-    mon: {
-      period1: "ゼミ",
-      period2: "講義",
-      period3: "制作",
-      period4: "移動 / 打ち合わせ",
-      period5: "課題整理"
-    },
-    tue: {
-      period1: "講義",
-      period2: "講義",
-      period3: "リサーチ",
-      period4: "制作",
-      period5: "空き"
-    },
-    wed: {
-      period1: "読書 / メモ",
-      period2: "ゼミ準備",
-      period3: "講義",
-      period4: "制作",
-      period5: "バイト / 部活"
-    },
-    thu: {
-      period1: "講義",
-      period2: "空き",
-      period3: "フィールドワーク",
-      period4: "制作",
-      period5: "振り返り"
-    },
-    fri: {
-      period1: "講義",
-      period2: "資料整理",
-      period3: "制作",
-      period4: "打ち合わせ",
-      period5: "次週準備"
-    }
+    mon: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
+    tue: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
+    wed: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
+    thu: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
+    fri: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
+    sat: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
+    sun: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" }
   };
 }
 
