@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { AvatarMark } from "@/components/avatar-mark";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
-import { PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT } from "@/lib/limits";
+import { AVATAR_MAX_BYTES, PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROFILE_OPEN_TO_LIMIT } from "@/lib/limits";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getAvatarBucket, uploadPublicFile } from "@/lib/storage";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 
 export function PublicProfilePage({ profile, posts }) {
@@ -17,6 +18,7 @@ export function PublicProfilePage({ profile, posts }) {
   const [session, setSession] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [status, setStatus] = useState("");
   const canEdit = session?.user?.id === profile.id;
 
@@ -77,6 +79,9 @@ export function PublicProfilePage({ profile, posts }) {
       page_theme: draft.page_theme || "default",
       display_name: `${draft.display_name || ""}`.trim(),
       headline: `${draft.headline || ""}`.trim(),
+      affiliation: `${draft.affiliation || ""}`.trim(),
+      focus_area: `${draft.focus_area || ""}`.trim(),
+      open_to: `${draft.open_to || ""}`.trim(),
       bio: `${draft.bio || ""}`.trim(),
       location: `${draft.location || ""}`.trim(),
       website_url: sanitizeExternalUrl(draft.website_url) || "",
@@ -103,6 +108,37 @@ export function PublicProfilePage({ profile, posts }) {
       setStatus(error.message || "保存に失敗しました。");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleAvatarUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file || !canEdit) return;
+    if (file.size > AVATAR_MAX_BYTES) {
+      setStatus("プロフィール画像は 5MB 以下にしてください。");
+      event.target.value = "";
+      return;
+    }
+
+    setUploadingAvatar(true);
+    setStatus("プロフィール画像をアップロードしています...");
+
+    try {
+      const publicUrl = await uploadPublicFile({
+        supabase,
+        bucket: getAvatarBucket(),
+        userId: profile.id,
+        file,
+        folder: "avatars"
+      });
+
+      setDraft((current) => ({ ...current, avatar_url: publicUrl }));
+      setStatus("プロフィール画像をアップロードしました。保存すると公開ページに反映されます。");
+    } catch (error) {
+      setStatus(error.message || "プロフィール画像のアップロードに失敗しました。");
+    } finally {
+      setUploadingAvatar(false);
+      event.target.value = "";
     }
   }
 
@@ -223,6 +259,103 @@ export function PublicProfilePage({ profile, posts }) {
               )}
             </div>
           ) : null}
+        </div>
+      </section>
+
+      <section className="section-grid">
+        <div className="section-copy">
+          <p className="eyebrow">Profile</p>
+          <h2>公開ページで編集</h2>
+          <p>{isEditing ? "プロフィール項目はここで直接編集できます。" : "表示名や自己紹介以外の項目も、このページ上でまとめて編集できます。"}</p>
+        </div>
+
+        <div className="stack-list">
+          <section className="surface form-stack">
+            <div className="profile-public-grid">
+              <label className="field">
+                <span>所属</span>
+                {isEditing ? (
+                  <input value={draft.affiliation || ""} onChange={(event) => updateField("affiliation", event.target.value)} />
+                ) : (
+                  <div className="profile-public-value">{draft.affiliation || "未設定"}</div>
+                )}
+              </label>
+
+              <label className="field">
+                <span>関心・専門</span>
+                {isEditing ? (
+                  <input value={draft.focus_area || ""} onChange={(event) => updateField("focus_area", event.target.value)} />
+                ) : (
+                  <div className="profile-public-value">{draft.focus_area || "未設定"}</div>
+                )}
+              </label>
+            </div>
+
+            <label className="field">
+              <span>チャット・トーク</span>
+              {isEditing ? (
+                <textarea
+                  rows="4"
+                  value={draft.open_to || ""}
+                  onChange={(event) => updateField("open_to", event.target.value)}
+                  maxLength={PROFILE_OPEN_TO_LIMIT}
+                />
+              ) : (
+                <div className="profile-public-value">{draft.open_to || "未設定"}</div>
+              )}
+            </label>
+
+            <div className="profile-public-grid">
+              <label className="field">
+                <span>ページテーマ</span>
+                {isEditing ? (
+                  <select value={draft.page_theme || "default"} onChange={(event) => updateField("page_theme", event.target.value)}>
+                    <option value="default">Default</option>
+                    <option value="signature">Signature</option>
+                  </select>
+                ) : (
+                  <div className="profile-public-value">{draft.page_theme === "signature" ? "Signature" : "Default"}</div>
+                )}
+              </label>
+
+              <label className="field">
+                <span>一覧表示</span>
+                {isEditing ? (
+                  <label className="checkbox-row">
+                    <input
+                      type="checkbox"
+                      checked={draft.discoverable !== false}
+                      onChange={(event) => updateField("discoverable", event.target.checked)}
+                    />
+                    <span>Explore とおすすめに表示する</span>
+                  </label>
+                ) : (
+                  <div className="profile-public-value">{draft.discoverable !== false ? "公開" : "非公開"}</div>
+                )}
+              </label>
+            </div>
+
+            <label className="field">
+              <span>プロフィール画像 URL</span>
+              {isEditing ? (
+                <>
+                  <input
+                    value={draft.avatar_url || ""}
+                    onChange={(event) => updateField("avatar_url", event.target.value)}
+                    placeholder="https://example.com/avatar.jpg"
+                  />
+                  <div className="upload-row">
+                    <label className="button button-secondary upload-button">
+                      {uploadingAvatar ? "アップロード中..." : "画像をアップロード"}
+                      <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+                    </label>
+                  </div>
+                </>
+              ) : (
+                <div className="profile-public-value">{draft.avatar_url || "未設定"}</div>
+              )}
+            </label>
+          </section>
         </div>
       </section>
 

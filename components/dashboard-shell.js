@@ -490,85 +490,27 @@ export function DashboardShell() {
       </section>
 
       <div className="dashboard-grid">
-        <form className="surface form-stack" onSubmit={saveProfile}>
+        <section className="surface form-stack">
           <div>
             <p className="eyebrow">Profile</p>
-            <h2>プロフィール編集</h2>
-            <p className="field-hint">完成形に近いプレビューへ直接書き込みながら整えます。</p>
+            <h2>プロフィール編集は公開ページへ統合</h2>
+            <p className="field-hint">表示名、自己紹介、テーマ、リンク、プロフィール画像は公開ページ `/@username` で直接編集してください。</p>
           </div>
-
-          <ProfileCanvasEditor profile={profile} setProfile={setProfile} />
-
-          <label className="field">
-            <span>公開プロフィールのテーマ</span>
-            <select
-              value={profile.page_theme}
-              onChange={(event) => setProfile((current) => ({ ...current, page_theme: event.target.value }))}
-            >
-              <option value="default">Default</option>
-              <option value="signature">Signature</option>
-            </select>
-            <small className="field-hint">公開ページ `/@username` にだけ反映されます。ダッシュボードの見た目は変わりません。</small>
-          </label>
 
           <p className="status-text">アカウント状態: {profile.account_status}</p>
           <p className="field-hint">公開URLは `/@username` になります。</p>
-
-          <label className="field">
-            <span>プロフィール画像 URL</span>
-            <input
-              value={profile.avatar_url}
-              onChange={(event) => setProfile((current) => ({ ...current, avatar_url: event.target.value }))}
-              placeholder="https://example.com/avatar.jpg"
-            />
-            <div className="upload-row">
-              <label className="button button-secondary upload-button">
-                {uploadingAvatar ? "アップロード中..." : "画像をアップロード"}
-                <input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
-              </label>
+          <div className="stack-list">
+            <div className="surface">
+              <p className="eyebrow">Current public URL</p>
+              <p>{profile.username ? `/@${normalizeUsername(profile.username)}` : "/@username"}</p>
             </div>
-          </label>
-
-          <label className="field">
-            <span>Web サイト</span>
-            <input
-              value={profile.website_url}
-              onChange={(event) => setProfile((current) => ({ ...current, website_url: event.target.value }))}
-              placeholder="https://example.com"
-            />
-          </label>
-
-          <label className="field">
-            <span>X</span>
-            <input
-              value={profile.x_url}
-              onChange={(event) => setProfile((current) => ({ ...current, x_url: event.target.value }))}
-              placeholder="https://x.com/yourname"
-            />
-          </label>
-
-          <label className="field">
-            <span>GitHub</span>
-            <input
-              value={profile.github_url}
-              onChange={(event) => setProfile((current) => ({ ...current, github_url: event.target.value }))}
-              placeholder="https://github.com/yourname"
-            />
-          </label>
-
-          <label className="field">
-            <span>note</span>
-            <input
-              value={profile.note_url}
-              onChange={(event) => setProfile((current) => ({ ...current, note_url: event.target.value }))}
-              placeholder="https://note.com/yourname"
-            />
-          </label>
-
-          <button type="submit" className="button button-primary full-width" disabled={savingProfile}>
-            {savingProfile ? "保存中..." : "プロフィールを保存"}
-          </button>
-        </form>
+            {profile.username ? (
+              <Link className="button button-primary full-width" href={`/@${normalizeUsername(profile.username)}`}>
+                公開ページでプロフィールを編集
+              </Link>
+            ) : null}
+          </div>
+        </section>
 
         <div className="stack-list">
           <form className="surface form-stack" onSubmit={savePost}>
