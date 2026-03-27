@@ -96,7 +96,7 @@ export function SignatureProfilePage({ profile, posts }) {
       body: ""
     }
   ];
-  const currentEntries = mergeCurrentEntries(draft.current_entries, buildDefaultCurrentEntries(draft, recentPosts));
+  const currentEntries = mergeCurrentEntries(draft.current_entries, buildDefaultCurrentEntries());
   const defaultLeadCopy = "なんか書ける";
 
   async function saveProfile() {
@@ -151,7 +151,7 @@ export function SignatureProfilePage({ profile, posts }) {
 
   function updateCurrentEntry(index, key, value) {
     setDraft((current) => {
-      const nextEntries = mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries(current, recentPosts)).map((entry, entryIndex) =>
+      const nextEntries = mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()).map((entry, entryIndex) =>
         entryIndex === index ? { ...entry, [key]: value } : entry
       );
 
@@ -164,7 +164,7 @@ export function SignatureProfilePage({ profile, posts }) {
       ...current,
       headline: current.headline || defaultLeadCopy,
       identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING,
-      current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries(current, recentPosts))
+      current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries())
     }));
     setIsEditing(true);
   }
@@ -390,23 +390,32 @@ export function SignatureProfilePage({ profile, posts }) {
         </div>
         <div className="signature-current-grid">
           {currentEntries.map((entry, index) => (
-            <article key={entry.label} className="signature-current-card">
-              <p className="eyebrow">{entry.label}</p>
+            <article key={`current-entry-${index}`} className="signature-current-card">
+              {isEditing ? (
+                <input
+                  className="signature-current-label-input eyebrow"
+                  value={entry.label || ""}
+                  onChange={(event) => updateCurrentEntry(index, "label", event.target.value)}
+                  maxLength={PROFILE_LOCATION_LIMIT}
+                  placeholder="日付"
+                />
+              ) : (
+                <p className="eyebrow">{entry.label}</p>
+              )}
               {isEditing ? (
                 <>
-                  <textarea
-                    rows="2"
+                  <input
                     value={entry.title || ""}
                     onChange={(event) => updateCurrentEntry(index, "title", event.target.value)}
                     maxLength={PROFILE_HEADLINE_LIMIT}
-                    placeholder="ひとこと見出し"
+                    placeholder="見出し"
                   />
                   <textarea
                     rows="4"
                     value={entry.body || ""}
                     onChange={(event) => updateCurrentEntry(index, "body", event.target.value)}
                     maxLength={PROFILE_BIO_LIMIT}
-                    placeholder="最近やっていることやメモ"
+                    placeholder="内容"
                   />
                 </>
               ) : (
@@ -537,25 +546,22 @@ export function SignatureProfilePage({ profile, posts }) {
   );
 }
 
-function buildDefaultCurrentEntries(profile, recentPosts) {
-  const latestPost = recentPosts[0] || null;
-  const latestTag = latestPost?.tags?.[0] || null;
-
+function buildDefaultCurrentEntries() {
   return [
     {
-      label: "いま",
-      title: latestPost?.title || "今日やっていること",
-      body: latestPost ? "直近の記事や制作の延長にある動き。" : "いま進めていることを短く書けます。"
+      label: "日付",
+      title: "見出し",
+      body: "内容"
     },
     {
-      label: "観察",
-      title: latestTag ? `#${latestTag}` : profile.focus_area || "気になっていること",
-      body: latestTag ? "最近よく出てくるキーワードや気づき。" : "観察したことや考え中のこと。"
+      label: "日付",
+      title: "見出し",
+      body: "内容"
     },
     {
-      label: "次",
-      title: latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "次にやること",
-      body: latestPost ? "次の更新に向けて触っていること。" : "このあと試すことや続けること。"
+      label: "日付",
+      title: "見出し",
+      body: "内容"
     }
   ];
 }
@@ -564,7 +570,7 @@ function mergeCurrentEntries(currentEntries, defaults) {
   return defaults.map((fallback, index) => {
     const current = currentEntries?.[index] || {};
     return {
-      label: fallback.label,
+      label: `${current.label || ""}`.trim() || fallback.label,
       title: `${current.title || ""}`.trim() || fallback.title,
       body: `${current.body || ""}`.trim() || fallback.body
     };
@@ -657,7 +663,8 @@ function packSignatureAffiliation(affiliation, heading, currentEntries) {
   const meta = encodeURIComponent(
     JSON.stringify({
       identity_heading: trimmedHeading,
-      current_entries: mergeCurrentEntries(currentEntries, buildDefaultCurrentEntries({}, [])).map((entry) => ({
+      current_entries: mergeCurrentEntries(currentEntries, buildDefaultCurrentEntries()).map((entry) => ({
+        label: `${entry.label || ""}`.trim(),
         title: `${entry.title || ""}`.trim(),
         body: `${entry.body || ""}`.trim()
       }))
