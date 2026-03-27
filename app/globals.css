@@ -1900,6 +1900,61 @@ textarea {
   gap: 14px;
 }
 
+.signature-record-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.signature-record-card {
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(184, 154, 93, 0.16);
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: 0 14px 40px rgba(29, 35, 40, 0.05);
+  display: grid;
+  gap: 10px;
+}
+
+.signature-record-card h3 {
+  margin: 0;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: 1.35rem;
+}
+
+.signature-record-card p {
+  margin: 0;
+  color: #576167;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.signature-record-card input,
+.signature-record-card textarea {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px dashed rgba(34, 49, 58, 0.18);
+  border-radius: 0;
+  background: transparent;
+  color: #1d2328;
+  padding: 0 0 8px;
+  box-shadow: none;
+  font: inherit;
+}
+
+.signature-record-card input:focus,
+.signature-record-card textarea:focus {
+  outline: none;
+  border-bottom-color: rgba(31, 111, 120, 0.42);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.signature-record-card textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.8;
+}
+
 .signature-signal-line {
   padding: 18px 20px;
   display: grid;
@@ -1991,6 +2046,7 @@ textarea {
   .signature-identity-grid,
   .signature-about-grid,
   .signature-current-layout,
+  .signature-record-grid,
   .profile-canvas-grid,
   .media-gallery.has-grid,
   .social-stats,

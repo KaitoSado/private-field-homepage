@@ -119,6 +119,7 @@ export function SignatureProfilePage({ profile, posts }) {
   ];
   const currentEntries = mergeCurrentEntries(draft.current_entries, buildDefaultCurrentEntries());
   const weeklySchedule = mergeWeeklySchedule(draft.weekly_schedule);
+  const recordItems = mergeRecordItems(draft.record_items, buildDefaultRecordItems());
   const defaultLeadCopy = "なんか書ける";
 
   async function saveProfile() {
@@ -134,7 +135,7 @@ export function SignatureProfilePage({ profile, posts }) {
       page_theme: draft.page_theme || "signature",
       display_name: `${draft.display_name || ""}`.trim(),
       headline: `${draft.headline || ""}`.trim(),
-      affiliation: packSignatureAffiliation(draft.affiliation, draft.identity_heading, currentEntries, weeklySchedule),
+      affiliation: packSignatureAffiliation(draft.affiliation, draft.identity_heading, currentEntries, weeklySchedule, recordItems),
       focus_area: `${draft.focus_area || ""}`.trim(),
       open_to: `${draft.open_to || ""}`.trim(),
       bio: `${draft.bio || ""}`.trim(),
@@ -197,13 +198,24 @@ export function SignatureProfilePage({ profile, posts }) {
     });
   }
 
+  function updateRecordItem(index, key, value) {
+    setDraft((current) => {
+      const nextRecords = mergeRecordItems(current.record_items, buildDefaultRecordItems()).map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [key]: value } : item
+      );
+
+      return { ...current, record_items: nextRecords };
+    });
+  }
+
   function startEditing() {
     setDraft((current) => ({
       ...current,
       headline: current.headline || defaultLeadCopy,
       identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING,
       current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()),
-      weekly_schedule: mergeWeeklySchedule(current.weekly_schedule)
+      weekly_schedule: mergeWeeklySchedule(current.weekly_schedule),
+      record_items: mergeRecordItems(current.record_items, buildDefaultRecordItems())
     }));
     setIsEditing(true);
   }
@@ -249,7 +261,7 @@ export function SignatureProfilePage({ profile, posts }) {
         <a href="#signature-identity">Identity</a>
         <a href="#signature-current">Current</a>
         <a href="#signature-works">Works</a>
-        <a href="#signature-thinking">Thinking</a>
+        <a href="#signature-thinking">Records</a>
         <a href="#signature-contact">Contact</a>
       </nav>
 
@@ -566,36 +578,38 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <SignatureInteractiveSection id="signature-thinking">
         <div className="signature-section-head">
-          <p className="eyebrow">Thinking</p>
-          <h2>Current signals</h2>
+          <p className="eyebrow">Records</p>
+          <h2>記録したいこと</h2>
         </div>
 
-        <div className="signature-signals">
-          {recentPosts.length ? (
-            recentPosts.map((post) => (
-              <Link key={post.id} href={`/@${draft.username}/${post.slug}`} className="signature-signal-line">
-                <span className="signature-signal-date">{formatDate(post.published_at || post.updated_at)}</span>
-                <div>
-                  <strong>{post.title}</strong>
-                  <p>{post.excerpt || "本文から紹介文を追加してください。"}</p>
-                  {post.tags.length ? (
-                    <div className="tag-row">
-                      {post.tags.map((tag) => (
-                        <span key={tag} className="tag-chip">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              </Link>
-            ))
-          ) : (
-            <div className="signature-post-card empty-state">
-              <h3>まだ公開記事がありません</h3>
-              <p>ここには最新の公開更新が並びます。</p>
-            </div>
-          )}
+        <div className="signature-record-grid">
+          {recordItems.map((item, index) => (
+            <article key={`record-item-${index}`} className="signature-record-card">
+              {isEditing ? (
+                <>
+                  <input
+                    className="signature-record-title"
+                    value={item.title || ""}
+                    onChange={(event) => updateRecordItem(index, "title", event.target.value)}
+                    maxLength={PROFILE_LOCATION_LIMIT}
+                    placeholder="項目名"
+                  />
+                  <textarea
+                    rows="4"
+                    value={item.body || ""}
+                    onChange={(event) => updateRecordItem(index, "body", event.target.value)}
+                    maxLength={PROFILE_BIO_LIMIT}
+                    placeholder="どんなふうに記録したいか"
+                  />
+                </>
+              ) : (
+                <>
+                  <h3>{item.title}</h3>
+                  <p>{item.body || "ここに記録を書けます。"}</p>
+                </>
+              )}
+            </article>
+          ))}
         </div>
       </SignatureInteractiveSection>
 
@@ -670,6 +684,16 @@ function buildDefaultWeeklySchedule() {
   };
 }
 
+function buildDefaultRecordItems() {
+  return [
+    { title: "食事", body: "" },
+    { title: "睡眠", body: "" },
+    { title: "運動", body: "" },
+    { title: "勉強", body: "" },
+    { title: "読書", body: "" }
+  ];
+}
+
 function mergeCurrentEntries(currentEntries, defaults) {
   return defaults.map((fallback, index) => {
     const current = currentEntries?.[index] || {};
@@ -696,6 +720,16 @@ function mergeWeeklySchedule(weeklySchedule) {
   );
 }
 
+function mergeRecordItems(recordItems, defaults) {
+  return defaults.map((fallback, index) => {
+    const current = recordItems?.[index] || {};
+    return {
+      title: `${current.title || ""}`.trim() || fallback.title,
+      body: `${current.body || ""}`.trim() || fallback.body
+    };
+  });
+}
+
 function formatDate(value) {
   if (!value) return "Draft";
   return new Intl.DateTimeFormat("ja-JP", {
@@ -717,14 +751,15 @@ function normalizeUsername(value) {
 }
 
 function inflateSignatureProfile(profile) {
-  const { heading, affiliation, currentEntries, weeklySchedule } = unpackSignatureAffiliation(profile.affiliation);
+  const { heading, affiliation, currentEntries, weeklySchedule, recordItems } = unpackSignatureAffiliation(profile.affiliation);
 
   return {
     ...profile,
     affiliation,
     identity_heading: heading || DEFAULT_IDENTITY_HEADING,
     current_entries: currentEntries,
-    weekly_schedule: weeklySchedule
+    weekly_schedule: weeklySchedule,
+    record_items: recordItems
   };
 }
 
@@ -739,14 +774,16 @@ function unpackSignatureAffiliation(value) {
           heading: meta.identity_heading || "",
           affiliation: raw.slice(markerEnd + 2).replace(/^\s+/, ""),
           currentEntries: Array.isArray(meta.current_entries) ? meta.current_entries : [],
-          weeklySchedule: meta.weekly_schedule && typeof meta.weekly_schedule === "object" ? meta.weekly_schedule : {}
+          weeklySchedule: meta.weekly_schedule && typeof meta.weekly_schedule === "object" ? meta.weekly_schedule : {},
+          recordItems: Array.isArray(meta.record_items) ? meta.record_items : []
         };
       } catch {
         return {
           heading: "",
           affiliation: raw,
           currentEntries: [],
-          weeklySchedule: {}
+          weeklySchedule: {},
+          recordItems: []
         };
       }
     }
@@ -757,7 +794,8 @@ function unpackSignatureAffiliation(value) {
       heading: "",
       affiliation: raw,
       currentEntries: [],
-      weeklySchedule: {}
+      weeklySchedule: {},
+      recordItems: []
     };
   }
 
@@ -767,7 +805,8 @@ function unpackSignatureAffiliation(value) {
       heading: "",
       affiliation: raw,
       currentEntries: [],
-      weeklySchedule: {}
+      weeklySchedule: {},
+      recordItems: []
     };
   }
 
@@ -778,11 +817,12 @@ function unpackSignatureAffiliation(value) {
     heading,
     affiliation,
     currentEntries: [],
-    weeklySchedule: {}
+    weeklySchedule: {},
+    recordItems: []
   };
 }
 
-function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule) {
+function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule, recordItems) {
   const trimmedAffiliation = `${affiliation || ""}`.trim();
   const trimmedHeading = `${heading || ""}`.trim() || DEFAULT_IDENTITY_HEADING;
   const meta = encodeURIComponent(
@@ -793,7 +833,11 @@ function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySc
         title: `${entry.title || ""}`.trim(),
         body: `${entry.body || ""}`.trim()
       })),
-      weekly_schedule: mergeWeeklySchedule(weeklySchedule)
+      weekly_schedule: mergeWeeklySchedule(weeklySchedule),
+      record_items: mergeRecordItems(recordItems, buildDefaultRecordItems()).map((item) => ({
+        title: `${item.title || ""}`.trim(),
+        body: `${item.body || ""}`.trim()
+      }))
     })
   );
 
