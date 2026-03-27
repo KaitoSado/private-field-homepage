@@ -271,8 +271,10 @@ export function SignatureProfilePage({ profile, posts }) {
 
       {canEdit ? (
         <div className="signature-owner-toolbar">
-          <strong>Owner mode</strong>
-          <span>{status || "この公開ページを直接編集できます。"}</span>
+          <div className="signature-owner-toolbar-head">
+            <strong>Owner mode</strong>
+            {status ? <span>{status}</span> : null}
+          </div>
           <div className="hero-actions">
             {isEditing ? (
               <>

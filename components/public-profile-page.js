@@ -156,8 +156,10 @@ export function PublicProfilePage({ profile, posts }) {
 
       {canEdit ? (
         <div className="signature-owner-toolbar">
-          <strong>Owner mode</strong>
-          <span>{status || "この公開プロフィールを直接編集できます。"}</span>
+          <div className="signature-owner-toolbar-head">
+            <strong>Owner mode</strong>
+            {status ? <span>{status}</span> : null}
+          </div>
           <div className="hero-actions">
             {isEditing ? (
               <>
