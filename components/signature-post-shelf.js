@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export function SignaturePostShelf({ username, posts }) {
@@ -16,9 +16,16 @@ export function SignaturePostShelf({ username, posts }) {
 
   const filterOptions = ["all", ...availableTags.slice(0, 4)];
   const [activeFilter, setActiveFilter] = useState("all");
+  const [archiveOpen, setArchiveOpen] = useState(false);
 
   const visiblePosts =
     activeFilter === "all" ? posts : posts.filter((post) => (post.tags || []).includes(activeFilter));
+  const featuredPosts = visiblePosts.slice(0, 3);
+  const archivedPosts = visiblePosts.slice(3);
+
+  useEffect(() => {
+    setArchiveOpen(false);
+  }, [activeFilter]);
 
   return (
     <div className="signature-shelf">
@@ -38,15 +45,15 @@ export function SignaturePostShelf({ username, posts }) {
       ) : null}
 
       <div className="signature-post-grid">
-        {visiblePosts.length ? (
-          visiblePosts.map((post) => (
+        {featuredPosts.length ? (
+          featuredPosts.map((post) => (
             <Link key={post.id} href={`/@${username}/${post.slug}`} className="signature-post-card">
               <div className="post-card-head">
                 <span>{formatDate(post.published_at || post.updated_at)}</span>
                 <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
               </div>
               <h3>{post.title}</h3>
-              <p>{post.excerpt || "制作の意図や問いを添えると、ここに表示されます。"}</p>
+              <p className="signature-post-preview">{getPostPreview(post)}</p>
               {post.tags.length ? (
                 <div className="tag-row">
                   {post.tags.map((tag) => (
@@ -65,6 +72,33 @@ export function SignaturePostShelf({ username, posts }) {
           </div>
         )}
       </div>
+
+      {archivedPosts.length ? (
+        <div className="signature-post-archive">
+          <button
+            type="button"
+            className="signature-inline-toggle signature-archive-toggle"
+            onClick={() => setArchiveOpen((current) => !current)}
+          >
+            {archiveOpen ? "アーカイブをたたむ" : `過去の記事をもっと見る (${archivedPosts.length})`}
+          </button>
+
+          {archiveOpen ? (
+            <div className="signature-post-archive-list">
+              {archivedPosts.map((post) => (
+                <Link key={post.id} href={`/@${username}/${post.slug}`} className="signature-post-archive-item">
+                  <div className="signature-post-archive-meta">
+                    <span>{formatDate(post.published_at || post.updated_at)}</span>
+                    <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
+                  </div>
+                  <strong>{post.title}</strong>
+                  <p>{getPostPreview(post, 96)}</p>
+                </Link>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -76,4 +110,20 @@ function formatDate(value) {
     month: "long",
     day: "numeric"
   }).format(new Date(value));
+}
+
+function getPostPreview(post, limit = 120) {
+  const source = `${post.excerpt || post.body || ""}`.trim();
+  if (!source) {
+    return "制作の意図や問いを添えると、ここに表示されます。";
+  }
+
+  if (source.length <= limit) {
+    return source;
+  }
+
+  const preview = source.slice(0, limit);
+  const breakIndex = Math.max(preview.lastIndexOf("\n"), preview.lastIndexOf(" "));
+  const safePreview = (breakIndex > Math.floor(limit * 0.6) ? preview.slice(0, breakIndex) : preview).trimEnd();
+  return `${safePreview}…`;
 }

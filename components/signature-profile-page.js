@@ -46,10 +46,14 @@ export function SignatureProfilePage({ profile, posts }) {
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [expandedCurrentEntries, setExpandedCurrentEntries] = useState({});
+  const [expandedRecordItems, setExpandedRecordItems] = useState({});
   const canEdit = session?.user?.id === profile.id;
 
   useEffect(() => {
     setDraft(inflateSignatureProfile(profile));
+    setExpandedCurrentEntries({});
+    setExpandedRecordItems({});
   }, [profile]);
 
   useEffect(() => {
@@ -85,7 +89,6 @@ export function SignatureProfilePage({ profile, posts }) {
     };
   }, [supabase]);
 
-  const featuredPosts = postItems.slice(0, 3);
   const recentPosts = postItems.slice(0, 4);
   const latestPost = recentPosts[0] || null;
   const leadCopy = draft.headline || "なんか書ける";
@@ -162,6 +165,8 @@ export function SignatureProfilePage({ profile, posts }) {
 
       setDraft((current) => ({ ...current, username: nextUsername }));
       setIsEditing(false);
+      setExpandedCurrentEntries({});
+      setExpandedRecordItems({});
       setStatus("公開ページを保存しました。");
       router.refresh();
 
@@ -472,17 +477,31 @@ export function SignatureProfilePage({ profile, posts }) {
                       value={entry.body || ""}
                       onChange={(event) => updateCurrentEntry(index, "body", event.target.value)}
                       maxLength={PROFILE_BIO_LIMIT}
-                      placeholder="内容"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <h3>{entry.title}</h3>
-                    <p>{entry.body}</p>
-                  </>
-                )}
-              </article>
-            ))}
+                    placeholder="内容"
+                  />
+                </>
+              ) : (
+                <>
+                  <h3>{entry.title}</h3>
+                  <p>{getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).text || "ここに近況を書けます。"}</p>
+                  {getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).truncated ? (
+                    <button
+                      type="button"
+                      className="signature-inline-toggle"
+                      onClick={() =>
+                        setExpandedCurrentEntries((current) => ({
+                          ...current,
+                          [index]: !current[index]
+                        }))
+                      }
+                    >
+                      {expandedCurrentEntries[index] ? "たたむ" : "続きを読む"}
+                    </button>
+                  ) : null}
+                </>
+              )}
+            </article>
+          ))}
           </div>
 
           <article className="signature-schedule-card">
@@ -548,8 +567,8 @@ export function SignatureProfilePage({ profile, posts }) {
             onPostsChange={setPostItems}
             title="記事を管理"
           />
-        ) : featuredPosts.length ? (
-          <SignaturePostShelf username={draft.username} posts={featuredPosts} />
+        ) : postItems.length ? (
+          <SignaturePostShelf username={draft.username} posts={postItems} />
         ) : (
           <div className="signature-post-card empty-state">
             <h3>まだ記事がありません</h3>
@@ -619,16 +638,30 @@ export function SignatureProfilePage({ profile, posts }) {
                     value={item.body || ""}
                     onChange={(event) => updateRecordItem(index, "body", event.target.value)}
                     maxLength={PROFILE_BIO_LIMIT}
-                    placeholder="どんなふうに記録したいか"
-                  />
-                </>
-              ) : (
-                <>
-                  <h3>{item.title}</h3>
-                  <p>{item.body || "ここに記録を書けます。"}</p>
-                </>
-              )}
-            </article>
+                  placeholder="どんなふうに記録したいか"
+                />
+              </>
+            ) : (
+              <>
+                <h3>{item.title}</h3>
+                <p>{getCollapsibleText(item.body, expandedRecordItems[index], 140).text || "ここに記録を書けます。"}</p>
+                {getCollapsibleText(item.body, expandedRecordItems[index], 140).truncated ? (
+                  <button
+                    type="button"
+                    className="signature-inline-toggle"
+                    onClick={() =>
+                      setExpandedRecordItems((current) => ({
+                        ...current,
+                        [index]: !current[index]
+                      }))
+                    }
+                  >
+                    {expandedRecordItems[index] ? "たたむ" : "続きを読む"}
+                  </button>
+                ) : null}
+              </>
+            )}
+          </article>
           ))}
         </div>
       </SignatureInteractiveSection>
@@ -874,4 +907,24 @@ function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySc
   );
 
   return `${SIGNATURE_META_MARKER}${meta}]]${trimmedAffiliation ? `\n${trimmedAffiliation}` : ""}`;
+}
+
+function getCollapsibleText(value, expanded, limit) {
+  const text = `${value || ""}`.trim();
+  if (!text) {
+    return { text: "", truncated: false };
+  }
+
+  if (expanded || text.length <= limit) {
+    return { text, truncated: text.length > limit };
+  }
+
+  const preview = text.slice(0, limit);
+  const breakIndex = Math.max(preview.lastIndexOf("\n"), preview.lastIndexOf(" "));
+  const safePreview = (breakIndex > Math.floor(limit * 0.6) ? preview.slice(0, breakIndex) : preview).trimEnd();
+
+  return {
+    text: `${safePreview}…`,
+    truncated: true
+  };
 }
