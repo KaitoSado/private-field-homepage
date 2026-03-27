@@ -222,9 +222,8 @@ export function ProfilePostManager({ supabase, session, username, posts, onPosts
     <div className="post-manager-embedded">
       <div className="post-manager-toolbar">
         <div className="post-manager-copy">
-          <p className="eyebrow">Owner tools</p>
           <strong>{title}</strong>
-          <span>{status || "記事の追加・更新・削除はここで行えます。"}</span>
+          <span>{status || "このページの編集モード内で記事を管理できます。"}</span>
         </div>
 
         <div className="hero-actions">

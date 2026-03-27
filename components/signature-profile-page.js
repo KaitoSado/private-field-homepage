@@ -518,7 +518,7 @@ export function SignatureProfilePage({ profile, posts }) {
           <p className="eyebrow">Works</p>
           <h2>記事</h2>
         </div>
-        {canEdit ? (
+        {isEditing ? (
           <ProfilePostManager
             supabase={supabase}
             session={session}

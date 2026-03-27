@@ -379,7 +379,7 @@ export function PublicProfilePage({ profile, posts }) {
         </div>
 
         <div className="stack-list">
-          {canEdit ? (
+          {isEditing ? (
             <ProfilePostManager
               supabase={supabase}
               session={session}
