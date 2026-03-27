@@ -370,17 +370,6 @@ export function SignatureProfilePage({ profile, posts }) {
       />
       <ReportAction targetProfileId={draft.id} label="プロフィールを通報" />
 
-      {canEdit ? (
-        <ProfilePostManager
-          supabase={supabase}
-          session={session}
-          username={draft.username}
-          posts={postItems}
-          onPostsChange={setPostItems}
-          title="公開ページで記事を管理"
-        />
-      ) : null}
-
       <SignatureInteractiveSection id="signature-identity">
         <div className="signature-section-head">
           <p className="eyebrow">Identity</p>
@@ -529,7 +518,16 @@ export function SignatureProfilePage({ profile, posts }) {
           <p className="eyebrow">Works</p>
           <h2>記事</h2>
         </div>
-        {featuredPosts.length ? (
+        {canEdit ? (
+          <ProfilePostManager
+            supabase={supabase}
+            session={session}
+            username={draft.username}
+            posts={postItems}
+            onPostsChange={setPostItems}
+            title="記事を管理"
+          />
+        ) : featuredPosts.length ? (
           <SignaturePostShelf username={draft.username} posts={featuredPosts} />
         ) : (
           <div className="signature-post-card empty-state">

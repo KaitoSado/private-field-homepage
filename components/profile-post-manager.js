@@ -38,12 +38,14 @@ export function ProfilePostManager({ supabase, session, username, posts, onPosts
   const [deletingPostId, setDeletingPostId] = useState("");
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
 
   useEffect(() => {
     if (!editor.id) return;
     const stillExists = posts.some((post) => post.id === editor.id);
     if (!stillExists) {
       setEditor(emptyPost);
+      setComposerOpen(false);
     }
   }, [posts, editor.id]);
 
@@ -83,6 +85,7 @@ export function ProfilePostManager({ supabase, session, username, posts, onPosts
       if (error) throw error;
 
       setEditor(emptyPost);
+      setComposerOpen(false);
       markRateLimitAction("post-save");
       await reloadPosts();
       setStatus("記事を保存しました。");
@@ -203,16 +206,48 @@ export function ProfilePostManager({ supabase, session, username, posts, onPosts
     }
   }
 
+  function openNewComposer() {
+    setEditor(emptyPost);
+    setComposerOpen(true);
+    setStatus("");
+  }
+
+  function openExistingPost(post) {
+    setEditor(mapPostToEditor(post));
+    setComposerOpen(true);
+    setStatus("");
+  }
+
   return (
-    <section className="section-grid single-column">
-      <div className="section-copy">
-        <p className="eyebrow">Posts</p>
-        <h2>{title}</h2>
-        <p>{status || "公開ページのまま記事を追加・更新・削除できます。"}</p>
+    <div className="post-manager-embedded">
+      <div className="post-manager-toolbar">
+        <div className="post-manager-copy">
+          <p className="eyebrow">Owner tools</p>
+          <strong>{title}</strong>
+          <span>{status || "記事の追加・更新・削除はここで行えます。"}</span>
+        </div>
+
+        <div className="hero-actions">
+          <button type="button" className="button button-primary" onClick={openNewComposer}>
+            新規記事
+          </button>
+          {composerOpen ? (
+            <button
+              type="button"
+              className="button button-ghost"
+              onClick={() => {
+                setComposerOpen(false);
+                setEditor(emptyPost);
+              }}
+            >
+              閉じる
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <div className="stack-list">
-        <form className="surface form-stack" onSubmit={savePost}>
+      {composerOpen ? (
+        <form className="surface form-stack post-manager-composer" onSubmit={savePost}>
           <div>
             <p className="eyebrow">Post editor</p>
             <h3>{editor.id ? "記事を編集" : "新規記事を作成"}</h3>
@@ -355,60 +390,62 @@ export function ProfilePostManager({ supabase, session, username, posts, onPosts
             <button type="submit" className="button button-primary" disabled={savingPost}>
               {savingPost ? "保存中..." : editor.id ? "記事を更新" : "記事を追加"}
             </button>
-            <button type="button" className="button button-ghost" onClick={() => setEditor(emptyPost)}>
+            <button
+              type="button"
+              className="button button-ghost"
+              onClick={() => {
+                setEditor(emptyPost);
+                setComposerOpen(false);
+              }}
+            >
               入力をリセット
             </button>
           </div>
         </form>
+      ) : null}
 
-        <section className="surface form-stack">
-          <div>
-            <p className="eyebrow">Your posts</p>
-            <h3>投稿一覧</h3>
-          </div>
-
-          {posts.length ? (
-            posts.map((post) => (
-              <article key={post.id} className="post-row-card">
-                <div className="post-row-body">
-                  <div className="post-row-meta">
-                    <strong>{post.title}</strong>
-                    <span className={`pill ${resolvePostPill(post).className}`}>{resolvePostPill(post).label}</span>
-                  </div>
-                  <p>{post.excerpt || "要約なし"}</p>
-                  <div className="inline-meta">
-                    <span>{post.visibility || "public"}</span>
-                    <span>{formatSchedule(post.scheduled_for)}</span>
-                    <span>{Array.isArray(post.tags) ? post.tags.length : 0} tags</span>
-                  </div>
-                  {username ? (
-                    <Link href={`/@${username}/${post.slug}`} className="text-button">
-                      公開ページを見る
-                    </Link>
-                  ) : null}
+      <div className="post-manager-list">
+        {posts.length ? (
+          posts.map((post) => (
+            <article key={post.id} className="post-row-card">
+              <div className="post-row-body">
+                <div className="post-row-meta">
+                  <strong>{post.title}</strong>
+                  <span className={`pill ${resolvePostPill(post).className}`}>{resolvePostPill(post).label}</span>
                 </div>
-
-                <div className="secondary-actions">
-                  <button type="button" className="button button-secondary" onClick={() => setEditor(mapPostToEditor(post))}>
-                    編集
-                  </button>
-                  <button
-                    type="button"
-                    className="button button-danger"
-                    disabled={deletingPostId === post.id}
-                    onClick={() => removePost(post.id)}
-                  >
-                    {deletingPostId === post.id ? "削除中..." : "削除"}
-                  </button>
+                <p>{post.excerpt || "要約なし"}</p>
+                <div className="inline-meta">
+                  <span>{post.visibility || "public"}</span>
+                  <span>{formatSchedule(post.scheduled_for)}</span>
+                  <span>{Array.isArray(post.tags) ? post.tags.length : 0} tags</span>
                 </div>
-              </article>
-            ))
-          ) : (
-            <div className="empty-inline">まだ記事がありません。</div>
-          )}
-        </section>
+                {username ? (
+                  <Link href={`/@${username}/${post.slug}`} className="text-button">
+                    公開ページを見る
+                  </Link>
+                ) : null}
+              </div>
+
+              <div className="secondary-actions">
+                <button type="button" className="button button-secondary" onClick={() => openExistingPost(post)}>
+                  編集
+                </button>
+                <button
+                  type="button"
+                  className="button button-danger"
+                  disabled={deletingPostId === post.id}
+                  onClick={() => removePost(post.id)}
+                >
+                  {deletingPostId === post.id ? "削除中..." : "削除"}
+                </button>
+              </div>
+            </article>
+          ))
+        ) : (
+          <div className="empty-inline">まだ記事がありません。</div>
+        )}
       </div>
-    </section>
+    </div>
   );
 }
 

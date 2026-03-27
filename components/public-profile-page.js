@@ -372,17 +372,6 @@ export function PublicProfilePage({ profile, posts }) {
       />
       <ReportAction targetProfileId={draft.id} label="プロフィールを通報" />
 
-      {canEdit ? (
-        <ProfilePostManager
-          supabase={supabase}
-          session={session}
-          username={draft.username}
-          posts={postItems}
-          onPostsChange={setPostItems}
-          title="公開ページで記事を管理"
-        />
-      ) : null}
-
       <section className="section-grid single-column">
         <div className="section-copy">
           <p className="eyebrow">Posts</p>
@@ -390,7 +379,16 @@ export function PublicProfilePage({ profile, posts }) {
         </div>
 
         <div className="stack-list">
-          {postItems.length ? (
+          {canEdit ? (
+            <ProfilePostManager
+              supabase={supabase}
+              session={session}
+              username={draft.username}
+              posts={postItems}
+              onPostsChange={setPostItems}
+              title="記事を管理"
+            />
+          ) : postItems.length ? (
             postItems.map((post) => (
               <Link key={post.id} href={`/@${draft.username}/${post.slug}`} className="surface post-card">
                 <div className="post-card-head">
