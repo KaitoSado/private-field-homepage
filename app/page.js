@@ -7,9 +7,9 @@ export const revalidate = 0;
 export default async function HomePage() {
   const { profiles, posts, tags } = await getCommunityFeed();
   const stats = [
-    { label: "プロフィール作成", value: "1 URL" },
-    { label: "記事投稿", value: "画像 / 動画" },
-    { label: "導入難度", value: "低め" }
+    { label: "公開ページ", value: "1 URL" },
+    { label: "記事・記録", value: "画像 / 動画" },
+    { label: "編集体験", value: "公開面で直接" }
   ];
 
   return (
@@ -17,17 +17,18 @@ export default async function HomePage() {
       <section className="hero">
         <div className="hero-copy">
           <p className="eyebrow">FieldCard Social</p>
-          <h1>誰でも、自分の肩書きと発信を1ページで持てる。</h1>
+          <h1>プロフィール、記事、記録をひとつの公開ページにまとめる。</h1>
           <p className="hero-lead">
-            プロフィール、ブログ、リンク集をひとつにまとめたSNSです。アカウントを作ると、
-            自分専用の公開ページと投稿管理画面をすぐ使えます。
+            肩書きやプロフィールだけで終わらず、記事、習慣の記録、週間の流れまで置ける
+            公開プロフィールサービスです。アカウントを作ると、自分専用の `@username`
+            ページをそのまま編集しながら育てられます。
           </p>
           <div className="hero-actions">
             <Link href="/auth" className="button button-primary">
               無料ではじめる
             </Link>
-            <Link href="/dashboard" className="button button-secondary">
-              ダッシュボードへ
+            <Link href="/explore" className="button button-secondary">
+              いまのページを見る
             </Link>
           </div>
         </div>
@@ -35,10 +36,10 @@ export default async function HomePage() {
         <div className="hero-panel surface">
           <p className="panel-label">できること</p>
           <ul className="check-list">
-            <li>プロフィールページを公開</li>
-            <li>ブログ記事を投稿</li>
-            <li>フォロー、いいね、コメントで反応</li>
-            <li>SNS やポートフォリオへのリンク集を掲載</li>
+            <li>`/@username` の公開ページをそのまま育てる</li>
+            <li>記事、画像、動画を投稿する</li>
+            <li>記録や週間予定をページ上に残す</li>
+            <li>フォロー、いいね、コメントでつながる</li>
             <li>タグと検索で新しい人を見つける</li>
           </ul>
           <div className="stats-grid">
@@ -54,14 +55,14 @@ export default async function HomePage() {
 
       <section className="feature-strip">
         <article className="surface feature-card">
-          <p className="eyebrow">For individuals</p>
-          <h2>ポートフォリオより軽く、SNSより整理されている。</h2>
-          <p>フリーランス、研究者、学生、制作者が自分の現在地を1ページで伝えられます。</p>
+          <p className="eyebrow">For public pages</p>
+          <h2>肩書きだけでなく、いまの動きまで見せられる。</h2>
+          <p>研究者、学生、制作者、個人開発者が、自分の現在地を更新し続けるための公開ページです。</p>
         </article>
         <article className="surface feature-card">
-          <p className="eyebrow">For sharing</p>
-          <h2>URLひとつで自己紹介が終わる。</h2>
-          <p>プロフィール、最近の投稿、外部リンクをまとめて見せられるので、名刺交換の代わりに使えます。</p>
+          <p className="eyebrow">For editing</p>
+          <h2>管理画面より、公開ページをそのまま触る。</h2>
+          <p>プロフィール編集も記事追加も、できるだけ公開面の近くで完結するように設計しています。</p>
         </article>
       </section>
 
@@ -69,7 +70,7 @@ export default async function HomePage() {
         <div className="section-copy">
           <p className="eyebrow">Profiles</p>
           <h2>最近のユーザー</h2>
-          <p>プロフィールは `/@username` で公開されます。</p>
+          <p>プロフィールは `/@username` で公開され、記事や記録もまとめて見られます。</p>
           <Link href="/explore" className="button button-secondary">
             全体を見る
           </Link>
@@ -109,7 +110,7 @@ export default async function HomePage() {
         <div className="section-copy">
           <p className="eyebrow">Posts</p>
           <h2>公開された記事</h2>
-          <p>公開設定にした記事はトップにも並びます。</p>
+          <p>公開設定にした記事はトップにも並び、各プロフィールの公開ページからそのまま読めます。</p>
         </div>
 
         <div className="stack-list">
@@ -151,7 +152,7 @@ export default async function HomePage() {
         <div className="section-copy">
           <p className="eyebrow">Discovery</p>
           <h2>注目タグ</h2>
-          <p>人気のタグから、いま動いているテーマを辿れます。</p>
+          <p>記事やプロフィールに付いたタグから、いま動いているテーマと人を辿れます。</p>
         </div>
 
         <div className="surface tag-cloud">
