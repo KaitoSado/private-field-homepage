@@ -49,12 +49,14 @@ export function SignatureProfilePage({ profile, posts }) {
   const [expandedCurrentEntries, setExpandedCurrentEntries] = useState({});
   const [expandedRecordItems, setExpandedRecordItems] = useState({});
   const [postCreateSignal, setPostCreateSignal] = useState(0);
+  const [postManagerOpen, setPostManagerOpen] = useState(false);
   const canEdit = session?.user?.id === profile.id;
 
   useEffect(() => {
     setDraft(inflateSignatureProfile(profile));
     setExpandedCurrentEntries({});
     setExpandedRecordItems({});
+    setPostManagerOpen(false);
   }, [profile]);
 
   useEffect(() => {
@@ -168,6 +170,7 @@ export function SignatureProfilePage({ profile, posts }) {
       setIsEditing(false);
       setExpandedCurrentEntries({});
       setExpandedRecordItems({});
+      setPostManagerOpen(false);
       setStatus("公開ページを保存しました。");
       router.refresh();
 
@@ -242,6 +245,24 @@ export function SignatureProfilePage({ profile, posts }) {
     setIsEditing(true);
   }
 
+  function startEditingWithNewRecord() {
+    setDraft((current) => ({
+      ...current,
+      headline: current.headline || defaultLeadCopy,
+      identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING,
+      record_heading: current.record_heading || DEFAULT_RECORD_HEADING,
+      current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()),
+      weekly_schedule: mergeWeeklySchedule(current.weekly_schedule),
+      record_items: [...mergeRecordItems(current.record_items, buildDefaultRecordItems()), { title: "", body: "" }]
+    }));
+    setIsEditing(true);
+  }
+
+  function openPostComposer() {
+    setPostManagerOpen(true);
+    setPostCreateSignal((current) => current + 1);
+  }
+
   return (
     <SignaturePageShell>
       <div className="signature-noise" aria-hidden="true" />
@@ -264,6 +285,7 @@ export function SignatureProfilePage({ profile, posts }) {
                   onClick={() => {
                     setDraft(inflateSignatureProfile(profile));
                     setIsEditing(false);
+                    setPostManagerOpen(false);
                     setStatus("");
                   }}
                 >
@@ -567,13 +589,13 @@ export function SignatureProfilePage({ profile, posts }) {
             <p className="eyebrow">Works</p>
             <h2>記事</h2>
           </div>
-          {isEditing ? (
-            <button type="button" className="button button-secondary button-small" onClick={() => setPostCreateSignal((current) => current + 1)}>
+          {canEdit ? (
+            <button type="button" className="button button-secondary button-small" onClick={openPostComposer}>
               新規記事
             </button>
           ) : null}
         </div>
-        {isEditing ? (
+        {isEditing || postManagerOpen ? (
           <ProfilePostManager
             supabase={supabase}
             session={session}
@@ -638,8 +660,12 @@ export function SignatureProfilePage({ profile, posts }) {
               <h2>{draft.record_heading || DEFAULT_RECORD_HEADING}</h2>
             )}
           </div>
-          {isEditing ? (
-            <button type="button" className="button button-secondary button-small" onClick={addRecordItem}>
+          {canEdit ? (
+            <button
+              type="button"
+              className="button button-secondary button-small"
+              onClick={isEditing ? addRecordItem : startEditingWithNewRecord}
+            >
               追加
             </button>
           ) : null}
