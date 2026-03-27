@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AvatarMark } from "@/components/avatar-mark";
+import { ProfilePostManager } from "@/components/profile-post-manager";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
 import { AVATAR_MAX_BYTES, PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROFILE_OPEN_TO_LIMIT } from "@/lib/limits";
@@ -15,6 +16,7 @@ export function PublicProfilePage({ profile, posts }) {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [draft, setDraft] = useState(profile);
+  const [postItems, setPostItems] = useState(posts);
   const [session, setSession] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -25,6 +27,10 @@ export function PublicProfilePage({ profile, posts }) {
   useEffect(() => {
     setDraft(profile);
   }, [profile]);
+
+  useEffect(() => {
+    setPostItems(posts);
+  }, [posts]);
 
   useEffect(() => {
     let mounted = true;
@@ -362,9 +368,20 @@ export function PublicProfilePage({ profile, posts }) {
       <ProfileSocialActions
         profileId={draft.id}
         username={draft.username}
-        initialStats={draft.stats || { follower_count: 0, following_count: 0, public_post_count: posts.length }}
+        initialStats={draft.stats || { follower_count: 0, following_count: 0, public_post_count: postItems.length }}
       />
       <ReportAction targetProfileId={draft.id} label="プロフィールを通報" />
+
+      {canEdit ? (
+        <ProfilePostManager
+          supabase={supabase}
+          session={session}
+          username={draft.username}
+          posts={postItems}
+          onPostsChange={setPostItems}
+          title="公開ページで記事を管理"
+        />
+      ) : null}
 
       <section className="section-grid single-column">
         <div className="section-copy">
@@ -373,8 +390,8 @@ export function PublicProfilePage({ profile, posts }) {
         </div>
 
         <div className="stack-list">
-          {posts.length ? (
-            posts.map((post) => (
+          {postItems.length ? (
+            postItems.map((post) => (
               <Link key={post.id} href={`/@${draft.username}/${post.slug}`} className="surface post-card">
                 <div className="post-card-head">
                   <span>{formatDate(post.published_at || post.updated_at)}</span>

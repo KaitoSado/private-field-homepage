@@ -8,6 +8,7 @@ import { SignatureHeroShader } from "@/components/signature-hero-shader";
 import { SignatureHeroStage } from "@/components/signature-hero-stage";
 import { SignatureInteractiveSection } from "@/components/signature-interactive-section";
 import { SignaturePageShell } from "@/components/signature-page-shell";
+import { ProfilePostManager } from "@/components/profile-post-manager";
 import { SignaturePostShelf } from "@/components/signature-post-shelf";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
@@ -39,6 +40,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const router = useRouter();
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [draft, setDraft] = useState(() => inflateSignatureProfile(profile));
+  const [postItems, setPostItems] = useState(posts);
   const [session, setSession] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [status, setStatus] = useState("");
@@ -48,6 +50,10 @@ export function SignatureProfilePage({ profile, posts }) {
   useEffect(() => {
     setDraft(inflateSignatureProfile(profile));
   }, [profile]);
+
+  useEffect(() => {
+    setPostItems(posts);
+  }, [posts]);
 
   useEffect(() => {
     let mounted = true;
@@ -78,8 +84,8 @@ export function SignatureProfilePage({ profile, posts }) {
     };
   }, [supabase]);
 
-  const featuredPosts = posts.slice(0, 3);
-  const recentPosts = posts.slice(0, 4);
+  const featuredPosts = postItems.slice(0, 3);
+  const recentPosts = postItems.slice(0, 4);
   const latestPost = recentPosts[0] || null;
   const leadCopy = draft.headline || "なんか書ける";
   const identityBody =
@@ -343,7 +349,7 @@ export function SignatureProfilePage({ profile, posts }) {
             </div>
             <div>
               <dt>Published</dt>
-              <dd>{posts.length} posts</dd>
+              <dd>{postItems.length} posts</dd>
             </div>
             <div>
               <dt>Latest</dt>
@@ -360,9 +366,20 @@ export function SignatureProfilePage({ profile, posts }) {
       <ProfileSocialActions
         profileId={draft.id}
         username={draft.username}
-        initialStats={draft.stats || { follower_count: 0, following_count: 0, public_post_count: posts.length }}
+        initialStats={draft.stats || { follower_count: 0, following_count: 0, public_post_count: postItems.length }}
       />
       <ReportAction targetProfileId={draft.id} label="プロフィールを通報" />
+
+      {canEdit ? (
+        <ProfilePostManager
+          supabase={supabase}
+          session={session}
+          username={draft.username}
+          posts={postItems}
+          onPostsChange={setPostItems}
+          title="公開ページで記事を管理"
+        />
+      ) : null}
 
       <SignatureInteractiveSection id="signature-identity">
         <div className="signature-section-head">
