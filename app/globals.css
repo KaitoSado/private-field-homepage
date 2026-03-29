@@ -1933,8 +1933,6 @@ textarea {
 
 .signature-current-card-head,
 .signature-current-edit-head {
-  display: grid;
-  gap: 0;
   align-content: start;
 }
 
@@ -1944,12 +1942,28 @@ textarea {
   line-height: 1.15;
 }
 
+.signature-current-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.signature-current-edit-head {
+  display: grid;
+  gap: 1px;
+}
+
 .signature-current-card-head h3,
 .signature-current-edit-head h3,
 .signature-current-card h3 {
   margin: 0;
   font-size: 1.12rem;
   line-height: 1.16;
+}
+
+.signature-current-card-head h3 {
+  font-size: 1.02rem;
 }
 
 .signature-current-label-input {
