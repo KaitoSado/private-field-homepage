@@ -50,6 +50,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [expandedCurrentEntries, setExpandedCurrentEntries] = useState({});
   const [expandedRecordItems, setExpandedRecordItems] = useState({});
+  const [showAllCurrentEntries, setShowAllCurrentEntries] = useState(false);
   const [postCreateSignal, setPostCreateSignal] = useState(0);
   const [postManagerOpen, setPostManagerOpen] = useState(false);
   const canEdit = session?.user?.id === profile.id;
@@ -58,6 +59,7 @@ export function SignatureProfilePage({ profile, posts }) {
     setDraft(inflateSignatureProfile(profile));
     setExpandedCurrentEntries({});
     setExpandedRecordItems({});
+    setShowAllCurrentEntries(false);
     setPostManagerOpen(false);
   }, [profile]);
 
@@ -127,6 +129,12 @@ export function SignatureProfilePage({ profile, posts }) {
     }
   ];
   const currentEntries = mergeCurrentEntries(draft.current_entries, buildDefaultCurrentEntries());
+  const visibleCurrentEntries = isEditing
+    ? currentEntries
+    : showAllCurrentEntries || currentEntries.length <= 4
+      ? currentEntries
+      : currentEntries.slice(-4);
+  const hiddenCurrentEntryCount = Math.max(0, currentEntries.length - visibleCurrentEntries.length);
   const weeklySchedule = mergeWeeklySchedule(draft.weekly_schedule);
   const recordItems = mergeRecordItems(draft.record_items, buildDefaultRecordItems());
   const defaultLeadCopy = "なんか書ける";
@@ -172,6 +180,7 @@ export function SignatureProfilePage({ profile, posts }) {
       setIsEditing(false);
       setExpandedCurrentEntries({});
       setExpandedRecordItems({});
+      setShowAllCurrentEntries(false);
       setPostManagerOpen(false);
       setStatus("公開ページを保存しました。");
       router.refresh();
@@ -341,6 +350,7 @@ export function SignatureProfilePage({ profile, posts }) {
                     setDraft(inflateSignatureProfile(profile));
                     setIsEditing(false);
                     setPostManagerOpen(false);
+                    setShowAllCurrentEntries(false);
                     setStatus("");
                   }}
                 >
@@ -555,40 +565,46 @@ export function SignatureProfilePage({ profile, posts }) {
         </div>
         <div className="signature-current-layout">
           <div className="signature-current-grid">
-            {currentEntries.map((entry, index) => (
+            {visibleCurrentEntries.map((entry, visibleIndex) => {
+              const index = isEditing ? visibleIndex : currentEntries.length - visibleCurrentEntries.length + visibleIndex;
+
+              return (
               <article key={`current-entry-${index}`} className="signature-current-card">
                 {isEditing ? (
-                  <input
-                    className="signature-current-label-input eyebrow"
-                    value={entry.label || ""}
-                    onChange={(event) => updateCurrentEntry(index, "label", event.target.value)}
-                    maxLength={PROFILE_LOCATION_LIMIT}
-                    placeholder="日付"
-                  />
-                ) : (
-                  <p className="eyebrow">{entry.label}</p>
-                )}
-                {isEditing ? (
-                  <>
+                  <div className="signature-current-edit-head">
                     <input
+                      className="signature-current-label-input eyebrow"
+                      value={entry.label || ""}
+                      onChange={(event) => updateCurrentEntry(index, "label", event.target.value)}
+                      maxLength={PROFILE_LOCATION_LIMIT}
+                      placeholder="日付"
+                    />
+                    <input
+                      className="signature-current-title-input"
                       value={entry.title || ""}
                       onChange={(event) => updateCurrentEntry(index, "title", event.target.value)}
                       maxLength={PROFILE_HEADLINE_LIMIT}
                       placeholder="見出し"
                     />
-                    <textarea
-                      rows="4"
-                      value={entry.body || ""}
-                      onChange={(event) => updateCurrentEntry(index, "body", event.target.value)}
-                      maxLength={PROFILE_BIO_LIMIT}
+                  </div>
+                ) : (
+                  <div className="signature-current-card-head">
+                    <p className="eyebrow">{entry.label || "日付未設定"}</p>
+                    <h3>{entry.title || "タイトル未設定"}</h3>
+                  </div>
+                )}
+                {isEditing ? (
+                  <textarea
+                    rows="3"
+                    value={entry.body || ""}
+                    onChange={(event) => updateCurrentEntry(index, "body", event.target.value)}
+                    maxLength={PROFILE_BIO_LIMIT}
                     placeholder="内容"
                   />
-                </>
-              ) : (
-                <>
-                  <h3>{entry.title}</h3>
+                ) : (
                   <p>{getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).text || "ここに近況を書けます。"}</p>
-                  {getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).truncated ? (
+                )}
+                {!isEditing && getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).truncated ? (
                     <button
                       type="button"
                       className="signature-inline-toggle"
@@ -602,10 +618,18 @@ export function SignatureProfilePage({ profile, posts }) {
                       {expandedCurrentEntries[index] ? "たたむ" : "続きを読む"}
                     </button>
                   ) : null}
-                </>
-              )}
             </article>
-          ))}
+              );
+            })}
+            {!isEditing && hiddenCurrentEntryCount > 0 ? (
+              <button
+                type="button"
+                className="signature-section-expand"
+                onClick={() => setShowAllCurrentEntries((current) => !current)}
+              >
+                {showAllCurrentEntries ? "最近の記録だけ表示" : `過去の記録をもっと見る (${hiddenCurrentEntryCount})`}
+              </button>
+            ) : null}
           </div>
 
           <article className="signature-schedule-card">
