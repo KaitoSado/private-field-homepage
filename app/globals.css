@@ -1928,7 +1928,7 @@ textarea {
 
 .signature-current-card {
   padding: 16px 18px;
-  gap: 8px;
+  gap: 6px;
 }
 
 .signature-current-card-head,
@@ -2146,9 +2146,12 @@ textarea {
 }
 
 .signature-post-preview,
-.signature-current-card p,
 .signature-record-card p {
   min-height: 4.8em;
+}
+
+.signature-current-card p {
+  min-height: 0;
 }
 
 .signature-post-card .tag-row {
