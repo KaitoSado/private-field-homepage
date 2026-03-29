@@ -265,6 +265,13 @@ export function SignatureProfilePage({ profile, posts }) {
     }));
   }
 
+  function addCurrentEntry() {
+    setDraft((current) => ({
+      ...current,
+      current_entries: [...mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()), { label: "", title: "", body: "" }]
+    }));
+  }
+
   function startEditing() {
     setDraft((current) => ({
       ...current,
@@ -287,6 +294,19 @@ export function SignatureProfilePage({ profile, posts }) {
       current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()),
       weekly_schedule: mergeWeeklySchedule(current.weekly_schedule),
       record_items: [...mergeRecordItems(current.record_items, buildDefaultRecordItems()), { title: "", body: "" }]
+    }));
+    setIsEditing(true);
+  }
+
+  function startEditingWithNewCurrentEntry() {
+    setDraft((current) => ({
+      ...current,
+      headline: current.headline || defaultLeadCopy,
+      identity_heading: current.identity_heading || DEFAULT_IDENTITY_HEADING,
+      record_heading: current.record_heading || DEFAULT_RECORD_HEADING,
+      current_entries: [...mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()), { label: "", title: "", body: "" }],
+      weekly_schedule: mergeWeeklySchedule(current.weekly_schedule),
+      record_items: mergeRecordItems(current.record_items, buildDefaultRecordItems())
     }));
     setIsEditing(true);
   }
@@ -519,8 +539,19 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <SignatureInteractiveSection id="signature-current">
         <div className="signature-section-head">
-          <p className="eyebrow">Current</p>
-          <h2>何してる？</h2>
+          <div>
+            <p className="eyebrow">Current</p>
+            <h2>何してる？</h2>
+          </div>
+          {canEdit ? (
+            <button
+              type="button"
+              className="button button-secondary button-small"
+              onClick={isEditing ? addCurrentEntry : startEditingWithNewCurrentEntry}
+            >
+              追加
+            </button>
+          ) : null}
         </div>
         <div className="signature-current-layout">
           <div className="signature-current-grid">
@@ -841,7 +872,7 @@ function buildDefaultRecordItems() {
 }
 
 function mergeCurrentEntries(currentEntries, defaults) {
-  return defaults.map((fallback, index) => {
+  const mergedDefaults = defaults.map((fallback, index) => {
     const current = currentEntries?.[index] || {};
     return {
       label: `${current.label || ""}`.trim() || fallback.label,
@@ -849,6 +880,16 @@ function mergeCurrentEntries(currentEntries, defaults) {
       body: `${current.body || ""}`.trim() || fallback.body
     };
   });
+
+  const extraEntries = Array.isArray(currentEntries)
+    ? currentEntries.slice(defaults.length).map((entry) => ({
+        label: `${entry?.label ?? ""}`,
+        title: `${entry?.title ?? ""}`,
+        body: `${entry?.body ?? ""}`
+      }))
+    : [];
+
+  return [...mergedDefaults, ...extraEntries];
 }
 
 function mergeWeeklySchedule(weeklySchedule) {
