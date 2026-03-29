@@ -1953,6 +1953,14 @@ textarea {
   flex-wrap: wrap;
 }
 
+.signature-current-edit-row,
+.signature-record-edit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
 .signature-current-edit-head {
   display: grid;
   gap: 1px;
@@ -2186,6 +2194,12 @@ textarea {
   resize: vertical;
   min-height: 96px;
   line-height: 1.8;
+}
+
+.signature-current-edit-row .button-small,
+.signature-record-edit-row .button-small {
+  min-height: 36px;
+  padding-inline: 12px;
 }
 
 .signature-current-card textarea {

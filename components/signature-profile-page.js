@@ -241,6 +241,18 @@ export function SignatureProfilePage({ profile, posts }) {
     });
   }
 
+  function removeCurrentEntry(index) {
+    setDraft((current) => ({
+      ...current,
+      current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()).filter((_, entryIndex) => entryIndex !== index)
+    }));
+    setExpandedCurrentEntries((current) => {
+      const next = { ...current };
+      delete next[index];
+      return next;
+    });
+  }
+
   function updateScheduleCell(dayKey, periodKey, value) {
     setDraft((current) => {
       const nextSchedule = mergeWeeklySchedule(current.weekly_schedule);
@@ -264,6 +276,18 @@ export function SignatureProfilePage({ profile, posts }) {
       );
 
       return { ...current, record_items: nextRecords };
+    });
+  }
+
+  function removeRecordItem(index) {
+    setDraft((current) => ({
+      ...current,
+      record_items: mergeRecordItems(current.record_items, buildDefaultRecordItems()).filter((_, itemIndex) => itemIndex !== index)
+    }));
+    setExpandedRecordItems((current) => {
+      const next = { ...current };
+      delete next[index];
+      return next;
     });
   }
 
@@ -571,21 +595,30 @@ export function SignatureProfilePage({ profile, posts }) {
               return (
               <article key={`current-entry-${index}`} className="signature-current-card">
                 {isEditing ? (
-                  <div className="signature-current-edit-head">
-                    <input
-                      className="signature-current-label-input eyebrow"
-                      value={entry.label || ""}
-                      onChange={(event) => updateCurrentEntry(index, "label", event.target.value)}
-                      maxLength={PROFILE_LOCATION_LIMIT}
-                      placeholder="日付"
-                    />
-                    <input
-                      className="signature-current-title-input"
-                      value={entry.title || ""}
-                      onChange={(event) => updateCurrentEntry(index, "title", event.target.value)}
-                      maxLength={PROFILE_HEADLINE_LIMIT}
-                      placeholder="見出し"
-                    />
+                  <div className="signature-current-edit-row">
+                    <div className="signature-current-edit-head">
+                      <input
+                        className="signature-current-label-input eyebrow"
+                        value={entry.label || ""}
+                        onChange={(event) => updateCurrentEntry(index, "label", event.target.value)}
+                        maxLength={PROFILE_LOCATION_LIMIT}
+                        placeholder="日付"
+                      />
+                      <input
+                        className="signature-current-title-input"
+                        value={entry.title || ""}
+                        onChange={(event) => updateCurrentEntry(index, "title", event.target.value)}
+                        maxLength={PROFILE_HEADLINE_LIMIT}
+                        placeholder="見出し"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="button button-ghost button-small"
+                      onClick={() => removeCurrentEntry(index)}
+                    >
+                      削除
+                    </button>
                   </div>
                 ) : (
                   <div className="signature-current-card-head">
@@ -776,13 +809,22 @@ export function SignatureProfilePage({ profile, posts }) {
             <article key={`record-item-${index}`} className="signature-record-card">
               {isEditing ? (
                 <>
-                  <input
-                    className="signature-record-title"
-                    value={item.title || ""}
-                    onChange={(event) => updateRecordItem(index, "title", event.target.value)}
-                    maxLength={PROFILE_LOCATION_LIMIT}
-                    placeholder="項目名"
-                  />
+                  <div className="signature-record-edit-row">
+                    <input
+                      className="signature-record-title"
+                      value={item.title || ""}
+                      onChange={(event) => updateRecordItem(index, "title", event.target.value)}
+                      maxLength={PROFILE_LOCATION_LIMIT}
+                      placeholder="項目名"
+                    />
+                    <button
+                      type="button"
+                      className="button button-ghost button-small"
+                      onClick={() => removeRecordItem(index)}
+                    >
+                      削除
+                    </button>
+                  </div>
                   <textarea
                     rows="4"
                     value={item.body || ""}
