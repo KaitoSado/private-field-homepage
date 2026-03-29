@@ -1934,22 +1934,24 @@ textarea {
 .signature-current-card-head,
 .signature-current-edit-head {
   display: grid;
-  gap: 6px;
+  gap: 2px;
 }
 
 .signature-current-card-head .eyebrow,
 .signature-current-edit-head .eyebrow {
   margin: 0;
+  line-height: 1.15;
 }
 
 .signature-current-card h3 {
   margin-bottom: 0;
   font-size: 1.12rem;
-  line-height: 1.25;
+  line-height: 1.16;
 }
 
 .signature-current-label-input {
   margin: 0;
+  padding-bottom: 2px;
   font-family: "IBM Plex Mono", monospace;
   color: #6b7276;
   letter-spacing: 0.06em;
@@ -1962,7 +1964,7 @@ textarea {
   border-radius: 0;
   background: transparent;
   color: #1d2328;
-  padding: 0 0 8px;
+  padding: 0 0 6px;
   box-shadow: none;
   font: inherit;
   font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
