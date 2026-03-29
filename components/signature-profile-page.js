@@ -242,6 +242,12 @@ export function SignatureProfilePage({ profile, posts }) {
   }
 
   function removeCurrentEntry(index) {
+    const targetEntry = mergeCurrentEntries(draft.current_entries, buildDefaultCurrentEntries())[index];
+    const hasContent = [targetEntry?.label, targetEntry?.title, targetEntry?.body].some((value) => `${value || ""}`.trim());
+    if (hasContent && !window.confirm("この項目を本当に削除しますか？")) {
+      return;
+    }
+
     setDraft((current) => ({
       ...current,
       current_entries: mergeCurrentEntries(current.current_entries, buildDefaultCurrentEntries()).filter((_, entryIndex) => entryIndex !== index)
@@ -280,6 +286,12 @@ export function SignatureProfilePage({ profile, posts }) {
   }
 
   function removeRecordItem(index) {
+    const targetItem = mergeRecordItems(draft.record_items, buildDefaultRecordItems())[index];
+    const hasContent = [targetItem?.title, targetItem?.body].some((value) => `${value || ""}`.trim());
+    if (hasContent && !window.confirm("この項目を本当に削除しますか？")) {
+      return;
+    }
+
     setDraft((current) => ({
       ...current,
       record_items: mergeRecordItems(current.record_items, buildDefaultRecordItems()).filter((_, itemIndex) => itemIndex !== index)
