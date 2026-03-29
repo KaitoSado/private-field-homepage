@@ -1909,7 +1909,7 @@ textarea {
 
 .signature-current-card p {
   margin: 0;
-  line-height: 1.72;
+  line-height: 1.58;
   color: #576167;
   white-space: pre-wrap;
 }
@@ -1928,7 +1928,11 @@ textarea {
 
 .signature-current-card {
   padding: 16px 18px;
-  gap: 6px;
+  gap: 0;
+}
+
+.signature-current-body {
+  margin-top: 2px;
 }
 
 .signature-current-card-head,

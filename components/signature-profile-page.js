@@ -602,7 +602,9 @@ export function SignatureProfilePage({ profile, posts }) {
                     placeholder="内容"
                   />
                 ) : (
-                  <p>{getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).text || "ここに近況を書けます。"}</p>
+                  <div className="signature-current-body">
+                    <p>{getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).text || "ここに近況を書けます。"}</p>
+                  </div>
                 )}
                 {!isEditing && getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).truncated ? (
                     <button
