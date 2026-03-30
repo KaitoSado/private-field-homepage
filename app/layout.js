@@ -2,6 +2,7 @@ import "./globals.css";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FeedVisibilityHydrator } from "@/components/feed-visibility-hydrator";
+import { HeaderNav } from "@/components/header-nav";
 import { TelemetryClient } from "@/components/telemetry-client";
 import { BRAND_DESCRIPTION, BRAND_NAME, BRAND_TAGLINE, buildAbsoluteUrl } from "@/lib/brand";
 
@@ -56,31 +57,7 @@ export default function RootLayout({ children }) {
                 <small>{BRAND_TAGLINE}</small>
               </span>
             </Link>
-
-            <nav className="site-nav site-nav-desktop">
-              <Link href="/">Home</Link>
-              <Link href="/explore">Explore</Link>
-              <Link href="/notifications">Notifications</Link>
-              <Link href="/auth">Auth</Link>
-              <Link href="/me">My Page</Link>
-              <Link href="/settings">Settings</Link>
-              <Link href="/admin">Admin</Link>
-              <Link href="/ops">Ops</Link>
-            </nav>
-
-            <details className="mobile-nav">
-              <summary>Menu</summary>
-              <nav className="mobile-nav-panel">
-                <Link href="/">Home</Link>
-                <Link href="/explore">Explore</Link>
-                <Link href="/notifications">Notifications</Link>
-                <Link href="/auth">Auth</Link>
-                <Link href="/me">My Page</Link>
-                <Link href="/settings">Settings</Link>
-                <Link href="/admin">Admin</Link>
-                <Link href="/ops">Ops</Link>
-              </nav>
-            </details>
+            <HeaderNav />
           </div>
         </header>
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { fetchOwnProfilePath } from "@/lib/profile-path";
+import { fetchOwnProfileMeta } from "@/lib/profile-path";
 
 export function MeRedirectPanel() {
   const router = useRouter();
@@ -33,10 +33,10 @@ export function MeRedirectPanel() {
         return;
       }
 
-      const next = await fetchOwnProfilePath(supabase, session.user);
+      const nextMeta = await fetchOwnProfileMeta(supabase, session.user);
       if (!active) return;
 
-      router.replace(next);
+      router.replace(typeof nextMeta === "string" ? nextMeta : nextMeta.path);
       router.refresh();
     }
 

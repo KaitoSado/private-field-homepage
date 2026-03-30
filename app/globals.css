@@ -72,7 +72,8 @@ body {
 
 .brand-lockup,
 .footer-links,
-.site-nav {
+.site-nav,
+.site-nav-desktop {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -101,6 +102,75 @@ body {
 .footer-links {
   flex-wrap: wrap;
   color: var(--muted);
+}
+
+.site-nav-desktop {
+  gap: 12px;
+}
+
+.site-nav-more {
+  position: relative;
+}
+
+.site-nav-more summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.site-nav-more summary::-webkit-details-marker {
+  display: none;
+}
+
+.site-nav-more[open] summary {
+  background: rgba(34, 49, 58, 0.92);
+  color: #f8f5ee;
+  border-color: rgba(34, 49, 58, 0.92);
+}
+
+.site-nav-menu-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+  min-width: 180px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: rgba(250, 247, 242, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.site-nav-menu-panel a,
+.site-nav-menu-panel button,
+.mobile-nav-button {
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.62);
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.site-nav-menu-panel a:hover,
+.site-nav-menu-panel button:hover,
+.mobile-nav-button:hover {
+  background: rgba(31, 111, 120, 0.1);
+  color: var(--ink);
 }
 
 .mobile-nav {
