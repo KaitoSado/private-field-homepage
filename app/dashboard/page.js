@@ -1,13 +1,9 @@
-import { DashboardShell } from "@/components/dashboard-shell";
+import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "ダッシュボード | FieldCard Social"
+  title: "My Page | FieldCard Social"
 };
 
 export default function DashboardPage() {
-  return (
-    <main className="shell">
-      <DashboardShell />
-    </main>
-  );
+  redirect("/me");
 }

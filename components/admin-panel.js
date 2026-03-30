@@ -284,8 +284,8 @@ export function AdminPanel() {
           <Link href="/ops" className="button button-secondary">
             Ops
           </Link>
-          <Link href="/dashboard" className="button button-ghost">
-            Dashboard
+          <Link href="/me" className="button button-ghost">
+            My Page
           </Link>
         </div>
       </section>

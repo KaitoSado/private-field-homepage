@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { fetchOwnProfilePath } from "@/lib/profile-path";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export function AuthCallbackPanel() {
@@ -23,7 +24,7 @@ export function AuthCallbackPanel() {
       }
 
       const code = searchParams.get("code");
-      const next = searchParams.get("next") || "/dashboard";
+      const next = searchParams.get("next");
 
       if (!code) {
         setMessage("認証コードが見つかりません。メール内のURLをもう一度開いてください。");
@@ -38,8 +39,13 @@ export function AuthCallbackPanel() {
         return;
       }
 
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+      const resolvedNext = next || (await fetchOwnProfilePath(supabase, session?.user));
+
       setMessage("認証が完了しました。移動します...");
-      router.replace(next);
+      router.replace(resolvedNext);
       router.refresh();
     }
 

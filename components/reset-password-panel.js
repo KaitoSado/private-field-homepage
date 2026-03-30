@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { fetchOwnProfilePath } from "@/lib/profile-path";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export function ResetPasswordPanel() {
@@ -27,8 +28,12 @@ export function ResetPasswordPanel() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      setMessage("パスワードを更新しました。ダッシュボードに移動します...");
-      router.replace("/dashboard");
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+      const next = await fetchOwnProfilePath(supabase, session?.user);
+      setMessage("パスワードを更新しました。公開ページへ移動します...");
+      router.replace(next);
       router.refresh();
     } catch (error) {
       setMessage(error.message);

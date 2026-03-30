@@ -62,7 +62,7 @@ export default function RootLayout({ children }) {
               <Link href="/explore">Explore</Link>
               <Link href="/notifications">Notifications</Link>
               <Link href="/auth">Auth</Link>
-              <Link href="/dashboard">Dashboard</Link>
+              <Link href="/me">My Page</Link>
               <Link href="/settings">Settings</Link>
               <Link href="/admin">Admin</Link>
               <Link href="/ops">Ops</Link>
@@ -75,7 +75,7 @@ export default function RootLayout({ children }) {
                 <Link href="/explore">Explore</Link>
                 <Link href="/notifications">Notifications</Link>
                 <Link href="/auth">Auth</Link>
-                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/me">My Page</Link>
                 <Link href="/settings">Settings</Link>
                 <Link href="/admin">Admin</Link>
                 <Link href="/ops">Ops</Link>

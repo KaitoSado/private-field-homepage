@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { checkRateLimit, formatRetryAfter, markRateLimitAction, reportAbuseClient } from "@/lib/abuse-client";
+import { fetchOwnProfilePath } from "@/lib/profile-path";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export function AuthPanel() {
@@ -69,12 +70,13 @@ export function AuthPanel() {
         });
         if (error) throw error;
         if (data.session) {
-          setMessage("アカウントを作成しました。ダッシュボードへ移動します。");
+          const next = await fetchOwnProfilePath(supabase, data.session.user);
+          setMessage("アカウントを作成しました。公開ページへ移動します。");
           setMessageTone("success");
           markRateLimitAction(`auth-${mode}`);
-          router.push("/dashboard");
+          router.push(next);
           router.refresh();
-          window.location.assign("/dashboard");
+          window.location.assign(next);
           return;
         }
         markRateLimitAction(`auth-${mode}`);
@@ -83,12 +85,16 @@ export function AuthPanel() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        setMessage("ログインしました。ダッシュボードへ移動します。");
+        const {
+          data: { session }
+        } = await supabase.auth.getSession();
+        const next = await fetchOwnProfilePath(supabase, session?.user);
+        setMessage("ログインしました。公開ページへ移動します。");
         setMessageTone("success");
         markRateLimitAction(`auth-${mode}`);
-        router.push("/dashboard");
+        router.push(next);
         router.refresh();
-        window.location.assign("/dashboard");
+        window.location.assign(next);
       }
     } catch (error) {
       setMessage(error.message || "認証に失敗しました。");
@@ -192,7 +198,7 @@ export function AuthPanel() {
         </button>
       ) : null}
 
-      <p className={`status-text status-${messageTone}`}>{message || "登録後はダッシュボードでプロフィールを作成できます。"}</p>
+      <p className={`status-text status-${messageTone}`}>{message || "登録後は自分の公開ページをそのまま編集できます。"}</p>
     </div>
   );
 }

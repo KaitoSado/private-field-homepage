@@ -168,8 +168,8 @@ export function AccountSettingsPanel() {
           <p>{status}</p>
         </div>
         <div className="hero-actions">
-          <Link href="/dashboard" className="button button-secondary">
-            ダッシュボード
+          <Link href="/me" className="button button-secondary">
+            公開ページ
           </Link>
         </div>
       </section>

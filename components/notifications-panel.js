@@ -205,8 +205,8 @@ export function NotificationsPanel() {
           <button type="button" className="button button-secondary" onClick={markAllAsRead}>
             すべて既読にする
           </button>
-          <Link href="/dashboard" className="button button-ghost">
-            ダッシュボード
+          <Link href="/me" className="button button-ghost">
+            公開ページ
           </Link>
         </div>
       </section>
