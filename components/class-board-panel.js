@@ -268,7 +268,6 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
             {filteredCourses.length ? (
               filteredCourses.map((course) => {
                 const isExpanded = expandedCourse === course.key;
-                const previewItems = isExpanded ? course.items : course.items.slice(0, 2);
 
                 return (
                   <article key={course.key} className="surface class-course-card">
@@ -276,9 +275,6 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                       <div className="class-course-copy">
                         <div className="class-course-topline">
                           <span className="pill published">{course.items.length} reactions</span>
-                          {course.latest?.updated_at || course.latest?.created_at ? (
-                            <span className="muted">last updated {formatDate(course.latest.updated_at || course.latest.created_at)}</span>
-                          ) : null}
                         </div>
                         <h3>{course.courseName}</h3>
                         <p className="muted">
@@ -302,27 +298,28 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                     </div>
 
                     <div className="inline-meta class-course-meta">
-                      {course.terms[0] ? <span>{course.terms[0]}</span> : null}
                       {course.weekdays[0] ? <span>{course.weekdays.join(" / ")}</span> : null}
                       {course.periods[0] ? <span>{course.periods.join(" / ")}</span> : null}
-                      {course.campuses[0] ? <span>{course.campuses.join(" / ")}</span> : null}
+                      {course.campuses[0] ? <span>{course.campuses[0]}</span> : null}
                     </div>
 
-                    <div className="stack-list class-reaction-list">
-                      {previewItems.map((item) => (
-                        <div key={item.id} className="class-reaction-card">
-                          <div className="class-reaction-head">
-                            <strong>@{item.profiles?.username || item.profiles?.display_name || "guest"}</strong>
-                            <span className="muted">{formatDate(item.updated_at || item.created_at)}</span>
+                    {isExpanded ? (
+                      <div className="stack-list class-reaction-list">
+                        {course.items.map((item) => (
+                          <div key={item.id} className="class-reaction-card">
+                            <div className="class-reaction-head">
+                              <strong>@{item.profiles?.username || item.profiles?.display_name || "guest"}</strong>
+                              <span className="muted">{formatDate(item.updated_at || item.created_at)}</span>
+                            </div>
+                            <p className="class-note-body">{item.body}</p>
                           </div>
-                          <p className="class-note-body">{item.body}</p>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : null}
 
-                    {!isExpanded && course.items.length > 2 ? (
+                    {!isExpanded && course.items.length > 0 ? (
                       <button type="button" className="button button-ghost class-expand-button" onClick={() => setExpandedCourse(course.key)}>
-                        さらに {course.items.length - 2} 件の反応を見る
+                        反応を見る
                       </button>
                     ) : null}
                   </article>
