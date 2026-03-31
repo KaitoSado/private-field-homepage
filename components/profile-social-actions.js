@@ -145,10 +145,6 @@ export function ProfileSocialActions({ profileId, username, initialStats }) {
         <Link href="/auth" className="button button-secondary full-width">
           ログインしてフォロー
         </Link>
-      ) : session.user.id === profileId ? (
-        <Link href="/me" className="button button-secondary full-width">
-          自分の公開ページへ
-        </Link>
       ) : (
         <div className="social-actions">
           <button
