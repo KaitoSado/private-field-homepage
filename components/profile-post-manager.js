@@ -48,6 +48,7 @@ export function ProfilePostManager({
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
+  const mediaItemsPreview = parseMediaItems(editor.media_input);
 
   useEffect(() => {
     if (!editor.id) return;
@@ -220,6 +221,16 @@ export function ProfilePostManager({
     }
   }
 
+  function removeMediaItem(index) {
+    setEditor((current) => {
+      const nextItems = parseMediaItems(current.media_input).filter((_, itemIndex) => itemIndex !== index);
+      return {
+        ...current,
+        media_input: formatMediaItems(nextItems)
+      };
+    });
+  }
+
   function openNewComposer() {
     setEditor(emptyPost);
     setComposerOpen(true);
@@ -330,12 +341,29 @@ export function ProfilePostManager({
           </label>
 
           <label className="field">
-            <span>カバー画像 URL</span>
+            <span>カバー画像</span>
             <input
               value={editor.cover_image_url}
               onChange={(event) => setEditor((current) => ({ ...current, cover_image_url: event.target.value }))}
               placeholder="https://example.com/cover.jpg"
             />
+            {editor.cover_image_url ? (
+              <div className="post-media-preview-grid post-media-preview-grid-cover">
+                <article className="post-media-preview-item">
+                  <img src={editor.cover_image_url} alt="カバー画像プレビュー" className="post-media-preview-image" />
+                  <div className="post-media-preview-actions">
+                    <span className="pill published">cover</span>
+                    <button
+                      type="button"
+                      className="text-button"
+                      onClick={() => setEditor((current) => ({ ...current, cover_image_url: "" }))}
+                    >
+                      削除
+                    </button>
+                  </div>
+                </article>
+              </div>
+            ) : null}
             <div className="upload-row">
               <label className="button button-secondary upload-button">
                 {uploadingCover ? "アップロード中..." : "カバー画像をアップロード"}
@@ -345,20 +373,39 @@ export function ProfilePostManager({
           </label>
 
           <label className="field">
-            <span>メディア URL 一覧</span>
+            <span>写真・動画</span>
             <textarea
               rows="4"
               value={editor.media_input}
               onChange={(event) => setEditor((current) => ({ ...current, media_input: event.target.value }))}
               placeholder={"image https://example.com/photo.jpg\nvideo https://example.com/movie.mp4"}
             />
-            <small className="field-hint">1行ごとに `image URL` または `video URL` を指定します。</small>
+            <small className="field-hint">写真をアップロードするか、1行ごとに `image URL` または `video URL` を指定します。</small>
             <div className="upload-row">
               <label className="button button-secondary upload-button">
-                {uploadingMedia ? "アップロード中..." : "画像・動画を追加"}
+                {uploadingMedia ? "アップロード中..." : "写真・動画をアップロード"}
                 <input type="file" accept="image/*,video/*" multiple onChange={handleMediaUpload} disabled={uploadingMedia} />
               </label>
             </div>
+            {mediaItemsPreview.length ? (
+              <div className="post-media-preview-grid">
+                {mediaItemsPreview.map((item, index) => (
+                  <article key={`${item.url}-${index}`} className="post-media-preview-item">
+                    {item.kind === "video" ? (
+                      <video src={item.url} className="post-media-preview-image" controls muted playsInline />
+                    ) : (
+                      <img src={item.url} alt={`投稿メディア ${index + 1}`} className="post-media-preview-image" />
+                    )}
+                    <div className="post-media-preview-actions">
+                      <span className={`pill ${item.kind === "video" ? "scheduled" : "published"}`}>{item.kind}</span>
+                      <button type="button" className="text-button" onClick={() => removeMediaItem(index)}>
+                        削除
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
           </label>
 
           <label className="field">

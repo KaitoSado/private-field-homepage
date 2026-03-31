@@ -822,6 +822,40 @@ textarea {
   cursor: pointer;
 }
 
+.post-media-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.post-media-preview-grid-cover {
+  grid-template-columns: minmax(0, 220px);
+}
+
+.post-media-preview-item {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.post-media-preview-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  background: rgba(34, 49, 58, 0.06);
+}
+
+.post-media-preview-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
 .text-button {
   justify-self: start;
   border: 0;
