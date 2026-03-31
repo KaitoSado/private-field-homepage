@@ -1,7 +1,7 @@
 import { MeRedirectPanel } from "@/components/me-redirect-panel";
 
 export const metadata = {
-  title: "編集ページ | FieldCard Social"
+  title: "ハブ | FieldCard Social"
 };
 
 export default function MePage() {
