@@ -1135,6 +1135,50 @@ textarea {
   padding: 24px;
 }
 
+.class-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.class-filter-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.class-note-list {
+  gap: 16px;
+}
+
+.class-note-card {
+  display: grid;
+  gap: 14px;
+  padding: 22px 24px;
+}
+
+.class-note-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.class-note-head h3 {
+  margin: 0;
+}
+
+.class-note-head > div:first-child {
+  display: grid;
+  gap: 4px;
+}
+
+.class-note-body {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
 .social-card,
 .engagement-panel {
   display: grid;
@@ -2727,7 +2771,8 @@ textarea {
   .media-gallery.has-grid,
   .social-stats,
   .feature-strip,
-  .stats-grid {
+  .stats-grid,
+  .class-form-grid {
     grid-template-columns: 1fr;
   }
 
@@ -2848,5 +2893,10 @@ textarea {
     left: 16px;
     right: 16px;
     bottom: 14px;
+  }
+
+  .class-note-head {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

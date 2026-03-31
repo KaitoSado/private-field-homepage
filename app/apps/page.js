@@ -7,6 +7,12 @@ export const metadata = {
 
 const plannedApps = [
   {
+    name: "授業情報",
+    status: "Live",
+    body: "授業名、担当、曜日、時限、キャンパス、感想メモを書き込んだり観たりできるボードです。",
+    href: "/apps/classes"
+  },
+  {
     name: "Question Box",
     status: "Live",
     body: "公開ページに匿名質問箱を置いて、受信と回答を管理します。"
@@ -51,6 +57,13 @@ export default function AppsPage() {
             </div>
             <h2>{app.name}</h2>
             <p>{app.body}</p>
+            {app.href ? (
+              <div className="hero-actions">
+                <Link href={app.href} className="button button-secondary">
+                  開く
+                </Link>
+              </div>
+            ) : null}
           </article>
         ))}
       </section>

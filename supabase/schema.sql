@@ -124,7 +124,31 @@ create table if not exists public.anonymous_questions (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.class_notes (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  course_name text not null,
+  instructor text not null default '',
+  campus text not null default '',
+  term_label text not null default '',
+  weekday text not null default '',
+  period_label text not null default '',
+  body text not null,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
 alter table public.anonymous_questions add column if not exists sender_profile_id uuid references public.profiles(id) on delete set null;
+alter table public.class_notes add column if not exists author_id uuid references public.profiles(id) on delete cascade;
+alter table public.class_notes add column if not exists course_name text;
+alter table public.class_notes add column if not exists instructor text not null default '';
+alter table public.class_notes add column if not exists campus text not null default '';
+alter table public.class_notes add column if not exists term_label text not null default '';
+alter table public.class_notes add column if not exists weekday text not null default '';
+alter table public.class_notes add column if not exists period_label text not null default '';
+alter table public.class_notes add column if not exists body text;
+alter table public.class_notes add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.class_notes add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
 
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -205,6 +229,8 @@ create index if not exists post_reposts_post_idx on public.post_reposts(post_id)
 create index if not exists post_comments_post_idx on public.post_comments(post_id, created_at desc);
 create index if not exists anonymous_questions_recipient_idx on public.anonymous_questions(recipient_id, created_at desc);
 create index if not exists anonymous_questions_sender_idx on public.anonymous_questions(sender_profile_id);
+create index if not exists class_notes_updated_idx on public.class_notes(updated_at desc);
+create index if not exists class_notes_author_idx on public.class_notes(author_id);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
@@ -256,6 +282,22 @@ alter table public.anonymous_questions
   add constraint anonymous_questions_question_length_check check (char_length(question) <= 280),
   drop constraint if exists anonymous_questions_answer_length_check,
   add constraint anonymous_questions_answer_length_check check (answer is null or char_length(answer) <= 2000);
+
+alter table public.class_notes
+  drop constraint if exists class_notes_course_name_length_check,
+  add constraint class_notes_course_name_length_check check (char_length(course_name) between 1 and 120),
+  drop constraint if exists class_notes_instructor_length_check,
+  add constraint class_notes_instructor_length_check check (char_length(instructor) <= 120),
+  drop constraint if exists class_notes_campus_length_check,
+  add constraint class_notes_campus_length_check check (char_length(campus) <= 120),
+  drop constraint if exists class_notes_term_label_length_check,
+  add constraint class_notes_term_label_length_check check (char_length(term_label) <= 120),
+  drop constraint if exists class_notes_weekday_length_check,
+  add constraint class_notes_weekday_length_check check (char_length(weekday) <= 20),
+  drop constraint if exists class_notes_period_label_length_check,
+  add constraint class_notes_period_label_length_check check (char_length(period_label) <= 40),
+  drop constraint if exists class_notes_body_length_check,
+  add constraint class_notes_body_length_check check (char_length(body) between 1 and 2000);
 
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
@@ -351,6 +393,11 @@ create trigger anonymous_questions_set_updated_at
 before update on public.anonymous_questions
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists class_notes_set_updated_at on public.class_notes;
+create trigger class_notes_set_updated_at
+before update on public.class_notes
+for each row execute procedure public.handle_updated_at();
+
 create or replace view public.profile_stats as
 select
   p.id as profile_id,
@@ -405,6 +452,7 @@ alter table public.post_bookmarks enable row level security;
 alter table public.post_reposts enable row level security;
 alter table public.post_comments enable row level security;
 alter table public.anonymous_questions enable row level security;
+alter table public.class_notes enable row level security;
 alter table public.notifications enable row level security;
 alter table public.reports enable row level security;
 alter table public.telemetry_page_views enable row level security;
@@ -643,6 +691,47 @@ using (auth.uid() = recipient_id);
 drop policy if exists "admins can manage anonymous questions" on public.anonymous_questions;
 create policy "admins can manage anonymous questions"
 on public.anonymous_questions
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "class notes are public readable" on public.class_notes;
+create policy "class notes are public readable"
+on public.class_notes
+for select
+using (true);
+
+drop policy if exists "authenticated users can create class notes" on public.class_notes;
+create policy "authenticated users can create class notes"
+on public.class_notes
+for insert
+to authenticated
+with check (
+  auth.uid() = author_id
+  and exists (
+    select 1
+    from public.profiles
+    where profiles.id = class_notes.author_id
+      and profiles.account_status = 'active'
+  )
+);
+
+drop policy if exists "owners can update class notes" on public.class_notes;
+create policy "owners can update class notes"
+on public.class_notes
+for update
+using (auth.uid() = author_id)
+with check (auth.uid() = author_id);
+
+drop policy if exists "owners can delete class notes" on public.class_notes;
+create policy "owners can delete class notes"
+on public.class_notes
+for delete
+using (auth.uid() = author_id);
+
+drop policy if exists "admins can manage class notes" on public.class_notes;
+create policy "admins can manage class notes"
+on public.class_notes
 for all
 using (public.is_admin())
 with check (public.is_admin());
