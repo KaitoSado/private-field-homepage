@@ -138,6 +138,17 @@ create table if not exists public.class_notes (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.special_articles (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null,
+  excerpt text not null default '',
+  body text not null,
+  price_label text not null default '',
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
 alter table public.anonymous_questions add column if not exists sender_profile_id uuid references public.profiles(id) on delete set null;
 alter table public.class_notes add column if not exists author_id uuid references public.profiles(id) on delete cascade;
 alter table public.class_notes add column if not exists course_name text;
@@ -149,6 +160,13 @@ alter table public.class_notes add column if not exists period_label text not nu
 alter table public.class_notes add column if not exists body text;
 alter table public.class_notes add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.class_notes add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.special_articles add column if not exists author_id uuid references public.profiles(id) on delete cascade;
+alter table public.special_articles add column if not exists title text;
+alter table public.special_articles add column if not exists excerpt text not null default '';
+alter table public.special_articles add column if not exists body text;
+alter table public.special_articles add column if not exists price_label text not null default '';
+alter table public.special_articles add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.special_articles add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
 
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -231,6 +249,8 @@ create index if not exists anonymous_questions_recipient_idx on public.anonymous
 create index if not exists anonymous_questions_sender_idx on public.anonymous_questions(sender_profile_id);
 create index if not exists class_notes_updated_idx on public.class_notes(updated_at desc);
 create index if not exists class_notes_author_idx on public.class_notes(author_id);
+create index if not exists special_articles_updated_idx on public.special_articles(updated_at desc);
+create index if not exists special_articles_author_idx on public.special_articles(author_id);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
@@ -298,6 +318,16 @@ alter table public.class_notes
   add constraint class_notes_period_label_length_check check (char_length(period_label) <= 40),
   drop constraint if exists class_notes_body_length_check,
   add constraint class_notes_body_length_check check (char_length(body) between 1 and 2000);
+
+alter table public.special_articles
+  drop constraint if exists special_articles_title_length_check,
+  add constraint special_articles_title_length_check check (char_length(title) between 1 and 140),
+  drop constraint if exists special_articles_excerpt_length_check,
+  add constraint special_articles_excerpt_length_check check (char_length(excerpt) <= 240),
+  drop constraint if exists special_articles_price_label_length_check,
+  add constraint special_articles_price_label_length_check check (char_length(price_label) <= 40),
+  drop constraint if exists special_articles_body_length_check,
+  add constraint special_articles_body_length_check check (char_length(body) between 1 and 12000);
 
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
@@ -398,6 +428,11 @@ create trigger class_notes_set_updated_at
 before update on public.class_notes
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists special_articles_set_updated_at on public.special_articles;
+create trigger special_articles_set_updated_at
+before update on public.special_articles
+for each row execute procedure public.handle_updated_at();
+
 create or replace view public.profile_stats as
 select
   p.id as profile_id,
@@ -453,6 +488,7 @@ alter table public.post_reposts enable row level security;
 alter table public.post_comments enable row level security;
 alter table public.anonymous_questions enable row level security;
 alter table public.class_notes enable row level security;
+alter table public.special_articles enable row level security;
 alter table public.notifications enable row level security;
 alter table public.reports enable row level security;
 alter table public.telemetry_page_views enable row level security;
@@ -732,6 +768,47 @@ using (auth.uid() = author_id);
 drop policy if exists "admins can manage class notes" on public.class_notes;
 create policy "admins can manage class notes"
 on public.class_notes
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "special articles are public readable" on public.special_articles;
+create policy "special articles are public readable"
+on public.special_articles
+for select
+using (true);
+
+drop policy if exists "authenticated users can create special articles" on public.special_articles;
+create policy "authenticated users can create special articles"
+on public.special_articles
+for insert
+to authenticated
+with check (
+  auth.uid() = author_id
+  and exists (
+    select 1
+    from public.profiles
+    where profiles.id = special_articles.author_id
+      and profiles.account_status = 'active'
+  )
+);
+
+drop policy if exists "owners can update special articles" on public.special_articles;
+create policy "owners can update special articles"
+on public.special_articles
+for update
+using (auth.uid() = author_id)
+with check (auth.uid() = author_id);
+
+drop policy if exists "owners can delete special articles" on public.special_articles;
+create policy "owners can delete special articles"
+on public.special_articles
+for delete
+using (auth.uid() = author_id);
+
+drop policy if exists "admins can manage special articles" on public.special_articles;
+create policy "admins can manage special articles"
+on public.special_articles
 for all
 using (public.is_admin())
 with check (public.is_admin());

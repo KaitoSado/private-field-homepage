@@ -2546,6 +2546,24 @@ textarea {
     linear-gradient(160deg, rgba(255, 252, 245, 0.98), rgba(250, 245, 232, 0.96));
 }
 
+.special-article-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.special-article-card {
+  align-content: start;
+}
+
+.special-article-card h3,
+.special-article-card p {
+  margin: 0;
+}
+
+.special-article-card p {
+  color: rgba(255, 240, 213, 0.86);
+  line-height: 1.75;
+}
+
 .signature-post-body {
   display: grid;
   gap: 12px;
