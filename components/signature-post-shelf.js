@@ -46,37 +46,54 @@ export function SignaturePostShelf({ username, posts }) {
 
       <div className="signature-post-grid">
         {featuredPosts.length ? (
-          featuredPosts.map((post) => {
-            const thumbnail = getPostThumbnail(post);
-            return (
-            <Link key={post.id} href={`/@${username}/${post.slug}`} className="signature-post-card">
-              <div className="post-card-head">
-                <span>{formatDate(post.published_at || post.updated_at)}</span>
-                <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
-              </div>
-              <div className={`signature-post-body ${thumbnail ? "has-thumb" : ""}`}>
-                <div className="signature-post-copy">
-                  <h3>{post.title}</h3>
-                  <p className="signature-post-preview">{getPostPreview(post)}</p>
-                </div>
-                {thumbnail ? (
-                  <div className="signature-post-thumb-wrap signature-post-thumb-wrap-inline">
-                    <img src={thumbnail} alt={`${post.title} のサムネイル`} className="signature-post-thumb" />
+          <>
+            {featuredPosts.map((post) => {
+              const thumbnail = getPostThumbnail(post);
+              return (
+                <Link key={post.id} href={`/@${username}/${post.slug}`} className="signature-post-card">
+                  <div className="post-card-head">
+                    <span>{formatDate(post.published_at || post.updated_at)}</span>
+                    <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
                   </div>
-                ) : null}
+                  <div className={`signature-post-body ${thumbnail ? "has-thumb" : ""}`}>
+                    <div className="signature-post-copy">
+                      <h3>{post.title}</h3>
+                      <p className="signature-post-preview">{getPostPreview(post)}</p>
+                    </div>
+                    {thumbnail ? (
+                      <div className="signature-post-thumb-wrap signature-post-thumb-wrap-inline">
+                        <img src={thumbnail} alt={`${post.title} のサムネイル`} className="signature-post-thumb" />
+                      </div>
+                    ) : null}
+                  </div>
+                  {post.tags.length ? (
+                    <div className="tag-row">
+                      {post.tags.map((tag) => (
+                        <span key={tag} className="tag-chip">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </Link>
+              );
+            })}
+            <Link href="/special-articles" className="signature-post-card signature-post-card-special">
+              <div className="post-card-head">
+                <span>Special access</span>
+                <span>Premium</span>
               </div>
-              {post.tags.length ? (
-                <div className="tag-row">
-                  {post.tags.map((tag) => (
-                    <span key={tag} className="tag-chip">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
+              <div className="signature-post-copy">
+                <h3>特別記事</h3>
+                <p className="signature-post-preview">
+                  通常の記事とは別に、深くまとめた長文や限定公開の読みものを置くための入口です。
+                </p>
+              </div>
+              <div className="signature-special-cta">
+                <span>特別記事を見る</span>
+              </div>
             </Link>
-          );
-          })
+          </>
         ) : (
           <div className="signature-post-card empty-state">
             <h3>一致する記事がありません</h3>
