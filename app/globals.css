@@ -2665,9 +2665,10 @@ textarea {
 
 .arcade-tetris-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 240px;
+  grid-template-columns: minmax(280px, 420px) 220px;
   gap: 18px;
   align-items: start;
+  justify-content: center;
 }
 
 .arcade-tetris-board {
@@ -2678,6 +2679,8 @@ textarea {
   border-radius: 28px;
   background: linear-gradient(160deg, rgba(20, 24, 28, 0.96), rgba(38, 48, 56, 0.92));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  width: min(100%, 420px);
+  justify-self: center;
 }
 
 .arcade-tetris-cell {
@@ -2692,6 +2695,7 @@ textarea {
 
 .arcade-tetris-side {
   align-content: start;
+  width: 100%;
 }
 
 .arcade-tetris-next {

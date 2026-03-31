@@ -125,20 +125,22 @@ function TetrisGame() {
   useEffect(() => {
     const interval = window.setInterval(() => {
       setState((current) => tickTetris(current));
-    }, state.gameOver ? 1000 : Math.max(160, 620 - state.level * 45));
+    }, state.gameOver || state.paused ? 1000 : Math.max(160, 620 - state.level * 45));
 
     return () => window.clearInterval(interval);
-  }, [state.gameOver, state.level]);
+  }, [state.gameOver, state.level, state.paused]);
 
   useEffect(() => {
     function handleKey(event) {
-      const keys = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " ", "r", "R"];
+      const keys = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " ", "r", "R", "p", "P"];
       if (!keys.includes(event.key)) return;
       event.preventDefault();
 
       setState((current) => {
         if (event.key === "r" || event.key === "R") return createTetrisState();
+        if (event.key === "p" || event.key === "P") return { ...current, paused: !current.paused };
         if (current.gameOver) return current;
+        if (current.paused) return current;
         if (event.key === "ArrowLeft") return movePiece(current, -1, 0);
         if (event.key === "ArrowRight") return movePiece(current, 1, 0);
         if (event.key === "ArrowDown") return movePiece(current, 0, 1);
@@ -160,7 +162,13 @@ function TetrisGame() {
         <div className="section-copy">
           <p className="eyebrow">Arcade</p>
           <h2>Tetris</h2>
-          <p>{state.gameOver ? "Game over. R でリスタート" : "← → ↓ で移動、↑ で回転、Space で即落下"}</p>
+          <p>
+            {state.gameOver
+              ? "Game over. R でリスタート"
+              : state.paused
+                ? "一時停止中。P で再開"
+                : "← → ↓ で移動、↑ で回転、Space で即落下、P で一時停止"}
+          </p>
         </div>
 
         <div className="arcade-tetris-layout">
@@ -208,6 +216,13 @@ function TetrisGame() {
             </div>
 
             <div className="hero-actions">
+              <button
+                type="button"
+                className="button button-ghost"
+                onClick={() => setState((current) => ({ ...current, paused: !current.paused }))}
+              >
+                {state.paused ? "再開" : "一時停止"}
+              </button>
               <button type="button" className="button button-secondary" onClick={() => setState(createTetrisState())}>
                 リセット
               </button>
@@ -441,6 +456,7 @@ function createTetrisState() {
     score: 0,
     lines: 0,
     level: 1,
+    paused: false,
     gameOver: false
   };
 }
@@ -465,27 +481,27 @@ function createPiece(key) {
 }
 
 function tickTetris(state) {
-  if (state.gameOver) return state;
+  if (state.gameOver || state.paused) return state;
   const moved = attemptPiece(state, { ...state.current, y: state.current.y + 1 });
   if (moved) return moved;
   return lockPiece(state);
 }
 
 function movePiece(state, dx, dy) {
-  if (state.gameOver) return state;
+  if (state.gameOver || state.paused) return state;
   const nextPiece = { ...state.current, x: state.current.x + dx, y: state.current.y + dy };
   return attemptPiece(state, nextPiece) || (dy > 0 ? lockPiece(state) : state);
 }
 
 function rotatePiece(state) {
-  if (state.gameOver) return state;
+  if (state.gameOver || state.paused) return state;
   const rotatedCells = state.current.cells.map(([x, y]) => [y, 3 - x]);
   const candidate = { ...state.current, cells: rotatedCells };
   return attemptPiece(state, candidate) || attemptPiece(state, { ...candidate, x: candidate.x - 1 }) || attemptPiece(state, { ...candidate, x: candidate.x + 1 }) || state;
 }
 
 function hardDrop(state) {
-  if (state.gameOver) return state;
+  if (state.gameOver || state.paused) return state;
   let current = state;
   while (true) {
     const moved = attemptPiece(current, { ...current.current, y: current.current.y + 1 });
@@ -539,6 +555,7 @@ function lockPiece(state, fromDrop = false) {
     score: nextScore,
     lines: nextLines,
     level: nextLevel,
+    paused: false,
     gameOver: !canPlace(remainingRows, nextCurrent)
   };
 
