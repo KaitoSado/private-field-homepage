@@ -3,15 +3,83 @@
 import { useEffect, useMemo, useState } from "react";
 
 const tabs = [
+  { id: "tetris", label: "Tetris" },
   { id: "tictactoe", label: "Tic-Tac-Toe" },
   { id: "reaction", label: "Reaction Tap" },
   { id: "memory", label: "Memory Flip" }
 ];
 
 const memoryIcons = ["◉", "△", "☾", "✦", "☀", "◇"];
+const TETRIS_WIDTH = 10;
+const TETRIS_HEIGHT = 20;
+const TETRIS_SHAPES = {
+  I: {
+    color: "#6ee7f9",
+    cells: [
+      [0, 1],
+      [1, 1],
+      [2, 1],
+      [3, 1]
+    ]
+  },
+  O: {
+    color: "#ffd166",
+    cells: [
+      [1, 0],
+      [2, 0],
+      [1, 1],
+      [2, 1]
+    ]
+  },
+  T: {
+    color: "#c084fc",
+    cells: [
+      [1, 0],
+      [0, 1],
+      [1, 1],
+      [2, 1]
+    ]
+  },
+  L: {
+    color: "#fb923c",
+    cells: [
+      [2, 0],
+      [0, 1],
+      [1, 1],
+      [2, 1]
+    ]
+  },
+  J: {
+    color: "#60a5fa",
+    cells: [
+      [0, 0],
+      [0, 1],
+      [1, 1],
+      [2, 1]
+    ]
+  },
+  S: {
+    color: "#4ade80",
+    cells: [
+      [1, 0],
+      [2, 0],
+      [0, 1],
+      [1, 1]
+    ]
+  },
+  Z: {
+    color: "#f87171",
+    cells: [
+      [0, 0],
+      [1, 0],
+      [1, 1],
+      [2, 1]
+    ]
+  }
+};
 
 export function GameArcade() {
-  const [activeTab, setActiveTab] = useState("tictactoe");
+  const [activeTab, setActiveTab] = useState("tetris");
 
   return (
     <div className="dashboard-layout">
@@ -42,10 +110,111 @@ export function GameArcade() {
           ))}
         </div>
 
+        {activeTab === "tetris" ? <TetrisGame /> : null}
         {activeTab === "tictactoe" ? <TicTacToeGame /> : null}
         {activeTab === "reaction" ? <ReactionTapGame /> : null}
         {activeTab === "memory" ? <MemoryFlipGame /> : null}
       </section>
+    </div>
+  );
+}
+
+function TetrisGame() {
+  const [state, setState] = useState(() => createTetrisState());
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setState((current) => tickTetris(current));
+    }, state.gameOver ? 1000 : Math.max(160, 620 - state.level * 45));
+
+    return () => window.clearInterval(interval);
+  }, [state.gameOver, state.level]);
+
+  useEffect(() => {
+    function handleKey(event) {
+      const keys = ["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp", " ", "r", "R"];
+      if (!keys.includes(event.key)) return;
+      event.preventDefault();
+
+      setState((current) => {
+        if (event.key === "r" || event.key === "R") return createTetrisState();
+        if (current.gameOver) return current;
+        if (event.key === "ArrowLeft") return movePiece(current, -1, 0);
+        if (event.key === "ArrowRight") return movePiece(current, 1, 0);
+        if (event.key === "ArrowDown") return movePiece(current, 0, 1);
+        if (event.key === "ArrowUp") return rotatePiece(current);
+        if (event.key === " ") return hardDrop(current);
+        return current;
+      });
+    }
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
+  const board = paintBoard(state.board, state.current);
+
+  return (
+    <div className="arcade-panel-grid arcade-panel-grid-wide">
+      <div className="surface arcade-game-card arcade-tetris-card">
+        <div className="section-copy">
+          <p className="eyebrow">Arcade</p>
+          <h2>Tetris</h2>
+          <p>{state.gameOver ? "Game over. R でリスタート" : "← → ↓ で移動、↑ で回転、Space で即落下"}</p>
+        </div>
+
+        <div className="arcade-tetris-layout">
+          <div className="arcade-tetris-board">
+            {board.map((row, rowIndex) =>
+              row.map((cell, columnIndex) => (
+                <span
+                  key={`${rowIndex}-${columnIndex}`}
+                  className={`arcade-tetris-cell ${cell ? "is-filled" : ""}`}
+                  style={cell ? { background: cell } : undefined}
+                />
+              ))
+            )}
+          </div>
+
+          <div className="surface arcade-side-card arcade-tetris-side">
+            <div className="stats-grid">
+              <div className="stat-tile">
+                <strong>{state.score}</strong>
+                <span>Score</span>
+              </div>
+              <div className="stat-tile">
+                <strong>{state.lines}</strong>
+                <span>Lines</span>
+              </div>
+              <div className="stat-tile">
+                <strong>{state.level}</strong>
+                <span>Level</span>
+              </div>
+            </div>
+
+            <div>
+              <p className="eyebrow">Next</p>
+              <div className="arcade-tetris-next">
+                {renderMiniPiece(state.next).map((row, rowIndex) =>
+                  row.map((cell, columnIndex) => (
+                    <span
+                      key={`${rowIndex}-${columnIndex}`}
+                      className={`arcade-tetris-mini-cell ${cell ? "is-filled" : ""}`}
+                      style={cell ? { background: cell } : undefined}
+                    />
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="hero-actions">
+              <button type="button" className="button button-secondary" onClick={() => setState(createTetrisState())}>
+                リセット
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -259,4 +428,151 @@ function buildMemoryDeck() {
   return [...memoryIcons, ...memoryIcons]
     .map((symbol, index) => ({ id: `${symbol}-${index}`, symbol }))
     .sort(() => Math.random() - 0.5);
+}
+
+function createTetrisState() {
+  const current = createPiece(randomShapeKey());
+  const next = createPiece(randomShapeKey());
+
+  return {
+    board: createEmptyBoard(),
+    current,
+    next,
+    score: 0,
+    lines: 0,
+    level: 1,
+    gameOver: false
+  };
+}
+
+function createEmptyBoard() {
+  return Array.from({ length: TETRIS_HEIGHT }, () => Array(TETRIS_WIDTH).fill(""));
+}
+
+function randomShapeKey() {
+  const keys = Object.keys(TETRIS_SHAPES);
+  return keys[Math.floor(Math.random() * keys.length)];
+}
+
+function createPiece(key) {
+  return {
+    key,
+    x: 3,
+    y: 0,
+    cells: TETRIS_SHAPES[key].cells.map(([x, y]) => [x, y]),
+    color: TETRIS_SHAPES[key].color
+  };
+}
+
+function tickTetris(state) {
+  if (state.gameOver) return state;
+  const moved = attemptPiece(state, { ...state.current, y: state.current.y + 1 });
+  if (moved) return moved;
+  return lockPiece(state);
+}
+
+function movePiece(state, dx, dy) {
+  if (state.gameOver) return state;
+  const nextPiece = { ...state.current, x: state.current.x + dx, y: state.current.y + dy };
+  return attemptPiece(state, nextPiece) || (dy > 0 ? lockPiece(state) : state);
+}
+
+function rotatePiece(state) {
+  if (state.gameOver) return state;
+  const rotatedCells = state.current.cells.map(([x, y]) => [y, 3 - x]);
+  const candidate = { ...state.current, cells: rotatedCells };
+  return attemptPiece(state, candidate) || attemptPiece(state, { ...candidate, x: candidate.x - 1 }) || attemptPiece(state, { ...candidate, x: candidate.x + 1 }) || state;
+}
+
+function hardDrop(state) {
+  if (state.gameOver) return state;
+  let current = state;
+  while (true) {
+    const moved = attemptPiece(current, { ...current.current, y: current.current.y + 1 });
+    if (!moved) {
+      return lockPiece(current, true);
+    }
+    current = moved;
+  }
+}
+
+function attemptPiece(state, candidate) {
+  return canPlace(state.board, candidate) ? { ...state, current: candidate } : null;
+}
+
+function canPlace(board, piece) {
+  return piece.cells.every(([cellX, cellY]) => {
+    const x = piece.x + cellX;
+    const y = piece.y + cellY;
+    if (x < 0 || x >= TETRIS_WIDTH || y < 0 || y >= TETRIS_HEIGHT) return false;
+    return !board[y][x];
+  });
+}
+
+function lockPiece(state, fromDrop = false) {
+  const board = state.board.map((row) => [...row]);
+
+  for (const [cellX, cellY] of state.current.cells) {
+    const x = state.current.x + cellX;
+    const y = state.current.y + cellY;
+    if (y < 0) {
+      return { ...state, gameOver: true };
+    }
+    board[y][x] = state.current.color;
+  }
+
+  const remainingRows = board.filter((row) => row.some((cell) => !cell));
+  const cleared = TETRIS_HEIGHT - remainingRows.length;
+  while (remainingRows.length < TETRIS_HEIGHT) {
+    remainingRows.unshift(Array(TETRIS_WIDTH).fill(""));
+  }
+
+  const nextCurrent = { ...state.next, x: 3, y: 0 };
+  const next = createPiece(randomShapeKey());
+  const nextLines = state.lines + cleared;
+  const nextLevel = Math.max(1, Math.floor(nextLines / 10) + 1);
+  const nextScore = state.score + scoreForLines(cleared) + (fromDrop ? 8 : 0);
+  const nextState = {
+    board: remainingRows,
+    current: nextCurrent,
+    next,
+    score: nextScore,
+    lines: nextLines,
+    level: nextLevel,
+    gameOver: !canPlace(remainingRows, nextCurrent)
+  };
+
+  return nextState;
+}
+
+function scoreForLines(lines) {
+  if (lines === 1) return 100;
+  if (lines === 2) return 250;
+  if (lines === 3) return 450;
+  if (lines >= 4) return 800;
+  return 0;
+}
+
+function paintBoard(board, current) {
+  const nextBoard = board.map((row) => [...row]);
+
+  for (const [cellX, cellY] of current.cells) {
+    const x = current.x + cellX;
+    const y = current.y + cellY;
+    if (x >= 0 && x < TETRIS_WIDTH && y >= 0 && y < TETRIS_HEIGHT) {
+      nextBoard[y][x] = current.color;
+    }
+  }
+
+  return nextBoard;
+}
+
+function renderMiniPiece(piece) {
+  const grid = Array.from({ length: 4 }, () => Array(4).fill(""));
+  for (const [x, y] of piece.cells) {
+    if (grid[y] && typeof grid[y][x] !== "undefined") {
+      grid[y][x] = piece.color;
+    }
+  }
+  return grid;
 }
