@@ -1,0 +1,305 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+
+const CATEGORIES = ["学割", "無料", "助成", "食費", "交通", "ソフト", "住まい", "学内", "バイト", "その他"];
+
+const emptyForm = {
+  title: "",
+  category: "学割",
+  campus: "",
+  link_url: "",
+  body: ""
+};
+
+const starterIdeas = [
+  "Adobe, Notion, Figma, GitHub Student などの学割リンク",
+  "学内の印刷、Wi-Fi、PC 貸出、図書館サービス",
+  "定期券、旅行、映画館、サブスクの学生料金",
+  "食堂、地域クーポン、住まい補助、奨学金の情報"
+];
+
+export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses }) {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
+  const [session, setSession] = useState(null);
+  const [items, setItems] = useState(initialItems);
+  const [form, setForm] = useState(emptyForm);
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState("");
+  const [query, setQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [campusFilter, setCampusFilter] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function bootstrap() {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      if (!mounted) return;
+      setSession(currentSession);
+    }
+
+    bootstrap();
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  const categories = useMemo(() => uniq([...CATEGORIES, ...initialCategories, ...items.map((item) => item.category).filter(Boolean)]), [initialCategories, items]);
+  const campuses = useMemo(() => uniq([...initialCampuses, ...items.map((item) => item.campus).filter(Boolean)]), [initialCampuses, items]);
+
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      if (categoryFilter && item.category !== categoryFilter) return false;
+      if (campusFilter && item.campus !== campusFilter) return false;
+
+      const normalizedQuery = query.trim().toLowerCase();
+      if (!normalizedQuery) return true;
+
+      return [item.title, item.category, item.campus, item.body, item.profiles?.display_name, item.profiles?.username]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedQuery);
+    });
+  }, [categoryFilter, campusFilter, items, query]);
+
+  async function submitTip(event) {
+    event.preventDefault();
+    if (!session?.user) {
+      setStatus("書き込むにはログインが必要です。");
+      return;
+    }
+
+    setSubmitting(true);
+    setStatus("");
+
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      const response = await fetch("/api/edge-tips", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {})
+        },
+        body: JSON.stringify(form)
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "エッジ情報の保存に失敗しました。");
+      }
+
+      setItems((current) => [result.item, ...current]);
+      setForm(emptyForm);
+      setStatus("エッジ情報を追加しました。");
+    } catch (error) {
+      setStatus(error.message || "エッジ情報の保存に失敗しました。");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function updateField(key, value) {
+    setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  return (
+    <div className="dashboard-layout">
+      <section className="section-grid section-head edge-board-hero">
+        <div className="section-copy">
+          <p className="eyebrow">Edge Info</p>
+          <h1 className="page-title">大学生にとって地味に得する情報を集める</h1>
+          <p>
+            学割、無料枠、助成、食費、交通、ソフト、学内制度。知っていると少し得する情報を集めて、
+            後輩や同級生がすぐ拾える形にしていく面です。
+          </p>
+        </div>
+
+        <div className="surface edge-board-side">
+          <div className="class-board-stat-grid edge-board-stat-grid">
+            <div className="stat-tile">
+              <strong>{items.length}</strong>
+              <span>集まった情報</span>
+            </div>
+            <div className="stat-tile">
+              <strong>{categories.length}</strong>
+              <span>カテゴリ</span>
+            </div>
+            <div className="stat-tile">
+              <strong>{campuses.length || "—"}</strong>
+              <span>対応キャンパス</span>
+            </div>
+          </div>
+          <div className="edge-board-ideas">
+            <p className="eyebrow">Hint</p>
+            <ul>
+              {starterIdeas.map((idea) => (
+                <li key={idea}>{idea}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="section-grid edge-board-main">
+        <div className="edge-board-column">
+          <div className="surface search-panel edge-filter-panel">
+            <div className="section-copy">
+              <p className="eyebrow">Browse</p>
+              <h2>エッジ情報を探す</h2>
+            </div>
+
+            <div className="class-form-grid">
+              <label className="field">
+                <span>検索</span>
+                <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="タイトル、カテゴリ、本文" />
+              </label>
+              <label className="field">
+                <span>カテゴリ</span>
+                <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+                  <option value="">すべて</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>キャンパス</span>
+                <select value={campusFilter} onChange={(event) => setCampusFilter(event.target.value)}>
+                  <option value="">すべて</option>
+                  {campuses.map((campus) => (
+                    <option key={campus} value={campus}>
+                      {campus}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div className="stack-list edge-tip-list">
+            {filteredItems.length ? (
+              filteredItems.map((item) => (
+                <article key={item.id} className="surface edge-tip-card">
+                  <div className="class-course-head">
+                    <div className="class-course-copy">
+                      <div className="class-course-topline">
+                        <span className="pill published">{item.category || "その他"}</span>
+                        {item.campus ? <span className="pill">{item.campus}</span> : null}
+                      </div>
+                      <h3>{item.title}</h3>
+                    </div>
+
+                    <div className="class-course-actions">
+                      {item.link_url ? (
+                        <Link href={item.link_url} className="button button-secondary" target="_blank" rel="noreferrer">
+                          リンクを見る
+                        </Link>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <p className="class-note-body">{item.body}</p>
+                  <div className="class-reaction-head">
+                    <strong>@{item.profiles?.username || item.profiles?.display_name || "guest"}</strong>
+                    <span className="muted">{formatDate(item.updated_at || item.created_at)}</span>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="surface empty-state">
+                <h3>まだ情報がありません</h3>
+                <p>最初のエッジ情報を書いて、得する導線を育ててください。</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="edge-board-column">
+          <form className="surface search-panel form-stack edge-write-panel" onSubmit={submitTip}>
+            <div className="section-copy">
+              <p className="eyebrow">Post</p>
+              <h2>エッジ情報を書く</h2>
+              <p className="muted">学割、抜け道、無料枠、学内制度。地味に得する情報を短く残してください。</p>
+            </div>
+
+            <div className="class-form-grid">
+              <label className="field">
+                <span>タイトル</span>
+                <input value={form.title} onChange={(event) => updateField("title", event.target.value)} placeholder="Adobe が学生なら無料で使える" required />
+              </label>
+              <label className="field">
+                <span>カテゴリ</span>
+                <select value={form.category} onChange={(event) => updateField("category", event.target.value)}>
+                  {CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>キャンパス</span>
+                <input value={form.campus} onChange={(event) => updateField("campus", event.target.value)} placeholder="三田 / 日吉 / 矢上" />
+              </label>
+              <label className="field">
+                <span>リンク</span>
+                <input value={form.link_url} onChange={(event) => updateField("link_url", event.target.value)} placeholder="https://..." />
+              </label>
+            </div>
+
+            <label className="field">
+              <span>内容</span>
+              <textarea
+                rows="6"
+                value={form.body}
+                onChange={(event) => updateField("body", event.target.value)}
+                placeholder="どういう条件で使えるか、どこから申し込むか、注意点があれば短く。"
+                required
+              />
+            </label>
+
+            <div className="hero-actions">
+              <button type="submit" className="button button-primary" disabled={submitting}>
+                {submitting ? "保存中..." : "書き込む"}
+              </button>
+              {!session?.user ? <span className="muted">投稿にはログインが必要です。</span> : null}
+            </div>
+            {status ? <p className="muted">{status}</p> : null}
+          </form>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function uniq(values) {
+  return [...new Set(values)];
+}
+
+function formatDate(value) {
+  if (!value) return "";
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    month: "numeric",
+    day: "numeric"
+  }).format(new Date(value));
+}

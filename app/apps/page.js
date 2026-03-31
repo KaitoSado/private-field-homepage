@@ -19,6 +19,12 @@ const plannedApps = [
     href: "/apps/classes"
   },
   {
+    name: "エッジ情報",
+    status: "Live",
+    body: "大学生向けの割引、無料枠、助成、学割、抜け道っぽい便利情報を集める掲示板です。知っていると地味に得する情報を持ち寄れます。",
+    href: "/apps/edge"
+  },
+  {
     name: "Question Box",
     status: "Live",
     body: "公開ページに匿名質問箱を置いて、受信と回答を管理します。"
