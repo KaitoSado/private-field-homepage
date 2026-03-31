@@ -71,7 +71,8 @@ export function HeaderNav() {
     ? [
         { href: "/", label: "Home" },
         { href: "/explore", label: "Explore" },
-        { href: "/notifications", label: "Notifications" }
+        { href: "/notifications", label: "Notifications" },
+        { href: profileMeta.path, label: "My Page" }
       ]
     : [
         { href: "/", label: "Home" },
@@ -81,7 +82,7 @@ export function HeaderNav() {
 
   const menuLinks = session
     ? [
-        { href: profileMeta.path, label: "My Page" },
+        { href: "/me", label: "編集ページ" },
         { href: "/settings", label: "Settings" },
         ...(profileMeta.role === "admin"
           ? [

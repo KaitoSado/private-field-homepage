@@ -69,8 +69,8 @@ export function MeRedirectPanel() {
   if (state.loading) {
     return (
       <section className="surface empty-state">
-        <h1>My Page を準備しています</h1>
-        <p>自分の公開ページとよく使う導線を読み込んでいます。</p>
+        <h1>編集ページを準備しています</h1>
+        <p>公開ページまわりの補助導線を読み込んでいます。</p>
       </section>
     );
   }
@@ -79,10 +79,10 @@ export function MeRedirectPanel() {
     return (
       <section className="surface dashboard-hero my-page-gate">
         <div className="dashboard-hero-head">
-          <p className="eyebrow">My Page</p>
-          <h1>ログインすると、自分の公開ページが入口になります。</h1>
+          <p className="eyebrow">Editor</p>
+          <h1>ログインすると、公開ページと補助導線に入れます。</h1>
           <p className="headline">
-            ここからプロフィール、記事、通知、設定へ入ります。まずはログインか新規登録をしてください。
+            ここは公開ページそのものではなく、通知や設定へ入るための補助ページです。まずはログインか新規登録をしてください。
           </p>
         </div>
         <div className="hero-actions">
@@ -101,10 +101,10 @@ export function MeRedirectPanel() {
     <div className="dashboard-layout">
       <section className="surface dashboard-hero my-page-gate">
         <div className="dashboard-hero-head">
-          <p className="eyebrow">My Page</p>
-          <h1>自分の公開ページを起点に動く。</h1>
+          <p className="eyebrow">Editor</p>
+          <h1>公開ページのための補助導線。</h1>
           <p className="headline">
-            プロフィール編集や記事追加は公開ページ側で行い、ここは入口として使います。
+            プロフィール編集や記事追加は公開ページ側で行い、ここでは通知、設定、運用ページへ移動できます。
           </p>
         </div>
         <div className="hero-actions">
