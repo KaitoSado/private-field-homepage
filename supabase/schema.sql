@@ -114,6 +114,15 @@ create table if not exists public.post_comments (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.anonymous_questions (
+  id uuid primary key default gen_random_uuid(),
+  recipient_id uuid not null references public.profiles(id) on delete cascade,
+  question text not null,
+  answer text,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
   recipient_id uuid not null references public.profiles(id) on delete cascade,
@@ -191,6 +200,7 @@ create index if not exists follows_follower_idx on public.follows(follower_id);
 create index if not exists post_likes_post_idx on public.post_likes(post_id);
 create index if not exists post_reposts_post_idx on public.post_reposts(post_id);
 create index if not exists post_comments_post_idx on public.post_comments(post_id, created_at desc);
+create index if not exists anonymous_questions_recipient_idx on public.anonymous_questions(recipient_id, created_at desc);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
@@ -236,6 +246,12 @@ alter table public.posts
 alter table public.post_comments
   drop constraint if exists post_comments_body_length_check,
   add constraint post_comments_body_length_check check (char_length(body) <= 500);
+
+alter table public.anonymous_questions
+  drop constraint if exists anonymous_questions_question_length_check,
+  add constraint anonymous_questions_question_length_check check (char_length(question) <= 280),
+  drop constraint if exists anonymous_questions_answer_length_check,
+  add constraint anonymous_questions_answer_length_check check (answer is null or char_length(answer) <= 2000);
 
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
@@ -326,6 +342,11 @@ create trigger post_comments_set_updated_at
 before update on public.post_comments
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists anonymous_questions_set_updated_at on public.anonymous_questions;
+create trigger anonymous_questions_set_updated_at
+before update on public.anonymous_questions
+for each row execute procedure public.handle_updated_at();
+
 create or replace view public.profile_stats as
 select
   p.id as profile_id,
@@ -379,6 +400,7 @@ alter table public.post_likes enable row level security;
 alter table public.post_bookmarks enable row level security;
 alter table public.post_reposts enable row level security;
 alter table public.post_comments enable row level security;
+alter table public.anonymous_questions enable row level security;
 alter table public.notifications enable row level security;
 alter table public.reports enable row level security;
 alter table public.telemetry_page_views enable row level security;
@@ -575,6 +597,47 @@ create policy "users can delete own comments"
 on public.post_comments
 for delete
 using (auth.uid() = user_id);
+
+drop policy if exists "answered anonymous questions are public readable" on public.anonymous_questions;
+create policy "answered anonymous questions are public readable"
+on public.anonymous_questions
+for select
+using (answer is not null or auth.uid() = recipient_id or public.is_admin());
+
+drop policy if exists "anyone can submit anonymous questions" on public.anonymous_questions;
+create policy "anyone can submit anonymous questions"
+on public.anonymous_questions
+for insert
+to anon, authenticated
+with check (
+  char_length(btrim(question)) > 0
+  and exists (
+    select 1
+    from public.profiles
+    where profiles.id = anonymous_questions.recipient_id
+      and profiles.account_status = 'active'
+  )
+);
+
+drop policy if exists "owners can update anonymous questions" on public.anonymous_questions;
+create policy "owners can update anonymous questions"
+on public.anonymous_questions
+for update
+using (auth.uid() = recipient_id)
+with check (auth.uid() = recipient_id);
+
+drop policy if exists "owners can delete anonymous questions" on public.anonymous_questions;
+create policy "owners can delete anonymous questions"
+on public.anonymous_questions
+for delete
+using (auth.uid() = recipient_id);
+
+drop policy if exists "admins can manage anonymous questions" on public.anonymous_questions;
+create policy "admins can manage anonymous questions"
+on public.anonymous_questions
+for all
+using (public.is_admin())
+with check (public.is_admin());
 
 drop policy if exists "admins can delete comments" on public.post_comments;
 create policy "admins can delete comments"

@@ -1951,6 +1951,7 @@ textarea {
 
 .signature-info-card,
 .signature-contact-card,
+.signature-question-card,
 .signature-current-card,
 .signature-statement-card,
 .signature-schedule-card {
@@ -1975,6 +1976,93 @@ textarea {
 .signature-contact-card p,
 .signature-panel dd {
   white-space: pre-wrap;
+}
+
+.signature-contact-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(300px, 0.82fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.signature-question-card {
+  display: grid;
+  gap: 16px;
+}
+
+.signature-question-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: start;
+}
+
+.signature-question-head h3 {
+  margin: 0;
+}
+
+.signature-question-count {
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: rgba(34, 49, 58, 0.9);
+  color: #f8f5ee;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+}
+
+.signature-question-form,
+.signature-question-list,
+.signature-question-item,
+.signature-question-answer-editor {
+  display: grid;
+  gap: 10px;
+}
+
+.signature-question-form textarea,
+.signature-question-answer-editor textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+.signature-question-list {
+  max-height: 560px;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.signature-question-item {
+  padding: 16px 0;
+  border-top: 1px solid rgba(184, 154, 93, 0.12);
+}
+
+.signature-question-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.signature-question-q,
+.signature-question-a {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.signature-question-q {
+  color: #1d2328;
+  font-weight: 600;
+}
+
+.signature-question-a {
+  color: #576167;
+  line-height: 1.7;
+}
+
+.signature-question-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .signature-current-card p {
@@ -2452,6 +2540,7 @@ textarea {
   .signature-identity-grid,
   .signature-about-grid,
   .signature-current-layout,
+  .signature-contact-layout,
   .signature-record-grid,
   .profile-canvas-grid,
   .media-gallery.has-grid,

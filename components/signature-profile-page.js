@@ -53,6 +53,14 @@ export function SignatureProfilePage({ profile, posts }) {
   const [showAllCurrentEntries, setShowAllCurrentEntries] = useState(false);
   const [postCreateSignal, setPostCreateSignal] = useState(0);
   const [postManagerOpen, setPostManagerOpen] = useState(false);
+  const [questionItems, setQuestionItems] = useState([]);
+  const [questionInput, setQuestionInput] = useState("");
+  const [questionDrafts, setQuestionDrafts] = useState({});
+  const [questionStatus, setQuestionStatus] = useState("");
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [submittingQuestion, setSubmittingQuestion] = useState(false);
+  const [savingQuestionId, setSavingQuestionId] = useState("");
+  const [deletingQuestionId, setDeletingQuestionId] = useState("");
   const canEdit = session?.user?.id === profile.id;
 
   useEffect(() => {
@@ -66,6 +74,46 @@ export function SignatureProfilePage({ profile, posts }) {
   useEffect(() => {
     setPostItems(posts);
   }, [posts]);
+
+  useEffect(() => {
+    if (!supabase || !profile?.id) return;
+
+    let active = true;
+
+    async function loadQuestions() {
+      setLoadingQuestions(true);
+
+      const { data, error } = await supabase
+        .from("anonymous_questions")
+        .select("id, question, answer, created_at, updated_at")
+        .eq("recipient_id", profile.id)
+        .order("created_at", { ascending: false });
+
+      if (!active) return;
+
+      if (error) {
+        setQuestionStatus(
+          error.message?.includes("anonymous_questions")
+            ? "匿名質問箱を使うには最新の Supabase schema を適用してください。"
+            : error.message || "質問箱の読み込みに失敗しました。"
+        );
+      } else {
+        setQuestionItems(data || []);
+        setQuestionDrafts(
+          Object.fromEntries((data || []).map((item) => [item.id, item.answer || ""]))
+        );
+        setQuestionStatus("");
+      }
+
+      setLoadingQuestions(false);
+    }
+
+    loadQuestions();
+
+    return () => {
+      active = false;
+    };
+  }, [supabase, profile?.id, session?.user?.id]);
 
   useEffect(() => {
     let mounted = true;
@@ -359,6 +407,100 @@ export function SignatureProfilePage({ profile, posts }) {
   function openPostComposer() {
     setPostManagerOpen(true);
     setPostCreateSignal((current) => current + 1);
+  }
+
+  async function submitQuestion(event) {
+    event.preventDefault();
+    if (!supabase) return;
+
+    const nextQuestion = `${questionInput || ""}`.trim();
+    if (!nextQuestion) {
+      setQuestionStatus("質問を入力してください。");
+      return;
+    }
+
+    setSubmittingQuestion(true);
+    setQuestionStatus("");
+
+    const { data, error } = await supabase
+      .from("anonymous_questions")
+      .insert({
+        recipient_id: profile.id,
+        question: nextQuestion
+      })
+      .select("id, question, answer, created_at, updated_at")
+      .single();
+
+    if (error) {
+      setQuestionStatus(
+        error.message?.includes("anonymous_questions")
+          ? "匿名質問箱を使うには最新の Supabase schema を適用してください。"
+          : error.message || "質問の送信に失敗しました。"
+      );
+      setSubmittingQuestion(false);
+      return;
+    }
+
+    setQuestionItems((current) => [data, ...current]);
+    setQuestionDrafts((current) => ({ ...current, [data.id]: data.answer || "" }));
+    setQuestionInput("");
+    setQuestionStatus("匿名で送信しました。");
+    setSubmittingQuestion(false);
+  }
+
+  async function saveQuestionAnswer(questionId) {
+    if (!canEdit || !supabase) return;
+
+    setSavingQuestionId(questionId);
+    setQuestionStatus("");
+
+    const nextAnswer = `${questionDrafts[questionId] || ""}`.trim();
+    const { data, error } = await supabase
+      .from("anonymous_questions")
+      .update({ answer: nextAnswer || null })
+      .eq("id", questionId)
+      .eq("recipient_id", profile.id)
+      .select("id, question, answer, created_at, updated_at")
+      .single();
+
+    if (error) {
+      setQuestionStatus(error.message || "回答の保存に失敗しました。");
+      setSavingQuestionId("");
+      return;
+    }
+
+    setQuestionItems((current) => current.map((item) => (item.id === questionId ? data : item)));
+    setQuestionStatus(nextAnswer ? "回答を保存しました。" : "回答を未公開に戻しました。");
+    setSavingQuestionId("");
+  }
+
+  async function deleteQuestion(questionId) {
+    if (!canEdit || !supabase) return;
+    if (!window.confirm("この質問を削除しますか？")) return;
+
+    setDeletingQuestionId(questionId);
+    setQuestionStatus("");
+
+    const { error } = await supabase
+      .from("anonymous_questions")
+      .delete()
+      .eq("id", questionId)
+      .eq("recipient_id", profile.id);
+
+    if (error) {
+      setQuestionStatus(error.message || "質問の削除に失敗しました。");
+      setDeletingQuestionId("");
+      return;
+    }
+
+    setQuestionItems((current) => current.filter((item) => item.id !== questionId));
+    setQuestionDrafts((current) => {
+      const next = { ...current };
+      delete next[questionId];
+      return next;
+    });
+    setQuestionStatus("質問を削除しました。");
+    setDeletingQuestionId("");
   }
 
   return (
@@ -875,34 +1017,110 @@ export function SignatureProfilePage({ profile, posts }) {
           <p className="eyebrow">Collaboration</p>
           <h2>チャット・トーク</h2>
         </div>
-        <div className="signature-contact-card">
-          {isEditing ? (
-            <textarea
-              className="signature-edit-block"
-              rows="4"
-              value={draft.open_to || ""}
-              onChange={(event) => updateField("open_to", event.target.value)}
-              maxLength={PROFILE_OPEN_TO_LIMIT}
-            />
-          ) : (
-            <p>
-              {draft.open_to ||
-                "研究プロトタイプ、実験用UI、文化系プロジェクト、個人開発の技術相談などを受けています。"}
-            </p>
-          )}
-          <div className="link-list">
-            {links.length ? (
-              links.map((link) => (
-                <a key={link.label} href={link.href} target="_blank" rel="noreferrer" className="button button-primary">
-                  {link.label}
-                </a>
-              ))
+        <div className="signature-contact-layout">
+          <div className="signature-contact-card">
+            {isEditing ? (
+              <textarea
+                className="signature-edit-block"
+                rows="4"
+                value={draft.open_to || ""}
+                onChange={(event) => updateField("open_to", event.target.value)}
+                maxLength={PROFILE_OPEN_TO_LIMIT}
+              />
             ) : (
-              <Link href="/settings" className="button button-secondary">
-                リンクを設定する
-              </Link>
+              <p>
+                {draft.open_to ||
+                  "研究プロトタイプ、実験用UI、文化系プロジェクト、個人開発の技術相談などを受けています。"}
+              </p>
             )}
+            <div className="link-list">
+              {links.length ? (
+                links.map((link) => (
+                  <a key={link.label} href={link.href} target="_blank" rel="noreferrer" className="button button-primary">
+                    {link.label}
+                  </a>
+                ))
+              ) : (
+                <Link href="/settings" className="button button-secondary">
+                  リンクを設定する
+                </Link>
+              )}
+            </div>
           </div>
+
+          <aside className="signature-question-card">
+            <div className="signature-question-head">
+              <div>
+                <p className="eyebrow">Marshmallow</p>
+                <h3>匿名質問箱</h3>
+              </div>
+              <span className="signature-question-count">{questionItems.length}</span>
+            </div>
+
+            <form className="signature-question-form" onSubmit={submitQuestion}>
+              <textarea
+                rows="3"
+                value={questionInput}
+                onChange={(event) => setQuestionInput(event.target.value)}
+                maxLength={280}
+                placeholder="匿名で質問を送る"
+              />
+              <button type="submit" className="button button-primary" disabled={submittingQuestion}>
+                {submittingQuestion ? "送信中..." : "質問を送る"}
+              </button>
+            </form>
+
+            {questionStatus ? <p className="status-text">{questionStatus}</p> : null}
+
+            <div className="signature-question-list">
+              {loadingQuestions ? (
+                <p className="muted">読み込み中...</p>
+              ) : questionItems.length ? (
+                questionItems.map((item) => (
+                  <article key={item.id} className="signature-question-item">
+                    <p className="signature-question-q">Q. {item.question}</p>
+                    {canEdit ? (
+                      <div className="signature-question-answer-editor">
+                        <textarea
+                          rows="3"
+                          value={questionDrafts[item.id] || ""}
+                          onChange={(event) =>
+                            setQuestionDrafts((current) => ({
+                              ...current,
+                              [item.id]: event.target.value
+                            }))
+                          }
+                          placeholder="ここに回答を書く"
+                        />
+                        <div className="signature-question-actions">
+                          <button
+                            type="button"
+                            className="button button-secondary button-small"
+                            disabled={savingQuestionId === item.id}
+                            onClick={() => saveQuestionAnswer(item.id)}
+                          >
+                            {savingQuestionId === item.id ? "保存中..." : "回答を保存"}
+                          </button>
+                          <button
+                            type="button"
+                            className="button button-ghost button-small"
+                            disabled={deletingQuestionId === item.id}
+                            onClick={() => deleteQuestion(item.id)}
+                          >
+                            {deletingQuestionId === item.id ? "削除中..." : "削除"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : item.answer ? (
+                      <p className="signature-question-a">A. {item.answer}</p>
+                    ) : null}
+                  </article>
+                ))
+              ) : (
+                <p className="muted">まだ質問はありません。</p>
+              )}
+            </div>
+          </aside>
         </div>
       </SignatureInteractiveSection>
     </SignaturePageShell>
