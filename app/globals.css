@@ -1148,19 +1148,16 @@ textarea {
 }
 
 .class-board-hero {
-  position: relative;
-  grid-template-columns: 1fr;
-  padding-right: min(29vw, 280px);
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  align-items: start;
 }
 
 .class-board-hero-stats {
-  position: absolute;
-  top: 0;
-  right: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 8px;
-  width: min(27vw, 248px);
+  justify-self: end;
+  width: 100%;
 }
 
 .class-board-main {
@@ -3247,12 +3244,11 @@ textarea {
   }
 
   .class-board-hero {
-    padding-right: 0;
+    grid-template-columns: 1fr;
   }
 
   .class-board-hero-stats {
-    position: static;
-    width: 100%;
+    justify-self: stretch;
     grid-template-columns: 1fr;
   }
 
