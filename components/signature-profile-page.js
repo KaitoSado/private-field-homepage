@@ -532,21 +532,25 @@ export function SignatureProfilePage({ profile, posts }) {
       <div className="signature-glow signature-glow-a" aria-hidden="true" />
       <div className="signature-glow signature-glow-b" aria-hidden="true" />
 
-      {canEdit ? (
-        <div className="signature-owner-toolbar">
-          <div className="signature-owner-toolbar-head">
-            <strong>Owner mode</strong>
-            {status ? <span>{status}</span> : null}
-          </div>
-          <div className="hero-actions">
+      <nav className="signature-local-nav" aria-label="Profile sections">
+        <div className="signature-local-nav-links">
+          <a href="#signature-identity">Identity</a>
+          <a href="#signature-current">Current</a>
+          <a href="#signature-works">Works</a>
+          <a href="#signature-thinking">Records</a>
+          <a href="#signature-contact">Contact</a>
+        </div>
+        {canEdit ? (
+          <div className="signature-local-nav-actions">
+            {status ? <span className="signature-local-nav-status">{status}</span> : null}
             {isEditing ? (
               <>
-                <button type="button" className="button button-primary" disabled={saving} onClick={saveProfile}>
-                  {saving ? "保存中..." : "公開ページを保存"}
+                <button type="button" className="button button-primary button-small" disabled={saving} onClick={saveProfile}>
+                  {saving ? "保存中..." : "保存"}
                 </button>
                 <button
                   type="button"
-                  className="button button-ghost"
+                  className="button button-ghost button-small"
                   onClick={() => {
                     setDraft(inflateSignatureProfile(profile));
                     setIsEditing(false);
@@ -559,20 +563,12 @@ export function SignatureProfilePage({ profile, posts }) {
                 </button>
               </>
             ) : (
-              <button type="button" className="button button-primary" onClick={startEditing}>
+              <button type="button" className="button button-primary button-small" onClick={startEditing}>
                 このページを編集
               </button>
             )}
           </div>
-        </div>
-      ) : null}
-
-      <nav className="signature-local-nav" aria-label="Profile sections">
-        <a href="#signature-identity">Identity</a>
-        <a href="#signature-current">Current</a>
-        <a href="#signature-works">Works</a>
-        <a href="#signature-thinking">Records</a>
-        <a href="#signature-contact">Contact</a>
+        ) : null}
       </nav>
 
       <SignatureHeroStage>
