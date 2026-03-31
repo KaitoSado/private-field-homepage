@@ -293,6 +293,15 @@ textarea {
   gap: 12px;
 }
 
+.my-page-gate {
+  gap: 18px;
+}
+
+.my-page-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2368,6 +2377,10 @@ textarea {
 
 @media (max-width: 900px) {
   .signature-schedule-head {
+    grid-template-columns: 1fr;
+  }
+
+  .my-page-grid {
     grid-template-columns: 1fr;
   }
 }
