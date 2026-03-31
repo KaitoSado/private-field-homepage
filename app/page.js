@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeAuthEntry } from "@/components/home-auth-entry";
 
 const steps = [
   {
@@ -40,10 +41,8 @@ export default function HomePage() {
             発見は <Link href="/explore">Explore</Link> に集約し、ログイン後は <Link href="/me">My Page</Link>
             から自分の公開ページへ入る構成にしています。
           </p>
+          <HomeAuthEntry />
           <div className="hero-actions">
-            <Link href="/auth" className="button button-primary">
-              無料ではじめる
-            </Link>
             <Link href="/explore" className="button button-secondary">
               Explore を見る
             </Link>

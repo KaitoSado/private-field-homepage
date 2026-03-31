@@ -293,6 +293,24 @@ textarea {
   gap: 12px;
 }
 
+.home-auth-reveal {
+  grid-column: 1 / -1;
+  margin-top: 6px;
+}
+
+.home-auth-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 0.78fr);
+  gap: 24px;
+  padding: 24px;
+}
+
+.home-auth-copy {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
 .my-page-gate {
   gap: 18px;
 }
@@ -2381,6 +2399,10 @@ textarea {
   }
 
   .my-page-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-auth-shell {
     grid-template-columns: 1fr;
   }
 }
