@@ -544,6 +544,28 @@ textarea {
   color: var(--muted);
 }
 
+.keio-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(8, 95, 149, 0.1);
+  border: 1px solid rgba(8, 95, 149, 0.16);
+  color: #0f4f78;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.keio-badge-compact {
+  min-height: 24px;
+  padding: 0 8px;
+  font-size: 0.64rem;
+}
+
 .avatar-upload-trigger input {
   position: absolute;
   inset: 0;
@@ -1198,6 +1220,13 @@ textarea {
   display: grid;
   gap: 14px;
   padding: 20px 22px;
+}
+
+.help-board-author {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
 }
 
 .class-course-list {

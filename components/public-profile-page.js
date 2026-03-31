@@ -7,6 +7,7 @@ import { AvatarMark } from "@/components/avatar-mark";
 import { ProfilePostManager } from "@/components/profile-post-manager";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
+import { KeioBadge } from "@/components/keio-badge";
 import { AVATAR_MAX_BYTES, PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROFILE_OPEN_TO_LIMIT } from "@/lib/limits";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getAvatarBucket, uploadPublicFile } from "@/lib/storage";
@@ -232,6 +233,7 @@ export function PublicProfilePage({ profile, posts }) {
             <>
               <p className="eyebrow">@{draft.username}</p>
               <h1>{draft.display_name || draft.username}</h1>
+              <KeioBadge profile={draft} />
               <p className="headline">{draft.headline || "肩書きはまだ未設定です。"}</p>
               <p>{draft.bio || "自己紹介はまだありません。"}</p>
             </>

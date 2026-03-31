@@ -25,6 +25,12 @@ const plannedApps = [
     href: "/apps/edge"
   },
   {
+    name: "助け合いボード",
+    status: "Live",
+    body: "ノート共有、過去問交換、空きコマ同行、機材貸し借り、引っ越し手伝いなどを募集・提供できる助け合い掲示板です。",
+    href: "/apps/help"
+  },
+  {
     name: "Question Box",
     status: "Live",
     body: "公開ページに匿名質問箱を置いて、受信と回答を管理します。"

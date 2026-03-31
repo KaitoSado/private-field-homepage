@@ -16,6 +16,8 @@ create table if not exists public.profiles (
   github_url text,
   note_url text,
   avatar_url text,
+  email_domain text not null default '',
+  keio_verified boolean not null default false,
   role text not null default 'user',
   account_status text not null default 'active',
   discoverable boolean not null default true,
@@ -31,6 +33,8 @@ alter table public.profiles add column if not exists x_url text;
 alter table public.profiles add column if not exists github_url text;
 alter table public.profiles add column if not exists note_url text;
 alter table public.profiles add column if not exists avatar_url text;
+alter table public.profiles add column if not exists email_domain text not null default '';
+alter table public.profiles add column if not exists keio_verified boolean not null default false;
 alter table public.profiles add column if not exists role text not null default 'user';
 alter table public.profiles add column if not exists account_status text not null default 'active';
 alter table public.profiles add column if not exists discoverable boolean not null default true;
@@ -168,6 +172,19 @@ create table if not exists public.edge_tips (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.help_requests (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null,
+  category text not null default 'その他',
+  help_mode text not null default 'お願い',
+  campus text not null default '',
+  status text not null default '募集中',
+  body text not null,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
 alter table public.anonymous_questions add column if not exists sender_profile_id uuid references public.profiles(id) on delete set null;
 alter table public.class_notes add column if not exists author_id uuid references public.profiles(id) on delete cascade;
 alter table public.class_notes add column if not exists course_name text;
@@ -201,6 +218,15 @@ alter table public.edge_tips add column if not exists link_url text not null def
 alter table public.edge_tips add column if not exists body text;
 alter table public.edge_tips add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.edge_tips add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.help_requests add column if not exists author_id uuid references public.profiles(id) on delete cascade;
+alter table public.help_requests add column if not exists title text;
+alter table public.help_requests add column if not exists category text not null default 'その他';
+alter table public.help_requests add column if not exists help_mode text not null default 'お願い';
+alter table public.help_requests add column if not exists campus text not null default '';
+alter table public.help_requests add column if not exists status text not null default '募集中';
+alter table public.help_requests add column if not exists body text;
+alter table public.help_requests add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.help_requests add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
 
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -288,6 +314,9 @@ create index if not exists special_articles_author_idx on public.special_article
 create index if not exists edge_tips_updated_idx on public.edge_tips(updated_at desc);
 create index if not exists edge_tips_author_idx on public.edge_tips(author_id);
 create index if not exists edge_tips_category_idx on public.edge_tips(category, updated_at desc);
+create index if not exists help_requests_updated_idx on public.help_requests(updated_at desc);
+create index if not exists help_requests_author_idx on public.help_requests(author_id);
+create index if not exists help_requests_category_idx on public.help_requests(category, updated_at desc);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
@@ -316,7 +345,9 @@ alter table public.profiles
   drop constraint if exists profiles_open_to_length_check,
   add constraint profiles_open_to_length_check check (open_to is null or char_length(open_to) <= 280),
   drop constraint if exists profiles_location_length_check,
-  add constraint profiles_location_length_check check (location is null or char_length(location) <= 80);
+  add constraint profiles_location_length_check check (location is null or char_length(location) <= 80),
+  drop constraint if exists profiles_email_domain_length_check,
+  add constraint profiles_email_domain_length_check check (char_length(email_domain) <= 120);
 
 alter table public.posts
   drop constraint if exists posts_title_length_check,
@@ -392,6 +423,20 @@ alter table public.edge_tips
   drop constraint if exists edge_tips_body_length_check,
   add constraint edge_tips_body_length_check check (char_length(body) between 1 and 2000);
 
+alter table public.help_requests
+  drop constraint if exists help_requests_title_length_check,
+  add constraint help_requests_title_length_check check (char_length(title) between 1 and 120),
+  drop constraint if exists help_requests_category_check,
+  add constraint help_requests_category_check check (category in ('ノート共有', '過去問交換', '空きコマ同行', '機材貸し借り', '引っ越し手伝い', 'その他')),
+  drop constraint if exists help_requests_help_mode_check,
+  add constraint help_requests_help_mode_check check (help_mode in ('お願い', '提供')),
+  drop constraint if exists help_requests_status_check,
+  add constraint help_requests_status_check check (status in ('募集中', '成立', '停止中')),
+  drop constraint if exists help_requests_campus_length_check,
+  add constraint help_requests_campus_length_check check (char_length(campus) <= 80),
+  drop constraint if exists help_requests_body_length_check,
+  add constraint help_requests_body_length_check check (char_length(body) between 1 and 2000);
+
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
 on conflict (id) do update set public = excluded.public;
@@ -433,15 +478,22 @@ set search_path = public
 as $$
 declare
   base_username text;
+  normalized_domain text;
 begin
+  normalized_domain := lower(split_part(coalesce(new.email, ''), '@', 2));
   base_username :=
     coalesce(
       nullif(regexp_replace(lower(split_part(new.email, '@', 1)), '[^a-z0-9_-]+', '-', 'g'), ''),
       'user'
     );
 
-  insert into public.profiles (id, username)
-  values (new.id, left(base_username || '-' || substring(new.id::text from 1 for 6), 30))
+  insert into public.profiles (id, username, email_domain, keio_verified)
+  values (
+    new.id,
+    left(base_username || '-' || substring(new.id::text from 1 for 6), 30),
+    normalized_domain,
+    normalized_domain in ('keio.jp', 'keio.ac.jp')
+  )
   on conflict (id) do nothing;
 
   return new;
@@ -456,10 +508,16 @@ set
       'user'
     ) || '-' || substring(p.id::text from 1 for 6),
     30
-  )
+  ),
+  email_domain = lower(split_part(u.email, '@', 2)),
+  keio_verified = lower(split_part(u.email, '@', 2)) in ('keio.jp', 'keio.ac.jp')
 from auth.users as u
 where u.id = p.id
-  and nullif(btrim(p.username), '') is null;
+  and (
+    nullif(btrim(p.username), '') is null
+    or p.email_domain = ''
+    or p.keio_verified is distinct from (lower(split_part(u.email, '@', 2)) in ('keio.jp', 'keio.ac.jp'))
+  );
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -499,6 +557,11 @@ for each row execute procedure public.handle_updated_at();
 drop trigger if exists edge_tips_set_updated_at on public.edge_tips;
 create trigger edge_tips_set_updated_at
 before update on public.edge_tips
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists help_requests_set_updated_at on public.help_requests;
+create trigger help_requests_set_updated_at
+before update on public.help_requests
 for each row execute procedure public.handle_updated_at();
 
 create or replace view public.profile_stats as
@@ -558,6 +621,7 @@ alter table public.anonymous_questions enable row level security;
 alter table public.class_notes enable row level security;
 alter table public.special_articles enable row level security;
 alter table public.edge_tips enable row level security;
+alter table public.help_requests enable row level security;
 alter table public.notifications enable row level security;
 alter table public.reports enable row level security;
 alter table public.telemetry_page_views enable row level security;
@@ -878,6 +942,47 @@ using (auth.uid() = author_id);
 drop policy if exists "admins can manage edge tips" on public.edge_tips;
 create policy "admins can manage edge tips"
 on public.edge_tips
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "help requests are public readable" on public.help_requests;
+create policy "help requests are public readable"
+on public.help_requests
+for select
+using (true);
+
+drop policy if exists "authenticated users can create help requests" on public.help_requests;
+create policy "authenticated users can create help requests"
+on public.help_requests
+for insert
+to authenticated
+with check (
+  auth.uid() = author_id
+  and exists (
+    select 1
+    from public.profiles
+    where profiles.id = help_requests.author_id
+      and profiles.account_status = 'active'
+  )
+);
+
+drop policy if exists "owners can update help requests" on public.help_requests;
+create policy "owners can update help requests"
+on public.help_requests
+for update
+using (auth.uid() = author_id)
+with check (auth.uid() = author_id);
+
+drop policy if exists "owners can delete help requests" on public.help_requests;
+create policy "owners can delete help requests"
+on public.help_requests
+for delete
+using (auth.uid() = author_id);
+
+drop policy if exists "admins can manage help requests" on public.help_requests;
+create policy "admins can manage help requests"
+on public.help_requests
 for all
 using (public.is_admin())
 with check (public.is_admin());

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AvatarMark } from "@/components/avatar-mark";
+import { KeioBadge } from "@/components/keio-badge";
 import { getExploreData } from "@/lib/data";
 
 export const metadata = {
@@ -59,6 +60,7 @@ export default async function ExplorePage({ searchParams }) {
                 <h3>{profile.display_name || profile.username}</h3>
                 <p className="muted">@{profile.username}</p>
               </div>
+              <KeioBadge profile={profile} compact />
               <p>{profile.headline || "プロフィールを準備中です。"}</p>
               <div className="inline-meta">
                 <span>{profile.stats.follower_count} followers</span>
@@ -89,6 +91,7 @@ export default async function ExplorePage({ searchParams }) {
                   <h3>{profile.display_name || profile.username}</h3>
                   <p className="muted">@{profile.username}</p>
                 </div>
+                <KeioBadge profile={profile} compact />
                 <p>{profile.headline || "プロフィールを準備中です。"}</p>
                 {profile.location ? <span className="muted">{profile.location}</span> : null}
                 <div className="inline-meta">
