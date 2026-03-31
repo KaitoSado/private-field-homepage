@@ -16,6 +16,7 @@ const emptyForm = {
   attendance_policy: "",
   assignment_load: "",
   quality_score: "",
+  verdict_grade: "",
   body: ""
 };
 
@@ -23,6 +24,7 @@ const weekdays = ["", "月", "火", "水", "木", "金", "土", "日"];
 const scoreOptions = ["", "1", "2", "3", "4", "5"];
 const evaluationOptions = ["", "試験", "レポート", "試験+レポート", "発表", "その他"];
 const attendanceOptions = ["", "あり", "なし", "ときどき"];
+const verdictOptions = ["", "S", "A", "B", "C", "D"];
 
 export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms }) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
@@ -196,7 +198,8 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
       evaluation_type: current.evaluation_type || "",
       attendance_policy: current.attendance_policy || "",
       assignment_load: current.assignment_load || "",
-      quality_score: current.quality_score || ""
+      quality_score: current.quality_score || "",
+      verdict_grade: current.verdict_grade || ""
     }));
     setExpandedCourse(course.key);
     setStatus(`「${course.courseName}」への反応を書く準備ができました。`);
@@ -217,6 +220,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
       attendance_policy: item.attendance_policy || "",
       assignment_load: item.assignment_load ? String(item.assignment_load) : "",
       quality_score: item.quality_score ? String(item.quality_score) : "",
+      verdict_grade: item.verdict_grade || "",
       body: item.body || ""
     });
     setExpandedCourse(`${item.course_name || ""}`.trim().toLowerCase());
@@ -445,7 +449,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                                     </select>
                                   </label>
                                   <label className="field">
-                                    <span>試験 or レポート</span>
+                                    <span>試験/レポ</span>
                                     <select value={editingDraft.evaluation_type} onChange={(event) => updateEditingField("evaluation_type", event.target.value)}>
                                       {evaluationOptions.map((option) => (
                                         <option key={option || "none"} value={option}>
@@ -484,6 +488,16 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                                       ))}
                                     </select>
                                   </label>
+                                  <label className="field">
+                                    <span>判決</span>
+                                    <select value={editingDraft.verdict_grade} onChange={(event) => updateEditingField("verdict_grade", event.target.value)}>
+                                      {verdictOptions.map((option) => (
+                                        <option key={option || "none"} value={option}>
+                                          {option || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
                                 </div>
                                 <label className="field">
                                   <span>反応</span>
@@ -511,6 +525,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                                   {renderTextPill("出欠", item.attendance_policy)}
                                   {renderScorePill("課題量", item.assignment_load)}
                                   {renderScorePill("授業の質", item.quality_score)}
+                                  {renderTextPill("判決", item.verdict_grade)}
                                 </div>
                                 <p className="class-note-body">{item.body}</p>
                                 {session?.user?.id === item.author_id ? (
@@ -615,7 +630,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                 </select>
               </label>
               <label className="field">
-                <span>試験 or レポート</span>
+                <span>試験/レポ</span>
                 <select value={form.evaluation_type} onChange={(event) => updateField("evaluation_type", event.target.value)}>
                   {evaluationOptions.map((option) => (
                     <option key={option || "none"} value={option}>
@@ -648,6 +663,16 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                 <span>授業の質</span>
                 <select value={form.quality_score} onChange={(event) => updateField("quality_score", event.target.value)}>
                   {scoreOptions.map((option) => (
+                    <option key={option || "none"} value={option}>
+                      {option || "未設定"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>判決</span>
+                <select value={form.verdict_grade} onChange={(event) => updateField("verdict_grade", event.target.value)}>
+                  {verdictOptions.map((option) => (
                     <option key={option || "none"} value={option}>
                       {option || "未設定"}
                     </option>

@@ -139,6 +139,7 @@ create table if not exists public.class_notes (
   attendance_policy text not null default '',
   assignment_load smallint,
   quality_score smallint,
+  verdict_grade text not null default '',
   body text not null,
   created_at timestamptz not null default timezone('utc'::text, now()),
   updated_at timestamptz not null default timezone('utc'::text, now())
@@ -169,6 +170,7 @@ alter table public.class_notes add column if not exists evaluation_type text not
 alter table public.class_notes add column if not exists attendance_policy text not null default '';
 alter table public.class_notes add column if not exists assignment_load smallint;
 alter table public.class_notes add column if not exists quality_score smallint;
+alter table public.class_notes add column if not exists verdict_grade text not null default '';
 alter table public.class_notes add column if not exists body text;
 alter table public.class_notes add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.class_notes add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
@@ -340,6 +342,8 @@ alter table public.class_notes
   add constraint class_notes_evaluation_type_length_check check (char_length(evaluation_type) <= 40),
   drop constraint if exists class_notes_attendance_policy_length_check,
   add constraint class_notes_attendance_policy_length_check check (char_length(attendance_policy) <= 40),
+  drop constraint if exists class_notes_verdict_grade_check,
+  add constraint class_notes_verdict_grade_check check (verdict_grade in ('', 'S', 'A', 'B', 'C', 'D')),
   drop constraint if exists class_notes_body_length_check,
   add constraint class_notes_body_length_check check (char_length(body) between 1 and 2000);
 

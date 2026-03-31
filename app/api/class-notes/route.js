@@ -3,6 +3,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 const NOTE_LIMIT = 2000;
 const TEXT_LIMIT = 120;
+const VERDICT_OPTIONS = new Set(["S", "A", "B", "C", "D"]);
 
 function normalizeScore(value) {
   const raw = `${value ?? ""}`.trim();
@@ -47,6 +48,7 @@ export async function POST(request) {
     attendance_policy: `${body.attendance_policy || ""}`.trim(),
     assignment_load: normalizeScore(body.assignment_load),
     quality_score: normalizeScore(body.quality_score),
+    verdict_grade: `${body.verdict_grade || ""}`.trim().toUpperCase(),
     body: `${body.body || ""}`.trim()
   };
 
@@ -63,6 +65,7 @@ export async function POST(request) {
     payload.period_label.length > 40 ||
     payload.evaluation_type.length > 40 ||
     payload.attendance_policy.length > 40 ||
+    payload.verdict_grade.length > 4 ||
     payload.body.length > NOTE_LIMIT
   ) {
     return NextResponse.json({ error: "入力が長すぎます。" }, { status: 400 });
@@ -77,6 +80,10 @@ export async function POST(request) {
     return NextResponse.json({ error: "評価スコアは 1〜5 で入力してください。" }, { status: 400 });
   }
 
+  if (payload.verdict_grade && !VERDICT_OPTIONS.has(payload.verdict_grade)) {
+    return NextResponse.json({ error: "判決は S〜D で入力してください。" }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from("class_notes")
     .insert({
@@ -84,7 +91,7 @@ export async function POST(request) {
       ...payload
     })
     .select(
-      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
+      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, verdict_grade, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
     )
     .single();
 
@@ -132,6 +139,7 @@ export async function PATCH(request) {
     attendance_policy: `${body.attendance_policy || ""}`.trim(),
     assignment_load: normalizeScore(body.assignment_load),
     quality_score: normalizeScore(body.quality_score),
+    verdict_grade: `${body.verdict_grade || ""}`.trim().toUpperCase(),
     body: `${body.body || ""}`.trim()
   };
 
@@ -148,6 +156,7 @@ export async function PATCH(request) {
     payload.period_label.length > 40 ||
     payload.evaluation_type.length > 40 ||
     payload.attendance_policy.length > 40 ||
+    payload.verdict_grade.length > 4 ||
     payload.body.length > NOTE_LIMIT
   ) {
     return NextResponse.json({ error: "入力が長すぎます。" }, { status: 400 });
@@ -162,13 +171,17 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "評価スコアは 1〜5 で入力してください。" }, { status: 400 });
   }
 
+  if (payload.verdict_grade && !VERDICT_OPTIONS.has(payload.verdict_grade)) {
+    return NextResponse.json({ error: "判決は S〜D で入力してください。" }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from("class_notes")
     .update(payload)
     .eq("id", noteId)
     .eq("author_id", user.id)
     .select(
-      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
+      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, verdict_grade, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
     )
     .maybeSingle();
 
