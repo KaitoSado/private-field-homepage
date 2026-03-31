@@ -457,7 +457,7 @@ export function SignatureProfilePage({ profile, posts }) {
     }
 
     const data = result.item;
-    if (data) {
+    if (data && canEdit) {
       setQuestionItems((current) => [data, ...current]);
       setQuestionDrafts((current) => ({ ...current, [data.id]: data.answer || "" }));
     }
