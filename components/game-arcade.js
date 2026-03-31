@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { BreakoutGame } from "@/components/breakout-game";
 
 const tabs = [
+  { id: "breakout", label: "Breakout" },
   { id: "tetris", label: "Tetris" },
   { id: "tictactoe", label: "Tic-Tac-Toe" },
   { id: "reaction", label: "Reaction Tap" },
@@ -79,7 +81,7 @@ const TETRIS_SHAPES = {
 };
 
 export function GameArcade() {
-  const [activeTab, setActiveTab] = useState("tetris");
+  const [activeTab, setActiveTab] = useState("breakout");
 
   return (
     <div className="dashboard-layout">
@@ -110,6 +112,7 @@ export function GameArcade() {
           ))}
         </div>
 
+        {activeTab === "breakout" ? <BreakoutGame /> : null}
         {activeTab === "tetris" ? <TetrisGame /> : null}
         {activeTab === "tictactoe" ? <TicTacToeGame /> : null}
         {activeTab === "reaction" ? <ReactionTapGame /> : null}

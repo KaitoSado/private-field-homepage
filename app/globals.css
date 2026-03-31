@@ -2714,6 +2714,25 @@ textarea {
   background: rgba(255, 255, 255, 0.2);
 }
 
+.arcade-breakout-card {
+  gap: 18px;
+}
+
+.arcade-breakout-hud {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.arcade-breakout-canvas {
+  width: 100%;
+  max-width: 720px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0f1722;
+  justify-self: center;
+}
+
 .signature-post-body {
   display: grid;
   gap: 12px;
@@ -3060,6 +3079,10 @@ textarea {
 
   .arcade-tetris-layout {
     grid-template-columns: 1fr;
+  }
+
+  .arcade-breakout-hud {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
