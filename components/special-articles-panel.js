@@ -118,17 +118,22 @@ export function SpecialArticlesPanel({ initialItems }) {
           <div className="card-grid special-article-grid">
             {items.length ? (
               items.map((item) => (
-                <article key={item.id} className="surface feature-card signature-post-card-special special-article-card">
+                <Link
+                  key={item.id}
+                  href={`/special-articles/${item.id}`}
+                  className="surface feature-card signature-post-card-special special-article-card"
+                >
                   <div className="post-card-head">
                     <span>{formatDate(item.updated_at || item.created_at)}</span>
                     <span>{item.price_label || "Premium note"}</span>
                   </div>
                   <h3>{item.title}</h3>
                   <p>{item.excerpt || getPreview(item.body)}</p>
-                  <div className="inline-meta">
+                  <div className="inline-meta special-article-card-meta">
                     <span>@{item.profiles?.username || item.profiles?.display_name || "author"}</span>
+                    <span>続きを読む</span>
                   </div>
-                </article>
+                </Link>
               ))
             ) : (
               <div className="surface empty-state">

@@ -2564,6 +2564,21 @@ textarea {
   line-height: 1.75;
 }
 
+.special-article-card-meta {
+  margin-top: auto;
+  justify-content: space-between;
+}
+
+.special-article-detail {
+  display: grid;
+  gap: 18px;
+}
+
+.special-article-body {
+  white-space: pre-wrap;
+  line-height: 1.9;
+}
+
 .signature-post-body {
   display: grid;
   gap: 12px;
