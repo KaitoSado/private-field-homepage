@@ -1222,6 +1222,32 @@ textarea {
   border: 1px solid rgba(31, 111, 120, 0.1);
 }
 
+.class-score-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.class-score-pill {
+  display: inline-grid;
+  gap: 2px;
+  min-width: 88px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(31, 111, 120, 0.1);
+}
+
+.class-score-pill strong {
+  font-size: 0.72rem;
+  color: #6b7276;
+}
+
+.class-score-pill span {
+  font-size: 0.86rem;
+  color: #22313a;
+}
+
 .class-expand-button {
   justify-self: flex-start;
 }

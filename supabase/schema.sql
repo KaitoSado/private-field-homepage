@@ -133,6 +133,12 @@ create table if not exists public.class_notes (
   term_label text not null default '',
   weekday text not null default '',
   period_label text not null default '',
+  easy_score smallint,
+  s_score smallint,
+  evaluation_type text not null default '',
+  attendance_policy text not null default '',
+  assignment_load smallint,
+  quality_score smallint,
   body text not null,
   created_at timestamptz not null default timezone('utc'::text, now()),
   updated_at timestamptz not null default timezone('utc'::text, now())
@@ -157,6 +163,12 @@ alter table public.class_notes add column if not exists campus text not null def
 alter table public.class_notes add column if not exists term_label text not null default '';
 alter table public.class_notes add column if not exists weekday text not null default '';
 alter table public.class_notes add column if not exists period_label text not null default '';
+alter table public.class_notes add column if not exists easy_score smallint;
+alter table public.class_notes add column if not exists s_score smallint;
+alter table public.class_notes add column if not exists evaluation_type text not null default '';
+alter table public.class_notes add column if not exists attendance_policy text not null default '';
+alter table public.class_notes add column if not exists assignment_load smallint;
+alter table public.class_notes add column if not exists quality_score smallint;
 alter table public.class_notes add column if not exists body text;
 alter table public.class_notes add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.class_notes add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
@@ -316,6 +328,18 @@ alter table public.class_notes
   add constraint class_notes_weekday_length_check check (char_length(weekday) <= 20),
   drop constraint if exists class_notes_period_label_length_check,
   add constraint class_notes_period_label_length_check check (char_length(period_label) <= 40),
+  drop constraint if exists class_notes_easy_score_range_check,
+  add constraint class_notes_easy_score_range_check check (easy_score is null or easy_score between 1 and 5),
+  drop constraint if exists class_notes_s_score_range_check,
+  add constraint class_notes_s_score_range_check check (s_score is null or s_score between 1 and 5),
+  drop constraint if exists class_notes_assignment_load_range_check,
+  add constraint class_notes_assignment_load_range_check check (assignment_load is null or assignment_load between 1 and 5),
+  drop constraint if exists class_notes_quality_score_range_check,
+  add constraint class_notes_quality_score_range_check check (quality_score is null or quality_score between 1 and 5),
+  drop constraint if exists class_notes_evaluation_type_length_check,
+  add constraint class_notes_evaluation_type_length_check check (char_length(evaluation_type) <= 40),
+  drop constraint if exists class_notes_attendance_policy_length_check,
+  add constraint class_notes_attendance_policy_length_check check (char_length(attendance_policy) <= 40),
   drop constraint if exists class_notes_body_length_check,
   add constraint class_notes_body_length_check check (char_length(body) between 1 and 2000);
 

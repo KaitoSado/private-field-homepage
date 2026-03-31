@@ -4,6 +4,13 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 const NOTE_LIMIT = 2000;
 const TEXT_LIMIT = 120;
 
+function normalizeScore(value) {
+  const raw = `${value ?? ""}`.trim();
+  if (!raw) return null;
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export async function POST(request) {
   const supabase = getSupabaseAdminClient();
   if (!supabase) {
@@ -34,6 +41,12 @@ export async function POST(request) {
     term_label: `${body.term_label || ""}`.trim(),
     weekday: `${body.weekday || ""}`.trim(),
     period_label: `${body.period_label || ""}`.trim(),
+    easy_score: normalizeScore(body.easy_score),
+    s_score: normalizeScore(body.s_score),
+    evaluation_type: `${body.evaluation_type || ""}`.trim(),
+    attendance_policy: `${body.attendance_policy || ""}`.trim(),
+    assignment_load: normalizeScore(body.assignment_load),
+    quality_score: normalizeScore(body.quality_score),
     body: `${body.body || ""}`.trim()
   };
 
@@ -48,9 +61,20 @@ export async function POST(request) {
     payload.term_label.length > TEXT_LIMIT ||
     payload.weekday.length > 20 ||
     payload.period_label.length > 40 ||
+    payload.evaluation_type.length > 40 ||
+    payload.attendance_policy.length > 40 ||
     payload.body.length > NOTE_LIMIT
   ) {
     return NextResponse.json({ error: "入力が長すぎます。" }, { status: 400 });
+  }
+
+  if (
+    (payload.easy_score !== null && (payload.easy_score < 1 || payload.easy_score > 5)) ||
+    (payload.s_score !== null && (payload.s_score < 1 || payload.s_score > 5)) ||
+    (payload.assignment_load !== null && (payload.assignment_load < 1 || payload.assignment_load > 5)) ||
+    (payload.quality_score !== null && (payload.quality_score < 1 || payload.quality_score > 5))
+  ) {
+    return NextResponse.json({ error: "評価スコアは 1〜5 で入力してください。" }, { status: 400 });
   }
 
   const { data, error } = await supabase
@@ -60,7 +84,7 @@ export async function POST(request) {
       ...payload
     })
     .select(
-      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
+      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
     )
     .single();
 
@@ -102,6 +126,12 @@ export async function PATCH(request) {
     term_label: `${body.term_label || ""}`.trim(),
     weekday: `${body.weekday || ""}`.trim(),
     period_label: `${body.period_label || ""}`.trim(),
+    easy_score: normalizeScore(body.easy_score),
+    s_score: normalizeScore(body.s_score),
+    evaluation_type: `${body.evaluation_type || ""}`.trim(),
+    attendance_policy: `${body.attendance_policy || ""}`.trim(),
+    assignment_load: normalizeScore(body.assignment_load),
+    quality_score: normalizeScore(body.quality_score),
     body: `${body.body || ""}`.trim()
   };
 
@@ -116,9 +146,20 @@ export async function PATCH(request) {
     payload.term_label.length > TEXT_LIMIT ||
     payload.weekday.length > 20 ||
     payload.period_label.length > 40 ||
+    payload.evaluation_type.length > 40 ||
+    payload.attendance_policy.length > 40 ||
     payload.body.length > NOTE_LIMIT
   ) {
     return NextResponse.json({ error: "入力が長すぎます。" }, { status: 400 });
+  }
+
+  if (
+    (payload.easy_score !== null && (payload.easy_score < 1 || payload.easy_score > 5)) ||
+    (payload.s_score !== null && (payload.s_score < 1 || payload.s_score > 5)) ||
+    (payload.assignment_load !== null && (payload.assignment_load < 1 || payload.assignment_load > 5)) ||
+    (payload.quality_score !== null && (payload.quality_score < 1 || payload.quality_score > 5))
+  ) {
+    return NextResponse.json({ error: "評価スコアは 1〜5 で入力してください。" }, { status: 400 });
   }
 
   const { data, error } = await supabase
@@ -127,7 +168,7 @@ export async function PATCH(request) {
     .eq("id", noteId)
     .eq("author_id", user.id)
     .select(
-      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
+      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
     )
     .maybeSingle();
 

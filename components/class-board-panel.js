@@ -10,10 +10,19 @@ const emptyForm = {
   term_label: "",
   weekday: "",
   period_label: "",
+  easy_score: "",
+  s_score: "",
+  evaluation_type: "",
+  attendance_policy: "",
+  assignment_load: "",
+  quality_score: "",
   body: ""
 };
 
 const weekdays = ["", "月", "火", "水", "木", "金", "土", "日"];
+const scoreOptions = ["", "1", "2", "3", "4", "5"];
+const evaluationOptions = ["", "試験", "レポート", "試験+レポート", "発表", "その他"];
+const attendanceOptions = ["", "あり", "なし", "ときどき"];
 
 export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms }) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
@@ -181,7 +190,13 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
       campus: current.campus || course.campuses[0] || "",
       term_label: current.term_label || course.terms[0] || "",
       weekday: current.weekday || course.weekdays[0] || "",
-      period_label: current.period_label || course.periods[0] || ""
+      period_label: current.period_label || course.periods[0] || "",
+      easy_score: current.easy_score || "",
+      s_score: current.s_score || "",
+      evaluation_type: current.evaluation_type || "",
+      attendance_policy: current.attendance_policy || "",
+      assignment_load: current.assignment_load || "",
+      quality_score: current.quality_score || ""
     }));
     setExpandedCourse(course.key);
     setStatus(`「${course.courseName}」への反応を書く準備ができました。`);
@@ -196,6 +211,12 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
       term_label: item.term_label || "",
       weekday: item.weekday || "",
       period_label: item.period_label || "",
+      easy_score: item.easy_score ? String(item.easy_score) : "",
+      s_score: item.s_score ? String(item.s_score) : "",
+      evaluation_type: item.evaluation_type || "",
+      attendance_policy: item.attendance_policy || "",
+      assignment_load: item.assignment_load ? String(item.assignment_load) : "",
+      quality_score: item.quality_score ? String(item.quality_score) : "",
       body: item.body || ""
     });
     setExpandedCourse(`${item.course_name || ""}`.trim().toLowerCase());
@@ -403,6 +424,66 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                                     <span>キャンパス</span>
                                     <input value={editingDraft.campus} onChange={(event) => updateEditingField("campus", event.target.value)} />
                                   </label>
+                                  <label className="field">
+                                    <span>楽単度</span>
+                                    <select value={editingDraft.easy_score} onChange={(event) => updateEditingField("easy_score", event.target.value)}>
+                                      {scoreOptions.map((option) => (
+                                        <option key={option || "none"} value={option}>
+                                          {option || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label className="field">
+                                    <span>S単度</span>
+                                    <select value={editingDraft.s_score} onChange={(event) => updateEditingField("s_score", event.target.value)}>
+                                      {scoreOptions.map((option) => (
+                                        <option key={option || "none"} value={option}>
+                                          {option || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label className="field">
+                                    <span>試験 or レポート</span>
+                                    <select value={editingDraft.evaluation_type} onChange={(event) => updateEditingField("evaluation_type", event.target.value)}>
+                                      {evaluationOptions.map((option) => (
+                                        <option key={option || "none"} value={option}>
+                                          {option || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label className="field">
+                                    <span>出欠</span>
+                                    <select value={editingDraft.attendance_policy} onChange={(event) => updateEditingField("attendance_policy", event.target.value)}>
+                                      {attendanceOptions.map((option) => (
+                                        <option key={option || "none"} value={option}>
+                                          {option || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label className="field">
+                                    <span>課題量</span>
+                                    <select value={editingDraft.assignment_load} onChange={(event) => updateEditingField("assignment_load", event.target.value)}>
+                                      {scoreOptions.map((option) => (
+                                        <option key={option || "none"} value={option}>
+                                          {option || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label className="field">
+                                    <span>授業の質</span>
+                                    <select value={editingDraft.quality_score} onChange={(event) => updateEditingField("quality_score", event.target.value)}>
+                                      {scoreOptions.map((option) => (
+                                        <option key={option || "none"} value={option}>
+                                          {option || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
                                 </div>
                                 <label className="field">
                                   <span>反応</span>
@@ -422,6 +503,14 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                                 <div className="class-reaction-head">
                                   <strong>@{item.profiles?.username || item.profiles?.display_name || "guest"}</strong>
                                   <span className="muted">{formatDate(item.updated_at || item.created_at)}</span>
+                                </div>
+                                <div className="class-score-strip">
+                                  {renderScorePill("楽単度", item.easy_score)}
+                                  {renderScorePill("S単度", item.s_score)}
+                                  {renderTextPill("試験/レポ", item.evaluation_type)}
+                                  {renderTextPill("出欠", item.attendance_policy)}
+                                  {renderScorePill("課題量", item.assignment_load)}
+                                  {renderScorePill("授業の質", item.quality_score)}
                                 </div>
                                 <p className="class-note-body">{item.body}</p>
                                 {session?.user?.id === item.author_id ? (
@@ -505,6 +594,66 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                 <span>キャンパス</span>
                 <input value={form.campus} onChange={(event) => updateField("campus", event.target.value)} />
               </label>
+              <label className="field">
+                <span>楽単度</span>
+                <select value={form.easy_score} onChange={(event) => updateField("easy_score", event.target.value)}>
+                  {scoreOptions.map((option) => (
+                    <option key={option || "none"} value={option}>
+                      {option || "未設定"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>S単度</span>
+                <select value={form.s_score} onChange={(event) => updateField("s_score", event.target.value)}>
+                  {scoreOptions.map((option) => (
+                    <option key={option || "none"} value={option}>
+                      {option || "未設定"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>試験 or レポート</span>
+                <select value={form.evaluation_type} onChange={(event) => updateField("evaluation_type", event.target.value)}>
+                  {evaluationOptions.map((option) => (
+                    <option key={option || "none"} value={option}>
+                      {option || "未設定"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>出欠</span>
+                <select value={form.attendance_policy} onChange={(event) => updateField("attendance_policy", event.target.value)}>
+                  {attendanceOptions.map((option) => (
+                    <option key={option || "none"} value={option}>
+                      {option || "未設定"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>課題量</span>
+                <select value={form.assignment_load} onChange={(event) => updateField("assignment_load", event.target.value)}>
+                  {scoreOptions.map((option) => (
+                    <option key={option || "none"} value={option}>
+                      {option || "未設定"}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>授業の質</span>
+                <select value={form.quality_score} onChange={(event) => updateField("quality_score", event.target.value)}>
+                  {scoreOptions.map((option) => (
+                    <option key={option || "none"} value={option}>
+                      {option || "未設定"}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
 
             <label className="field">
@@ -543,4 +692,24 @@ function formatDate(value) {
     month: "numeric",
     day: "numeric"
   }).format(new Date(value));
+}
+
+function renderScorePill(label, value) {
+  if (!value) return null;
+  return (
+    <span className="class-score-pill" key={label}>
+      <strong>{label}</strong>
+      <span>{value}/5</span>
+    </span>
+  );
+}
+
+function renderTextPill(label, value) {
+  if (!value) return null;
+  return (
+    <span className="class-score-pill" key={label}>
+      <strong>{label}</strong>
+      <span>{value}</span>
+    </span>
+  );
 }
