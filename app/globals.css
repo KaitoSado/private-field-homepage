@@ -1170,33 +1170,24 @@ textarea {
   gap: 14px;
 }
 
+.edge-board-hero {
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  align-items: start;
+}
+
 .edge-board-main {
   grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
   align-items: start;
 }
 
 .edge-board-column,
-.edge-write-panel,
-.edge-board-side,
-.edge-board-ideas {
+.edge-write-panel {
   display: grid;
   gap: 16px;
 }
 
-.edge-board-side {
-  padding: 20px;
-}
-
 .edge-board-stat-grid {
   grid-template-columns: 1fr;
-}
-
-.edge-board-ideas ul {
-  margin: 0;
-  padding-left: 18px;
-  color: var(--muted);
-  display: grid;
-  gap: 8px;
 }
 
 .edge-tip-list {
@@ -3282,6 +3273,7 @@ textarea {
     align-items: flex-start;
   }
 
+  .edge-board-hero,
   .edge-board-main,
   .class-board-hero {
     grid-template-columns: 1fr;

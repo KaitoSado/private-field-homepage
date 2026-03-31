@@ -14,13 +14,6 @@ const emptyForm = {
   body: ""
 };
 
-const starterIdeas = [
-  "Adobe, Notion, Figma, GitHub Student などの学割リンク",
-  "学内の印刷、Wi-Fi、PC 貸出、図書館サービス",
-  "定期券、旅行、映画館、サブスクの学生料金",
-  "食堂、地域クーポン、住まい補助、奨学金の情報"
-];
-
 export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses }) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [session, setSession] = useState(null);
@@ -131,28 +124,18 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
           </p>
         </div>
 
-        <div className="surface edge-board-side">
-          <div className="class-board-stat-grid edge-board-stat-grid">
-            <div className="stat-tile">
-              <strong>{items.length}</strong>
-              <span>集まった情報</span>
-            </div>
-            <div className="stat-tile">
-              <strong>{categories.length}</strong>
-              <span>カテゴリ</span>
-            </div>
-            <div className="stat-tile">
-              <strong>{campuses.length || "—"}</strong>
-              <span>対応キャンパス</span>
-            </div>
+        <div className="class-board-hero-stats edge-board-hero-stats" aria-label="エッジ情報の集計">
+          <div className="stat-tile">
+            <strong>{items.length}</strong>
+            <span>集まった情報</span>
           </div>
-          <div className="edge-board-ideas">
-            <p className="eyebrow">Hint</p>
-            <ul>
-              {starterIdeas.map((idea) => (
-                <li key={idea}>{idea}</li>
-              ))}
-            </ul>
+          <div className="stat-tile">
+            <strong>{categories.length}</strong>
+            <span>カテゴリ</span>
+          </div>
+          <div className="stat-tile">
+            <strong>{campuses.length || "—"}</strong>
+            <span>対応キャンパス</span>
           </div>
         </div>
       </section>
