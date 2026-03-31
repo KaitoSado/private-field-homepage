@@ -73,6 +73,7 @@ export default function RootLayout({ children }) {
             <div className="footer-links">
               <Link href="/">Home</Link>
               <Link href="/explore">Explore</Link>
+              <Link href="/apps">Apps</Link>
               <Link href="/auth">Auth</Link>
               <Link href="/notifications">Notifications</Link>
               <Link href="/settings">Settings</Link>

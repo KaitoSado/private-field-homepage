@@ -71,12 +71,14 @@ export function HeaderNav() {
     ? [
         { href: "/", label: "Home" },
         { href: "/explore", label: "Explore" },
+        { href: "/apps", label: "Apps" },
         { href: "/notifications", label: "Notifications" },
         { href: profileMeta.path, label: "My Page" }
       ]
     : [
         { href: "/", label: "Home" },
         { href: "/explore", label: "Explore" },
+        { href: "/apps", label: "Apps" },
         { href: "/auth", label: "Auth" }
       ];
 
