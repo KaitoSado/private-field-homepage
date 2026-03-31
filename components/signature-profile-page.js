@@ -432,32 +432,31 @@ export function SignatureProfilePage({ profile, posts }) {
     setSubmittingQuestion(true);
     setQuestionStatus("");
 
-    const insertQuery = supabase.from("anonymous_questions").insert({
-      recipient_id: profile.id,
-      question: nextQuestion,
-      sender_profile_id: session?.user?.id || null
+    const {
+      data: { session: currentSession }
+    } = await supabase.auth.getSession();
+
+    const response = await fetch("/api/questions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {})
+      },
+      body: JSON.stringify({
+        recipientId: profile.id,
+        question: nextQuestion
+      })
     });
 
-    const { data, error } = canEdit
-      ? await insertQuery
-          .select(
-            canRevealQuestionSender
-              ? "id, question, answer, created_at, updated_at, sender_profile_id, sender:profiles!anonymous_questions_sender_profile_id_fkey(id, username, display_name, avatar_url)"
-              : "id, question, answer, created_at, updated_at"
-          )
-          .single()
-      : await insertQuery;
+    const result = await response.json().catch(() => ({}));
 
-    if (error) {
-      setQuestionStatus(
-        error.message?.includes("anonymous_questions")
-          ? "匿名質問箱を使うには最新の Supabase schema を適用してください。"
-          : error.message || "質問の送信に失敗しました。"
-      );
+    if (!response.ok) {
+      setQuestionStatus(result.error || "質問の送信に失敗しました。");
       setSubmittingQuestion(false);
       return;
     }
 
+    const data = result.item;
     if (data) {
       setQuestionItems((current) => [data, ...current]);
       setQuestionDrafts((current) => ({ ...current, [data.id]: data.answer || "" }));
