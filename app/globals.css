@@ -2384,6 +2384,19 @@ textarea {
   min-height: 280px;
 }
 
+.signature-post-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 14px;
+  align-items: start;
+}
+
+.signature-post-copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
 .signature-post-thumb-wrap,
 .signature-post-archive-thumb-wrap {
   overflow: hidden;
@@ -2391,9 +2404,13 @@ textarea {
   background: rgba(34, 49, 58, 0.06);
 }
 
+.signature-post-thumb-wrap-inline {
+  align-self: start;
+}
+
 .signature-post-thumb {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   display: block;
 }
@@ -2456,6 +2473,16 @@ textarea {
 
 .signature-post-card .tag-row {
   margin-top: auto;
+}
+
+@media (max-width: 720px) {
+  .signature-post-body {
+    grid-template-columns: 1fr;
+  }
+
+  .signature-post-thumb-wrap-inline {
+    max-width: 132px;
+  }
 }
 
 .signature-record-card input,

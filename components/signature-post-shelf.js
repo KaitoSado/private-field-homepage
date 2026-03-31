@@ -46,19 +46,25 @@ export function SignaturePostShelf({ username, posts }) {
 
       <div className="signature-post-grid">
         {featuredPosts.length ? (
-          featuredPosts.map((post) => (
+          featuredPosts.map((post) => {
+            const thumbnail = getPostThumbnail(post);
+            return (
             <Link key={post.id} href={`/@${username}/${post.slug}`} className="signature-post-card">
-              {getPostThumbnail(post) ? (
-                <div className="signature-post-thumb-wrap">
-                  <img src={getPostThumbnail(post)} alt={`${post.title} のサムネイル`} className="signature-post-thumb" />
-                </div>
-              ) : null}
               <div className="post-card-head">
                 <span>{formatDate(post.published_at || post.updated_at)}</span>
                 <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
               </div>
-              <h3>{post.title}</h3>
-              <p className="signature-post-preview">{getPostPreview(post)}</p>
+              <div className="signature-post-body">
+                <div className="signature-post-copy">
+                  <h3>{post.title}</h3>
+                  <p className="signature-post-preview">{getPostPreview(post)}</p>
+                </div>
+                {thumbnail ? (
+                  <div className="signature-post-thumb-wrap signature-post-thumb-wrap-inline">
+                    <img src={thumbnail} alt={`${post.title} のサムネイル`} className="signature-post-thumb" />
+                  </div>
+                ) : null}
+              </div>
               {post.tags.length ? (
                 <div className="tag-row">
                   {post.tags.map((tag) => (
@@ -69,7 +75,8 @@ export function SignaturePostShelf({ username, posts }) {
                 </div>
               ) : null}
             </Link>
-          ))
+          );
+          })
         ) : (
           <div className="signature-post-card empty-state">
             <h3>一致する記事がありません</h3>
