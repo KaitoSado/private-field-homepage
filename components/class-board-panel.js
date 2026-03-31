@@ -248,11 +248,11 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
     <div className="dashboard-layout">
       <section className="section-grid section-head class-board-hero">
         <div className="section-copy">
-          <p className="eyebrow">Class Board</p>
-          <h1 className="page-title">授業名から、みんなの反応を見る</h1>
+          <p className="eyebrow">Enma Mode</p>
+          <h1 className="page-title">教員を裁け！地獄の裏シラバス</h1>
           <p>
-            まず授業ごとの面があって、その中に受講した人の感想やメモが積み上がっていく形にしています。
-            ドイツ語や現代社会理論のように、同じ授業に対する反応をまとめて追えるボードです。
+            あなたは閻魔大王です。今学期は散々な目に遭いましたね。今度はあなたが教員を評価する番です。
+            授業ごとに反応を積み上げて、裏シラバスとして厳しく裁いていきましょう。
           </p>
         </div>
 
@@ -273,8 +273,8 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
           </div>
 
           <div className="class-board-hero-copy">
-            <p className="eyebrow">How it works</p>
-            <p>授業名で面を見つけて、その授業に対する雰囲気、負荷、面白さ、注意点を短く重ねていきます。</p>
+            <p className="eyebrow">Judgement</p>
+            <p>授業名ごとに面を見つけて、雰囲気、負荷、面白さ、注意点を短く積み上げます。被告は教員、判決は受講者です。</p>
           </div>
         </div>
       </section>
@@ -283,8 +283,8 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
         <div className="class-board-column">
           <div className="surface search-panel class-filter-panel">
             <div className="section-copy">
-              <p className="eyebrow">Browse</p>
-              <h2>授業から探す</h2>
+              <p className="eyebrow">Docket</p>
+              <h2>被告の授業を探す</h2>
             </div>
 
             <div className="class-form-grid">
@@ -458,9 +458,9 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
         <div className="class-board-column">
           <form className="surface search-panel form-stack class-write-panel" onSubmit={submitNote}>
             <div className="section-copy">
-              <p className="eyebrow">Write</p>
-              <h2>授業への反応を書く</h2>
-              <p className="muted">すでにある授業にも、新しい授業にもそのまま書き込めます。</p>
+              <p className="eyebrow">Verdict</p>
+              <h2>判決を書く</h2>
+              <p className="muted">すでにある授業にも、新しい授業にもそのまま判決を書き込めます。</p>
             </div>
 
             <div className="class-form-grid">
@@ -508,23 +508,23 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
             </div>
 
             <label className="field">
-              <span>反応</span>
+              <span>判決メモ</span>
               <textarea
                 rows="6"
                 value={form.body}
                 onChange={(event) => updateField("body", event.target.value)}
-                placeholder="授業の雰囲気、課題量、発表の有無、面白かった点、受ける前に知りたかったこと"
+                placeholder="授業の雰囲気、負荷、発表の有無、地獄度、救いの有無など"
                 required
               />
             </label>
 
             <div className="hero-actions">
               <button type="submit" className="button button-primary" disabled={submitting}>
-                {submitting ? "保存中..." : "反応を追加する"}
+                {submitting ? "記録中..." : "判決を追加する"}
               </button>
             </div>
             <p className={`status-text ${status ? "status-success" : ""}`}>
-              {status || (session?.user ? "ログイン中です。そのまま書き込めます。" : "閲覧は誰でもできます。書き込むにはログインしてください。")}
+              {status || (session?.user ? "ログイン中です。そのまま裁けます。" : "閲覧は誰でもできます。裁くにはログインしてください。")}
             </p>
           </form>
         </div>

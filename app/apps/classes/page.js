@@ -2,8 +2,8 @@ import { ClassBoardPanel } from "@/components/class-board-panel";
 import { getClassBoardData } from "@/lib/data";
 
 export const metadata = {
-  title: "授業情報 | Apps | FieldCard Social",
-  description: "授業情報を書き込んだり、観たりするための共有ボード。"
+  title: "教員を裁け！地獄の裏シラバス | Apps | FieldCard Social",
+  description: "授業ごとに反応を積み上げて、教員を評価していく裏シラバス。"
 };
 
 export const revalidate = 0;
