@@ -54,7 +54,7 @@ export function SignaturePostShelf({ username, posts }) {
                 <span>{formatDate(post.published_at || post.updated_at)}</span>
                 <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
               </div>
-              <div className="signature-post-body">
+              <div className={`signature-post-body ${thumbnail ? "has-thumb" : ""}`}>
                 <div className="signature-post-copy">
                   <h3>{post.title}</h3>
                   <p className="signature-post-preview">{getPostPreview(post)}</p>

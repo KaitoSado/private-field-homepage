@@ -2386,9 +2386,12 @@ textarea {
 
 .signature-post-body {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 104px;
-  gap: 14px;
+  gap: 12px;
   align-items: start;
+}
+
+.signature-post-body.has-thumb {
+  grid-template-columns: minmax(0, 1fr) 88px;
 }
 
 .signature-post-copy {
@@ -2406,6 +2409,7 @@ textarea {
 
 .signature-post-thumb-wrap-inline {
   align-self: start;
+  width: 88px;
 }
 
 .signature-post-thumb {
@@ -2481,7 +2485,7 @@ textarea {
   }
 
   .signature-post-thumb-wrap-inline {
-    max-width: 132px;
+    width: min(132px, 100%);
   }
 }
 
