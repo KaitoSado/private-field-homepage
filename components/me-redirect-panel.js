@@ -108,9 +108,6 @@ export function MeRedirectPanel() {
           </p>
         </div>
         <div className="hero-actions">
-          <Link href={state.path} className="button button-primary">
-            自分の公開ページへ
-          </Link>
           <Link href="/notifications" className="button button-secondary">
             通知を見る
           </Link>
@@ -118,12 +115,6 @@ export function MeRedirectPanel() {
       </section>
 
       <section className="section-grid my-page-grid">
-        <Link href={state.path} className="surface feature-card">
-          <p className="eyebrow">Public Page</p>
-          <h2>公開ページを開く</h2>
-          <p>プロフィール編集、記事追加、質問箱の管理はここから行います。</p>
-        </Link>
-
         <Link href="/explore" className="surface feature-card">
           <p className="eyebrow">Explore</p>
           <h2>他のページを探す</h2>
