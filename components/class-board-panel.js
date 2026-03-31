@@ -20,6 +20,8 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
   const [session, setSession] = useState(null);
   const [items, setItems] = useState(initialItems);
   const [form, setForm] = useState(emptyForm);
+  const [editingNoteId, setEditingNoteId] = useState("");
+  const [editingDraft, setEditingDraft] = useState(emptyForm);
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [query, setQuery] = useState("");
@@ -167,6 +169,10 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
     setForm((current) => ({ ...current, [key]: value }));
   }
 
+  function updateEditingField(key, value) {
+    setEditingDraft((current) => ({ ...current, [key]: value }));
+  }
+
   function startReply(course) {
     setForm((current) => ({
       ...current,
@@ -179,6 +185,63 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
     }));
     setExpandedCourse(course.key);
     setStatus(`「${course.courseName}」への反応を書く準備ができました。`);
+  }
+
+  function startEditing(item) {
+    setEditingNoteId(item.id);
+    setEditingDraft({
+      course_name: item.course_name || "",
+      instructor: item.instructor || "",
+      campus: item.campus || "",
+      term_label: item.term_label || "",
+      weekday: item.weekday || "",
+      period_label: item.period_label || "",
+      body: item.body || ""
+    });
+    setExpandedCourse(`${item.course_name || ""}`.trim().toLowerCase());
+    setStatus("自分の反応を編集中です。");
+  }
+
+  function cancelEditing() {
+    setEditingNoteId("");
+    setEditingDraft(emptyForm);
+    setStatus("");
+  }
+
+  async function saveEditingNote(noteId) {
+    if (!session?.user) return;
+
+    setSubmitting(true);
+    setStatus("");
+
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      const response = await fetch("/api/class-notes", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {})
+        },
+        body: JSON.stringify({ id: noteId, ...editingDraft })
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "授業情報の更新に失敗しました。");
+      }
+
+      setItems((current) => current.map((item) => (item.id === noteId ? result.item : item)));
+      setEditingNoteId("");
+      setEditingDraft(emptyForm);
+      setStatus("反応を更新しました。");
+    } catch (error) {
+      setStatus(error.message || "授業情報の更新に失敗しました。");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -307,11 +370,69 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                       <div className="stack-list class-reaction-list">
                         {course.items.map((item) => (
                           <div key={item.id} className="class-reaction-card">
-                            <div className="class-reaction-head">
-                              <strong>@{item.profiles?.username || item.profiles?.display_name || "guest"}</strong>
-                              <span className="muted">{formatDate(item.updated_at || item.created_at)}</span>
-                            </div>
-                            <p className="class-note-body">{item.body}</p>
+                            {editingNoteId === item.id ? (
+                              <div className="form-stack class-inline-editor">
+                                <div className="class-form-grid">
+                                  <label className="field">
+                                    <span>授業名</span>
+                                    <input value={editingDraft.course_name} onChange={(event) => updateEditingField("course_name", event.target.value)} />
+                                  </label>
+                                  <label className="field">
+                                    <span>担当</span>
+                                    <input value={editingDraft.instructor} onChange={(event) => updateEditingField("instructor", event.target.value)} />
+                                  </label>
+                                  <label className="field">
+                                    <span>学期</span>
+                                    <input value={editingDraft.term_label} onChange={(event) => updateEditingField("term_label", event.target.value)} />
+                                  </label>
+                                  <label className="field">
+                                    <span>曜日</span>
+                                    <select value={editingDraft.weekday} onChange={(event) => updateEditingField("weekday", event.target.value)}>
+                                      {weekdays.map((day) => (
+                                        <option key={day || "none"} value={day}>
+                                          {day || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label className="field">
+                                    <span>時限</span>
+                                    <input value={editingDraft.period_label} onChange={(event) => updateEditingField("period_label", event.target.value)} />
+                                  </label>
+                                  <label className="field">
+                                    <span>キャンパス</span>
+                                    <input value={editingDraft.campus} onChange={(event) => updateEditingField("campus", event.target.value)} />
+                                  </label>
+                                </div>
+                                <label className="field">
+                                  <span>反応</span>
+                                  <textarea rows="4" value={editingDraft.body} onChange={(event) => updateEditingField("body", event.target.value)} />
+                                </label>
+                                <div className="hero-actions">
+                                  <button type="button" className="button button-primary" disabled={submitting} onClick={() => saveEditingNote(item.id)}>
+                                    {submitting ? "保存中..." : "保存"}
+                                  </button>
+                                  <button type="button" className="button button-ghost" onClick={cancelEditing}>
+                                    キャンセル
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="class-reaction-head">
+                                  <strong>@{item.profiles?.username || item.profiles?.display_name || "guest"}</strong>
+                                  <span className="muted">{formatDate(item.updated_at || item.created_at)}</span>
+                                </div>
+                                <p className="class-note-body">{item.body}</p>
+                                {session?.user?.id === item.author_id ? (
+                                  <div className="hero-actions">
+                                    <button type="button" className="button button-ghost button-small" onClick={() => startEditing(item)}>
+                                      編集
+                                    </button>
+                                  </div>
+                                ) : null}
+                              </>
+                            )}
                           </div>
                         ))}
                       </div>
