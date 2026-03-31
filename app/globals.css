@@ -2049,6 +2049,14 @@ textarea {
   white-space: pre-wrap;
 }
 
+.signature-question-meta {
+  margin: 0;
+  color: #6b7276;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+}
+
 .signature-question-q {
   color: #1d2328;
   font-weight: 600;

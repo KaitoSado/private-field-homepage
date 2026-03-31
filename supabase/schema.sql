@@ -117,11 +117,14 @@ create table if not exists public.post_comments (
 create table if not exists public.anonymous_questions (
   id uuid primary key default gen_random_uuid(),
   recipient_id uuid not null references public.profiles(id) on delete cascade,
+  sender_profile_id uuid references public.profiles(id) on delete set null,
   question text not null,
   answer text,
   created_at timestamptz not null default timezone('utc'::text, now()),
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
+
+alter table public.anonymous_questions add column if not exists sender_profile_id uuid references public.profiles(id) on delete set null;
 
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -201,6 +204,7 @@ create index if not exists post_likes_post_idx on public.post_likes(post_id);
 create index if not exists post_reposts_post_idx on public.post_reposts(post_id);
 create index if not exists post_comments_post_idx on public.post_comments(post_id, created_at desc);
 create index if not exists anonymous_questions_recipient_idx on public.anonymous_questions(recipient_id, created_at desc);
+create index if not exists anonymous_questions_sender_idx on public.anonymous_questions(sender_profile_id);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
@@ -611,6 +615,10 @@ for insert
 to anon, authenticated
 with check (
   char_length(btrim(question)) > 0
+  and (
+    (auth.uid() is null and sender_profile_id is null)
+    or (auth.uid() is not null and sender_profile_id = auth.uid())
+  )
   and exists (
     select 1
     from public.profiles

@@ -62,6 +62,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const [savingQuestionId, setSavingQuestionId] = useState("");
   const [deletingQuestionId, setDeletingQuestionId] = useState("");
   const canEdit = session?.user?.id === profile.id;
+  const canRevealQuestionSender = canEdit && profile.username === "kaito-sado";
 
   useEffect(() => {
     setDraft(inflateSignatureProfile(profile));
@@ -82,10 +83,13 @@ export function SignatureProfilePage({ profile, posts }) {
 
     async function loadQuestions() {
       setLoadingQuestions(true);
+      const questionSelect = canRevealQuestionSender
+        ? "id, question, answer, created_at, updated_at, sender_profile_id, sender:profiles!anonymous_questions_sender_profile_id_fkey(id, username, display_name, avatar_url)"
+        : "id, question, answer, created_at, updated_at";
 
       const { data, error } = await supabase
         .from("anonymous_questions")
-        .select("id, question, answer, created_at, updated_at")
+        .select(questionSelect)
         .eq("recipient_id", profile.id)
         .order("created_at", { ascending: false });
 
@@ -113,7 +117,7 @@ export function SignatureProfilePage({ profile, posts }) {
     return () => {
       active = false;
     };
-  }, [supabase, profile?.id, session?.user?.id]);
+  }, [supabase, profile?.id, session?.user?.id, canRevealQuestionSender]);
 
   useEffect(() => {
     let mounted = true;
@@ -426,9 +430,14 @@ export function SignatureProfilePage({ profile, posts }) {
       .from("anonymous_questions")
       .insert({
         recipient_id: profile.id,
-        question: nextQuestion
+        question: nextQuestion,
+        sender_profile_id: session?.user?.id || null
       })
-      .select("id, question, answer, created_at, updated_at")
+      .select(
+        canRevealQuestionSender
+          ? "id, question, answer, created_at, updated_at, sender_profile_id, sender:profiles!anonymous_questions_sender_profile_id_fkey(id, username, display_name, avatar_url)"
+          : "id, question, answer, created_at, updated_at"
+      )
       .single();
 
     if (error) {
@@ -460,7 +469,11 @@ export function SignatureProfilePage({ profile, posts }) {
       .update({ answer: nextAnswer || null })
       .eq("id", questionId)
       .eq("recipient_id", profile.id)
-      .select("id, question, answer, created_at, updated_at")
+      .select(
+        canRevealQuestionSender
+          ? "id, question, answer, created_at, updated_at, sender_profile_id, sender:profiles!anonymous_questions_sender_profile_id_fkey(id, username, display_name, avatar_url)"
+          : "id, question, answer, created_at, updated_at"
+      )
       .single();
 
     if (error) {
@@ -1079,6 +1092,11 @@ export function SignatureProfilePage({ profile, posts }) {
                 questionItems.map((item) => (
                   <article key={item.id} className="signature-question-item">
                     <p className="signature-question-q">Q. {item.question}</p>
+                    {canRevealQuestionSender ? (
+                      <p className="signature-question-meta">
+                        送信元: {item.sender?.username ? `@${item.sender.username}` : "匿名"}
+                      </p>
+                    ) : null}
                     {canEdit ? (
                       <div className="signature-question-answer-editor">
                         <textarea
