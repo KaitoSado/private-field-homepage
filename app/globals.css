@@ -2579,6 +2579,82 @@ textarea {
   line-height: 1.9;
 }
 
+.arcade-hero-card,
+.arcade-game-card,
+.arcade-side-card {
+  display: grid;
+  gap: 16px;
+}
+
+.arcade-tab-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.arcade-panel-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
+  gap: 18px;
+}
+
+.arcade-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.arcade-board-cell,
+.arcade-memory-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.72);
+  min-height: 92px;
+  font-family: "Fraunces", "Yu Mincho", serif;
+  font-size: 2rem;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.arcade-board-cell:hover,
+.arcade-memory-card:hover,
+.arcade-reaction-stage:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(23, 29, 36, 0.1);
+}
+
+.arcade-reaction-card {
+  align-content: start;
+}
+
+.arcade-reaction-stage {
+  min-height: 180px;
+  border-radius: 28px;
+  border: 1px solid rgba(31, 111, 120, 0.14);
+  background: linear-gradient(155deg, rgba(248, 248, 241, 0.96), rgba(231, 238, 237, 0.94));
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.arcade-reaction-card.is-ready .arcade-reaction-stage {
+  background: linear-gradient(155deg, rgba(209, 255, 225, 0.98), rgba(148, 247, 190, 0.94));
+}
+
+.arcade-reaction-card.is-waiting .arcade-reaction-stage {
+  background: linear-gradient(155deg, rgba(255, 241, 212, 0.98), rgba(245, 220, 161, 0.94));
+}
+
+.arcade-memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.arcade-memory-card.is-open {
+  background: linear-gradient(145deg, rgba(34, 49, 58, 0.96), rgba(73, 109, 122, 0.94));
+  color: #f6f3ee;
+}
+
 .signature-post-body {
   display: grid;
   gap: 12px;
@@ -2904,6 +2980,7 @@ textarea {
   .feature-strip,
   .stats-grid,
   .class-board-main,
+  .arcade-panel-grid,
   .class-form-grid {
     grid-template-columns: 1fr;
   }
@@ -2916,6 +2993,10 @@ textarea {
 
   .card-grid {
     grid-template-columns: 1fr;
+  }
+
+  .arcade-memory-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -3038,5 +3119,9 @@ textarea {
 
   .class-course-actions {
     justify-content: flex-start;
+  }
+
+  .arcade-memory-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

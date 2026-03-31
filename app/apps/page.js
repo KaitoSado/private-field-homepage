@@ -7,6 +7,12 @@ export const metadata = {
 
 const plannedApps = [
   {
+    name: "Games",
+    status: "Live",
+    body: "すぐ遊べるミニゲームをまとめた小さいゲームハブです。気分転換や動作確認にも使えます。",
+    href: "/apps/games"
+  },
+  {
     name: "授業情報",
     status: "Live",
     body: "授業名、担当、曜日、時限、キャンパス、感想メモを書き込んだり観たりできるボードです。",
