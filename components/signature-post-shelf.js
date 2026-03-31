@@ -48,6 +48,11 @@ export function SignaturePostShelf({ username, posts }) {
         {featuredPosts.length ? (
           featuredPosts.map((post) => (
             <Link key={post.id} href={`/@${username}/${post.slug}`} className="signature-post-card">
+              {getPostThumbnail(post) ? (
+                <div className="signature-post-thumb-wrap">
+                  <img src={getPostThumbnail(post)} alt={`${post.title} のサムネイル`} className="signature-post-thumb" />
+                </div>
+              ) : null}
               <div className="post-card-head">
                 <span>{formatDate(post.published_at || post.updated_at)}</span>
                 <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
@@ -87,6 +92,11 @@ export function SignaturePostShelf({ username, posts }) {
             <div className="signature-post-archive-list">
               {archivedPosts.map((post) => (
                 <Link key={post.id} href={`/@${username}/${post.slug}`} className="signature-post-archive-item">
+                  {getPostThumbnail(post) ? (
+                    <div className="signature-post-archive-thumb-wrap">
+                      <img src={getPostThumbnail(post)} alt={`${post.title} のサムネイル`} className="signature-post-archive-thumb" />
+                    </div>
+                  ) : null}
                   <div className="signature-post-archive-meta">
                     <span>{formatDate(post.published_at || post.updated_at)}</span>
                     <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
@@ -126,4 +136,12 @@ function getPostPreview(post, limit = 120) {
   const breakIndex = Math.max(preview.lastIndexOf("\n"), preview.lastIndexOf(" "));
   const safePreview = (breakIndex > Math.floor(limit * 0.6) ? preview.slice(0, breakIndex) : preview).trimEnd();
   return `${safePreview}…`;
+}
+
+function getPostThumbnail(post) {
+  if (post.cover_image_url) return post.cover_image_url;
+  const firstImage = Array.isArray(post.media_items)
+    ? post.media_items.find((item) => item?.kind !== "video" && item?.url)
+    : null;
+  return firstImage?.url || "";
 }

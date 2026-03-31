@@ -470,6 +470,11 @@ export function ProfilePostManager({
         {posts.length ? (
           posts.map((post) => (
             <article key={post.id} className="post-row-card">
+              {getPostThumbnail(post) ? (
+                <div className="post-row-thumb-wrap">
+                  <img src={getPostThumbnail(post)} alt={`${post.title} のサムネイル`} className="post-row-thumb" />
+                </div>
+              ) : null}
               <div className="post-row-body">
                 <div className="post-row-meta">
                   <strong>{post.title}</strong>
@@ -582,6 +587,14 @@ function formatMediaItems(value) {
 
 function inferMediaKind(file) {
   return file.type?.startsWith("video/") ? "video" : "image";
+}
+
+function getPostThumbnail(post) {
+  if (post.cover_image_url) return post.cover_image_url;
+  const firstImage = Array.isArray(post.media_items)
+    ? post.media_items.find((item) => item?.kind !== "video" && item?.url)
+    : null;
+  return firstImage?.url || "";
 }
 
 function resolvePostPill(post) {
