@@ -1141,23 +1141,31 @@ textarea {
   gap: 14px;
 }
 
-.class-board-hero-panel,
-.class-board-hero-copy,
 .class-board-column,
 .class-write-panel {
   display: grid;
   gap: 16px;
 }
 
+.class-board-hero {
+  position: relative;
+  grid-template-columns: 1fr;
+  padding-right: min(29vw, 280px);
+}
+
+.class-board-hero-stats {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  width: min(27vw, 248px);
+}
+
 .class-board-main {
   grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
   align-items: start;
-}
-
-.class-board-stat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
 }
 
 .class-filter-panel {
@@ -3238,7 +3246,13 @@ textarea {
     align-items: flex-start;
   }
 
-  .class-board-stat-grid {
+  .class-board-hero {
+    padding-right: 0;
+  }
+
+  .class-board-hero-stats {
+    position: static;
+    width: 100%;
     grid-template-columns: 1fr;
   }
 

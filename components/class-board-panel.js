@@ -281,25 +281,18 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
           </p>
         </div>
 
-        <div className="surface class-board-hero-panel">
-          <div className="class-board-stat-grid">
-            <div className="stat-tile">
-              <strong>{groupedCourses.length}</strong>
-              <span>授業スレッド</span>
-            </div>
-            <div className="stat-tile">
-              <strong>{items.length}</strong>
-              <span>反応の総数</span>
-            </div>
-            <div className="stat-tile">
-              <strong>{campuses.length || "—"}</strong>
-              <span>キャンパス</span>
-            </div>
+        <div className="class-board-hero-stats" aria-label="授業情報の集計">
+          <div className="stat-tile">
+            <strong>{groupedCourses.length}</strong>
+            <span>授業スレッド</span>
           </div>
-
-          <div className="class-board-hero-copy">
-            <p className="eyebrow">Judgement</p>
-            <p>授業名ごとに面を見つけて、雰囲気、負荷、面白さ、注意点を短く積み上げます。被告は教員、判決は受講者です。</p>
+          <div className="stat-tile">
+            <strong>{items.length}</strong>
+            <span>反応の総数</span>
+          </div>
+          <div className="stat-tile">
+            <strong>{campuses.length || "—"}</strong>
+            <span>キャンパス</span>
           </div>
         </div>
       </section>
