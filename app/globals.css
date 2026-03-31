@@ -2182,12 +2182,60 @@ textarea {
 
 .signature-schedule-head {
   display: grid;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  gap: 16px;
+  align-items: start;
 }
 
 .signature-schedule-head p:last-child {
   color: #657075;
   max-width: 54ch;
+}
+
+.signature-schedule-note {
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(184, 154, 93, 0.12);
+  background: rgba(255, 252, 246, 0.7);
+  min-height: 100%;
+}
+
+.signature-schedule-note-label {
+  margin: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #7b725d;
+}
+
+.signature-schedule-note p {
+  margin: 0;
+  color: #2b383f;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.signature-schedule-note-empty {
+  color: #8b8f90;
+}
+
+.signature-schedule-note textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #22313a;
+  font: inherit;
+  line-height: 1.55;
+  padding: 0;
+}
+
+.signature-schedule-note textarea:focus {
+  outline: none;
 }
 
 .signature-schedule-wrap {
@@ -2269,6 +2317,12 @@ textarea {
 
 .signature-schedule-table td textarea:focus {
   outline: none;
+}
+
+@media (max-width: 900px) {
+  .signature-schedule-head {
+    grid-template-columns: 1fr;
+  }
 }
 
 .signature-post-card {

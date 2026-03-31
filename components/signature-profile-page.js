@@ -215,6 +215,7 @@ export function SignatureProfilePage({ profile, posts }) {
         draft.identity_heading,
         currentEntries,
         weeklySchedule,
+        draft.schedule_note,
         recordItems,
         draft.record_heading
       ),
@@ -845,8 +846,26 @@ export function SignatureProfilePage({ profile, posts }) {
 
           <article className="signature-schedule-card">
             <div className="signature-schedule-head">
-              <p className="eyebrow">Week</p>
-              <h3>デフォルト予定</h3>
+              <div>
+                <p className="eyebrow">Week</p>
+                <h3>デフォルト予定</h3>
+              </div>
+              <div className="signature-schedule-note">
+                <p className="signature-schedule-note-label">メモ</p>
+                {isEditing ? (
+                  <textarea
+                    rows="3"
+                    value={draft.schedule_note || ""}
+                    onChange={(event) => updateField("schedule_note", event.target.value)}
+                    maxLength={PROFILE_BIO_LIMIT}
+                    placeholder="補足、ゆるい目標、今週の注意点"
+                  />
+                ) : draft.schedule_note ? (
+                  <p>{draft.schedule_note}</p>
+                ) : (
+                  <p className="signature-schedule-note-empty">補足メモ</p>
+                )}
+              </div>
             </div>
             <div className="signature-schedule-wrap">
               <table className="signature-schedule-table">
@@ -1274,7 +1293,7 @@ function normalizeUsername(value) {
 }
 
 function inflateSignatureProfile(profile) {
-  const { heading, recordHeading, affiliation, currentEntries, weeklySchedule, recordItems } = unpackSignatureAffiliation(
+  const { heading, recordHeading, affiliation, currentEntries, weeklySchedule, scheduleNote, recordItems } = unpackSignatureAffiliation(
     profile.affiliation
   );
 
@@ -1285,6 +1304,7 @@ function inflateSignatureProfile(profile) {
     record_heading: recordHeading || DEFAULT_RECORD_HEADING,
     current_entries: currentEntries,
     weekly_schedule: weeklySchedule,
+    schedule_note: scheduleNote,
     record_items: recordItems
   };
 }
@@ -1302,6 +1322,7 @@ function unpackSignatureAffiliation(value) {
           affiliation: raw.slice(markerEnd + 2).replace(/^\s+/, ""),
           currentEntries: Array.isArray(meta.current_entries) ? meta.current_entries : [],
           weeklySchedule: meta.weekly_schedule && typeof meta.weekly_schedule === "object" ? meta.weekly_schedule : {},
+          scheduleNote: `${meta.schedule_note || ""}`,
           recordItems: Array.isArray(meta.record_items) ? meta.record_items : []
         };
       } catch {
@@ -1311,6 +1332,7 @@ function unpackSignatureAffiliation(value) {
           affiliation: raw,
           currentEntries: [],
           weeklySchedule: {},
+          scheduleNote: "",
           recordItems: []
         };
       }
@@ -1324,6 +1346,7 @@ function unpackSignatureAffiliation(value) {
       affiliation: raw,
       currentEntries: [],
       weeklySchedule: {},
+      scheduleNote: "",
       recordItems: []
     };
   }
@@ -1336,6 +1359,7 @@ function unpackSignatureAffiliation(value) {
       affiliation: raw,
       currentEntries: [],
       weeklySchedule: {},
+      scheduleNote: "",
       recordItems: []
     };
   }
@@ -1349,11 +1373,12 @@ function unpackSignatureAffiliation(value) {
     affiliation,
     currentEntries: [],
     weeklySchedule: {},
+    scheduleNote: "",
     recordItems: []
   };
 }
 
-function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule, recordItems, recordHeading) {
+function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule, scheduleNote, recordItems, recordHeading) {
   const trimmedAffiliation = `${affiliation || ""}`.trim();
   const trimmedHeading = `${heading || ""}`.trim() || DEFAULT_IDENTITY_HEADING;
   const trimmedRecordHeading = `${recordHeading || ""}`.trim() || DEFAULT_RECORD_HEADING;
@@ -1367,6 +1392,7 @@ function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySc
         body: `${entry.body || ""}`.trim()
       })),
       weekly_schedule: mergeWeeklySchedule(weeklySchedule),
+      schedule_note: `${scheduleNote || ""}`.trim(),
       record_items: mergeRecordItems(recordItems, buildDefaultRecordItems()).map((item) => ({
         title: `${item.title || ""}`.trim(),
         body: `${item.body || ""}`.trim()
