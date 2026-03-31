@@ -1141,35 +1141,89 @@ textarea {
   gap: 14px;
 }
 
+.class-board-hero-panel,
+.class-board-hero-copy,
+.class-board-column,
+.class-write-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.class-board-main {
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  align-items: start;
+}
+
+.class-board-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
 .class-filter-panel {
   display: grid;
   gap: 14px;
 }
 
-.class-note-list {
+.class-course-list {
   gap: 16px;
 }
 
-.class-note-card {
+.class-course-card {
   display: grid;
   gap: 14px;
   padding: 22px 24px;
 }
 
-.class-note-head {
+.class-course-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
 }
 
-.class-note-head h3 {
+.class-course-head h3 {
   margin: 0;
 }
 
-.class-note-head > div:first-child {
+.class-course-copy,
+.class-course-copy > div:first-child {
   display: grid;
   gap: 4px;
+}
+
+.class-course-topline,
+.class-course-actions,
+.class-reaction-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.class-course-actions {
+  justify-content: flex-end;
+}
+
+.class-course-meta {
+  gap: 8px;
+}
+
+.class-reaction-list {
+  gap: 10px;
+}
+
+.class-reaction-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid rgba(31, 111, 120, 0.1);
+}
+
+.class-expand-button {
+  justify-self: flex-start;
 }
 
 .class-note-body {
@@ -2772,6 +2826,7 @@ textarea {
   .social-stats,
   .feature-strip,
   .stats-grid,
+  .class-board-main,
   .class-form-grid {
     grid-template-columns: 1fr;
   }
@@ -2895,8 +2950,16 @@ textarea {
     bottom: 14px;
   }
 
-  .class-note-head {
+  .class-course-head {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .class-board-stat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .class-course-actions {
+    justify-content: flex-start;
   }
 }
