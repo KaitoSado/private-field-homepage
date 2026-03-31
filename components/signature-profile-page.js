@@ -58,11 +58,15 @@ export function SignatureProfilePage({ profile, posts }) {
   const [questionDrafts, setQuestionDrafts] = useState({});
   const [questionStatus, setQuestionStatus] = useState("");
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  const [questionsLoaded, setQuestionsLoaded] = useState(false);
   const [submittingQuestion, setSubmittingQuestion] = useState(false);
   const [savingQuestionId, setSavingQuestionId] = useState("");
   const [deletingQuestionId, setDeletingQuestionId] = useState("");
   const canEdit = session?.user?.id === profile.id;
   const canRevealQuestionSender = canEdit && profile.username === "kaito-sado";
+  const shouldShowQuestionStatus =
+    Boolean(questionStatus) &&
+    !(questionsLoaded && questionStatus.includes("最新の Supabase schema"));
 
   useEffect(() => {
     setDraft(inflateSignatureProfile(profile));
@@ -83,6 +87,7 @@ export function SignatureProfilePage({ profile, posts }) {
 
     async function loadQuestions() {
       setLoadingQuestions(true);
+      setQuestionsLoaded(false);
       const questionSelect = canRevealQuestionSender
         ? "id, question, answer, created_at, updated_at, sender_profile_id, sender:profiles!anonymous_questions_sender_profile_id_fkey(id, username, display_name, avatar_url)"
         : "id, question, answer, created_at, updated_at";
@@ -107,6 +112,7 @@ export function SignatureProfilePage({ profile, posts }) {
           Object.fromEntries((data || []).map((item) => [item.id, item.answer || ""]))
         );
         setQuestionStatus("");
+        setQuestionsLoaded(true);
       }
 
       setLoadingQuestions(false);
@@ -1083,7 +1089,7 @@ export function SignatureProfilePage({ profile, posts }) {
               </button>
             </form>
 
-            {questionStatus ? <p className="status-text">{questionStatus}</p> : null}
+            {shouldShowQuestionStatus ? <p className="status-text">{questionStatus}</p> : null}
 
             <div className="signature-question-list">
               {loadingQuestions ? (
