@@ -432,19 +432,21 @@ export function SignatureProfilePage({ profile, posts }) {
     setSubmittingQuestion(true);
     setQuestionStatus("");
 
-    const { data, error } = await supabase
-      .from("anonymous_questions")
-      .insert({
-        recipient_id: profile.id,
-        question: nextQuestion,
-        sender_profile_id: session?.user?.id || null
-      })
-      .select(
-        canRevealQuestionSender
-          ? "id, question, answer, created_at, updated_at, sender_profile_id, sender:profiles!anonymous_questions_sender_profile_id_fkey(id, username, display_name, avatar_url)"
-          : "id, question, answer, created_at, updated_at"
-      )
-      .single();
+    const insertQuery = supabase.from("anonymous_questions").insert({
+      recipient_id: profile.id,
+      question: nextQuestion,
+      sender_profile_id: session?.user?.id || null
+    });
+
+    const { data, error } = canEdit
+      ? await insertQuery
+          .select(
+            canRevealQuestionSender
+              ? "id, question, answer, created_at, updated_at, sender_profile_id, sender:profiles!anonymous_questions_sender_profile_id_fkey(id, username, display_name, avatar_url)"
+              : "id, question, answer, created_at, updated_at"
+          )
+          .single()
+      : await insertQuery;
 
     if (error) {
       setQuestionStatus(
@@ -456,8 +458,10 @@ export function SignatureProfilePage({ profile, posts }) {
       return;
     }
 
-    setQuestionItems((current) => [data, ...current]);
-    setQuestionDrafts((current) => ({ ...current, [data.id]: data.answer || "" }));
+    if (data) {
+      setQuestionItems((current) => [data, ...current]);
+      setQuestionDrafts((current) => ({ ...current, [data.id]: data.answer || "" }));
+    }
     setQuestionInput("");
     setQuestionStatus("匿名で送信しました。");
     setSubmittingQuestion(false);
