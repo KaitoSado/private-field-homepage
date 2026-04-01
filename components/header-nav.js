@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { fetchOwnProfileMeta } from "@/lib/profile-path";
 
@@ -11,6 +12,7 @@ const defaultMeta = {
 };
 
 export function HeaderNav() {
+  const pathname = usePathname();
   const hasSupabaseConfig = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
@@ -69,27 +71,25 @@ export function HeaderNav() {
 
   const mainLinks = session
     ? [
-        { href: "/", label: "Home" },
-        { href: "/explore", label: "Explore" },
-        { href: "/apps", label: "Apps" },
-        { href: "/notifications", label: "Notifications" },
-        { href: profileMeta.path, label: "My Page" }
+        { href: "/explore", label: "発見" },
+        { href: "/apps", label: "アプリ" },
+        { href: "/notifications", label: "通知" },
+        { href: profileMeta.path, label: "マイページ" }
       ]
     : [
-        { href: "/", label: "Home" },
-        { href: "/explore", label: "Explore" },
-        { href: "/apps", label: "Apps" },
-        { href: "/auth", label: "Auth" }
+        { href: "/explore", label: "発見" },
+        { href: "/apps", label: "アプリ" },
+        { href: "/auth", label: "はじめる" }
       ];
 
   const menuLinks = session
     ? [
         { href: "/me", label: "ハブ" },
-        { href: "/settings", label: "Settings" },
+        { href: "/settings", label: "設定" },
         ...(profileMeta.role === "admin"
           ? [
-              { href: "/admin", label: "Admin" },
-              { href: "/ops", label: "Ops" }
+              { href: "/admin", label: "管理" },
+              { href: "/ops", label: "運用" }
             ]
           : [])
       ]
@@ -100,7 +100,11 @@ export function HeaderNav() {
       <div className="site-nav-desktop">
         <nav className="site-nav">
           {mainLinks.map((link) => (
-            <Link key={link.href} href={link.href}>
+            <Link
+              key={link.href}
+              href={link.href}
+              className={`site-nav-link ${pathname === link.href ? "is-active" : ""}`}
+            >
               {link.label}
             </Link>
           ))}
@@ -108,7 +112,7 @@ export function HeaderNav() {
 
         {session ? (
           <details className="site-nav-more">
-            <summary>Menu</summary>
+            <summary>メニュー</summary>
             <div className="site-nav-menu-panel">
               {menuLinks.map((link) => (
                 <Link key={link.href} href={link.href}>
@@ -116,7 +120,7 @@ export function HeaderNav() {
                 </Link>
               ))}
               <button type="button" onClick={handleSignOut} disabled={signingOut}>
-                {signingOut ? "Signing out..." : "Logout"}
+                {signingOut ? "ログアウト中..." : "ログアウト"}
               </button>
             </div>
           </details>
@@ -124,7 +128,7 @@ export function HeaderNav() {
       </div>
 
       <details className="mobile-nav">
-        <summary>Menu</summary>
+        <summary>メニュー</summary>
         <nav className="mobile-nav-panel">
           {mainLinks.map((link) => (
             <Link key={link.href} href={link.href}>
@@ -140,7 +144,7 @@ export function HeaderNav() {
             : null}
           {session ? (
             <button type="button" className="mobile-nav-button" onClick={handleSignOut} disabled={signingOut}>
-              {signingOut ? "Signing out..." : "Logout"}
+              {signingOut ? "ログアウト中..." : "ログアウト"}
             </button>
           ) : null}
         </nav>

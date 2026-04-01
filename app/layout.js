@@ -71,19 +71,19 @@ export default function RootLayout({ children }) {
               {supportEmail ? <p className="muted">Support: {supportEmail}</p> : null}
             </div>
             <div className="footer-links">
-              <Link href="/">Home</Link>
-              <Link href="/explore">Explore</Link>
-              <Link href="/apps">Apps</Link>
-              <Link href="/auth">Auth</Link>
-              <Link href="/notifications">Notifications</Link>
-              <Link href="/settings">Settings</Link>
-              <Link href="/admin">Admin</Link>
-              <Link href="/ops">Ops</Link>
-              <Link href="/terms">Terms</Link>
-              <Link href="/privacy">Privacy</Link>
-              <Link href="/retention">Retention</Link>
-              <Link href="/contact">Contact</Link>
-              <Link href="/changelog">Changelog</Link>
+              <Link href="/">トップ</Link>
+              <Link href="/explore">発見</Link>
+              <Link href="/apps">アプリ</Link>
+              <Link href="/auth">認証</Link>
+              <Link href="/notifications">通知</Link>
+              <Link href="/settings">設定</Link>
+              <Link href="/admin">管理</Link>
+              <Link href="/ops">運用</Link>
+              <Link href="/terms">利用規約</Link>
+              <Link href="/privacy">プライバシー</Link>
+              <Link href="/retention">保持方針</Link>
+              <Link href="/contact">問い合わせ</Link>
+              <Link href="/changelog">更新履歴</Link>
             </div>
           </div>
         </footer>

@@ -38,13 +38,13 @@ export default function HomePage() {
           <h1>自分の公開ページを、そのまま育てる。</h1>
           <p className="hero-lead">
             FieldCard Social は、プロフィール、記事、記録をひとつの公開ページにまとめるサービスです。
-            発見は <Link href="/explore">Explore</Link> に集約し、ログイン後は <Link href="/me">My Page</Link>
-            から自分の公開ページへ入る構成にしています。
+            発見は <Link href="/explore">発見</Link> に集約し、ログイン後は <Link href="/me">ハブ</Link>
+            や <Link href="/explore">発見</Link> から自分の公開ページへ入る構成にしています。
           </p>
           <HomeAuthEntry />
           <div className="hero-actions">
             <Link href="/explore" className="button button-secondary">
-              Explore を見る
+              発見を見る
             </Link>
           </div>
         </div>
@@ -66,7 +66,7 @@ export default function HomePage() {
               <span>その場で編集</span>
             </div>
             <div className="stat-tile">
-              <strong>Explore</strong>
+              <strong>Discover</strong>
               <span>発見は別面へ</span>
             </div>
           </div>
@@ -86,17 +86,17 @@ export default function HomePage() {
       <section className="section-grid single-column">
         <div className="surface feature-card">
           <p className="eyebrow">Navigation</p>
-          <h2>Home は説明、Explore は発見、My Page は自分用の入口。</h2>
+          <h2>トップはロゴから。主導線は 発見・アプリ・通知・マイページ。</h2>
           <p>
-            Home ではサービスの考え方だけを案内し、一覧や検索は Explore に寄せています。
-            ログイン後は My Page から、自分の公開ページ、通知、設定へ移動できます。
+            トップはロゴから戻れるようにして、主ナビは日常的に使う面だけに絞っています。
+            一覧や検索は発見へ、実用面はアプリへ、自分のことはマイページへ寄せています。
           </p>
           <div className="hero-actions">
             <Link href="/me" className="button button-secondary">
-              My Page へ
+              ハブへ
             </Link>
             <Link href="/explore" className="button button-ghost">
-              Explore を開く
+              発見を開く
             </Link>
           </div>
         </div>

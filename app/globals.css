@@ -104,6 +104,46 @@ body {
   color: var(--muted);
 }
 
+.site-nav {
+  gap: 10px;
+}
+
+.site-nav-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(31, 111, 120, 0.12);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--accent-2);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(20, 29, 40, 0.04);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.site-nav-link:hover {
+  transform: translateY(-1px);
+  background: rgba(31, 111, 120, 0.12);
+  border-color: rgba(31, 111, 120, 0.24);
+  color: #174e55;
+  box-shadow: 0 14px 28px rgba(20, 29, 40, 0.08);
+}
+
+.site-nav-link.is-active {
+  background: linear-gradient(135deg, rgba(31, 111, 120, 0.18), rgba(178, 107, 42, 0.18));
+  border-color: rgba(178, 107, 42, 0.26);
+  color: var(--ink);
+}
+
 .site-nav-desktop {
   gap: 12px;
 }
