@@ -78,7 +78,7 @@ export function SignaturePostShelf({ username, posts }) {
                 </Link>
               );
             })}
-            <Link href="/special-articles" className="signature-post-card signature-post-card-special">
+            <Link href={`/@${username}/special-articles`} className="signature-post-card signature-post-card-special">
               <div className="post-card-head">
                 <span>Long-form</span>
                 <span>Collection</span>

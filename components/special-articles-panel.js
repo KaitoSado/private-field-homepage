@@ -11,7 +11,12 @@ const emptyForm = {
   price_label: ""
 };
 
-export function SpecialArticlesPanel({ initialItems }) {
+export function SpecialArticlesPanel({
+  initialItems,
+  ownerProfile = null,
+  backHref = "/apps",
+  detailHrefBase = "/special-articles"
+}) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [session, setSession] = useState(null);
   const [items, setItems] = useState(initialItems);
@@ -19,6 +24,7 @@ export function SpecialArticlesPanel({ initialItems }) {
   const [editingId, setEditingId] = useState("");
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const canManageScopedArticles = ownerProfile ? session?.user?.id === ownerProfile.id : Boolean(session?.user);
 
   useEffect(() => {
     let mounted = true;
@@ -48,7 +54,7 @@ export function SpecialArticlesPanel({ initialItems }) {
 
   async function submitArticle(event) {
     event.preventDefault();
-    if (!session?.user) {
+      if (!canManageScopedArticles) {
       setStatus("特別記事を書くにはログインが必要です。");
       return;
     }
@@ -118,8 +124,8 @@ export function SpecialArticlesPanel({ initialItems }) {
         <div className="surface feature-card special-articles-hero">
           <h1 className="page-title">特別記事</h1>
           <div className="hero-actions">
-            <Link href="/@kaito-sado" className="button button-secondary">
-              公開ページへ戻る
+            <Link href={backHref} className="button button-secondary">
+              戻る
             </Link>
             <Link href="/apps" className="button button-ghost">
               Apps
@@ -138,7 +144,7 @@ export function SpecialArticlesPanel({ initialItems }) {
               items.map((item) => (
                 <div key={item.id} className="special-article-item">
                   <Link
-                    href={`/special-articles/${item.id}`}
+                    href={`${detailHrefBase}/${item.id}`}
                     className="surface feature-card signature-post-card-special special-article-card"
                   >
                     <div className="post-card-head">
@@ -152,7 +158,7 @@ export function SpecialArticlesPanel({ initialItems }) {
                       <span>続きを読む</span>
                     </div>
                   </Link>
-                  {session?.user?.id === item.author_id ? (
+                  {canManageScopedArticles && session?.user?.id === item.author_id ? (
                     <div className="special-article-card-actions">
                       <button type="button" className="button button-ghost" onClick={() => beginEdit(item)}>
                         編集
@@ -170,60 +176,74 @@ export function SpecialArticlesPanel({ initialItems }) {
         </div>
 
         <div className="class-board-column">
-          <form className="surface search-panel form-stack class-write-panel" onSubmit={submitArticle}>
-            <div className="section-copy">
-              <h2>{editingId ? "特別記事を編集" : "特別記事を書く"}</h2>
+          {ownerProfile && !canManageScopedArticles ? (
+            <div className="surface search-panel form-stack class-write-panel">
+              <div className="section-copy">
+                <h2>閲覧中</h2>
+              </div>
+              <p className="status-text">このページでは {ownerProfile.display_name || ownerProfile.username} の特別記事だけを読めます。</p>
             </div>
+          ) : (
+            <form className="surface search-panel form-stack class-write-panel" onSubmit={submitArticle}>
+              <div className="section-copy">
+                <h2>{editingId ? "特別記事を編集" : "特別記事を書く"}</h2>
+              </div>
 
-            <label className="field">
-              <span>タイトル</span>
-              <input value={form.title} onChange={(event) => updateField("title", event.target.value)} required />
-            </label>
+              <label className="field">
+                <span>タイトル</span>
+                <input value={form.title} onChange={(event) => updateField("title", event.target.value)} required />
+              </label>
 
-            <label className="field">
-              <span>見出し用の短い説明</span>
-              <textarea
-                rows="3"
-                value={form.excerpt}
-                onChange={(event) => updateField("excerpt", event.target.value)}
-                placeholder="一覧で見せる短い紹介"
-              />
-            </label>
+              <label className="field">
+                <span>見出し用の短い説明</span>
+                <textarea
+                  rows="3"
+                  value={form.excerpt}
+                  onChange={(event) => updateField("excerpt", event.target.value)}
+                  placeholder="一覧で見せる短い紹介"
+                />
+              </label>
 
-            <label className="field">
-              <span>補足ラベル</span>
-              <input
-                value={form.price_label}
-                onChange={(event) => updateField("price_label", event.target.value)}
-                placeholder="連載 / 補遺 / 長文"
-              />
-            </label>
+              <label className="field">
+                <span>補足ラベル</span>
+                <input
+                  value={form.price_label}
+                  onChange={(event) => updateField("price_label", event.target.value)}
+                  placeholder="連載 / 補遺 / 長文"
+                />
+              </label>
 
-            <label className="field">
-              <span>本文</span>
-              <textarea
-                rows="12"
-                value={form.body}
-                onChange={(event) => updateField("body", event.target.value)}
-                placeholder="ここに特別記事の本文を書きます"
-                required
-              />
-            </label>
+              <label className="field">
+                <span>本文</span>
+                <textarea
+                  rows="12"
+                  value={form.body}
+                  onChange={(event) => updateField("body", event.target.value)}
+                  placeholder="ここに特別記事の本文を書きます"
+                  required
+                />
+              </label>
 
-            <div className="hero-actions">
-              <button type="submit" className="button button-primary" disabled={submitting}>
-                {submitting ? "保存中..." : editingId ? "変更を保存する" : "特別記事を追加する"}
-              </button>
-              {editingId ? (
-                <button type="button" className="button button-secondary" onClick={resetComposer}>
-                  キャンセル
+              <div className="hero-actions">
+                <button type="submit" className="button button-primary" disabled={submitting}>
+                  {submitting ? "保存中..." : editingId ? "変更を保存する" : "特別記事を追加する"}
                 </button>
-              ) : null}
-            </div>
-            <p className={`status-text ${status ? "status-success" : ""}`}>
-              {status || (session?.user ? "ログイン中です。そのまま書き込めます。" : "閲覧は誰でもできます。書くにはログインしてください。")}
-            </p>
-          </form>
+                {editingId ? (
+                  <button type="button" className="button button-secondary" onClick={resetComposer}>
+                    キャンセル
+                  </button>
+                ) : null}
+              </div>
+              <p className={`status-text ${status ? "status-success" : ""}`}>
+                {status ||
+                  (canManageScopedArticles
+                    ? "このページの特別記事を編集できます。"
+                    : session?.user
+                      ? "ログイン中です。そのまま書き込めます。"
+                      : "閲覧は誰でもできます。書くにはログインしてください。")}
+              </p>
+            </form>
+          )}
         </div>
       </section>
     </div>
