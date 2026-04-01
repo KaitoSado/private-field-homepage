@@ -29,21 +29,6 @@ const plannedApps = [
     status: "Live",
     body: "ノート共有、過去問交換、空きコマ同行、機材貸し借り、引っ越し手伝いなどを募集・提供できる助け合い掲示板です。",
     href: "/apps/help"
-  },
-  {
-    name: "Question Box",
-    status: "Live",
-    body: "公開ページに匿名質問箱を置いて、受信と回答を管理します。"
-  },
-  {
-    name: "Profile Tools",
-    status: "Planned",
-    body: "公開ページの編集を補助する、小さいツール群をここへ足していきます。"
-  },
-  {
-    name: "Experiments",
-    status: "Planned",
-    body: "試作中の小さいサービスや、ページと連動する実験をここから公開します。"
   }
 ];
 
@@ -55,14 +40,14 @@ export default function AppsPage() {
           <p className="eyebrow">Apps</p>
           <h1 className="page-title">FieldCard にぶら下がるアプリの入口</h1>
           <p>
-            ここには、公開ページとつながる小さいサービスや補助ツールを増やしていく予定です。
-            まだ少ないですが、今後この面を起点に広げられるようにしてあります。
+            ここには、公開ページとつながりながら独立して使える小さいサービスをまとめています。
+            大学生活の実用アプリを中心に、必要な面をここから増やしていきます。
           </p>
         </div>
         <div className="surface feature-card">
           <p className="eyebrow">Next</p>
           <h2>プロフィールの外側に、使える面を増やす。</h2>
-          <p>今は質問箱が中心ですが、今後はメモ、実験、連携サービスの入口として育てていけます。</p>
+          <p>裏シラバス、エッジ情報、助け合い、ゲームのように、公開ページとは別の実用面をここに積み上げていきます。</p>
         </div>
       </section>
 
