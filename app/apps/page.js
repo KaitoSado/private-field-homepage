@@ -50,11 +50,6 @@ export default function AppsPage() {
             大学生活の実用アプリを中心に、必要な面をここから増やしていきます。
           </p>
         </div>
-        <div className="surface feature-card">
-          <p className="eyebrow">Next</p>
-          <h2>プロフィールの外側に、使える面を増やす。</h2>
-          <p>裏シラバス、エッジ情報、助け合い、ゲームのように、公開ページとは別の実用面をここに積み上げていきます。</p>
-        </div>
       </section>
 
       <section className="card-grid">
