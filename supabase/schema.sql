@@ -16,6 +16,7 @@ create table if not exists public.profiles (
   github_url text,
   note_url text,
   avatar_url text,
+  custom_links jsonb not null default '[]'::jsonb,
   email_domain text not null default '',
   email_verified boolean not null default false,
   keio_verified boolean not null default false,
@@ -34,6 +35,7 @@ alter table public.profiles add column if not exists x_url text;
 alter table public.profiles add column if not exists github_url text;
 alter table public.profiles add column if not exists note_url text;
 alter table public.profiles add column if not exists avatar_url text;
+alter table public.profiles add column if not exists custom_links jsonb not null default '[]'::jsonb;
 alter table public.profiles add column if not exists email_domain text not null default '';
 alter table public.profiles add column if not exists email_verified boolean not null default false;
 alter table public.profiles add column if not exists keio_verified boolean not null default false;

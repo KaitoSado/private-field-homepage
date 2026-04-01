@@ -14,6 +14,12 @@ import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
 import { KeioBadge } from "@/components/keio-badge";
 import { AVATAR_MAX_BYTES, PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROFILE_OPEN_TO_LIMIT } from "@/lib/limits";
+import {
+  buildRenderedProfileLinks,
+  getFixedLinkFields,
+  inflateCustomLinks,
+  normalizeCustomLinks
+} from "@/lib/profile-links";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getAvatarBucket, uploadPublicFile } from "@/lib/storage";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
@@ -157,16 +163,13 @@ export function SignatureProfilePage({ profile, posts }) {
 
   const recentPosts = postItems.slice(0, 4);
   const latestPost = recentPosts[0] || null;
+  const fixedLinkFields = getFixedLinkFields();
   const leadCopy = draft.headline || "なんか書ける";
   const identityBody =
     draft.bio ||
     "知覚、身体、記録、インターフェース。そのあいだを研究と実装の両方から往復しながら、触れる思考と残る体験をつくっています。";
-  const links = [
-    { label: "Website", href: sanitizeExternalUrl(draft.website_url), key: "website_url" },
-    { label: "X", href: sanitizeExternalUrl(draft.x_url), key: "x_url" },
-    { label: "GitHub", href: sanitizeExternalUrl(draft.github_url), key: "github_url" },
-    { label: "note", href: sanitizeExternalUrl(draft.note_url), key: "note_url" }
-  ].filter((item) => item.href || isEditing);
+  const customLinks = inflateCustomLinks(draft.custom_links);
+  const links = buildRenderedProfileLinks(draft);
   const infoCards = [
     {
       eyebrow: "Affiliation",
@@ -229,6 +232,7 @@ export function SignatureProfilePage({ profile, posts }) {
       github_url: sanitizeExternalUrl(draft.github_url) || "",
       note_url: sanitizeExternalUrl(draft.note_url) || "",
       avatar_url: sanitizeHttpUrl(draft.avatar_url) || "",
+      custom_links: normalizeCustomLinks(draft.custom_links),
       discoverable: draft.discoverable !== false
     };
 
@@ -258,6 +262,29 @@ export function SignatureProfilePage({ profile, posts }) {
 
   function updateField(key, value) {
     setDraft((current) => ({ ...current, [key]: value }));
+  }
+
+  function updateCustomLink(index, key, value) {
+    setDraft((current) => ({
+      ...current,
+      custom_links: inflateCustomLinks(current.custom_links).map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [key]: value } : item
+      )
+    }));
+  }
+
+  function addCustomLink() {
+    setDraft((current) => ({
+      ...current,
+      custom_links: [...inflateCustomLinks(current.custom_links), { label: "", href: "" }]
+    }));
+  }
+
+  function removeCustomLink(index) {
+    setDraft((current) => ({
+      ...current,
+      custom_links: inflateCustomLinks(current.custom_links).filter((_, itemIndex) => itemIndex !== index)
+    }));
   }
 
   async function handleAvatarUpload(event) {
@@ -642,24 +669,56 @@ export function SignatureProfilePage({ profile, posts }) {
             </a>
           </div>
 
-          {links.length ? (
+          {links.length || isEditing ? (
             <div className="signature-inline-links">
-              {isEditing
-                ? links.map((link) => (
-                    <label key={link.key} className="signature-edit-inline signature-edit-link">
-                      <span>{link.label}</span>
+              {isEditing ? (
+                <div className="link-editor-stack">
+                  {fixedLinkFields.map((field) => (
+                    <label key={field.key} className="signature-edit-inline signature-edit-link">
+                      <span>{field.label}</span>
                       <input
-                        value={draft[link.key] || ""}
-                        onChange={(event) => updateField(link.key, event.target.value)}
-                        placeholder={`https://${link.label.toLowerCase()}.com/...`}
+                        value={draft[field.key] || ""}
+                        onChange={(event) => updateField(field.key, event.target.value)}
+                        placeholder={field.placeholder}
                       />
                     </label>
-                  ))
-                : links.map((link) => (
-                    <a key={link.label} href={link.href} target="_blank" rel="noreferrer">
-                      {link.label}
-                    </a>
                   ))}
+                  {customLinks.map((link, index) => (
+                    <div key={`signature-custom-link-${index}`} className="link-editor-row">
+                      <label className="signature-edit-inline signature-edit-link">
+                        <span>ラベル</span>
+                        <input
+                          value={link.label || ""}
+                          onChange={(event) => updateCustomLink(index, "label", event.target.value)}
+                          placeholder="Portfolio / Podcast / Docs"
+                        />
+                      </label>
+                      <label className="signature-edit-inline signature-edit-link">
+                        <span>URL</span>
+                        <input
+                          value={link.href || ""}
+                          onChange={(event) => updateCustomLink(index, "href", event.target.value)}
+                          placeholder="https://example.com/..."
+                        />
+                      </label>
+                      <button type="button" className="button button-ghost button-small" onClick={() => removeCustomLink(index)}>
+                        削除
+                      </button>
+                    </div>
+                  ))}
+                  <div className="link-editor-actions">
+                    <button type="button" className="button button-secondary button-small" onClick={addCustomLink}>
+                      リンクを追加
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                links.map((link) => (
+                  <a key={link.key} href={link.href} target="_blank" rel="noreferrer">
+                    {link.label}
+                  </a>
+                ))
+              )}
             </div>
           ) : null}
         </div>
@@ -942,28 +1001,60 @@ export function SignatureProfilePage({ profile, posts }) {
         )}
       </SignatureInteractiveSection>
 
-      {links.length ? (
+      {links.length || isEditing ? (
         <SignatureInteractiveSection id="signature-links">
           <div className="signature-section-head">
             <p className="eyebrow">Links</p>
             <h2>Outside the page</h2>
           </div>
           <div className="link-list">
-            {links.map((link) =>
-              isEditing ? (
-                <label key={link.key} className="signature-edit-inline signature-edit-link-card">
-                  <span>{link.label}</span>
-                  <input
-                    value={draft[link.key] || ""}
-                    onChange={(event) => updateField(link.key, event.target.value)}
-                    placeholder={`https://${link.label.toLowerCase()}.com/...`}
-                  />
-                </label>
-              ) : (
-                <a key={link.label} href={link.href} target="_blank" rel="noreferrer" className="button button-secondary">
+            {isEditing ? (
+              <div className="link-editor-stack">
+                {fixedLinkFields.map((field) => (
+                  <label key={field.key} className="signature-edit-inline signature-edit-link-card">
+                    <span>{field.label}</span>
+                    <input
+                      value={draft[field.key] || ""}
+                      onChange={(event) => updateField(field.key, event.target.value)}
+                      placeholder={field.placeholder}
+                    />
+                  </label>
+                ))}
+                {customLinks.map((link, index) => (
+                  <div key={`signature-links-card-${index}`} className="link-editor-row">
+                    <label className="signature-edit-inline signature-edit-link-card">
+                      <span>ラベル</span>
+                      <input
+                        value={link.label || ""}
+                        onChange={(event) => updateCustomLink(index, "label", event.target.value)}
+                        placeholder="Link title"
+                      />
+                    </label>
+                    <label className="signature-edit-inline signature-edit-link-card">
+                      <span>URL</span>
+                      <input
+                        value={link.href || ""}
+                        onChange={(event) => updateCustomLink(index, "href", event.target.value)}
+                        placeholder="https://example.com/..."
+                      />
+                    </label>
+                    <button type="button" className="button button-ghost button-small" onClick={() => removeCustomLink(index)}>
+                      削除
+                    </button>
+                  </div>
+                ))}
+                <div className="link-editor-actions">
+                  <button type="button" className="button button-secondary button-small" onClick={addCustomLink}>
+                    リンクを追加
+                  </button>
+                </div>
+              </div>
+            ) : (
+              links.map((link) => (
+                <a key={link.key} href={link.href} target="_blank" rel="noreferrer" className="button button-secondary">
                   {link.label}
                 </a>
-              )
+              ))
             )}
           </div>
         </SignatureInteractiveSection>
@@ -1297,6 +1388,7 @@ function inflateSignatureProfile(profile) {
 
   return {
     ...profile,
+    custom_links: inflateCustomLinks(profile.custom_links),
     affiliation,
     identity_heading: heading || DEFAULT_IDENTITY_HEADING,
     record_heading: recordHeading || DEFAULT_RECORD_HEADING,
