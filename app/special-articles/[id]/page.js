@@ -1,6 +1,12 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
+import { SpecialArticleGate } from "@/components/special-article-gate";
 import { getSpecialArticleById } from "@/lib/data";
+import {
+  getSpecialArticleAccessCookieName,
+  requiresSpecialArticlePassword
+} from "@/lib/special-article-access";
 
 export const revalidate = 0;
 
@@ -28,6 +34,10 @@ export default async function SpecialArticleDetailPage({ params }) {
     notFound();
   }
 
+  const cookieStore = await cookies();
+  const unlocked = cookieStore.get(getSpecialArticleAccessCookieName(article.id))?.value === "granted";
+  const needsPassword = requiresSpecialArticlePassword(article);
+
   return (
     <main className="shell narrow-shell">
       <article className="surface article-card special-article-detail">
@@ -40,7 +50,7 @@ export default async function SpecialArticleDetailPage({ params }) {
         <div className="inline-meta">
           <span>@{article.profiles?.username || article.profiles?.display_name || "author"}</span>
         </div>
-        <div className="special-article-body">{article.body}</div>
+        {needsPassword && !unlocked ? <SpecialArticleGate articleId={article.id} /> : <div className="special-article-body">{article.body}</div>}
         <div className="hero-actions">
           <Link href="/special-articles" className="button button-secondary">
             特別記事一覧へ戻る
