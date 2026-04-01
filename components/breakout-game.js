@@ -118,7 +118,6 @@ export function BreakoutGame() {
     <div className="arcade-panel-grid arcade-panel-grid-wide">
       <div className="surface arcade-game-card arcade-breakout-card">
         <div className="section-copy">
-          <p className="eyebrow">Arcade</p>
           <h2>Breakout</h2>
           <p>
             {hud.status === "start" ? "Enterでスタート" : null}
@@ -157,8 +156,7 @@ export function BreakoutGame() {
       </div>
 
       <div className="surface arcade-side-card">
-        <p className="eyebrow">Items</p>
-        <h3>落ちてくる 3 種のアイテム</h3>
+        <h3>アイテム</h3>
         <p>`multiball` はボール追加、`wide` はパドル拡張、`pierce` は一定時間ブロック貫通です。</p>
       </div>
     </div>

@@ -87,14 +87,7 @@ export function GameArcade() {
     <div className="dashboard-layout">
       <section className="section-grid section-head">
         <div className="section-copy">
-          <p className="eyebrow">Games</p>
           <h1 className="page-title">ちょっと遊べるゲームハブ</h1>
-          <p>Apps の中で、そのまま遊べる軽いゲームをまとめています。まずは短く遊べる 3 本を入れています。</p>
-        </div>
-        <div className="surface feature-card arcade-hero-card">
-          <p className="eyebrow">Arcade</p>
-          <h2>切り替えてすぐ遊ぶ。</h2>
-          <p>盤面系、反射神経系、記憶系を並べています。今後ここにゲームを増やせます。</p>
         </div>
       </section>
 
@@ -163,7 +156,6 @@ function TetrisGame() {
     <div className="arcade-panel-grid arcade-panel-grid-wide">
       <div className="surface arcade-game-card arcade-tetris-card">
         <div className="section-copy">
-          <p className="eyebrow">Arcade</p>
           <h2>Tetris</h2>
           <p>
             {state.gameOver
