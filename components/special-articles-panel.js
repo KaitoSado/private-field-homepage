@@ -92,11 +92,11 @@ export function SpecialArticlesPanel({ initialItems }) {
     <div className="dashboard-layout">
       <section className="section-grid section-head">
         <div className="surface feature-card special-articles-hero">
-          <p className="eyebrow">Special access</p>
+          <p className="eyebrow">Long-form collection</p>
           <h1 className="page-title">特別記事</h1>
           <p>
-            通常の記事とは少し距離を置いて、深くまとめた長文や特別な読みものを置く面です。
-            プレミア感のある読みものをここに溜めていけます。
+            通常の記事とは少し距離を置いて、深くまとめた長文や読みものを置く面です。
+            まとまった記録や長めのテキストをここに蓄積していけます。
           </p>
           <div className="hero-actions">
             <Link href="/@kaito-sado" className="button button-secondary">
@@ -125,7 +125,7 @@ export function SpecialArticlesPanel({ initialItems }) {
                 >
                   <div className="post-card-head">
                     <span>{formatDate(item.updated_at || item.created_at)}</span>
-                    <span>{item.price_label || "Premium note"}</span>
+                    <span>{item.price_label || "Long-form"}</span>
                   </div>
                   <h3>{item.title}</h3>
                   <p>{item.excerpt || getPreview(item.body)}</p>
@@ -168,11 +168,11 @@ export function SpecialArticlesPanel({ initialItems }) {
             </label>
 
             <label className="field">
-              <span>価格・ラベル</span>
+              <span>補足ラベル</span>
               <input
                 value={form.price_label}
                 onChange={(event) => updateField("price_label", event.target.value)}
-                placeholder="Members only / ¥980 / Premium"
+                placeholder="連載 / 補遺 / 長文"
               />
             </label>
 

@@ -33,7 +33,7 @@ export default async function SpecialArticleDetailPage({ params }) {
       <article className="surface article-card special-article-detail">
         <div className="post-card-head">
           <span>{formatDate(article.updated_at || article.created_at)}</span>
-          <span>{article.price_label || "Premium note"}</span>
+          <span>{article.price_label || "Long-form"}</span>
         </div>
         <h1>{article.title}</h1>
         {article.excerpt ? <p className="hero-lead">{article.excerpt}</p> : null}

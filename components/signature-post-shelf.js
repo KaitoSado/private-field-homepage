@@ -80,8 +80,8 @@ export function SignaturePostShelf({ username, posts }) {
             })}
             <Link href="/special-articles" className="signature-post-card signature-post-card-special">
               <div className="post-card-head">
-                <span>Special access</span>
-                <span>Premium</span>
+                <span>Long-form</span>
+                <span>Collection</span>
               </div>
               <div className="signature-post-copy">
                 <h3>特別記事</h3>
