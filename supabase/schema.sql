@@ -17,6 +17,7 @@ create table if not exists public.profiles (
   note_url text,
   avatar_url text,
   email_domain text not null default '',
+  email_verified boolean not null default false,
   keio_verified boolean not null default false,
   role text not null default 'user',
   account_status text not null default 'active',
@@ -34,6 +35,7 @@ alter table public.profiles add column if not exists github_url text;
 alter table public.profiles add column if not exists note_url text;
 alter table public.profiles add column if not exists avatar_url text;
 alter table public.profiles add column if not exists email_domain text not null default '';
+alter table public.profiles add column if not exists email_verified boolean not null default false;
 alter table public.profiles add column if not exists keio_verified boolean not null default false;
 alter table public.profiles add column if not exists role text not null default 'user';
 alter table public.profiles add column if not exists account_status text not null default 'active';
@@ -479,22 +481,49 @@ as $$
 declare
   base_username text;
   normalized_domain text;
+  is_email_verified boolean;
 begin
   normalized_domain := lower(split_part(coalesce(new.email, ''), '@', 2));
+  is_email_verified := new.email_confirmed_at is not null;
   base_username :=
     coalesce(
       nullif(regexp_replace(lower(split_part(new.email, '@', 1)), '[^a-z0-9_-]+', '-', 'g'), ''),
       'user'
     );
 
-  insert into public.profiles (id, username, email_domain, keio_verified)
+  insert into public.profiles (id, username, email_domain, email_verified, keio_verified)
   values (
     new.id,
     left(base_username || '-' || substring(new.id::text from 1 for 6), 30),
     normalized_domain,
-    normalized_domain in ('keio.jp', 'keio.ac.jp')
+    is_email_verified,
+    normalized_domain in ('keio.jp', 'keio.ac.jp') and is_email_verified
   )
   on conflict (id) do nothing;
+
+  return new;
+end;
+$$;
+
+create or replace function public.handle_auth_user_updated()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  normalized_domain text;
+  is_email_verified boolean;
+begin
+  normalized_domain := lower(split_part(coalesce(new.email, ''), '@', 2));
+  is_email_verified := new.email_confirmed_at is not null;
+
+  update public.profiles
+  set
+    email_domain = normalized_domain,
+    email_verified = is_email_verified,
+    keio_verified = normalized_domain in ('keio.jp', 'keio.ac.jp') and is_email_verified
+  where id = new.id;
 
   return new;
 end;
@@ -510,19 +539,26 @@ set
     30
   ),
   email_domain = lower(split_part(u.email, '@', 2)),
-  keio_verified = lower(split_part(u.email, '@', 2)) in ('keio.jp', 'keio.ac.jp')
+  email_verified = u.email_confirmed_at is not null,
+  keio_verified = lower(split_part(u.email, '@', 2)) in ('keio.jp', 'keio.ac.jp') and u.email_confirmed_at is not null
 from auth.users as u
 where u.id = p.id
   and (
     nullif(btrim(p.username), '') is null
     or p.email_domain = ''
-    or p.keio_verified is distinct from (lower(split_part(u.email, '@', 2)) in ('keio.jp', 'keio.ac.jp'))
+    or p.email_verified is distinct from (u.email_confirmed_at is not null)
+    or p.keio_verified is distinct from ((lower(split_part(u.email, '@', 2)) in ('keio.jp', 'keio.ac.jp')) and u.email_confirmed_at is not null)
   );
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
 after insert on auth.users
 for each row execute procedure public.handle_new_user();
+
+drop trigger if exists on_auth_user_updated on auth.users;
+create trigger on_auth_user_updated
+after update of email, email_confirmed_at on auth.users
+for each row execute procedure public.handle_auth_user_updated();
 
 drop trigger if exists profiles_set_updated_at on public.profiles;
 create trigger profiles_set_updated_at
