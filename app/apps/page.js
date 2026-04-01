@@ -29,6 +29,12 @@ const plannedApps = [
     status: "Live",
     body: "ノート共有、過去問交換、空きコマ同行、機材貸し借り、引っ越し手伝いなどを募集・提供できる助け合い掲示板です。",
     href: "/apps/help"
+  },
+  {
+    name: "祈祷と呪詛",
+    status: "Live",
+    body: "慶應大学院生向けの、愚痴・祈り・雑談・募集をゆるく流せる共同待合室です。",
+    href: "/apps/ritual"
   }
 ];
 

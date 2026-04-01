@@ -1202,6 +1202,54 @@ textarea {
   align-items: start;
 }
 
+.ritual-board-hero .section-copy p:last-child {
+  max-width: 62ch;
+}
+
+.ritual-room-strip {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.ritual-room-card {
+  border: 1px solid rgba(124, 92, 164, 0.14);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(188, 154, 255, 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(255, 250, 255, 0.98), rgba(250, 243, 255, 0.94));
+}
+
+.ritual-room-card.is-active {
+  border-color: rgba(124, 92, 164, 0.34);
+  box-shadow: 0 12px 28px rgba(76, 52, 110, 0.08);
+}
+
+.ritual-room-toggle {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  display: grid;
+  gap: 0.4rem;
+  text-align: left;
+  padding: 1rem 1.05rem;
+  cursor: pointer;
+}
+
+.ritual-room-toggle strong {
+  font-size: 0.98rem;
+}
+
+.ritual-room-toggle span {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.ritual-feed-card {
+  border-color: rgba(124, 92, 164, 0.18);
+}
+
 .edge-board-column,
 .edge-write-panel {
   display: grid;

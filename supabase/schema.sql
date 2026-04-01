@@ -189,6 +189,18 @@ create table if not exists public.help_requests (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.grad_ritual_posts (
+  id uuid primary key default gen_random_uuid(),
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  room text not null default '呪詛ログ',
+  vibe text not null default '吐き出したい',
+  title text not null,
+  timing_label text not null default '',
+  body text not null,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
 alter table public.anonymous_questions add column if not exists sender_profile_id uuid references public.profiles(id) on delete set null;
 alter table public.class_notes add column if not exists author_id uuid references public.profiles(id) on delete cascade;
 alter table public.class_notes add column if not exists course_name text;
@@ -231,6 +243,14 @@ alter table public.help_requests add column if not exists status text not null d
 alter table public.help_requests add column if not exists body text;
 alter table public.help_requests add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.help_requests add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.grad_ritual_posts add column if not exists author_id uuid references public.profiles(id) on delete cascade;
+alter table public.grad_ritual_posts add column if not exists room text not null default '呪詛ログ';
+alter table public.grad_ritual_posts add column if not exists vibe text not null default '吐き出したい';
+alter table public.grad_ritual_posts add column if not exists title text;
+alter table public.grad_ritual_posts add column if not exists timing_label text not null default '';
+alter table public.grad_ritual_posts add column if not exists body text;
+alter table public.grad_ritual_posts add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.grad_ritual_posts add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
 
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -321,6 +341,9 @@ create index if not exists edge_tips_category_idx on public.edge_tips(category, 
 create index if not exists help_requests_updated_idx on public.help_requests(updated_at desc);
 create index if not exists help_requests_author_idx on public.help_requests(author_id);
 create index if not exists help_requests_category_idx on public.help_requests(category, updated_at desc);
+create index if not exists grad_ritual_posts_updated_idx on public.grad_ritual_posts(updated_at desc);
+create index if not exists grad_ritual_posts_author_idx on public.grad_ritual_posts(author_id);
+create index if not exists grad_ritual_posts_room_idx on public.grad_ritual_posts(room, updated_at desc);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
@@ -440,6 +463,18 @@ alter table public.help_requests
   add constraint help_requests_campus_length_check check (char_length(campus) <= 80),
   drop constraint if exists help_requests_body_length_check,
   add constraint help_requests_body_length_check check (char_length(body) between 1 and 2000);
+
+alter table public.grad_ritual_posts
+  drop constraint if exists grad_ritual_posts_title_length_check,
+  add constraint grad_ritual_posts_title_length_check check (char_length(title) between 1 and 120),
+  drop constraint if exists grad_ritual_posts_room_check,
+  add constraint grad_ritual_posts_room_check check (room in ('呪詛ログ', '祈祷室', '院生ロビー', '一緒に見る', '生存確認')),
+  drop constraint if exists grad_ritual_posts_vibe_check,
+  add constraint grad_ritual_posts_vibe_check check (vibe in ('吐き出したい', '祈ってほしい', '雑談したい', '募集したい', '生存報告')),
+  drop constraint if exists grad_ritual_posts_timing_label_length_check,
+  add constraint grad_ritual_posts_timing_label_length_check check (char_length(timing_label) <= 80),
+  drop constraint if exists grad_ritual_posts_body_length_check,
+  add constraint grad_ritual_posts_body_length_check check (char_length(body) between 1 and 2000);
 
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
@@ -602,6 +637,11 @@ create trigger help_requests_set_updated_at
 before update on public.help_requests
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists grad_ritual_posts_set_updated_at on public.grad_ritual_posts;
+create trigger grad_ritual_posts_set_updated_at
+before update on public.grad_ritual_posts
+for each row execute procedure public.handle_updated_at();
+
 create or replace view public.profile_stats as
 select
   p.id as profile_id,
@@ -660,6 +700,7 @@ alter table public.class_notes enable row level security;
 alter table public.special_articles enable row level security;
 alter table public.edge_tips enable row level security;
 alter table public.help_requests enable row level security;
+alter table public.grad_ritual_posts enable row level security;
 alter table public.notifications enable row level security;
 alter table public.reports enable row level security;
 alter table public.telemetry_page_views enable row level security;
@@ -1021,6 +1062,47 @@ using (auth.uid() = author_id);
 drop policy if exists "admins can manage help requests" on public.help_requests;
 create policy "admins can manage help requests"
 on public.help_requests
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "ritual posts are public readable" on public.grad_ritual_posts;
+create policy "ritual posts are public readable"
+on public.grad_ritual_posts
+for select
+using (true);
+
+drop policy if exists "authenticated users can create ritual posts" on public.grad_ritual_posts;
+create policy "authenticated users can create ritual posts"
+on public.grad_ritual_posts
+for insert
+to authenticated
+with check (
+  auth.uid() = author_id
+  and exists (
+    select 1
+    from public.profiles
+    where profiles.id = grad_ritual_posts.author_id
+      and profiles.account_status = 'active'
+  )
+);
+
+drop policy if exists "owners can update ritual posts" on public.grad_ritual_posts;
+create policy "owners can update ritual posts"
+on public.grad_ritual_posts
+for update
+using (auth.uid() = author_id)
+with check (auth.uid() = author_id);
+
+drop policy if exists "owners can delete ritual posts" on public.grad_ritual_posts;
+create policy "owners can delete ritual posts"
+on public.grad_ritual_posts
+for delete
+using (auth.uid() = author_id);
+
+drop policy if exists "admins can manage ritual posts" on public.grad_ritual_posts;
+create policy "admins can manage ritual posts"
+on public.grad_ritual_posts
 for all
 using (public.is_admin())
 with check (public.is_admin());
