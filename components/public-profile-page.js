@@ -346,7 +346,6 @@ export function PublicProfilePage({ profile, posts }) {
         <div className="section-copy">
           <p className="eyebrow">Profile</p>
           <h2>公開ページで編集</h2>
-          <p>{isEditing ? "プロフィール項目はここで直接編集できます。" : "表示名や自己紹介以外の項目も、このページ上でまとめて編集できます。"}</p>
         </div>
 
         <div className="stack-list">

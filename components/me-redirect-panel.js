@@ -70,7 +70,6 @@ export function MeRedirectPanel() {
     return (
       <section className="surface empty-state">
         <h1>ハブを準備しています</h1>
-        <p>公開ページまわりの補助導線を読み込んでいます。</p>
       </section>
     );
   }
@@ -80,17 +79,14 @@ export function MeRedirectPanel() {
       <section className="surface dashboard-hero my-page-gate">
         <div className="dashboard-hero-head">
           <p className="eyebrow">Hub</p>
-          <h1>ログインすると、公開ページと補助導線に入れます。</h1>
-          <p className="headline">
-            ここは公開ページそのものではなく、通知や設定へ入るための補助ページです。まずはログインか新規登録をしてください。
-          </p>
+          <h1>ログインしてください</h1>
         </div>
         <div className="hero-actions">
           <Link href="/auth?next=/me" className="button button-primary">
             ログイン / 新規登録
           </Link>
           <Link href="/explore" className="button button-secondary">
-            Explore を見る
+            発見を見る
           </Link>
         </div>
       </section>
@@ -102,10 +98,7 @@ export function MeRedirectPanel() {
       <section className="surface dashboard-hero my-page-gate">
         <div className="dashboard-hero-head">
           <p className="eyebrow">Hub</p>
-          <h1>公開ページのための補助導線。</h1>
-          <p className="headline">
-            プロフィール編集や記事追加は公開ページ側で行い、ここでは通知、設定、運用ページへ移動できます。
-          </p>
+          <h1>ハブ</h1>
         </div>
         <div className="hero-actions">
           <Link href={state.path} className="button button-primary">
@@ -121,25 +114,21 @@ export function MeRedirectPanel() {
         <Link href={state.path} className="surface feature-card">
           <p className="eyebrow">Public Page</p>
           <h2>公開ページを開く</h2>
-          <p>プロフィール編集、記事追加、質問箱の管理はここから行います。</p>
         </Link>
 
         <Link href="/explore" className="surface feature-card">
-          <p className="eyebrow">Explore</p>
-          <h2>他のページを探す</h2>
-          <p>公開ページ、記事、タグから人やトピックを辿れます。</p>
+          <p className="eyebrow">Discover</p>
+          <h2>発見</h2>
         </Link>
 
         <Link href="/settings" className="surface feature-card">
           <p className="eyebrow">Settings</p>
-          <h2>アカウント設定</h2>
-          <p>メール、パスワード、公開範囲などの基本設定を管理します。</p>
+          <h2>設定</h2>
         </Link>
 
         <Link href="/notifications" className="surface feature-card">
           <p className="eyebrow">Notifications</p>
-          <h2>反応を見る</h2>
-          <p>フォロー、コメント、いいね、更新の通知をまとめて確認します。</p>
+          <h2>通知</h2>
         </Link>
 
         {state.role === "admin" ? (
@@ -147,12 +136,10 @@ export function MeRedirectPanel() {
             <Link href="/admin" className="surface feature-card">
               <p className="eyebrow">Admin</p>
               <h2>モデレーション</h2>
-              <p>通報確認、公開制御、コメント削除などの運用を行います。</p>
             </Link>
             <Link href="/ops" className="surface feature-card">
               <p className="eyebrow">Ops</p>
               <h2>運用ログ</h2>
-              <p>テレメトリと運用状況を確認します。</p>
             </Link>
           </>
         ) : null}

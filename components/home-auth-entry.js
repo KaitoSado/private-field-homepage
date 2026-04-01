@@ -23,10 +23,7 @@ export function HomeAuthEntry() {
           <div className="surface home-auth-shell">
             <div className="home-auth-copy">
               <p className="eyebrow">Start here</p>
-              <h2>このまま登録して、自分の公開ページを作る。</h2>
-              <p className="headline">
-                ページ移動せずにここでログインまたは新規登録できます。登録後はそのまま自分の公開ページへ移動します。
-              </p>
+              <h2>ここで始める</h2>
             </div>
             <AuthPanel />
           </div>

@@ -45,10 +45,6 @@ export default function AppsPage() {
         <div className="section-copy">
           <p className="eyebrow">Apps</p>
           <h1 className="page-title">FieldCard にぶら下がるアプリの入口</h1>
-          <p>
-            ここには、公開ページとつながりながら独立して使える小さいサービスをまとめています。
-            大学生活の実用アプリを中心に、必要な面をここから増やしていきます。
-          </p>
         </div>
       </section>
 
@@ -60,7 +56,6 @@ export default function AppsPage() {
               <span>{app.status}</span>
             </div>
             <h2>{app.name}</h2>
-            <p>{app.body}</p>
             {app.href ? (
               <div className="hero-actions">
                 <Link href={app.href} className="button button-secondary">
@@ -70,21 +65,6 @@ export default function AppsPage() {
             ) : null}
           </article>
         ))}
-      </section>
-
-      <section className="section-grid single-column">
-        <div className="surface feature-card">
-          <p className="eyebrow">Jump back</p>
-          <h2>公開ページや Explore に戻る</h2>
-          <div className="hero-actions">
-            <Link href="/explore" className="button button-secondary">
-              Explore
-            </Link>
-            <Link href="/me" className="button button-ghost">
-              ハブ
-            </Link>
-          </div>
-        </div>
       </section>
     </main>
   );
