@@ -279,12 +279,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
     <div className="dashboard-layout">
       <section className="section-grid section-head class-board-hero">
         <div className="section-copy">
-          <p className="eyebrow">Enma Mode</p>
           <h1 className="page-title">教員を裁け！地獄の裏シラバス</h1>
-          <p>
-            あなたは閻魔大王です。今学期は散々な目に遭いましたね。今度はあなたが教員を評価する番です。
-            学部でも大学院でも、授業ごとに反応を積み上げて、裏シラバスとして厳しく裁いていきましょう。
-          </p>
         </div>
 
         <div className="class-board-hero-stats" aria-label="授業情報の集計">
@@ -307,7 +302,6 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
         <div className="class-board-column">
           <div className="surface search-panel class-filter-panel">
             <div className="section-copy">
-              <p className="eyebrow">Docket</p>
               <h2>被告の授業を探す</h2>
             </div>
 
@@ -564,7 +558,6 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
             ) : (
               <div className="surface empty-state">
                 <h3>条件に合う授業がありません</h3>
-                <p>検索条件をゆるめるか、最初の反応を書いてスレッドを作ってください。</p>
               </div>
             )}
           </div>
@@ -573,9 +566,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
         <div className="class-board-column">
           <form className="surface search-panel form-stack class-write-panel" onSubmit={submitNote}>
             <div className="section-copy">
-              <p className="eyebrow">Verdict</p>
               <h2>判決を書く</h2>
-              <p className="muted">すでにある授業にも、新しい授業にもそのまま判決を書き込めます。</p>
             </div>
 
             <div className="class-form-grid">

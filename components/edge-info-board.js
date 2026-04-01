@@ -116,12 +116,7 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
     <div className="dashboard-layout">
       <section className="section-grid section-head edge-board-hero">
         <div className="section-copy">
-          <p className="eyebrow">Edge Info</p>
           <h1 className="page-title">大学生にとって地味に得する情報を集める</h1>
-          <p>
-            学割、無料枠、助成、食費、交通、ソフト、学内制度。知っていると少し得する情報を集めて、
-            後輩や同級生がすぐ拾える形にしていく面です。
-          </p>
         </div>
 
         <div className="class-board-hero-stats edge-board-hero-stats" aria-label="エッジ情報の集計">
@@ -144,7 +139,6 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
         <div className="edge-board-column">
           <div className="surface search-panel edge-filter-panel">
             <div className="section-copy">
-              <p className="eyebrow">Browse</p>
               <h2>エッジ情報を探す</h2>
             </div>
 
@@ -210,7 +204,6 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
             ) : (
               <div className="surface empty-state">
                 <h3>まだ情報がありません</h3>
-                <p>最初のエッジ情報を書いて、得する導線を育ててください。</p>
               </div>
             )}
           </div>
@@ -219,9 +212,7 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
         <div className="edge-board-column">
           <form className="surface search-panel form-stack edge-write-panel" onSubmit={submitTip}>
             <div className="section-copy">
-              <p className="eyebrow">Post</p>
               <h2>エッジ情報を書く</h2>
-              <p className="muted">学割、抜け道、無料枠、学内制度。地味に得する情報を短く残してください。</p>
             </div>
 
             <div className="class-form-grid">

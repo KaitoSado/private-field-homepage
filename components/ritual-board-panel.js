@@ -180,12 +180,7 @@ export function RitualBoardPanel({ initialItems, initialRooms }) {
     <div className="dashboard-layout">
       <section className="section-grid section-head ritual-board-hero">
         <div className="section-copy">
-          <p className="eyebrow">Grad sanctuary</p>
           <h1 className="page-title">祈祷と呪詛</h1>
-          <p>
-            慶應大学院生のための、半分避難所で半分ロビーな待合室です。愚痴る、祈ってもらう、雑談する、
-            一緒にアニメやゲームを見る人を募る、生存確認だけ置く。重すぎず軽すぎず、気配をつなぐ場として使えます。
-          </p>
         </div>
 
         <div className="class-board-hero-stats ritual-board-hero-stats" aria-label="祈祷と呪詛の集計">
@@ -209,7 +204,6 @@ export function RitualBoardPanel({ initialItems, initialRooms }) {
           <article key={room.value} className={`ritual-room-card ${roomFilter === room.value ? "is-active" : ""}`}>
             <button type="button" className="ritual-room-toggle" onClick={() => setRoomFilter((current) => (current === room.value ? "" : room.value))}>
               <strong>{room.value}</strong>
-              <span>{room.copy}</span>
             </button>
           </article>
         ))}
@@ -219,7 +213,6 @@ export function RitualBoardPanel({ initialItems, initialRooms }) {
         <div className="edge-board-column">
           <div className="surface search-panel class-filter-panel">
             <div className="section-copy">
-              <p className="eyebrow">Browse</p>
               <h2>場の流れを見る</h2>
             </div>
 
@@ -337,7 +330,6 @@ export function RitualBoardPanel({ initialItems, initialRooms }) {
             ) : (
               <div className="surface empty-state">
                 <h3>まだ書き込みがありません</h3>
-                <p>最初の気配を置いて、この場を動かし始めてください。</p>
               </div>
             )}
           </div>
@@ -346,9 +338,7 @@ export function RitualBoardPanel({ initialItems, initialRooms }) {
         <div className="edge-board-column">
           <form className="surface search-panel form-stack edge-write-panel" onSubmit={submitPost}>
             <div className="section-copy">
-              <p className="eyebrow">Post</p>
               <h2>場に気配を置く</h2>
-              <p className="muted">重くなりすぎず、でも薄すぎない。今のしんどさや募集を短く書いて流します。</p>
             </div>
 
             <div className="class-form-grid">

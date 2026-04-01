@@ -78,7 +78,6 @@ export function MeRedirectPanel() {
     return (
       <section className="surface dashboard-hero my-page-gate">
         <div className="dashboard-hero-head">
-          <p className="eyebrow">Hub</p>
           <h1>ログインしてください</h1>
         </div>
         <div className="hero-actions">
@@ -97,7 +96,6 @@ export function MeRedirectPanel() {
     <div className="dashboard-layout">
       <section className="surface dashboard-hero my-page-gate">
         <div className="dashboard-hero-head">
-          <p className="eyebrow">Hub</p>
           <h1>ハブ</h1>
         </div>
         <div className="hero-actions">
@@ -112,33 +110,27 @@ export function MeRedirectPanel() {
 
       <section className="section-grid my-page-grid">
         <Link href={state.path} className="surface feature-card">
-          <p className="eyebrow">Public Page</p>
           <h2>公開ページを開く</h2>
         </Link>
 
         <Link href="/explore" className="surface feature-card">
-          <p className="eyebrow">Discover</p>
           <h2>発見</h2>
         </Link>
 
         <Link href="/settings" className="surface feature-card">
-          <p className="eyebrow">Settings</p>
           <h2>設定</h2>
         </Link>
 
         <Link href="/notifications" className="surface feature-card">
-          <p className="eyebrow">Notifications</p>
           <h2>通知</h2>
         </Link>
 
         {state.role === "admin" ? (
           <>
             <Link href="/admin" className="surface feature-card">
-              <p className="eyebrow">Admin</p>
               <h2>モデレーション</h2>
             </Link>
             <Link href="/ops" className="surface feature-card">
-              <p className="eyebrow">Ops</p>
               <h2>運用ログ</h2>
             </Link>
           </>

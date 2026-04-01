@@ -176,12 +176,7 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
     <div className="dashboard-layout">
       <section className="section-grid section-head class-board-hero">
         <div className="section-copy">
-          <p className="eyebrow">Mutual Aid</p>
           <h1 className="page-title">助け合いボード</h1>
-          <p>
-            ノート共有、過去問交換、空きコマ同行、機材貸し借り、引っ越し手伝い。学内でちょっと助けてほしいこと、
-            逆に提供できることをここに出してつなげます。
-          </p>
         </div>
 
         <div className="class-board-hero-stats" aria-label="助け合いボードの集計">
@@ -204,7 +199,6 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
         <div className="edge-board-column">
           <div className="surface search-panel class-filter-panel">
             <div className="section-copy">
-              <p className="eyebrow">Browse</p>
               <h2>募集を探す</h2>
             </div>
 
@@ -344,7 +338,6 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
             ) : (
               <div className="surface empty-state">
                 <h3>まだ募集がありません</h3>
-                <p>最初の助け合い募集を書いて、この面を動かしてください。</p>
               </div>
             )}
           </div>
@@ -353,9 +346,7 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
         <div className="edge-board-column">
           <form className="surface search-panel form-stack edge-write-panel" onSubmit={submitRequest}>
             <div className="section-copy">
-              <p className="eyebrow">Post</p>
               <h2>助け合いを出す</h2>
-              <p className="muted">お願いでも提供でも出せます。学内向けの助け合いを、短く具体的に書いてください。</p>
             </div>
 
             <div className="class-form-grid">

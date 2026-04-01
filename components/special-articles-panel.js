@@ -116,12 +116,7 @@ export function SpecialArticlesPanel({ initialItems }) {
     <div className="dashboard-layout">
       <section className="section-grid section-head">
         <div className="surface feature-card special-articles-hero">
-          <p className="eyebrow">Long-form collection</p>
           <h1 className="page-title">特別記事</h1>
-          <p>
-            通常の記事とは少し距離を置いて、深くまとめた長文や読みものを置く面です。
-            まとまった記録や長めのテキストをここに蓄積していけます。
-          </p>
           <div className="hero-actions">
             <Link href="/@kaito-sado" className="button button-secondary">
               公開ページへ戻る
@@ -136,7 +131,6 @@ export function SpecialArticlesPanel({ initialItems }) {
       <section className="section-grid class-board-main">
         <div className="class-board-column">
           <div className="section-copy">
-            <p className="eyebrow">Collection</p>
             <h2>特別記事の一覧</h2>
           </div>
           <div className="card-grid special-article-grid">
@@ -170,7 +164,6 @@ export function SpecialArticlesPanel({ initialItems }) {
             ) : (
               <div className="surface empty-state">
                 <h3>まだ特別記事がありません</h3>
-                <p>最初の1本を書いて、この面を動かし始めてください。</p>
               </div>
             )}
           </div>
@@ -179,9 +172,7 @@ export function SpecialArticlesPanel({ initialItems }) {
         <div className="class-board-column">
           <form className="surface search-panel form-stack class-write-panel" onSubmit={submitArticle}>
             <div className="section-copy">
-              <p className="eyebrow">Write</p>
               <h2>{editingId ? "特別記事を編集" : "特別記事を書く"}</h2>
-              <p className="muted">通常記事より長めの読みものや、限定感のあるテキストをここに追加します。</p>
             </div>
 
             <label className="field">
