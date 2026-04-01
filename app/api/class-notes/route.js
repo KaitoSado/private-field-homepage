@@ -4,6 +4,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 const NOTE_LIMIT = 2000;
 const TEXT_LIMIT = 120;
 const VERDICT_OPTIONS = new Set(["S", "A", "B", "C", "D"]);
+const SCOPE_OPTIONS = new Set(["", "学部", "大学院", "共通"]);
 
 function normalizeScore(value) {
   const raw = `${value ?? ""}`.trim();
@@ -37,6 +38,7 @@ export async function POST(request) {
   const body = await request.json().catch(() => ({}));
   const payload = {
     course_name: `${body.course_name || ""}`.trim(),
+    course_scope: `${body.course_scope || ""}`.trim(),
     instructor: `${body.instructor || ""}`.trim(),
     campus: `${body.campus || ""}`.trim(),
     term_label: `${body.term_label || ""}`.trim(),
@@ -58,6 +60,7 @@ export async function POST(request) {
 
   if (
     payload.course_name.length > TEXT_LIMIT ||
+    payload.course_scope.length > 20 ||
     payload.instructor.length > TEXT_LIMIT ||
     payload.campus.length > TEXT_LIMIT ||
     payload.term_label.length > TEXT_LIMIT ||
@@ -84,6 +87,10 @@ export async function POST(request) {
     return NextResponse.json({ error: "判決は S〜D で入力してください。" }, { status: 400 });
   }
 
+  if (!SCOPE_OPTIONS.has(payload.course_scope)) {
+    return NextResponse.json({ error: "区分は 学部 / 大学院 / 共通 で入力してください。" }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from("class_notes")
     .insert({
@@ -91,7 +98,7 @@ export async function POST(request) {
       ...payload
     })
     .select(
-      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, verdict_grade, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
+      "id, author_id, course_name, course_scope, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, verdict_grade, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
     )
     .single();
 
@@ -128,6 +135,7 @@ export async function PATCH(request) {
   const noteId = `${body.id || ""}`.trim();
   const payload = {
     course_name: `${body.course_name || ""}`.trim(),
+    course_scope: `${body.course_scope || ""}`.trim(),
     instructor: `${body.instructor || ""}`.trim(),
     campus: `${body.campus || ""}`.trim(),
     term_label: `${body.term_label || ""}`.trim(),
@@ -149,6 +157,7 @@ export async function PATCH(request) {
 
   if (
     payload.course_name.length > TEXT_LIMIT ||
+    payload.course_scope.length > 20 ||
     payload.instructor.length > TEXT_LIMIT ||
     payload.campus.length > TEXT_LIMIT ||
     payload.term_label.length > TEXT_LIMIT ||
@@ -175,13 +184,17 @@ export async function PATCH(request) {
     return NextResponse.json({ error: "判決は S〜D で入力してください。" }, { status: 400 });
   }
 
+  if (!SCOPE_OPTIONS.has(payload.course_scope)) {
+    return NextResponse.json({ error: "区分は 学部 / 大学院 / 共通 で入力してください。" }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from("class_notes")
     .update(payload)
     .eq("id", noteId)
     .eq("author_id", user.id)
     .select(
-      "id, author_id, course_name, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, verdict_grade, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
+      "id, author_id, course_name, course_scope, instructor, campus, term_label, weekday, period_label, easy_score, s_score, evaluation_type, attendance_policy, assignment_load, quality_score, verdict_grade, body, created_at, updated_at, profiles!class_notes_author_id_fkey(id, username, display_name, avatar_url)"
     )
     .maybeSingle();
 

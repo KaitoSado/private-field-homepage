@@ -3,7 +3,7 @@ import { getClassBoardData } from "@/lib/data";
 
 export const metadata = {
   title: "教員を裁け！地獄の裏シラバス | Apps | FieldCard Social",
-  description: "授業ごとに反応を積み上げて、教員を評価していく裏シラバス。"
+  description: "学部・大学院を問わず、授業ごとに反応を積み上げて教員を評価していく裏シラバス。"
 };
 
 export const revalidate = 0;

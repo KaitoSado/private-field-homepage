@@ -136,6 +136,7 @@ create table if not exists public.class_notes (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references public.profiles(id) on delete cascade,
   course_name text not null,
+  course_scope text not null default '',
   instructor text not null default '',
   campus text not null default '',
   term_label text not null default '',
@@ -204,6 +205,7 @@ create table if not exists public.grad_ritual_posts (
 alter table public.anonymous_questions add column if not exists sender_profile_id uuid references public.profiles(id) on delete set null;
 alter table public.class_notes add column if not exists author_id uuid references public.profiles(id) on delete cascade;
 alter table public.class_notes add column if not exists course_name text;
+alter table public.class_notes add column if not exists course_scope text not null default '';
 alter table public.class_notes add column if not exists instructor text not null default '';
 alter table public.class_notes add column if not exists campus text not null default '';
 alter table public.class_notes add column if not exists term_label text not null default '';
@@ -401,6 +403,8 @@ alter table public.anonymous_questions
 alter table public.class_notes
   drop constraint if exists class_notes_course_name_length_check,
   add constraint class_notes_course_name_length_check check (char_length(course_name) between 1 and 120),
+  drop constraint if exists class_notes_course_scope_check,
+  add constraint class_notes_course_scope_check check (course_scope in ('', '学部', '大学院', '共通')),
   drop constraint if exists class_notes_instructor_length_check,
   add constraint class_notes_instructor_length_check check (char_length(instructor) <= 120),
   drop constraint if exists class_notes_campus_length_check,

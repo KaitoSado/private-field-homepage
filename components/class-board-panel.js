@@ -5,6 +5,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const emptyForm = {
   course_name: "",
+  course_scope: "",
   instructor: "",
   campus: "",
   term_label: "",
@@ -21,6 +22,7 @@ const emptyForm = {
 };
 
 const weekdays = ["", "月", "火", "水", "木", "金", "土", "日"];
+const scopeOptions = ["", "学部", "大学院", "共通"];
 const scoreOptions = ["", "1", "2", "3", "4", "5"];
 const evaluationOptions = ["", "試験", "レポート", "試験+レポート", "発表", "その他"];
 const attendanceOptions = ["", "あり", "なし", "ときどき"];
@@ -94,6 +96,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
         const sortedItems = [...group.items].sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
         const latest = sortedItems[0];
         const instructors = uniq(sortedItems.map((item) => item.instructor).filter(Boolean));
+        const scopes = uniq(sortedItems.map((item) => item.course_scope).filter(Boolean));
         const campusesForCourse = uniq(sortedItems.map((item) => item.campus).filter(Boolean));
         const termsForCourse = uniq(sortedItems.map((item) => item.term_label).filter(Boolean));
         const weekdaysForCourse = uniq(sortedItems.map((item) => item.weekday).filter(Boolean));
@@ -104,6 +107,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
           items: sortedItems,
           latest,
           instructors,
+          scopes,
           campuses: campusesForCourse,
           terms: termsForCourse,
           weekdays: weekdaysForCourse,
@@ -188,6 +192,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
     setForm((current) => ({
       ...current,
       course_name: course.courseName,
+      course_scope: current.course_scope || course.scopes[0] || "",
       instructor: current.instructor || course.instructors[0] || "",
       campus: current.campus || course.campuses[0] || "",
       term_label: current.term_label || course.terms[0] || "",
@@ -209,6 +214,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
     setEditingNoteId(item.id);
     setEditingDraft({
       course_name: item.course_name || "",
+      course_scope: item.course_scope || "",
       instructor: item.instructor || "",
       campus: item.campus || "",
       term_label: item.term_label || "",
@@ -277,7 +283,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
           <h1 className="page-title">教員を裁け！地獄の裏シラバス</h1>
           <p>
             あなたは閻魔大王です。今学期は散々な目に遭いましたね。今度はあなたが教員を評価する番です。
-            授業ごとに反応を積み上げて、裏シラバスとして厳しく裁いていきましょう。
+            学部でも大学院でも、授業ごとに反応を積み上げて、裏シラバスとして厳しく裁いていきましょう。
           </p>
         </div>
 
@@ -356,6 +362,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                       <div className="class-course-copy">
                         <div className="class-course-topline">
                           <span className="pill published">{course.items.length} reactions</span>
+                          {course.scopes[0] ? <span className="pill">{course.scopes.join(" / ")}</span> : null}
                         </div>
                         <h3>{course.courseName}</h3>
                         <p className="muted">
@@ -394,6 +401,16 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                                   <label className="field">
                                     <span>授業名</span>
                                     <input value={editingDraft.course_name} onChange={(event) => updateEditingField("course_name", event.target.value)} />
+                                  </label>
+                                  <label className="field">
+                                    <span>区分</span>
+                                    <select value={editingDraft.course_scope} onChange={(event) => updateEditingField("course_scope", event.target.value)}>
+                                      {scopeOptions.map((scope) => (
+                                        <option key={scope || "none"} value={scope}>
+                                          {scope || "未設定"}
+                                        </option>
+                                      ))}
+                                    </select>
                                   </label>
                                   <label className="field">
                                     <span>担当</span>
@@ -512,6 +529,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                                   <span className="muted">{formatDate(item.updated_at || item.created_at)}</span>
                                 </div>
                                 <div className="class-score-strip">
+                                  {renderTextPill("区分", item.course_scope)}
                                   {renderScorePill("楽単度", item.easy_score)}
                                   {renderScorePill("S単度", item.s_score)}
                                   {renderTextPill("試験/レポ", item.evaluation_type)}
@@ -567,7 +585,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                   list="class-course-options"
                   value={form.course_name}
                   onChange={(event) => updateField("course_name", event.target.value)}
-                  placeholder="ドイツ語 / 現代社会理論"
+                  placeholder="ドイツ語 / 現代社会理論 / 量子情報特論"
                   required
                 />
                 <datalist id="class-course-options">
@@ -575,6 +593,16 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                     <option key={course.key} value={course.courseName} />
                   ))}
                 </datalist>
+              </label>
+              <label className="field">
+                <span>区分</span>
+                <select value={form.course_scope} onChange={(event) => updateField("course_scope", event.target.value)}>
+                  {scopeOptions.map((scope) => (
+                    <option key={scope || "none"} value={scope}>
+                      {scope || "未設定"}
+                    </option>
+                  ))}
+                </select>
               </label>
               <label className="field">
                 <span>担当</span>
