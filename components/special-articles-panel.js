@@ -16,6 +16,7 @@ export function SpecialArticlesPanel({ initialItems }) {
   const [session, setSession] = useState(null);
   const [items, setItems] = useState(initialItems);
   const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState("");
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -61,12 +62,12 @@ export function SpecialArticlesPanel({ initialItems }) {
       } = await supabase.auth.getSession();
 
       const response = await fetch("/api/special-articles", {
-        method: "POST",
+        method: editingId ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json",
           ...(currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {})
         },
-        body: JSON.stringify(form)
+        body: JSON.stringify(editingId ? { id: editingId, ...form } : form)
       });
 
       const result = await response.json().catch(() => ({}));
@@ -74,11 +75,17 @@ export function SpecialArticlesPanel({ initialItems }) {
         throw new Error(result.error || "特別記事の保存に失敗しました。");
       }
 
-      setItems((current) => [result.item, ...current]);
+      setItems((current) => {
+        if (editingId) {
+          return current.map((item) => (item.id === editingId ? result.item : item));
+        }
+        return [result.item, ...current];
+      });
       setForm(emptyForm);
-      setStatus("特別記事を追加しました。");
+      setEditingId("");
+      setStatus(editingId ? "特別記事を更新しました。" : "特別記事を追加しました。");
     } catch (error) {
-      setStatus(error.message || "特別記事の保存に失敗しました。");
+      setStatus(error.message || (editingId ? "特別記事の更新に失敗しました。" : "特別記事の保存に失敗しました。"));
     } finally {
       setSubmitting(false);
     }
@@ -86,6 +93,23 @@ export function SpecialArticlesPanel({ initialItems }) {
 
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function beginEdit(item) {
+    setEditingId(item.id);
+    setForm({
+      title: item.title || "",
+      excerpt: item.excerpt || "",
+      body: item.body || "",
+      price_label: item.price_label || ""
+    });
+    setStatus("");
+  }
+
+  function resetComposer() {
+    setEditingId("");
+    setForm(emptyForm);
+    setStatus("");
   }
 
   return (
@@ -118,22 +142,30 @@ export function SpecialArticlesPanel({ initialItems }) {
           <div className="card-grid special-article-grid">
             {items.length ? (
               items.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/special-articles/${item.id}`}
-                  className="surface feature-card signature-post-card-special special-article-card"
-                >
-                  <div className="post-card-head">
-                    <span>{formatDate(item.updated_at || item.created_at)}</span>
-                    <span>{item.price_label || "Long-form"}</span>
-                  </div>
-                  <h3>{item.title}</h3>
-                  <p>{item.excerpt || getPreview(item.body)}</p>
-                  <div className="inline-meta special-article-card-meta">
-                    <span>@{item.profiles?.username || item.profiles?.display_name || "author"}</span>
-                    <span>続きを読む</span>
-                  </div>
-                </Link>
+                <div key={item.id} className="special-article-item">
+                  <Link
+                    href={`/special-articles/${item.id}`}
+                    className="surface feature-card signature-post-card-special special-article-card"
+                  >
+                    <div className="post-card-head">
+                      <span>{formatDate(item.updated_at || item.created_at)}</span>
+                      <span>{item.price_label || "Long-form"}</span>
+                    </div>
+                    <h3>{item.title}</h3>
+                    <p>{item.excerpt || getPreview(item.body)}</p>
+                    <div className="inline-meta special-article-card-meta">
+                      <span>@{item.profiles?.username || item.profiles?.display_name || "author"}</span>
+                      <span>続きを読む</span>
+                    </div>
+                  </Link>
+                  {session?.user?.id === item.author_id ? (
+                    <div className="special-article-card-actions">
+                      <button type="button" className="button button-ghost" onClick={() => beginEdit(item)}>
+                        編集
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               ))
             ) : (
               <div className="surface empty-state">
@@ -148,7 +180,7 @@ export function SpecialArticlesPanel({ initialItems }) {
           <form className="surface search-panel form-stack class-write-panel" onSubmit={submitArticle}>
             <div className="section-copy">
               <p className="eyebrow">Write</p>
-              <h2>特別記事を書く</h2>
+              <h2>{editingId ? "特別記事を編集" : "特別記事を書く"}</h2>
               <p className="muted">通常記事より長めの読みものや、限定感のあるテキストをここに追加します。</p>
             </div>
 
@@ -189,8 +221,13 @@ export function SpecialArticlesPanel({ initialItems }) {
 
             <div className="hero-actions">
               <button type="submit" className="button button-primary" disabled={submitting}>
-                {submitting ? "保存中..." : "特別記事を追加する"}
+                {submitting ? "保存中..." : editingId ? "変更を保存する" : "特別記事を追加する"}
               </button>
+              {editingId ? (
+                <button type="button" className="button button-secondary" onClick={resetComposer}>
+                  キャンセル
+                </button>
+              ) : null}
             </div>
             <p className={`status-text ${status ? "status-success" : ""}`}>
               {status || (session?.user ? "ログイン中です。そのまま書き込めます。" : "閲覧は誰でもできます。書くにはログインしてください。")}

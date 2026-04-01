@@ -2653,8 +2653,23 @@ textarea {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.special-article-item {
+  display: grid;
+  gap: 0.55rem;
+}
+
 .special-article-card {
   align-content: start;
+}
+
+.special-article-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.special-article-card-actions .button {
+  min-height: 0;
+  padding: 0.5rem 0.8rem;
 }
 
 .special-article-card h3,
