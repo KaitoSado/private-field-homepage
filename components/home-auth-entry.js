@@ -21,10 +21,6 @@ export function HomeAuthEntry() {
       {open ? (
         <section ref={panelRef} className="home-auth-reveal">
           <div className="surface home-auth-shell">
-            <div className="home-auth-copy">
-              <p className="eyebrow">Start here</p>
-              <h2>ここで始める</h2>
-            </div>
             <AuthPanel />
           </div>
         </section>
