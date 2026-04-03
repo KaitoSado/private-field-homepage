@@ -13,6 +13,7 @@ import { SignaturePostShelf } from "@/components/signature-post-shelf";
 import { ProfileSocialActions } from "@/components/profile-social-actions";
 import { ReportAction } from "@/components/report-action";
 import { KeioBadge } from "@/components/keio-badge";
+import { ExternalLink } from "@/components/external-link";
 import { AVATAR_MAX_BYTES, PROFILE_BIO_LIMIT, PROFILE_HEADLINE_LIMIT, PROFILE_LOCATION_LIMIT, PROFILE_OPEN_TO_LIMIT } from "@/lib/limits";
 import {
   buildRenderedProfileLinks,
@@ -714,9 +715,9 @@ export function SignatureProfilePage({ profile, posts }) {
                 </div>
               ) : (
                 links.map((link) => (
-                  <a key={link.key} href={link.href} target="_blank" rel="noreferrer">
+                  <ExternalLink key={link.key} href={link.href}>
                     {link.label}
-                  </a>
+                  </ExternalLink>
                 ))
               )}
             </div>
@@ -1051,9 +1052,9 @@ export function SignatureProfilePage({ profile, posts }) {
               </div>
             ) : (
               links.map((link) => (
-                <a key={link.key} href={link.href} target="_blank" rel="noreferrer" className="button button-secondary">
+                <ExternalLink key={link.key} href={link.href} className="button button-secondary">
                   {link.label}
-                </a>
+                </ExternalLink>
               ))
             )}
           </div>
@@ -1166,9 +1167,9 @@ export function SignatureProfilePage({ profile, posts }) {
             <div className="link-list">
               {links.length ? (
                 links.map((link) => (
-                  <a key={link.label} href={link.href} target="_blank" rel="noreferrer" className="button button-primary">
+                  <ExternalLink key={link.label} href={link.href} className="button button-primary">
                     {link.label}
-                  </a>
+                  </ExternalLink>
                 ))
               ) : (
                 <Link href="/settings" className="button button-secondary">
