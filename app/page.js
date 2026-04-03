@@ -8,7 +8,7 @@ export default function HomePage() {
     <main className="shell">
       <section className="hero home-hero">
         <div className="hero-copy">
-          <h1>自分の公開ページを、そのまま育てる。</h1>
+          <h1>自分のページを、今すぐ公開。記録も、情報も、協力プレーも、ここからつながる。</h1>
           <HomeAuthEntry />
           <div className="hero-actions">
             <Link href="/explore" className="button button-secondary">
