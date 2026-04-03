@@ -19,7 +19,6 @@ export default async function ExplorePage({ searchParams }) {
     <main className="shell">
       <section className="section-grid section-head">
         <div className="section-copy">
-          <p className="eyebrow">Explore</p>
           <h1 className="page-title">ユーザーと記事を探す</h1>
           <p>
             名刺代わりのプロフィール、公開記事、タグからコミュニティ全体を辿れます。
@@ -43,7 +42,6 @@ export default async function ExplorePage({ searchParams }) {
 
       <section className="section-grid">
         <div className="section-copy">
-          <p className="eyebrow">Recommended</p>
           <h2>おすすめユーザー</h2>
         </div>
 
@@ -73,7 +71,6 @@ export default async function ExplorePage({ searchParams }) {
 
       <section className="section-grid">
         <div className="section-copy">
-          <p className="eyebrow">People</p>
           <h2>プロフィール一覧</h2>
         </div>
 
@@ -111,7 +108,6 @@ export default async function ExplorePage({ searchParams }) {
 
       <section className="section-grid">
         <div className="section-copy">
-          <p className="eyebrow">Writing</p>
           <h2>公開記事一覧</h2>
         </div>
 
@@ -156,7 +152,6 @@ export default async function ExplorePage({ searchParams }) {
 
       <section className="section-grid">
         <div className="section-copy">
-          <p className="eyebrow">Tags</p>
           <h2>人気タグ</h2>
         </div>
 
