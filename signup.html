@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>はじめる | 学生ネットワーク</title>
+    <meta
+      name="description"
+      content="公開プロフィール・情報共有・助け合いAppsが統合された、慶應/SFC寄りの学生ネットワーク。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="signup.css" />
+  </head>
+  <body class="signup-body">
+    <canvas class="network-bg" id="network-bg" aria-hidden="true"></canvas>
+    <div class="page-noise" aria-hidden="true"></div>
+    <div class="cursor-orbit" aria-hidden="true"></div>
+
+    <header class="site-header" id="top">
+      <div class="container header-inner">
+        <a class="brand" href="#" aria-label="Home">
+          <span class="brand-mark">SN</span>
+          <span class="brand-copy">
+            <strong>Student Network</strong>
+            <span>for Keio / SFC</span>
+          </span>
+        </a>
+
+        <nav class="desktop-nav" aria-label="Primary">
+          <a href="#features">できること</a>
+          <a href="#apps">Apps</a>
+          <a href="#trust">信頼</a>
+        </nav>
+
+        <div class="header-meta">
+          <a class="button button-secondary button-small" href="#">ログイン</a>
+        </div>
+
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+
+      <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
+        <nav class="mobile-nav" aria-label="Mobile">
+          <a href="#features">できること</a>
+          <a href="#apps">Apps</a>
+          <a href="#trust">信頼</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- ===== HERO ===== -->
+      <section class="section entrance" id="entrance">
+        <canvas class="hero-shader" id="hero-shader" aria-hidden="true"></canvas>
+        <div class="hero-vignette" aria-hidden="true"></div>
+        <div class="hero-interaction" id="hero-interaction" aria-hidden="true">
+          <div class="hero-glow" id="hero-glow"></div>
+          <div class="hero-ripple-layer" id="hero-ripple-layer"></div>
+        </div>
+
+        <div class="container entrance-grid signup-entrance-grid">
+          <div class="entrance-copy reveal">
+            <div class="eyebrow-row">
+              <span class="status-badge">Open Beta</span>
+              <p class="kicker">Keio / SFC Student Network</p>
+            </div>
+
+            <h1 class="signup-headline">
+              <span class="headline-at">@username</span> で、<br />大学生活をひらく。
+            </h1>
+
+            <p class="entrance-statement signup-statement">
+              公開プロフィール、情報共有、助け合いApps。<br />
+              3つが統合された、慶應/SFC寄りの学生ネットワークです。
+            </p>
+
+            <form class="signup-inline-form" id="signup-form">
+              <div class="signup-input-group">
+                <span class="signup-at-prefix">@</span>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="username"
+                  autocomplete="off"
+                  spellcheck="false"
+                  required
+                />
+              </div>
+              <button class="button button-primary signup-cta" type="submit">
+                無料ではじめる
+              </button>
+            </form>
+
+            <p class="signup-note">
+              慶應メール認証で<strong>認証バッジ</strong>がもらえます。
+            </p>
+
+            <div class="scroll-invite">
+              <span class="scroll-line"></span>
+              <p>もっと見る</p>
+            </div>
+          </div>
+
+          <aside class="entrance-panel reveal signup-preview-panel">
+            <div class="preview-browser-bar">
+              <span></span><span></span><span></span>
+              <p class="preview-url">studentnetwork.app/<strong>@yuuki</strong></p>
+            </div>
+            <div class="preview-page">
+              <div class="preview-header-area">
+                <div class="preview-avatar">Y</div>
+                <div class="preview-profile-info">
+                  <h3 class="preview-name">ゆうき</h3>
+                  <p class="preview-handle">@yuuki</p>
+                  <div class="preview-badge-row">
+                    <span class="preview-badge keio">慶應認証</span>
+                    <span class="preview-badge sfc">SFC '27</span>
+                  </div>
+                </div>
+              </div>
+              <p class="preview-bio">環境情報学部 B3 / UI設計とHCIに興味があります</p>
+              <div class="preview-tabs">
+                <span class="active">プロフィール</span>
+                <span>記事</span>
+                <span>記録</span>
+                <span>予定</span>
+              </div>
+              <div class="preview-content-blocks">
+                <div class="preview-block">
+                  <span class="preview-block-label">Links</span>
+                  <div class="preview-links">
+                    <span>GitHub</span><span>X</span><span>Portfolio</span>
+                  </div>
+                </div>
+                <div class="preview-block">
+                  <span class="preview-block-label">最近の記事</span>
+                  <p class="preview-article-title">SFC の研究室選び、3つのポイント</p>
+                  <p class="preview-article-meta">2026.03.28 · 142 views</p>
+                </div>
+              </div>
+              <div class="preview-edit-hint">
+                <span>直接編集</span> ダッシュボード不要。ページ上でそのまま編集。
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ===== FEATURES ===== -->
+      <section class="section" id="features">
+        <div class="container">
+          <div class="section-heading reveal">
+            <p class="kicker">Features / できること</p>
+            <h2>学生生活に必要なものを、ひとつの場所に。</h2>
+          </div>
+
+          <div class="features-trio">
+            <article class="feature-card reveal">
+              <div class="feature-icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <circle cx="16" cy="11" r="5" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M6 27c0-5.523 4.477-10 10-10s10 4.477 10 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <p class="kicker">01</p>
+              <h3>自分の公開ページ</h3>
+              <p>
+                <strong>@username</strong> の公開ページを持てます。
+                プロフィール、記事、記録、予定、リンクを載せられて、
+                ダッシュボードなしでページ上から直接編集。
+              </p>
+              <ul class="feature-list">
+                <li>公開プロフィール</li>
+                <li>記事投稿</li>
+                <li>記録・予定</li>
+                <li>リンク集</li>
+              </ul>
+            </article>
+
+            <article class="feature-card reveal">
+              <div class="feature-icon icon-discover">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <circle cx="14" cy="14" r="8" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M20 20l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="14" cy="14" r="3" stroke="currentColor" stroke-width="1"/>
+                </svg>
+              </div>
+              <p class="kicker">02</p>
+              <h3>交流と発見</h3>
+              <p>
+                「発見」で他のユーザーや記事を探せます。
+                フォロー、通知、匿名質問箱があり、
+                公開ページ同士がゆるくつながるネットワーク。
+              </p>
+              <ul class="feature-list">
+                <li>発見フィード</li>
+                <li>フォロー・通知</li>
+                <li>匿名質問箱</li>
+                <li>通報機能</li>
+              </ul>
+            </article>
+
+            <article class="feature-card reveal">
+              <div class="feature-icon icon-apps">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <rect x="4" y="4" width="10" height="10" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                  <rect x="18" y="4" width="10" height="10" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                  <rect x="4" y="18" width="10" height="10" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                  <rect x="18" y="18" width="10" height="10" rx="3" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+              </div>
+              <p class="kicker">03</p>
+              <h3>実用アプリ群</h3>
+              <p>
+                授業レビュー、学生向け情報、助け合いボード、
+                院生向け雑談、ミニゲームまで。
+                大学生活のためのアプリが揃っています。
+              </p>
+              <ul class="feature-list">
+                <li>授業レビュー</li>
+                <li>ノート共有・過去問</li>
+                <li>お得情報</li>
+                <li>ミニゲーム</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== APPS SHOWCASE ===== -->
+      <section class="section" id="apps">
+        <div class="container">
+          <div class="section-heading reveal section-heading-split">
+            <div>
+              <p class="kicker">Apps / 実用アプリ</p>
+              <h2>大学生活を、もっと面白く。</h2>
+              <p>学生の「あったらいいのに」を、全部アプリにしました。</p>
+            </div>
+          </div>
+
+          <div class="apps-grid">
+            <article class="app-card app-card-featured reveal">
+              <div class="app-card-accent accent-red"></div>
+              <div class="app-emoji">&#x2696;&#xFE0F;</div>
+              <h3>教員を裁け！<br />地獄の裏シラバス</h3>
+              <p>授業レビュー、各種評価、判決メモ。履修選びの本音がここに。</p>
+              <div class="tag-row">
+                <span>授業レビュー</span>
+                <span>評価</span>
+                <span>判決</span>
+              </div>
+            </article>
+
+            <article class="app-card reveal">
+              <div class="app-card-accent accent-blue"></div>
+              <div class="app-emoji">&#x1F4A1;</div>
+              <h3>エッジ情報</h3>
+              <p>大学生向けのお得情報や生活情報をキャッチアップ。</p>
+              <div class="tag-row">
+                <span>お得情報</span>
+                <span>生活</span>
+              </div>
+            </article>
+
+            <article class="app-card reveal">
+              <div class="app-card-accent accent-green"></div>
+              <div class="app-emoji">&#x1F91D;</div>
+              <h3>助け合いボード</h3>
+              <p>ノート共有、過去問交換、空きコマ同行、貸し借り、手伝い募集。</p>
+              <div class="tag-row">
+                <span>ノート</span>
+                <span>過去問</span>
+                <span>助け合い</span>
+              </div>
+            </article>
+
+            <article class="app-card reveal">
+              <div class="app-card-accent accent-purple"></div>
+              <div class="app-emoji">&#x1F54A;&#xFE0F;</div>
+              <h3>祈祷と呪詛</h3>
+              <p>大学院生向けの軽い吐き出し・雑談・募集の場。</p>
+              <div class="tag-row">
+                <span>院生</span>
+                <span>雑談</span>
+                <span>募集</span>
+              </div>
+            </article>
+
+            <article class="app-card reveal">
+              <div class="app-card-accent accent-gold"></div>
+              <div class="app-emoji">&#x1F3AE;</div>
+              <h3>Games</h3>
+              <p>テトリス、ブロック崩しなど。空きコマの暇つぶしに。</p>
+              <div class="tag-row">
+                <span>テトリス</span>
+                <span>ブロック崩し</span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TRUST ===== -->
+      <section class="section" id="trust">
+        <div class="container">
+          <div class="trust-layout reveal">
+            <div class="trust-copy">
+              <p class="kicker">Trust / 信頼</p>
+              <h2>匿名掲示板ではない。</h2>
+              <p class="trust-lead">
+                このサービスは一定の信頼軸を持つ、学内寄りのネットワークです。
+              </p>
+
+              <div class="trust-points">
+                <div class="trust-point">
+                  <div class="trust-point-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3>慶應メール認証</h3>
+                    <p>@keio.jp / @keio.ac.jp のメール認証で慶應認証バッジを取得。誰が本物の学生かが分かる。</p>
+                  </div>
+                </div>
+
+                <div class="trust-point">
+                  <div class="trust-point-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3>モデレーション</h3>
+                    <p>通報機能と管理者によるモデレーションで、安全な場を維持。</p>
+                  </div>
+                </div>
+
+                <div class="trust-point">
+                  <div class="trust-point-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                      <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3>公開ページ中心</h3>
+                    <p>発言は公開ページに紐づく。匿名の無責任な投稿ではなく、自分のページとして残る。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="trust-badge-card">
+              <div class="badge-showcase">
+                <div class="badge-large">
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="20" stroke="url(#badge-grad)" stroke-width="2"/>
+                    <path d="M18 24l4 4 8-8" stroke="url(#badge-grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs>
+                      <linearGradient id="badge-grad" x1="4" y1="4" x2="44" y2="44">
+                        <stop offset="0%" stop-color="#56b9c5"/>
+                        <stop offset="100%" stop-color="#b38e44"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
+                <h3>慶應認証バッジ</h3>
+                <p>Keio Verified</p>
+              </div>
+              <div class="badge-example">
+                <div class="badge-example-row">
+                  <span class="badge-mini keio-mini">慶應認証</span>
+                  <span class="badge-desc">@keio.jp で認証済み</span>
+                </div>
+                <div class="badge-example-row">
+                  <span class="badge-mini sfc-mini">SFC</span>
+                  <span class="badge-desc">湘南藤沢キャンパス</span>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== FINAL CTA ===== -->
+      <section class="section signup-final" id="join">
+        <div class="container">
+          <div class="final-cta-card reveal">
+            <p class="kicker">Join / はじめる</p>
+            <h2>あなたの @username を取得しよう。</h2>
+            <p class="final-cta-lead">
+              無料で始められます。慶應メールがあれば、認証バッジも。
+            </p>
+
+            <form class="signup-inline-form signup-final-form" id="signup-form-bottom">
+              <div class="signup-input-group">
+                <span class="signup-at-prefix">@</span>
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="username"
+                  autocomplete="off"
+                  spellcheck="false"
+                  required
+                />
+              </div>
+              <button class="button button-primary signup-cta" type="submit">
+                無料ではじめる
+              </button>
+            </form>
+
+            <div class="final-stats">
+              <div class="stat">
+                <strong>5</strong>
+                <span>アプリ</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat">
+                <strong>無料</strong>
+                <span>利用料</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat">
+                <strong>30秒</strong>
+                <span>で登録</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div>
+          <p class="footer-title">Student Network</p>
+          <p class="footer-copy">for Keio / SFC</p>
+        </div>
+        <div class="footer-links">
+          <a href="#">利用規約</a>
+          <a href="#">プライバシー</a>
+          <a href="#">お問い合わせ</a>
+        </div>
+      </div>
+    </footer>
+
+    <button class="floating-button to-top" id="to-top" type="button" aria-label="Back to top">↑</button>
+
+    <script src="signup.js"></script>
+  </body>
+</html>
