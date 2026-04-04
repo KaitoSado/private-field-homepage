@@ -76,7 +76,7 @@ export default function HomePage() {
           <div className="home-kicker-row">
             <span className="home-status-badge">Open Beta</span>
           </div>
-          <h1>自分のページを、{"\n"}そのまま育てる。</h1>
+          <h1>自分のページを、今すぐ公開。記録も、情報も、協力プレーも、ここからつながる。</h1>
           <p className="hero-lead home-hero-lead">
             プロフィール、ブログ、ソーシャルカードが一体の公開ページ。{"\n"}発見、助け合い、学内アプリもここから。
           </p>
