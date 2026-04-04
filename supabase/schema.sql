@@ -202,6 +202,28 @@ create table if not exists public.grad_ritual_posts (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.walk_sessions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  status text not null default 'active',
+  tags text[] not null default '{}'::text[],
+  current_lat double precision,
+  current_lng double precision,
+  current_point_at timestamptz,
+  started_at timestamptz not null default timezone('utc'::text, now()),
+  ended_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.location_points (
+  id bigint generated always as identity primary key,
+  session_id uuid not null references public.walk_sessions(id) on delete cascade,
+  lat double precision not null,
+  lng double precision not null,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
 alter table public.anonymous_questions add column if not exists sender_profile_id uuid references public.profiles(id) on delete set null;
 alter table public.class_notes add column if not exists author_id uuid references public.profiles(id) on delete cascade;
 alter table public.class_notes add column if not exists course_name text;
@@ -253,6 +275,20 @@ alter table public.grad_ritual_posts add column if not exists timing_label text 
 alter table public.grad_ritual_posts add column if not exists body text;
 alter table public.grad_ritual_posts add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.grad_ritual_posts add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.walk_sessions add column if not exists user_id uuid references public.profiles(id) on delete cascade;
+alter table public.walk_sessions add column if not exists status text not null default 'active';
+alter table public.walk_sessions add column if not exists tags text[] not null default '{}'::text[];
+alter table public.walk_sessions add column if not exists current_lat double precision;
+alter table public.walk_sessions add column if not exists current_lng double precision;
+alter table public.walk_sessions add column if not exists current_point_at timestamptz;
+alter table public.walk_sessions add column if not exists started_at timestamptz not null default timezone('utc'::text, now());
+alter table public.walk_sessions add column if not exists ended_at timestamptz;
+alter table public.walk_sessions add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.walk_sessions add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.location_points add column if not exists session_id uuid references public.walk_sessions(id) on delete cascade;
+alter table public.location_points add column if not exists lat double precision;
+alter table public.location_points add column if not exists lng double precision;
+alter table public.location_points add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -346,6 +382,9 @@ create index if not exists help_requests_category_idx on public.help_requests(ca
 create index if not exists grad_ritual_posts_updated_idx on public.grad_ritual_posts(updated_at desc);
 create index if not exists grad_ritual_posts_author_idx on public.grad_ritual_posts(author_id);
 create index if not exists grad_ritual_posts_room_idx on public.grad_ritual_posts(room, updated_at desc);
+create index if not exists walk_sessions_status_started_idx on public.walk_sessions(status, started_at desc);
+create index if not exists walk_sessions_user_idx on public.walk_sessions(user_id, started_at desc);
+create index if not exists location_points_session_created_idx on public.location_points(session_id, created_at asc);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
@@ -479,6 +518,12 @@ alter table public.grad_ritual_posts
   add constraint grad_ritual_posts_timing_label_length_check check (char_length(timing_label) <= 80),
   drop constraint if exists grad_ritual_posts_body_length_check,
   add constraint grad_ritual_posts_body_length_check check (char_length(body) between 1 and 2000);
+
+alter table public.walk_sessions
+  drop constraint if exists walk_sessions_status_check,
+  add constraint walk_sessions_status_check check (status in ('active', 'ended')),
+  drop constraint if exists walk_sessions_tags_count_check,
+  add constraint walk_sessions_tags_count_check check (coalesce(array_length(tags, 1), 0) <= 6);
 
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
@@ -646,6 +691,11 @@ create trigger grad_ritual_posts_set_updated_at
 before update on public.grad_ritual_posts
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists walk_sessions_set_updated_at on public.walk_sessions;
+create trigger walk_sessions_set_updated_at
+before update on public.walk_sessions
+for each row execute procedure public.handle_updated_at();
+
 create or replace view public.profile_stats as
 select
   p.id as profile_id,
@@ -705,6 +755,8 @@ alter table public.special_articles enable row level security;
 alter table public.edge_tips enable row level security;
 alter table public.help_requests enable row level security;
 alter table public.grad_ritual_posts enable row level security;
+alter table public.walk_sessions enable row level security;
+alter table public.location_points enable row level security;
 alter table public.notifications enable row level security;
 alter table public.reports enable row level security;
 alter table public.telemetry_page_views enable row level security;
@@ -1107,6 +1159,87 @@ using (auth.uid() = author_id);
 drop policy if exists "admins can manage ritual posts" on public.grad_ritual_posts;
 create policy "admins can manage ritual posts"
 on public.grad_ritual_posts
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "walk sessions are public readable" on public.walk_sessions;
+create policy "walk sessions are public readable"
+on public.walk_sessions
+for select
+using (true);
+
+drop policy if exists "authenticated users can create walk sessions" on public.walk_sessions;
+create policy "authenticated users can create walk sessions"
+on public.walk_sessions
+for insert
+to authenticated
+with check (
+  auth.uid() = user_id
+  and exists (
+    select 1
+    from public.profiles
+    where profiles.id = walk_sessions.user_id
+      and profiles.account_status = 'active'
+  )
+);
+
+drop policy if exists "owners can update walk sessions" on public.walk_sessions;
+create policy "owners can update walk sessions"
+on public.walk_sessions
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "owners can delete walk sessions" on public.walk_sessions;
+create policy "owners can delete walk sessions"
+on public.walk_sessions
+for delete
+using (auth.uid() = user_id);
+
+drop policy if exists "admins can manage walk sessions" on public.walk_sessions;
+create policy "admins can manage walk sessions"
+on public.walk_sessions
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "location points are public readable" on public.location_points;
+create policy "location points are public readable"
+on public.location_points
+for select
+using (true);
+
+drop policy if exists "authenticated users can create location points" on public.location_points;
+create policy "authenticated users can create location points"
+on public.location_points
+for insert
+to authenticated
+with check (
+  exists (
+    select 1
+    from public.walk_sessions
+    where walk_sessions.id = location_points.session_id
+      and walk_sessions.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "owners can delete location points" on public.location_points;
+create policy "owners can delete location points"
+on public.location_points
+for delete
+using (
+  exists (
+    select 1
+    from public.walk_sessions
+    where walk_sessions.id = location_points.session_id
+      and walk_sessions.user_id = auth.uid()
+  )
+);
+
+drop policy if exists "admins can manage location points" on public.location_points;
+create policy "admins can manage location points"
+on public.location_points
 for all
 using (public.is_admin())
 with check (public.is_admin());

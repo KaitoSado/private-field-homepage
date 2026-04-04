@@ -7,6 +7,11 @@ export const metadata = {
 
 const plannedApps = [
   {
+    name: "深夜徘徊界隈",
+    body: "深夜の移動セッションをそのままログにし、いま歩いている気配をゆるく共有するリアルタイム徘徊面です。",
+    href: "/apps/night"
+  },
+  {
     name: "Games",
     body: "すぐ遊べるミニゲームをまとめた小さいゲームハブです。気分転換や動作確認にも使えます。",
     href: "/apps/games"

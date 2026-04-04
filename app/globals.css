@@ -3488,6 +3488,114 @@ textarea {
   background: rgba(79, 162, 212, 0.72);
 }
 
+.night-walk-main {
+  align-items: start;
+}
+
+.night-walk-column {
+  display: grid;
+  gap: 18px;
+}
+
+.night-walk-stage,
+.night-walk-session-list {
+  display: grid;
+  gap: 16px;
+}
+
+.night-walk-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.night-walk-canvas {
+  width: 100%;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0d1520;
+}
+
+.night-walk-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.night-walk-status-text {
+  margin: 0;
+  color: #5f686d;
+  font-size: 0.95rem;
+}
+
+.night-walk-tag-field {
+  min-width: min(100%, 320px);
+}
+
+.night-walk-session-card {
+  border: 1px solid rgba(31, 111, 120, 0.12);
+  border-radius: 22px;
+  background: rgba(248, 248, 241, 0.82);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.night-walk-session-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(23, 29, 36, 0.08);
+}
+
+.night-walk-session-card.is-focused {
+  border-color: rgba(31, 111, 120, 0.32);
+  box-shadow: 0 18px 36px rgba(31, 111, 120, 0.12);
+}
+
+.night-walk-session-focus {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 18px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+}
+
+.night-walk-session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.night-walk-session-meta strong {
+  font-size: 1rem;
+}
+
+.night-walk-session-meta span {
+  color: #6b7276;
+  font-size: 0.84rem;
+}
+
+.night-walk-session-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.night-walk-session-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #6b7276;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .arcade-defense-card {
   gap: 18px;
 }
