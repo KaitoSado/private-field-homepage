@@ -3401,6 +3401,23 @@ textarea {
   justify-self: center;
 }
 
+.arcade-platformer-card {
+  gap: 18px;
+}
+
+.arcade-platformer-canvas {
+  width: 100%;
+  max-width: 900px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #102130;
+  justify-self: center;
+}
+
+.arcade-platformer-side {
+  align-content: start;
+}
+
 .arcade-defense-card {
   gap: 18px;
 }

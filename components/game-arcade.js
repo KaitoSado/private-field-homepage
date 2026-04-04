@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BreakoutGame } from "@/components/breakout-game";
+import { DuckPlatformerGame } from "@/components/duck-platformer-game";
 import { TowerDefenseGame } from "@/components/tower-defense-game";
 
 const tabs = [
   { id: "defense", label: "Tower Defense" },
+  { id: "duck", label: "Duck Run" },
   { id: "breakout", label: "Breakout" },
   { id: "tetris", label: "Tetris" },
   { id: "tictactoe", label: "Tic-Tac-Toe" },
@@ -108,6 +110,7 @@ export function GameArcade() {
         </div>
 
         {activeTab === "defense" ? <TowerDefenseGame /> : null}
+        {activeTab === "duck" ? <DuckPlatformerGame /> : null}
         {activeTab === "breakout" ? <BreakoutGame /> : null}
         {activeTab === "tetris" ? <TetrisGame /> : null}
         {activeTab === "tictactoe" ? <TicTacToeGame /> : null}
