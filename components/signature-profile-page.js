@@ -772,37 +772,22 @@ export function SignatureProfilePage({ profile, posts }) {
             <h2>{draft.identity_heading || DEFAULT_IDENTITY_HEADING}</h2>
           )}
         </div>
-        <div className="signature-identity-grid">
-          <article className="signature-statement-card">
-            {isEditing ? (
-              <textarea
-                className="signature-edit-block"
-                rows="5"
-                value={draft.bio || ""}
-                onChange={(event) => updateField("bio", event.target.value)}
-                maxLength={PROFILE_BIO_LIMIT}
-              />
-            ) : (
-              <p className="signature-body">{identityBody}</p>
-            )}
-          </article>
-          <div className="signature-about-grid">
-            {infoCards.map((card) => (
-              <article key={card.eyebrow} className="signature-info-card">
-                <p className="eyebrow">{card.eyebrow}</p>
-                {isEditing ? (
-                  <textarea
-                    rows="2"
-                    value={draft[card.key] || ""}
-                    onChange={(event) => updateField(card.key, event.target.value)}
-                  />
-                ) : (
-                  <h3>{card.title}</h3>
-                )}
-                {card.body ? <p>{card.body}</p> : null}
-              </article>
-            ))}
-          </div>
+        <div className="signature-about-grid">
+          {infoCards.map((card) => (
+            <article key={card.eyebrow} className="signature-info-card">
+              <p className="eyebrow">{card.eyebrow}</p>
+              {isEditing ? (
+                <textarea
+                  rows="2"
+                  value={draft[card.key] || ""}
+                  onChange={(event) => updateField(card.key, event.target.value)}
+                />
+              ) : (
+                <h3>{card.title}</h3>
+              )}
+              {card.body ? <p>{card.body}</p> : null}
+            </article>
+          ))}
         </div>
       </SignatureInteractiveSection>
 
