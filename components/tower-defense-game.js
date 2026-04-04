@@ -93,6 +93,38 @@ const MAP_CONFIGS = {
     [9, 5],
     [10, 5],
     [11, 5]
+  ]),
+  curves: createMapConfig("curves", [
+    [0, 4],
+    [1, 4],
+    [2, 4],
+    [3, 4],
+    [3, 3],
+    [3, 2],
+    [3, 1],
+    [4, 1],
+    [5, 1],
+    [6, 1],
+    [7, 1],
+    [8, 1],
+    [8, 2],
+    [8, 3],
+    [8, 4],
+    [7, 4],
+    [6, 4],
+    [5, 4],
+    [5, 5],
+    [5, 6],
+    [6, 6],
+    [7, 6],
+    [8, 6],
+    [9, 6],
+    [10, 6],
+    [10, 5],
+    [10, 4],
+    [10, 3],
+    [10, 2],
+    [11, 2]
   ])
 };
 
@@ -155,6 +187,33 @@ const STAGE_CONFIGS = {
         { type: "normal", count: 6, spacing: 0.56 },
         { type: "fast", count: 6, spacing: 0.4, delay: 1.4 },
         { type: "tank", count: 4, spacing: 1.04, delay: 3.1 }
+      ]
+    ]
+  },
+  stage3: {
+    id: "stage3",
+    number: 3,
+    name: "Positioning Stage",
+    description: "曲がり角と折り返しの強ポジを見つけるステージ",
+    mapId: "curves",
+    availableTowers: ["archer", "cannon", "ice"],
+    startingGold: 200,
+    playerLife: 15,
+    waves: [
+      [{ type: "normal", count: 10, spacing: 0.66 }],
+      [{ type: "fast", count: 12, spacing: 0.36 }],
+      [
+        { type: "tank", count: 5, spacing: 1.08 },
+        { type: "normal", count: 4, spacing: 0.58, delay: 1 }
+      ],
+      [
+        { type: "fast", count: 8, spacing: 0.38 },
+        { type: "tank", count: 4, spacing: 1.02, delay: 1.8 }
+      ],
+      [
+        { type: "normal", count: 6, spacing: 0.52 },
+        { type: "fast", count: 6, spacing: 0.38, delay: 1.2 },
+        { type: "tank", count: 5, spacing: 1.02, delay: 2.8 }
       ]
     ]
   }
@@ -365,7 +424,9 @@ export function TowerDefenseGame() {
               <button
                 key={towerId}
                 type="button"
-                className={`arcade-defense-tower-button ${selectedTower === towerId ? "is-active" : ""} ${isExpensive ? "is-expensive" : ""}`}
+                className={`arcade-defense-tower-button ${selectedTower === towerId ? "is-active" : ""} ${
+                  isExpensive ? "is-expensive" : ""
+                }`}
                 onClick={() => handleTowerSelect(towerId)}
               >
                 <strong>{tower.label}</strong>
@@ -498,7 +559,7 @@ function buildBuildableCells(routeCells, routeSet) {
 
 function startGame(game) {
   game.status = "playing";
-  game.notice = { text: `Stage ${game.stage.number} start`, ttl: 1.4 };
+  game.notice = { text: `Stage ${game.stage.number} 開始`, ttl: 1.4 };
 }
 
 function updateTowerDefense(game, delta) {
@@ -830,7 +891,7 @@ function drawTowerDefense(context, game) {
   context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
   drawBoard(context, game.map);
   drawRoute(context, game.map);
-  drawBuildableHighlights(context, game.map);
+  drawBuildableHighlights(context, game);
   drawHoveredCell(context, game);
   drawTowers(context, game.towers);
   drawEnemies(context, game.enemies);
@@ -880,17 +941,42 @@ function drawRoute(context, map) {
   context.restore();
 }
 
-function drawBuildableHighlights(context, map) {
-  context.save();
-  context.fillStyle = "rgba(132, 204, 255, 0.09)";
+function drawBuildableHighlights(context, game) {
+  const range = TOWER_TYPES[game.selectedTower].range;
+  const coverages = [];
+  let maxCoverage = 1;
 
-  for (const key of map.buildableCells) {
+  for (const key of game.map.buildableCells) {
     const [column, row] = key.split(":").map(Number);
     const centerX = column * TILE_SIZE + TILE_SIZE / 2;
     const centerY = row * TILE_SIZE + TILE_SIZE / 2;
+    const coverage = getCoverageCount(game.map, centerX, centerY, range);
+    maxCoverage = Math.max(maxCoverage, coverage);
+    coverages.push({ key, column, row, coverage });
+  }
+
+  context.save();
+
+  for (const cell of coverages) {
+    const centerX = cell.column * TILE_SIZE + TILE_SIZE / 2;
+    const centerY = cell.row * TILE_SIZE + TILE_SIZE / 2;
+    const ratio = cell.coverage / maxCoverage;
+    const isStageThree = game.stage.id === "stage3";
+    const radius = isStageThree ? 5 + ratio * 8 : 6;
+    const alpha = isStageThree ? 0.08 + ratio * 0.18 : 0.09;
+
+    context.fillStyle = `rgba(132, 204, 255, ${alpha})`;
     context.beginPath();
-    context.arc(centerX, centerY, 6, 0, Math.PI * 2);
+    context.arc(centerX, centerY, radius, 0, Math.PI * 2);
     context.fill();
+
+    if (isStageThree && ratio >= 0.72) {
+      context.strokeStyle = "rgba(247, 178, 103, 0.34)";
+      context.lineWidth = 1.5;
+      context.beginPath();
+      context.arc(centerX, centerY, radius + 5, 0, Math.PI * 2);
+      context.stroke();
+    }
   }
 
   context.restore();
@@ -915,6 +1001,8 @@ function drawHoveredCell(context, game) {
     const selected = TOWER_TYPES[game.selectedTower];
     const centerX = x + TILE_SIZE / 2;
     const centerY = y + TILE_SIZE / 2;
+    const coveredCells = getCoveredRouteCells(game.map, centerX, centerY, selected.range);
+
     context.fillStyle = `${selected.color}66`;
     context.beginPath();
     context.arc(centerX, centerY, 16, 0, Math.PI * 2);
@@ -925,6 +1013,28 @@ function drawHoveredCell(context, game) {
     context.beginPath();
     context.arc(centerX, centerY, selected.range, 0, Math.PI * 2);
     context.stroke();
+
+    drawCoveragePreview(context, coveredCells);
+
+    context.fillStyle = "rgba(15, 23, 34, 0.82)";
+    context.fillRect(x + 8, y + 8, 72, 24);
+    context.fillStyle = "#f8fafc";
+    context.font = '600 12px "IBM Plex Mono", monospace';
+    context.textAlign = "left";
+    context.fillText(`cover ${coveredCells.length}`, x + 16, y + 24);
+  }
+
+  context.restore();
+}
+
+function drawCoveragePreview(context, coveredCells) {
+  context.save();
+  context.fillStyle = "rgba(247, 178, 103, 0.16)";
+
+  for (const cell of coveredCells) {
+    const x = cell.column * TILE_SIZE + 8;
+    const y = cell.row * TILE_SIZE + 8;
+    context.fillRect(x, y, TILE_SIZE - 16, TILE_SIZE - 16);
   }
 
   context.restore();
@@ -959,7 +1069,8 @@ function drawEnemies(context, enemies) {
 
     context.save();
     context.translate(enemy.x, enemy.y);
-    context.fillStyle = enemy.flash > 0 ? "#ffffff" : enemy.isSlowed ? blendHex(enemy.color, "#8ef6e4", 0.42) : enemy.color;
+    context.fillStyle =
+      enemy.flash > 0 ? "#ffffff" : enemy.isSlowed ? blendHex(enemy.color, "#8ef6e4", 0.42) : enemy.color;
     context.beginPath();
     context.arc(0, 0, enemy.radius, 0, Math.PI * 2);
     context.fill();
@@ -1034,12 +1145,31 @@ function drawOverlay(context, game) {
   context.fillText(game.stage.name, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 2);
 
   context.font = '500 16px "IBM Plex Mono", monospace';
-  const subline =
-    game.status === "title"
-      ? "Enter or Start で開始"
-      : "Enter or Restart でやり直し";
+  const subline = game.status === "title" ? "Enter or Start で開始" : "Enter or Restart でやり直し";
   context.fillText(subline, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 34);
   context.restore();
+}
+
+function getCoverageCount(map, centerX, centerY, range) {
+  let count = 0;
+
+  for (const [column, row] of map.routeCells) {
+    const routeX = column * TILE_SIZE + TILE_SIZE / 2;
+    const routeY = row * TILE_SIZE + TILE_SIZE / 2;
+    if (Math.hypot(routeX - centerX, routeY - centerY) <= range) count += 1;
+  }
+
+  return count;
+}
+
+function getCoveredRouteCells(map, centerX, centerY, range) {
+  return map.routeCells
+    .filter(([column, row]) => {
+      const routeX = column * TILE_SIZE + TILE_SIZE / 2;
+      const routeY = row * TILE_SIZE + TILE_SIZE / 2;
+      return Math.hypot(routeX - centerX, routeY - centerY) <= range;
+    })
+    .map(([column, row]) => ({ column, row }));
 }
 
 function getGridCell(x, y) {
