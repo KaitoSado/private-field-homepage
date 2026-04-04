@@ -7,36 +7,8 @@ const GRID_ROWS = 8;
 const TILE_SIZE = 60;
 const CANVAS_WIDTH = GRID_COLUMNS * TILE_SIZE;
 const CANVAS_HEIGHT = GRID_ROWS * TILE_SIZE;
-const START_LIVES = 20;
-const START_COST = 140;
-
-const ROUTE_CELLS = [
-  [0, 3],
-  [1, 3],
-  [2, 3],
-  [2, 2],
-  [2, 1],
-  [3, 1],
-  [4, 1],
-  [5, 1],
-  [5, 2],
-  [5, 3],
-  [6, 3],
-  [7, 3],
-  [8, 3],
-  [8, 4],
-  [8, 5],
-  [9, 5],
-  [10, 5],
-  [11, 5]
-];
-
-const PATH_POINTS = ROUTE_CELLS.map(([column, row]) => ({
-  x: column * TILE_SIZE + TILE_SIZE / 2,
-  y: row * TILE_SIZE + TILE_SIZE / 2
-}));
-
-const BUILDABLE_CELLS = buildBuildableCells();
+const DEFAULT_STAGE_ID = "stage1";
+const DEFAULT_TOWER_ID = "archer";
 
 const TOWER_TYPES = {
   archer: {
@@ -67,10 +39,10 @@ const TOWER_TYPES = {
     damage: 8,
     attackInterval: 0.84,
     projectileSpeed: 340,
-    slowFactor: 0.5,
-    slowDuration: 1.5,
+    slowMultiplier: 0.55,
+    slowDuration: 1.45,
     color: "#8ef6e4",
-    detail: "減速 / 低ダメージ"
+    detail: "減速 / 支援"
   }
 };
 
@@ -86,52 +58,117 @@ const ENEMY_TYPES = {
   fast: {
     label: "Fast",
     maxHp: 34,
-    speed: 98,
-    reward: 10,
-    radius: 13,
+    speed: 104,
+    reward: 13,
+    radius: 12,
     color: "#facc15"
   },
   tank: {
     label: "Tank",
-    maxHp: 122,
-    speed: 40,
-    reward: 18,
+    maxHp: 134,
+    speed: 38,
+    reward: 20,
     radius: 18,
     color: "#a78bfa"
   }
 };
 
-const WAVE_DEFINITIONS = [
-  [{ type: "normal", count: 6, spacing: 0.88 }],
-  [
-    { type: "normal", count: 7, spacing: 0.72 },
-    { type: "fast", count: 3, spacing: 0.6, delay: 2.1 }
-  ],
-  [
-    { type: "normal", count: 6, spacing: 0.68 },
-    { type: "tank", count: 2, spacing: 1.35, delay: 1.8 }
-  ],
-  [
-    { type: "fast", count: 7, spacing: 0.46 },
-    { type: "normal", count: 5, spacing: 0.7, delay: 1.4 }
-  ],
-  [
-    { type: "tank", count: 4, spacing: 1.15 },
-    { type: "fast", count: 5, spacing: 0.58, delay: 2.6 }
-  ],
-  [
-    { type: "normal", count: 10, spacing: 0.48 },
-    { type: "fast", count: 8, spacing: 0.42, delay: 2.2 },
-    { type: "tank", count: 3, spacing: 1.1, delay: 5.2 }
-  ]
-];
+const MAP_CONFIGS = {
+  training: createMapConfig("training", [
+    [0, 3],
+    [1, 3],
+    [2, 3],
+    [2, 2],
+    [2, 1],
+    [3, 1],
+    [4, 1],
+    [5, 1],
+    [5, 2],
+    [5, 3],
+    [6, 3],
+    [7, 3],
+    [8, 3],
+    [8, 4],
+    [8, 5],
+    [9, 5],
+    [10, 5],
+    [11, 5]
+  ])
+};
+
+const STAGE_CONFIGS = {
+  stage1: {
+    id: "stage1",
+    number: 1,
+    name: "Basic Defense",
+    description: "基本配置と迎撃のテンポを覚えるステージ",
+    mapId: "training",
+    availableTowers: ["archer", "cannon", "ice"],
+    startingGold: 140,
+    playerLife: 20,
+    waves: [
+      [{ type: "normal", count: 6, spacing: 0.88 }],
+      [
+        { type: "normal", count: 7, spacing: 0.72 },
+        { type: "fast", count: 3, spacing: 0.6, delay: 2.1 }
+      ],
+      [
+        { type: "normal", count: 6, spacing: 0.68 },
+        { type: "tank", count: 2, spacing: 1.35, delay: 1.8 }
+      ],
+      [
+        { type: "fast", count: 7, spacing: 0.46 },
+        { type: "normal", count: 5, spacing: 0.7, delay: 1.4 }
+      ],
+      [
+        { type: "tank", count: 4, spacing: 1.15 },
+        { type: "fast", count: 5, spacing: 0.58, delay: 2.6 }
+      ],
+      [
+        { type: "normal", count: 10, spacing: 0.48 },
+        { type: "fast", count: 8, spacing: 0.42, delay: 2.2 },
+        { type: "tank", count: 3, spacing: 1.1, delay: 5.2 }
+      ]
+    ]
+  },
+  stage2: {
+    id: "stage2",
+    number: 2,
+    name: "Matchup Lesson",
+    description: "速敵と重敵を相手に、塔の相性を学ぶステージ",
+    mapId: "training",
+    availableTowers: ["archer", "cannon", "ice"],
+    startingGold: 170,
+    playerLife: 16,
+    waves: [
+      [{ type: "normal", count: 8, spacing: 0.74 }],
+      [{ type: "fast", count: 10, spacing: 0.44 }],
+      [
+        { type: "tank", count: 4, spacing: 1.06 },
+        { type: "normal", count: 4, spacing: 0.64, delay: 0.8 }
+      ],
+      [
+        { type: "fast", count: 8, spacing: 0.4 },
+        { type: "tank", count: 3, spacing: 1.12, delay: 1.9 }
+      ],
+      [
+        { type: "normal", count: 6, spacing: 0.56 },
+        { type: "fast", count: 6, spacing: 0.4, delay: 1.4 },
+        { type: "tank", count: 4, spacing: 1.04, delay: 3.1 }
+      ]
+    ]
+  }
+};
+
+const STAGE_ORDER = Object.keys(STAGE_CONFIGS);
 
 export function TowerDefenseGame() {
   const canvasRef = useRef(null);
   const animationRef = useRef(0);
   const lastFrameRef = useRef(0);
-  const gameRef = useRef(createTowerDefenseState("archer"));
-  const [selectedTower, setSelectedTower] = useState("archer");
+  const [selectedStageId, setSelectedStageId] = useState(DEFAULT_STAGE_ID);
+  const [selectedTower, setSelectedTower] = useState(DEFAULT_TOWER_ID);
+  const gameRef = useRef(createTowerDefenseState(DEFAULT_STAGE_ID, DEFAULT_TOWER_ID));
   const [hud, setHud] = useState(() => buildHud(gameRef.current));
 
   useEffect(() => {
@@ -152,7 +189,8 @@ export function TowerDefenseGame() {
         current.wave === nextHud.wave &&
         current.totalWaves === nextHud.totalWaves &&
         current.status === nextHud.status &&
-        current.selectedTower === nextHud.selectedTower
+        current.selectedTower === nextHud.selectedTower &&
+        current.stageId === nextHud.stageId
           ? current
           : nextHud
       );
@@ -191,17 +229,23 @@ export function TowerDefenseGame() {
     function handleKeyDown(event) {
       if (event.key === "Enter") {
         if (gameRef.current.status === "title") {
-          gameRef.current.status = "playing";
-          gameRef.current.notice = { text: "Wave 1 incoming", ttl: 1.4 };
+          startGame(gameRef.current);
         } else if (gameRef.current.status === "gameover" || gameRef.current.status === "clear") {
-          gameRef.current = createTowerDefenseState(selectedTower);
+          gameRef.current = createTowerDefenseState(selectedStageId, selectedTower);
         }
         syncHud();
       }
 
-      if (event.key === "1") setSelectedTower("archer");
-      if (event.key === "2") setSelectedTower("cannon");
-      if (event.key === "3") setSelectedTower("ice");
+      const towerByKey = {
+        1: "archer",
+        2: "cannon",
+        3: "ice"
+      };
+
+      const nextTower = towerByKey[event.key];
+      if (nextTower && gameRef.current.stage.availableTowers.includes(nextTower)) {
+        setSelectedTower(nextTower);
+      }
     }
 
     canvas.addEventListener("mousemove", handleCanvasMove);
@@ -216,14 +260,31 @@ export function TowerDefenseGame() {
       canvas.removeEventListener("click", handleCanvasClick);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedTower]);
+  }, [selectedStageId, selectedTower]);
+
+  function handleStageChange(stageId) {
+    const stage = STAGE_CONFIGS[stageId];
+    const nextTower = stage.availableTowers.includes(selectedTower) ? selectedTower : stage.availableTowers[0];
+    setSelectedStageId(stageId);
+    setSelectedTower(nextTower);
+    const nextGame = createTowerDefenseState(stageId, nextTower);
+    gameRef.current = nextGame;
+    setHud(buildHud(nextGame));
+  }
+
+  function handleTowerSelect(towerId) {
+    if (!gameRef.current.stage.availableTowers.includes(towerId)) return;
+    setSelectedTower(towerId);
+    gameRef.current.selectedTower = towerId;
+    setHud(buildHud(gameRef.current));
+  }
 
   function handleStartOrRestart() {
     if (gameRef.current.status === "title") {
-      gameRef.current.status = "playing";
-      gameRef.current.notice = { text: "Wave 1 incoming", ttl: 1.4 };
+      startGame(gameRef.current);
     } else {
-      gameRef.current = createTowerDefenseState(selectedTower);
+      const nextGame = createTowerDefenseState(selectedStageId, selectedTower);
+      gameRef.current = nextGame;
     }
     setHud(buildHud(gameRef.current));
   }
@@ -232,13 +293,32 @@ export function TowerDefenseGame() {
     <div className="arcade-panel-grid">
       <div className="surface arcade-game-card arcade-defense-card">
         <div className="section-copy">
+          <p className="eyebrow">
+            Stage {hud.stageNumber} / {hud.stageName}
+          </p>
           <h2>Tower Defense</h2>
           <p>
             {hud.status === "title" ? "Enter or Start で開始" : null}
-            {hud.status === "playing" ? "塔を置いてゴールを守る" : null}
+            {hud.status === "playing" ? hud.stageDescription : null}
             {hud.status === "gameover" ? "ゲームオーバー。Enterで再開" : null}
             {hud.status === "clear" ? "クリア。Enterで再開" : null}
           </p>
+        </div>
+
+        <div className="arcade-defense-stage-row">
+          {STAGE_ORDER.map((stageId) => {
+            const stage = STAGE_CONFIGS[stageId];
+            return (
+              <button
+                key={stageId}
+                type="button"
+                className={`signature-filter-chip ${selectedStageId === stageId ? "is-active" : ""}`}
+                onClick={() => handleStageChange(stageId)}
+              >
+                Stage {stage.number}
+              </button>
+            );
+          })}
         </div>
 
         <div className="arcade-defense-hud">
@@ -278,18 +358,22 @@ export function TowerDefenseGame() {
         </div>
 
         <div className="arcade-defense-tower-list">
-          {Object.entries(TOWER_TYPES).map(([key, tower]) => (
-            <button
-              key={key}
-              type="button"
-              className={`arcade-defense-tower-button ${selectedTower === key ? "is-active" : ""}`}
-              onClick={() => setSelectedTower(key)}
-            >
-              <strong>{tower.label}</strong>
-              <span>{tower.cost} cost</span>
-              <small>{tower.detail}</small>
-            </button>
-          ))}
+          {gameRef.current.stage.availableTowers.map((towerId) => {
+            const tower = TOWER_TYPES[towerId];
+            const isExpensive = hud.cost < tower.cost && hud.status === "playing";
+            return (
+              <button
+                key={towerId}
+                type="button"
+                className={`arcade-defense-tower-button ${selectedTower === towerId ? "is-active" : ""} ${isExpensive ? "is-expensive" : ""}`}
+                onClick={() => handleTowerSelect(towerId)}
+              >
+                <strong>{tower.label}</strong>
+                <span>{tower.cost} cost</span>
+                <small>{tower.detail}</small>
+              </button>
+            );
+          })}
         </div>
 
         <div className="arcade-defense-legend">
@@ -317,11 +401,20 @@ export function TowerDefenseGame() {
   );
 }
 
-function createTowerDefenseState(selectedTower) {
+function createTowerDefenseState(stageId, selectedTowerId) {
+  const stage = STAGE_CONFIGS[stageId] ?? STAGE_CONFIGS[DEFAULT_STAGE_ID];
+  const map = MAP_CONFIGS[stage.mapId];
+  const selectedTower = stage.availableTowers.includes(selectedTowerId)
+    ? selectedTowerId
+    : stage.availableTowers[0];
+
   return {
     status: "title",
-    lives: START_LIVES,
-    cost: START_COST,
+    stageId: stage.id,
+    stage,
+    map,
+    lives: stage.playerLife,
+    cost: stage.startingGold,
     score: 0,
     selectedTower,
     towers: [],
@@ -336,6 +429,7 @@ function createTowerDefenseState(selectedTower) {
     enemyId: 1,
     projectileId: 1,
     effectId: 1,
+    elapsedTime: 0,
     notice: { text: "Enterでスタート", ttl: 10 }
   };
 }
@@ -346,17 +440,37 @@ function buildHud(game) {
     cost: game.cost,
     score: game.score,
     wave: Math.max(1, game.currentWave),
-    totalWaves: WAVE_DEFINITIONS.length,
+    totalWaves: game.stage.waves.length,
     status: game.status,
-    selectedTower: game.selectedTower
+    selectedTower: game.selectedTower,
+    stageId: game.stage.id,
+    stageNumber: game.stage.number,
+    stageName: game.stage.name,
+    stageDescription: game.stage.description
   };
 }
 
-function buildBuildableCells() {
-  const routeSet = new Set(ROUTE_CELLS.map(([column, row]) => `${column}:${row}`));
+function createMapConfig(id, routeCells) {
+  const routeSet = new Set(routeCells.map(([column, row]) => `${column}:${row}`));
+  const pathPoints = routeCells.map(([column, row]) => ({
+    x: column * TILE_SIZE + TILE_SIZE / 2,
+    y: row * TILE_SIZE + TILE_SIZE / 2
+  }));
+  const buildableCells = buildBuildableCells(routeCells, routeSet);
+
+  return {
+    id,
+    routeCells,
+    routeSet,
+    pathPoints,
+    buildableCells
+  };
+}
+
+function buildBuildableCells(routeCells, routeSet) {
   const cells = new Set();
 
-  for (const [column, row] of ROUTE_CELLS) {
+  for (const [column, row] of routeCells) {
     const candidates = [
       [column + 1, row],
       [column - 1, row],
@@ -382,14 +496,20 @@ function buildBuildableCells() {
   return cells;
 }
 
+function startGame(game) {
+  game.status = "playing";
+  game.notice = { text: `Stage ${game.stage.number} start`, ttl: 1.4 };
+}
+
 function updateTowerDefense(game, delta) {
+  game.elapsedTime += delta;
   updateEffects(game, delta);
   updateNotice(game, delta);
 
   if (game.status !== "playing") return;
 
   if (!game.spawnQueue.length && !game.enemies.length) {
-    if (game.currentWave >= WAVE_DEFINITIONS.length) {
+    if (game.currentWave >= game.stage.waves.length) {
       game.status = "clear";
       game.notice = { text: "All waves cleared", ttl: 2.4 };
       return;
@@ -418,7 +538,7 @@ function updateTowerDefense(game, delta) {
 }
 
 function startNextWave(game) {
-  const waveDefinition = WAVE_DEFINITIONS[game.currentWave];
+  const waveDefinition = game.stage.waves[game.currentWave];
   game.spawnQueue = buildSpawnQueue(waveDefinition);
   game.waveTime = 0;
   game.currentWave += 1;
@@ -452,7 +572,7 @@ function updateSpawnQueue(game, delta) {
 
 function createEnemy(game, type) {
   const config = ENEMY_TYPES[type];
-  const start = PATH_POINTS[0];
+  const start = game.map.pathPoints[0];
 
   return {
     id: game.enemyId++,
@@ -468,8 +588,9 @@ function createEnemy(game, type) {
     routeIndex: 0,
     progress: 0,
     alive: true,
-    slowTimer: 0,
-    slowFactor: 1,
+    isSlowed: false,
+    slowMultiplier: 1,
+    slowEndTime: 0,
     flash: 0
   };
 }
@@ -488,7 +609,7 @@ function createTower(column, row, type) {
     attackInterval: config.attackInterval,
     projectileSpeed: config.projectileSpeed,
     splashRadius: config.splashRadius || 0,
-    slowFactor: config.slowFactor || 1,
+    slowMultiplier: config.slowMultiplier || 1,
     slowDuration: config.slowDuration || 0,
     cooldown: 0,
     flash: 0,
@@ -501,15 +622,16 @@ function updateEnemies(game, delta) {
     if (!enemy.alive) continue;
 
     enemy.flash = Math.max(0, enemy.flash - delta);
-    if (enemy.slowTimer > 0) {
-      enemy.slowTimer = Math.max(0, enemy.slowTimer - delta);
-      if (enemy.slowTimer === 0) enemy.slowFactor = 1;
+    if (enemy.isSlowed && game.elapsedTime >= enemy.slowEndTime) {
+      enemy.isSlowed = false;
+      enemy.slowMultiplier = 1;
+      enemy.slowEndTime = 0;
     }
 
-    let remaining = enemy.speed * enemy.slowFactor * delta;
+    let remaining = enemy.speed * (enemy.isSlowed ? enemy.slowMultiplier : 1) * delta;
 
-    while (remaining > 0 && enemy.routeIndex < PATH_POINTS.length - 1) {
-      const target = PATH_POINTS[enemy.routeIndex + 1];
+    while (remaining > 0 && enemy.routeIndex < game.map.pathPoints.length - 1) {
+      const target = game.map.pathPoints[enemy.routeIndex + 1];
       const dx = target.x - enemy.x;
       const dy = target.y - enemy.y;
       const distance = Math.hypot(dx, dy);
@@ -526,15 +648,15 @@ function updateEnemies(game, delta) {
       }
     }
 
-    if (enemy.routeIndex >= PATH_POINTS.length - 1) {
+    if (enemy.routeIndex >= game.map.pathPoints.length - 1) {
       enemy.alive = false;
       game.lives -= 1;
       game.notice = { text: "An enemy slipped through", ttl: 1.1 };
       continue;
     }
 
-    const segmentStart = PATH_POINTS[enemy.routeIndex];
-    const segmentEnd = PATH_POINTS[enemy.routeIndex + 1];
+    const segmentStart = game.map.pathPoints[enemy.routeIndex];
+    const segmentEnd = game.map.pathPoints[enemy.routeIndex + 1];
     const segmentLength = Math.hypot(segmentEnd.x - segmentStart.x, segmentEnd.y - segmentStart.y) || 1;
     const segmentTravel = Math.hypot(enemy.x - segmentStart.x, enemy.y - segmentStart.y);
     enemy.progress = enemy.routeIndex + segmentTravel / segmentLength;
@@ -581,7 +703,7 @@ function createProjectile(game, tower, target) {
     speed: tower.projectileSpeed,
     damage: tower.damage,
     splashRadius: tower.splashRadius,
-    slowFactor: tower.slowFactor,
+    slowMultiplier: tower.slowMultiplier,
     slowDuration: tower.slowDuration,
     color: tower.color,
     radius: tower.type === "cannon" ? 7 : 5,
@@ -627,13 +749,18 @@ function resolveProjectileHit(game, projectile, hitX, hitY, target) {
       if (distance <= projectile.splashRadius) applyHit(game, enemy, projectile.damage);
     }
     game.effects.push(createEffect(game, hitX, hitY, "#f7b267", projectile.splashRadius));
-  } else {
-    if (target && target.alive) {
-      applyHit(game, target, projectile.damage);
-      if (projectile.type === "ice") {
-        target.slowTimer = Math.max(target.slowTimer, projectile.slowDuration);
-        target.slowFactor = Math.min(target.slowFactor, projectile.slowFactor);
-      }
+  } else if (target && target.alive) {
+    applyHit(game, target, projectile.damage);
+
+    if (projectile.type === "ice" && target.alive) {
+      const nextSlow = target.isSlowed
+        ? Math.min(target.slowMultiplier, projectile.slowMultiplier)
+        : projectile.slowMultiplier;
+      target.isSlowed = true;
+      target.slowMultiplier = nextSlow;
+      target.slowEndTime = Math.max(target.slowEndTime, game.elapsedTime + projectile.slowDuration);
+      game.effects.push(createEffect(game, target.x, target.y, "#8ef6e4", 22));
+    } else {
       game.effects.push(createEffect(game, target.x, target.y, projectile.color, 18));
     }
   }
@@ -685,7 +812,7 @@ function tryPlaceTower(game, column, row) {
   const towerConfig = TOWER_TYPES[game.selectedTower];
   const occupied = game.towers.some((tower) => tower.column === column && tower.row === row);
 
-  if (!BUILDABLE_CELLS.has(cellKey) || occupied) {
+  if (!game.map.buildableCells.has(cellKey) || occupied) {
     game.notice = { text: "ここには置けません", ttl: 0.9 };
     return;
   }
@@ -701,9 +828,9 @@ function tryPlaceTower(game, column, row) {
 
 function drawTowerDefense(context, game) {
   context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-  drawBoard(context);
-  drawRoute(context);
-  drawBuildableHighlights(context);
+  drawBoard(context, game.map);
+  drawRoute(context, game.map);
+  drawBuildableHighlights(context, game.map);
   drawHoveredCell(context, game);
   drawTowers(context, game.towers);
   drawEnemies(context, game.enemies);
@@ -712,7 +839,7 @@ function drawTowerDefense(context, game) {
   drawOverlay(context, game);
 }
 
-function drawBoard(context) {
+function drawBoard(context, map) {
   context.fillStyle = "#0d1520";
   context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -721,23 +848,22 @@ function drawBoard(context) {
       const x = column * TILE_SIZE;
       const y = row * TILE_SIZE;
       const key = `${column}:${row}`;
-      const isRoute = ROUTE_CELLS.some(([routeColumn, routeRow]) => routeColumn === column && routeRow === row);
 
-      context.fillStyle = isRoute ? "#253244" : BUILDABLE_CELLS.has(key) ? "#162330" : "#111b27";
+      context.fillStyle = map.routeSet.has(key) ? "#253244" : map.buildableCells.has(key) ? "#162330" : "#111b27";
       context.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
     }
   }
 }
 
-function drawRoute(context) {
+function drawRoute(context, map) {
   context.save();
   context.lineWidth = 26;
   context.lineCap = "round";
   context.lineJoin = "round";
   context.strokeStyle = "rgba(250, 203, 107, 0.18)";
   context.beginPath();
-  context.moveTo(PATH_POINTS[0].x, PATH_POINTS[0].y);
-  for (const point of PATH_POINTS.slice(1)) {
+  context.moveTo(map.pathPoints[0].x, map.pathPoints[0].y);
+  for (const point of map.pathPoints.slice(1)) {
     context.lineTo(point.x, point.y);
   }
   context.stroke();
@@ -746,7 +872,7 @@ function drawRoute(context) {
   context.strokeStyle = "rgba(250, 203, 107, 0.55)";
   context.stroke();
 
-  const goal = PATH_POINTS[PATH_POINTS.length - 1];
+  const goal = map.pathPoints[map.pathPoints.length - 1];
   context.fillStyle = "#f87171";
   context.beginPath();
   context.arc(goal.x, goal.y, 14, 0, Math.PI * 2);
@@ -754,11 +880,11 @@ function drawRoute(context) {
   context.restore();
 }
 
-function drawBuildableHighlights(context) {
+function drawBuildableHighlights(context, map) {
   context.save();
   context.fillStyle = "rgba(132, 204, 255, 0.09)";
 
-  for (const key of BUILDABLE_CELLS) {
+  for (const key of map.buildableCells) {
     const [column, row] = key.split(":").map(Number);
     const centerX = column * TILE_SIZE + TILE_SIZE / 2;
     const centerY = row * TILE_SIZE + TILE_SIZE / 2;
@@ -780,11 +906,12 @@ function drawHoveredCell(context, game) {
   const occupied = game.towers.some((tower) => tower.column === column && tower.row === row);
 
   context.save();
-  context.strokeStyle = BUILDABLE_CELLS.has(key) && !occupied ? "rgba(110, 231, 249, 0.7)" : "rgba(248, 113, 113, 0.6)";
+  context.strokeStyle =
+    game.map.buildableCells.has(key) && !occupied ? "rgba(110, 231, 249, 0.7)" : "rgba(248, 113, 113, 0.6)";
   context.lineWidth = 3;
   context.strokeRect(x + 3, y + 3, TILE_SIZE - 6, TILE_SIZE - 6);
 
-  if (BUILDABLE_CELLS.has(key) && !occupied) {
+  if (game.map.buildableCells.has(key) && !occupied) {
     const selected = TOWER_TYPES[game.selectedTower];
     const centerX = x + TILE_SIZE / 2;
     const centerY = y + TILE_SIZE / 2;
@@ -832,7 +959,7 @@ function drawEnemies(context, enemies) {
 
     context.save();
     context.translate(enemy.x, enemy.y);
-    context.fillStyle = enemy.flash > 0 ? "#ffffff" : enemy.color;
+    context.fillStyle = enemy.flash > 0 ? "#ffffff" : enemy.isSlowed ? blendHex(enemy.color, "#8ef6e4", 0.42) : enemy.color;
     context.beginPath();
     context.arc(0, 0, enemy.radius, 0, Math.PI * 2);
     context.fill();
@@ -843,8 +970,8 @@ function drawEnemies(context, enemies) {
     context.fillStyle = "#7df59b";
     context.fillRect(-hpWidth / 2, -enemy.radius - 12, hpWidth * Math.max(0, enemy.hp / enemy.maxHp), 5);
 
-    if (enemy.slowTimer > 0) {
-      context.strokeStyle = "rgba(142, 246, 228, 0.8)";
+    if (enemy.isSlowed) {
+      context.strokeStyle = "rgba(142, 246, 228, 0.9)";
       context.lineWidth = 2;
       context.beginPath();
       context.arc(0, 0, enemy.radius + 4, 0, Math.PI * 2);
@@ -880,7 +1007,7 @@ function drawOverlay(context, game) {
 
   if (game.notice) {
     context.fillStyle = "rgba(15, 23, 34, 0.72)";
-    context.fillRect(CANVAS_WIDTH / 2 - 120, 18, 240, 36);
+    context.fillRect(CANVAS_WIDTH / 2 - 140, 18, 280, 36);
     context.fillStyle = "#f8fafc";
     context.font = '600 15px "IBM Plex Mono", monospace';
     context.textAlign = "center";
@@ -900,15 +1027,18 @@ function drawOverlay(context, game) {
   context.font = '700 42px "Fraunces", "Yu Mincho", serif';
 
   const title =
-    game.status === "title" ? "Tower Defense" : game.status === "clear" ? "Clear" : "Game Over";
-  context.fillText(title, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 28);
+    game.status === "title" ? `Stage ${game.stage.number}` : game.status === "clear" ? "Clear" : "Game Over";
+  context.fillText(title, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 42);
 
-  context.font = '500 18px "IBM Plex Mono", monospace';
+  context.font = '700 28px "Fraunces", "Yu Mincho", serif';
+  context.fillText(game.stage.name, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 2);
+
+  context.font = '500 16px "IBM Plex Mono", monospace';
   const subline =
     game.status === "title"
       ? "Enter or Start で開始"
       : "Enter or Restart でやり直し";
-  context.fillText(subline, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 16);
+  context.fillText(subline, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 34);
   context.restore();
 }
 
@@ -931,10 +1061,25 @@ function translatePointer(canvas, clientX, clientY) {
 }
 
 function hexToRgba(hex, alpha) {
+  const { red, green, blue } = parseHex(hex);
+  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+}
+
+function blendHex(leftHex, rightHex, ratio) {
+  const left = parseHex(leftHex);
+  const right = parseHex(rightHex);
+  const red = Math.round(left.red * (1 - ratio) + right.red * ratio);
+  const green = Math.round(left.green * (1 - ratio) + right.green * ratio);
+  const blue = Math.round(left.blue * (1 - ratio) + right.blue * ratio);
+  return `rgb(${red}, ${green}, ${blue})`;
+}
+
+function parseHex(hex) {
   const normalized = hex.replace("#", "");
   const bigint = Number.parseInt(normalized, 16);
-  const red = (bigint >> 16) & 255;
-  const green = (bigint >> 8) & 255;
-  const blue = bigint & 255;
-  return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+  return {
+    red: (bigint >> 16) & 255,
+    green: (bigint >> 8) & 255,
+    blue: bigint & 255
+  };
 }
