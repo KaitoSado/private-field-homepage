@@ -33,6 +33,12 @@ export function NightWalkBoard({ initialSessions }) {
   const [geoStatus, setGeoStatus] = useState("待機中");
   const [realtimeStatus, setRealtimeStatus] = useState("未接続");
   const [latestPoint, setLatestPoint] = useState(null);
+  const mapBounds = useMemo(() => computeBounds(sessions, latestPoint, focusedSessionId), [sessions, latestPoint, focusedSessionId]);
+  const mapMarker = useMemo(
+    () => getPreferredMapPoint(sessions, latestPoint, focusedSessionId, activeSessionId),
+    [sessions, latestPoint, focusedSessionId, activeSessionId]
+  );
+  const mapUrl = useMemo(() => buildMapEmbedUrl(mapBounds, mapMarker), [mapBounds, mapMarker]);
 
   useEffect(() => {
     let mounted = true;
@@ -54,9 +60,10 @@ export function NightWalkBoard({ initialSessions }) {
         setActiveSessionId(selfSession.id);
         setFocusedSessionId(selfSession.id);
         setStatus("進行中の徘徊を復元しました。");
+        requestCurrentLocation({ silent: true });
         beginWatching(selfSession.id);
       } else {
-        setStatus("徘徊を始めると、ここに動きが浮かびます。");
+        requestCurrentLocation({ silent: false });
       }
     }
 
@@ -171,7 +178,45 @@ export function NightWalkBoard({ initialSessions }) {
       navigator.geolocation.clearWatch(watchIdRef.current);
     }
     watchIdRef.current = null;
-    setGeoStatus("待機中");
+    setGeoStatus(latestPoint ? "現在地取得済み" : "待機中");
+  }
+
+  function requestCurrentLocation({ silent = false } = {}) {
+    if (!("geolocation" in navigator)) {
+      setGeoStatus("位置情報API非対応");
+      if (!silent) setStatus("このブラウザでは位置情報を取得できません。");
+      return;
+    }
+
+    setGeoStatus(watchIdRef.current !== null ? "追跡中" : "現在地取得中");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const point = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          timestamp: new Date(position.timestamp).toISOString()
+        };
+
+        setLatestPoint(point);
+        setGeoStatus(watchIdRef.current !== null ? "追跡中" : "現在地取得済み");
+
+        if (!activeSessionId && !silent) {
+          setStatus("現在地を取得しました。徘徊開始でルートを残せます。");
+        }
+      },
+      (error) => {
+        setGeoStatus("位置情報エラー");
+        if (!silent) {
+          setStatus(error.message || "位置情報が許可されていません。");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 10000,
+        timeout: 15000
+      }
+    );
   }
 
   function beginWatching(sessionId) {
@@ -183,6 +228,7 @@ export function NightWalkBoard({ initialSessions }) {
     if (watchIdRef.current !== null) return;
 
     setGeoStatus("追跡中");
+    requestCurrentLocation({ silent: true });
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (position) => {
@@ -392,6 +438,12 @@ export function NightWalkBoard({ initialSessions }) {
     setStatus("徘徊を開始しました。");
     beginWatching(data.id);
 
+    if (latestPoint) {
+      await persistPoint(data.id, latestPoint).catch((persistError) => {
+        setStatus(persistError.message || "開始直後の位置保存に失敗しました。");
+      });
+    }
+
     await channelRef.current?.send({
       type: "broadcast",
       event: "session-status",
@@ -435,8 +487,8 @@ export function NightWalkBoard({ initialSessions }) {
     setSessions((current) => current.filter((item) => item.id !== activeSessionId));
     setStatus("徘徊を終了しました。");
     setActiveSessionId("");
-    setLatestPoint(null);
     lastPersistRef.current = { at: 0, point: null };
+    requestCurrentLocation({ silent: true });
   }
 
   const activeCount = sessions.filter((item) => item.status === "active").length;
@@ -481,6 +533,9 @@ export function NightWalkBoard({ initialSessions }) {
                 <span className="status-pill">{geoStatus}</span>
               </div>
               <div className="hero-actions">
+                <button type="button" className="button button-ghost" onClick={() => requestCurrentLocation()}>
+                  現在地を取得
+                </button>
                 <button type="button" className="button button-secondary" onClick={startSession}>
                   徘徊開始
                 </button>
@@ -490,15 +545,35 @@ export function NightWalkBoard({ initialSessions }) {
               </div>
             </div>
 
-            <canvas
-              ref={canvasRef}
-              width={MAP_WIDTH}
-              height={MAP_HEIGHT}
-              className="night-walk-canvas"
-            />
+            <div className="night-walk-visuals">
+              <div className="night-walk-map-frame">
+                {mapUrl ? (
+                  <iframe
+                    title="深夜徘徊マップ"
+                    src={mapUrl}
+                    className="night-walk-map"
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                ) : (
+                  <div className="night-walk-map-empty">
+                    <strong>地図を表示するには現在地を取得してください。</strong>
+                    <span>位置情報を許可すると、この場に現在地と徘徊の中心が出ます。</span>
+                  </div>
+                )}
+              </div>
+
+              <canvas
+                ref={canvasRef}
+                width={MAP_WIDTH}
+                height={MAP_HEIGHT}
+                className="night-walk-canvas"
+              />
+            </div>
 
             <div className="night-walk-status-row">
               <p className="night-walk-status-text">{status}</p>
+              <p className="night-walk-coordinate">{formatCoordinate(mapMarker)}</p>
               <label className="field night-walk-tag-field">
                 <span>今回のタグ</span>
                 <input
@@ -623,6 +698,10 @@ function drawNightBoard(context, state) {
     const isSelf = item.id === activeSessionId;
     drawSessionPoint(context, item, bounds, sessionColor(item.id, 1), isSelf || isFocused, timestamp);
   }
+
+  if (latestPoint && !activeSessionId) {
+    drawFloatingPoint(context, latestPoint, bounds, timestamp);
+  }
 }
 
 function drawNightGrid(context) {
@@ -684,6 +763,26 @@ function drawSessionPoint(context, session, bounds, color, emphasized, timestamp
   context.stroke();
 }
 
+function drawFloatingPoint(context, point, bounds, timestamp) {
+  const mapped = projectPoint(point, bounds);
+  const pulse = 7 + Math.sin(timestamp / 220) * 2.5;
+
+  context.fillStyle = "rgba(122, 215, 255, 0.95)";
+  context.beginPath();
+  context.arc(mapped.x, mapped.y, pulse, 0, Math.PI * 2);
+  context.fill();
+
+  context.strokeStyle = "rgba(255,255,255,0.28)";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.arc(mapped.x, mapped.y, pulse + 7, 0, Math.PI * 2);
+  context.stroke();
+
+  context.fillStyle = "rgba(235, 242, 255, 0.86)";
+  context.font = '12px "IBM Plex Mono", monospace';
+  context.fillText("CURRENT", mapped.x + 14, mapped.y - 12);
+}
+
 function computeBounds(sessions, latestPoint, focusedSessionId) {
   const points = [];
   for (const session of sessions) {
@@ -738,6 +837,38 @@ function sessionColor(id, alpha = 1) {
   return `hsla(${hash}, 80%, 68%, ${alpha})`;
 }
 
+function getPreferredMapPoint(sessions, latestPoint, focusedSessionId, activeSessionId) {
+  if (latestPoint) return latestPoint;
+
+  const pickOrder = [focusedSessionId, activeSessionId].filter(Boolean);
+  for (const id of pickOrder) {
+    const session = sessions.find((item) => item.id === id);
+    if (session?.current_lat && session?.current_lng) {
+      return { lat: session.current_lat, lng: session.current_lng };
+    }
+    if (session?.points?.length) {
+      const last = session.points[session.points.length - 1];
+      return { lat: last.lat, lng: last.lng };
+    }
+  }
+
+  const fallback = sessions.find((item) => item.current_lat && item.current_lng) || sessions.find((item) => item.points?.length);
+  if (!fallback) return null;
+  if (fallback.current_lat && fallback.current_lng) return { lat: fallback.current_lat, lng: fallback.current_lng };
+  const last = fallback.points[fallback.points.length - 1];
+  return { lat: last.lat, lng: last.lng };
+}
+
+function buildMapEmbedUrl(bounds, marker) {
+  if (!bounds || !marker) return "";
+
+  const bbox = [bounds.minLng, bounds.minLat, bounds.maxLng, bounds.maxLat]
+    .map((value) => Number(value.toFixed(6)))
+    .join("%2C");
+  const markerValue = `${Number(marker.lat.toFixed(6))}%2C${Number(marker.lng.toFixed(6))}`;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${markerValue}`;
+}
+
 function findUserActiveSession(sessions, userId) {
   if (!userId) return null;
   return sessions.find((item) => item.user_id === userId && item.status === "active") || null;
@@ -760,6 +891,11 @@ function formatRelative(value) {
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `${hours}時間前`;
   return `${Math.round(hours / 24)}日前`;
+}
+
+function formatCoordinate(point) {
+  if (!point) return "位置情報未取得";
+  return `${point.lat.toFixed(5)}, ${point.lng.toFixed(5)}`;
 }
 
 function distanceMeters(left, right) {

@@ -3503,12 +3503,48 @@ textarea {
   gap: 16px;
 }
 
+.night-walk-visuals {
+  display: grid;
+  gap: 16px;
+}
+
 .night-walk-topbar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.night-walk-map-frame {
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0d1520;
+  min-height: 280px;
+}
+
+.night-walk-map {
+  display: block;
+  width: 100%;
+  min-height: 280px;
+  border: 0;
+}
+
+.night-walk-map-empty {
+  display: grid;
+  gap: 8px;
+  place-items: center;
+  min-height: 280px;
+  padding: 28px;
+  text-align: center;
+  color: rgba(235, 242, 255, 0.86);
+}
+
+.night-walk-map-empty span {
+  max-width: 34ch;
+  color: rgba(191, 205, 229, 0.74);
+  font-size: 0.94rem;
 }
 
 .night-walk-canvas {
@@ -3530,6 +3566,14 @@ textarea {
   margin: 0;
   color: #5f686d;
   font-size: 0.95rem;
+}
+
+.night-walk-coordinate {
+  margin: 0;
+  color: #7b858c;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
 }
 
 .night-walk-tag-field {
