@@ -70,6 +70,24 @@ const ENEMY_TYPES = {
     reward: 20,
     radius: 18,
     color: "#a78bfa"
+  },
+  splitter: {
+    label: "Splitter",
+    maxHp: 82,
+    speed: 62,
+    reward: 18,
+    radius: 16,
+    color: "#f97316",
+    splitOnDeath: {
+      type: "fast",
+      count: 2,
+      maxHp: 24,
+      speedMultiplier: 1.08,
+      radius: 10,
+      color: "#fde68a",
+      reward: 6,
+      spread: 10
+    }
   }
 };
 
@@ -161,7 +179,8 @@ const STAGE_CONFIGS = {
         { type: "fast", count: 8, spacing: 0.42, delay: 2.2 },
         { type: "tank", count: 3, spacing: 1.1, delay: 5.2 }
       ]
-    ]
+    ],
+    waveEvents: [[], [], [], [], [], []]
   },
   stage2: {
     id: "stage2",
@@ -188,7 +207,8 @@ const STAGE_CONFIGS = {
         { type: "fast", count: 6, spacing: 0.4, delay: 1.4 },
         { type: "tank", count: 4, spacing: 1.04, delay: 3.1 }
       ]
-    ]
+    ],
+    waveEvents: [[], [], [], [], []]
   },
   stage3: {
     id: "stage3",
@@ -214,6 +234,81 @@ const STAGE_CONFIGS = {
         { type: "normal", count: 6, spacing: 0.52 },
         { type: "fast", count: 6, spacing: 0.38, delay: 1.2 },
         { type: "tank", count: 5, spacing: 1.02, delay: 2.8 }
+      ]
+    ],
+    waveEvents: [[], [], [], [], []]
+  },
+  stage4: {
+    id: "stage4",
+    number: 4,
+    name: "Collapse Stage",
+    description: "分裂とラッシュで想定を崩し、再構築を迫るステージ",
+    mapId: "curves",
+    availableTowers: ["archer", "cannon", "ice"],
+    startingGold: 220,
+    playerLife: 14,
+    waves: [
+      [{ type: "normal", count: 10, spacing: 0.62 }],
+      [{ type: "fast", count: 12, spacing: 0.34 }],
+      [
+        { type: "splitter", count: 6, spacing: 0.76 },
+        { type: "normal", count: 4, spacing: 0.56, delay: 0.9 }
+      ],
+      [
+        { type: "splitter", count: 8, spacing: 0.54 },
+        { type: "fast", count: 8, spacing: 0.3, delay: 1.1 }
+      ],
+      [
+        { type: "tank", count: 5, spacing: 1.02 },
+        { type: "splitter", count: 6, spacing: 0.66, delay: 1.2 }
+      ],
+      [
+        { type: "normal", count: 6, spacing: 0.5 },
+        { type: "fast", count: 8, spacing: 0.3, delay: 1 },
+        { type: "splitter", count: 6, spacing: 0.6, delay: 2.1 }
+      ]
+    ],
+    waveEvents: [
+      [],
+      [],
+      [
+        {
+          type: "speedRush",
+          start: 1.5,
+          duration: 3.8,
+          speedMultiplier: 1.28,
+          label: "RUSH!"
+        }
+      ],
+      [
+        {
+          type: "massRush",
+          start: 1.4,
+          duration: 4.2,
+          interval: 0.55,
+          spawnType: "fast",
+          count: 6,
+          label: "MASS RUSH!"
+        }
+      ],
+      [],
+      [
+        {
+          type: "speedRush",
+          start: 1.2,
+          duration: 4.4,
+          speedMultiplier: 1.32,
+          label: "RUSH!"
+        },
+        {
+          type: "massRush",
+          start: 2,
+          duration: 4.6,
+          interval: 0.48,
+          spawnType: "fast",
+          count: 8,
+          label: "SWARM!"
+        }
       ]
     ]
   }
@@ -249,7 +344,8 @@ export function TowerDefenseGame() {
         current.totalWaves === nextHud.totalWaves &&
         current.status === nextHud.status &&
         current.selectedTower === nextHud.selectedTower &&
-        current.stageId === nextHud.stageId
+        current.stageId === nextHud.stageId &&
+        current.activeEventLabel === nextHud.activeEventLabel
           ? current
           : nextHud
       );
@@ -397,7 +493,7 @@ export function TowerDefenseGame() {
           </div>
           <div className="stat-tile">
             <strong>{hud.score}</strong>
-            <span>Score</span>
+            <span>{hud.activeEventLabel || "Score"}</span>
           </div>
         </div>
 
@@ -483,6 +579,8 @@ function createTowerDefenseState(stageId, selectedTowerId) {
     projectiles: [],
     effects: [],
     spawnQueue: [],
+    pendingWaveEvents: [],
+    activeWaveEvents: [],
     currentWave: 0,
     waveTime: 0,
     interWaveTimer: 1.2,
@@ -507,7 +605,8 @@ function buildHud(game) {
     stageId: game.stage.id,
     stageNumber: game.stage.number,
     stageName: game.stage.name,
-    stageDescription: game.stage.description
+    stageDescription: game.stage.description,
+    activeEventLabel: game.activeWaveEvents.map((event) => event.label).join(" / ")
   };
 }
 
@@ -569,6 +668,11 @@ function updateTowerDefense(game, delta) {
 
   if (game.status !== "playing") return;
 
+  if (game.currentWave > 0) {
+    game.waveTime += delta;
+    updateWaveEvents(game, delta);
+  }
+
   if (!game.spawnQueue.length && !game.enemies.length) {
     if (game.currentWave >= game.stage.waves.length) {
       game.status = "clear";
@@ -581,7 +685,7 @@ function updateTowerDefense(game, delta) {
       startNextWave(game);
     }
   } else {
-    updateSpawnQueue(game, delta);
+    updateSpawnQueue(game);
   }
 
   updateTowers(game, delta);
@@ -599,8 +703,11 @@ function updateTowerDefense(game, delta) {
 }
 
 function startNextWave(game) {
-  const waveDefinition = game.stage.waves[game.currentWave];
+  const waveIndex = game.currentWave;
+  const waveDefinition = game.stage.waves[waveIndex];
   game.spawnQueue = buildSpawnQueue(waveDefinition);
+  game.pendingWaveEvents = buildWaveEvents(game.stage.waveEvents?.[waveIndex] || []);
+  game.activeWaveEvents = [];
   game.waveTime = 0;
   game.currentWave += 1;
   game.interWaveTimer = 2.1;
@@ -622,37 +729,80 @@ function buildSpawnQueue(groups) {
   return events.sort((left, right) => left.time - right.time);
 }
 
-function updateSpawnQueue(game, delta) {
-  game.waveTime += delta;
+function buildWaveEvents(events) {
+  return events.map((event, index) => ({
+    id: `${event.type}-${index}`,
+    ...event,
+    activated: false,
+    ended: false,
+    endTime: (event.start || 0) + (event.duration || 0),
+    nextSpawnTime: event.start || 0,
+    remainingSpawns: event.count || 0
+  }));
+}
 
+function updateSpawnQueue(game) {
   while (game.spawnQueue.length && game.spawnQueue[0].time <= game.waveTime) {
     const next = game.spawnQueue.shift();
     game.enemies.push(createEnemy(game, next.type));
   }
 }
 
-function createEnemy(game, type) {
-  const config = ENEMY_TYPES[type];
-  const start = game.map.pathPoints[0];
+function updateWaveEvents(game) {
+  for (const event of game.pendingWaveEvents) {
+    if (!event.activated && game.waveTime >= event.start) {
+      event.activated = true;
+      game.activeWaveEvents.push(event);
+      game.notice = { text: event.label, ttl: 1 };
+    }
+
+    if (!event.activated || event.ended) continue;
+
+    if (event.type === "massRush") {
+      while (event.remainingSpawns > 0 && game.waveTime >= event.nextSpawnTime) {
+        game.enemies.push(createEnemy(game, event.spawnType));
+        event.remainingSpawns -= 1;
+        event.nextSpawnTime += event.interval;
+      }
+    }
+
+    if (game.waveTime >= event.endTime || (event.type === "massRush" && event.remainingSpawns <= 0)) {
+      event.ended = true;
+    }
+  }
+
+  game.activeWaveEvents = game.activeWaveEvents.filter((event) => !event.ended);
+}
+
+function createEnemy(game, type, overrides = {}) {
+  const base = ENEMY_TYPES[type];
+  const config = {
+    ...base,
+    ...overrides
+  };
+  const routeIndex = overrides.routeIndex ?? 0;
+  const startPoint = game.map.pathPoints[Math.min(routeIndex, game.map.pathPoints.length - 1)];
 
   return {
     id: game.enemyId++,
     type,
-    x: start.x,
-    y: start.y,
+    x: overrides.x ?? startPoint.x,
+    y: overrides.y ?? startPoint.y,
     hp: config.maxHp,
     maxHp: config.maxHp,
     speed: config.speed,
     reward: config.reward,
     radius: config.radius,
     color: config.color,
-    routeIndex: 0,
-    progress: 0,
+    routeIndex,
+    progress: overrides.progress ?? routeIndex,
     alive: true,
     isSlowed: false,
     slowMultiplier: 1,
     slowEndTime: 0,
-    flash: 0
+    flash: 0,
+    splitOnDeath: config.splitOnDeath || null,
+    spawnSource: overrides.spawnSource || null
   };
 }
 
@@ -679,6 +829,8 @@ function createTower(column, row, type) {
 }
 
 function updateEnemies(game, delta) {
+  const rushMultiplier = getActiveSpeedRushMultiplier(game);
+
   for (const enemy of game.enemies) {
     if (!enemy.alive) continue;
 
@@ -689,7 +841,7 @@ function updateEnemies(game, delta) {
       enemy.slowEndTime = 0;
     }
 
-    let remaining = enemy.speed * (enemy.isSlowed ? enemy.slowMultiplier : 1) * delta;
+    let remaining = enemy.speed * rushMultiplier * (enemy.isSlowed ? enemy.slowMultiplier : 1) * delta;
 
     while (remaining > 0 && enemy.routeIndex < game.map.pathPoints.length - 1) {
       const target = game.map.pathPoints[enemy.routeIndex + 1];
@@ -722,6 +874,13 @@ function updateEnemies(game, delta) {
     const segmentTravel = Math.hypot(enemy.x - segmentStart.x, enemy.y - segmentStart.y);
     enemy.progress = enemy.routeIndex + segmentTravel / segmentLength;
   }
+}
+
+function getActiveSpeedRushMultiplier(game) {
+  return game.activeWaveEvents.reduce((multiplier, event) => {
+    if (event.type !== "speedRush") return multiplier;
+    return multiplier * (event.speedMultiplier || 1);
+  }, 1);
 }
 
 function updateTowers(game, delta) {
@@ -834,11 +993,40 @@ function applyHit(game, enemy, damage) {
   enemy.flash = 0.1;
 
   if (enemy.hp <= 0 && enemy.alive) {
-    enemy.alive = false;
-    game.score += enemy.reward * 10;
-    game.cost += enemy.reward;
-    game.effects.push(createEffect(game, enemy.x, enemy.y, enemy.color, 30));
+    handleEnemyDeath(game, enemy);
   }
+}
+
+function handleEnemyDeath(game, enemy) {
+  enemy.alive = false;
+  game.score += enemy.reward * 10;
+  game.cost += enemy.reward;
+  game.effects.push(createEffect(game, enemy.x, enemy.y, enemy.color, 30));
+
+  if (!enemy.splitOnDeath) return;
+
+  const child = enemy.splitOnDeath;
+
+  for (let index = 0; index < child.count; index += 1) {
+    const offsetX = (index === 0 ? -1 : 1) * (child.spread || 8);
+    const offsetY = index === 0 ? -4 : 4;
+    game.enemies.push(
+      createEnemy(game, child.type, {
+        x: enemy.x + offsetX,
+        y: enemy.y + offsetY,
+        routeIndex: enemy.routeIndex,
+        progress: enemy.progress,
+        maxHp: child.maxHp,
+        speed: ENEMY_TYPES[child.type].speed * (child.speedMultiplier || 1),
+        reward: child.reward,
+        radius: child.radius,
+        color: child.color,
+        spawnSource: "split"
+      })
+    );
+  }
+
+  game.notice = { text: "SPLIT!", ttl: 0.9 };
 }
 
 function createEffect(game, x, y, color, maxRadius) {
@@ -952,7 +1140,7 @@ function drawBuildableHighlights(context, game) {
     const centerY = row * TILE_SIZE + TILE_SIZE / 2;
     const coverage = getCoverageCount(game.map, centerX, centerY, range);
     maxCoverage = Math.max(maxCoverage, coverage);
-    coverages.push({ key, column, row, coverage });
+    coverages.push({ column, row, coverage });
   }
 
   context.save();
@@ -961,16 +1149,16 @@ function drawBuildableHighlights(context, game) {
     const centerX = cell.column * TILE_SIZE + TILE_SIZE / 2;
     const centerY = cell.row * TILE_SIZE + TILE_SIZE / 2;
     const ratio = cell.coverage / maxCoverage;
-    const isStageThree = game.stage.id === "stage3";
-    const radius = isStageThree ? 5 + ratio * 8 : 6;
-    const alpha = isStageThree ? 0.08 + ratio * 0.18 : 0.09;
+    const emphasize = game.stage.id === "stage3" || game.stage.id === "stage4";
+    const radius = emphasize ? 5 + ratio * 8 : 6;
+    const alpha = emphasize ? 0.08 + ratio * 0.18 : 0.09;
 
     context.fillStyle = `rgba(132, 204, 255, ${alpha})`;
     context.beginPath();
     context.arc(centerX, centerY, radius, 0, Math.PI * 2);
     context.fill();
 
-    if (isStageThree && ratio >= 0.72) {
+    if (emphasize && ratio >= 0.72) {
       context.strokeStyle = "rgba(247, 178, 103, 0.34)";
       context.lineWidth = 1.5;
       context.beginPath();
@@ -1075,6 +1263,25 @@ function drawEnemies(context, enemies) {
     context.arc(0, 0, enemy.radius, 0, Math.PI * 2);
     context.fill();
 
+    if (enemy.type === "splitter") {
+      context.strokeStyle = "rgba(255, 237, 213, 0.9)";
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(0, 0, enemy.radius + 3, 0, Math.PI * 2);
+      context.stroke();
+      context.beginPath();
+      context.moveTo(-6, 0);
+      context.lineTo(6, 0);
+      context.stroke();
+    }
+
+    if (enemy.spawnSource === "split") {
+      context.fillStyle = "rgba(255,255,255,0.88)";
+      context.beginPath();
+      context.arc(0, 0, 3, 0, Math.PI * 2);
+      context.fill();
+    }
+
     const hpWidth = enemy.radius * 2;
     context.fillStyle = "rgba(15, 23, 34, 0.8)";
     context.fillRect(-hpWidth / 2, -enemy.radius - 12, hpWidth, 5);
@@ -1123,6 +1330,21 @@ function drawOverlay(context, game) {
     context.font = '600 15px "IBM Plex Mono", monospace';
     context.textAlign = "center";
     context.fillText(game.notice.text, CANVAS_WIDTH / 2, 41);
+  }
+
+  if (game.activeWaveEvents.length) {
+    let x = CANVAS_WIDTH - 24;
+    for (const event of [...game.activeWaveEvents].reverse()) {
+      const width = event.label.length * 10 + 26;
+      x -= width;
+      context.fillStyle = "rgba(248, 113, 113, 0.88)";
+      context.fillRect(x, 18, width, 28);
+      context.fillStyle = "#fff8ef";
+      context.font = '700 13px "IBM Plex Mono", monospace';
+      context.textAlign = "center";
+      context.fillText(event.label, x + width / 2, 37);
+      x -= 10;
+    }
   }
 
   if (game.status === "playing") {
