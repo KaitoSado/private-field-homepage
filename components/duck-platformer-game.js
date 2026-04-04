@@ -4,7 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 const CANVAS_WIDTH = 900;
 const CANVAS_HEIGHT = 520;
-const WORLD_WIDTH = 1700;
+
+const PLAYER_SIZE = {
+  width: 50,
+  height: 38
+};
 
 const PHYSICS = {
   gravity: 1900,
@@ -24,44 +28,164 @@ const PHYSICS = {
   maxWaterFallSpeed: 220
 };
 
-const PLAYER = {
-  width: 50,
-  height: 38
+const ENEMY_TYPES = {
+  walker: {
+    label: "Walker",
+    width: 34,
+    height: 28,
+    color: "#d36757",
+    speed: 84,
+    stompable: true,
+    kind: "ground"
+  },
+  flyer: {
+    label: "Flyer",
+    width: 36,
+    height: 26,
+    color: "#8267df",
+    speed: 120,
+    stompable: false,
+    kind: "fly"
+  },
+  skimmer: {
+    label: "Skimmer",
+    width: 38,
+    height: 22,
+    color: "#4fa2d4",
+    speed: 92,
+    stompable: false,
+    kind: "water"
+  },
+  hopper: {
+    label: "Hopper",
+    width: 34,
+    height: 30,
+    color: "#53a86b",
+    speed: 72,
+    jumpVelocity: 420,
+    jumpInterval: 1.4,
+    stompable: true,
+    kind: "ground"
+  },
+  charger: {
+    label: "Charger",
+    width: 44,
+    height: 28,
+    color: "#874d44",
+    speed: 56,
+    dashSpeed: 260,
+    dashDuration: 0.48,
+    aggroRange: 160,
+    dashCooldown: 1.35,
+    stompable: true,
+    kind: "ground"
+  }
 };
 
-const START_POINT = {
-  x: 96,
-  y: 352
+const STAGE_CONFIGS = {
+  stage1: {
+    id: "stage1",
+    label: "Stage 1",
+    name: "Pond Lesson",
+    worldWidth: 1700,
+    fallLimit: 760,
+    start: { x: 96, y: 352 },
+    goal: { x: 1568, y: 272, width: 52, height: 128 },
+    checkpoints: [],
+    waters: [{ x: 690, y: 312, width: 360, height: 208 }],
+    solids: [
+      { x: 0, y: 400, width: 670, height: 120, type: "ground" },
+      { x: 670, y: 430, width: 420, height: 90, type: "ground" },
+      { x: 1090, y: 400, width: 610, height: 120, type: "ground" },
+      { x: 768, y: 282, width: 132, height: 18, type: "platform" },
+      { x: 980, y: 336, width: 118, height: 18, type: "platform" },
+      { x: 1208, y: 300, width: 150, height: 18, type: "platform" }
+    ],
+    enemies: [
+      { type: "skimmer", x: 812, y: 320, patrolLeft: 740, patrolRight: 1008 },
+      { type: "walker", x: 1260, y: 372, patrolLeft: 1160, patrolRight: 1500 }
+    ]
+  },
+  stage2: {
+    id: "stage2",
+    label: "Stage 2",
+    name: "Three Route Marsh",
+    worldWidth: 5200,
+    fallLimit: 820,
+    start: { x: 92, y: 352 },
+    goal: { x: 5070, y: 252, width: 54, height: 148 },
+    checkpoints: [
+      {
+        x: 3048,
+        y: 182,
+        respawn: { x: 2990, y: 194 },
+        label: "MID"
+      }
+    ],
+    waters: [
+      { x: 660, y: 324, width: 300, height: 196 },
+      { x: 1840, y: 330, width: 380, height: 190 },
+      { x: 2880, y: 334, width: 320, height: 186 },
+      { x: 3720, y: 338, width: 380, height: 182 }
+    ],
+    solids: [
+      { x: 0, y: 400, width: 620, height: 120, type: "ground" },
+      { x: 620, y: 430, width: 360, height: 90, type: "ground" },
+      { x: 980, y: 400, width: 460, height: 120, type: "ground" },
+      { x: 1490, y: 400, width: 330, height: 120, type: "ground" },
+      { x: 1820, y: 438, width: 460, height: 82, type: "ground" },
+      { x: 2280, y: 400, width: 520, height: 120, type: "ground" },
+      { x: 2860, y: 442, width: 380, height: 78, type: "ground" },
+      { x: 3240, y: 400, width: 400, height: 120, type: "ground" },
+      { x: 3700, y: 448, width: 440, height: 72, type: "ground" },
+      { x: 4140, y: 400, width: 1060, height: 120, type: "ground" },
+      { x: 760, y: 312, width: 120, height: 18, type: "platform" },
+      { x: 930, y: 262, width: 120, height: 18, type: "platform" },
+      { x: 1110, y: 298, width: 130, height: 18, type: "platform" },
+      { x: 1320, y: 244, width: 120, height: 18, type: "platform" },
+      { x: 1690, y: 304, width: 120, height: 18, type: "platform" },
+      { x: 1960, y: 254, width: 120, height: 18, type: "platform" },
+      { x: 2140, y: 206, width: 120, height: 18, type: "platform" },
+      { x: 2460, y: 330, width: 120, height: 18, type: "platform" },
+      { x: 2670, y: 280, width: 120, height: 18, type: "platform" },
+      { x: 2940, y: 232, width: 130, height: 18, type: "platform" },
+      { x: 3170, y: 272, width: 120, height: 18, type: "platform" },
+      { x: 3460, y: 216, width: 130, height: 18, type: "platform" },
+      { x: 3840, y: 306, width: 120, height: 18, type: "platform" },
+      { x: 4020, y: 252, width: 120, height: 18, type: "platform" },
+      { x: 4240, y: 220, width: 140, height: 18, type: "platform" },
+      { x: 4470, y: 268, width: 120, height: 18, type: "platform" },
+      { x: 4680, y: 214, width: 120, height: 18, type: "platform" },
+      { x: 4900, y: 250, width: 110, height: 18, type: "platform" }
+    ],
+    enemies: [
+      { type: "walker", x: 540, y: 372, patrolLeft: 360, patrolRight: 610 },
+      { type: "skimmer", x: 806, y: 332, patrolLeft: 714, patrolRight: 928 },
+      { type: "flyer", x: 1180, y: 222, patrolLeft: 1070, patrolRight: 1380, floatAmplitude: 18 },
+      { type: "hopper", x: 1328, y: 370, patrolLeft: 1180, patrolRight: 1420 },
+      { type: "walker", x: 1600, y: 372, patrolLeft: 1510, patrolRight: 1760 },
+      { type: "skimmer", x: 2020, y: 338, patrolLeft: 1890, patrolRight: 2180 },
+      { type: "flyer", x: 2088, y: 164, patrolLeft: 1940, patrolRight: 2200, floatAmplitude: 14 },
+      { type: "charger", x: 2510, y: 372, patrolLeft: 2360, patrolRight: 2760 },
+      { type: "skimmer", x: 3000, y: 342, patrolLeft: 2910, patrolRight: 3170 },
+      { type: "hopper", x: 3340, y: 372, patrolLeft: 3260, patrolRight: 3600 },
+      { type: "flyer", x: 3490, y: 180, patrolLeft: 3380, patrolRight: 3590, floatAmplitude: 20 },
+      { type: "skimmer", x: 3920, y: 346, patrolLeft: 3760, patrolRight: 4060 },
+      { type: "charger", x: 4410, y: 372, patrolLeft: 4280, patrolRight: 4640 },
+      { type: "hopper", x: 4572, y: 238, patrolLeft: 4470, patrolRight: 4592 },
+      { type: "flyer", x: 4740, y: 172, patrolLeft: 4630, patrolRight: 4930, floatAmplitude: 16 },
+      { type: "walker", x: 4870, y: 372, patrolLeft: 4780, patrolRight: 5030 }
+    ]
+  }
 };
 
-const WATER = {
-  x: 690,
-  y: 312,
-  width: 360,
-  height: 208
-};
-
-const GOAL = {
-  x: 1568,
-  y: 272,
-  width: 52,
-  height: 128
-};
-
-const SOLIDS = [
-  { x: 0, y: 400, width: 670, height: 120, type: "ground" },
-  { x: 670, y: 430, width: 420, height: 90, type: "ground" },
-  { x: 1090, y: 400, width: 610, height: 120, type: "ground" },
-  { x: 768, y: 282, width: 132, height: 18, type: "platform" },
-  { x: 980, y: 336, width: 118, height: 18, type: "platform" },
-  { x: 1208, y: 300, width: 150, height: 18, type: "platform" }
-];
+const STAGE_IDS = Object.keys(STAGE_CONFIGS);
 
 export function DuckPlatformerGame() {
   const canvasRef = useRef(null);
   const animationRef = useRef(0);
   const lastFrameRef = useRef(0);
-  const gameRef = useRef(createGameState());
+  const gameRef = useRef(createGameState("stage1"));
   const inputRef = useRef({
     left: false,
     right: false,
@@ -80,7 +204,10 @@ export function DuckPlatformerGame() {
       setHud((current) =>
         current.status === nextHud.status &&
         current.mode === nextHud.mode &&
-        current.resets === nextHud.resets
+        current.deaths === nextHud.deaths &&
+        current.hp === nextHud.hp &&
+        current.stageId === nextHud.stageId &&
+        current.checkpointLabel === nextHud.checkpointLabel
           ? current
           : nextHud
       );
@@ -117,9 +244,10 @@ export function DuckPlatformerGame() {
       }
 
       if (event.key === "Enter") {
-        if (gameRef.current.status === "start" || gameRef.current.status === "clear") {
-          gameRef.current = createGameState();
+        if (gameRef.current.status === "ready") {
           gameRef.current.status = "playing";
+        } else if (gameRef.current.status === "clear") {
+          gameRef.current = createGameState(gameRef.current.stageId, true);
         }
         event.preventDefault();
       }
@@ -149,34 +277,59 @@ export function DuckPlatformerGame() {
     };
   }, []);
 
+  function selectStage(stageId) {
+    gameRef.current = createGameState(stageId);
+    setHud(buildHud(gameRef.current));
+  }
+
   return (
     <div className="arcade-panel-grid">
       <div className="surface arcade-game-card arcade-platformer-card">
         <div className="section-copy">
           <h2>Duck Run</h2>
           <p>
-            {hud.status === "start" ? "Enterでスタート" : null}
-            {hud.status === "playing" ? "← → / A D で移動、Space でジャンプ。空中で長押しすると羽ばたいてゆっくり落下。" : null}
-            {hud.status === "clear" ? "クリア。Enterで再開" : null}
+            {hud.status === "ready" ? `${hud.stageName} を選択中。Enterで開始` : null}
+            {hud.status === "playing"
+              ? "← → / A D で移動、Spaceでジャンプ。空中長押しで羽ばたき、水中では浮力を使って進む。"
+              : null}
+            {hud.status === "clear" ? `${hud.stageName} クリア。Enterで再開` : null}
           </p>
+        </div>
+
+        <div className="arcade-platformer-stage-row">
+          {STAGE_IDS.map((stageId) => {
+            const stage = STAGE_CONFIGS[stageId];
+            const isActive = hud.stageId === stageId;
+            return (
+              <button
+                key={stageId}
+                type="button"
+                className={`arcade-platformer-stage-button ${isActive ? "is-active" : ""}`}
+                onClick={() => selectStage(stageId)}
+              >
+                <strong>{stage.label}</strong>
+                <span>{stage.name}</span>
+              </button>
+            );
+          })}
         </div>
 
         <div className="arcade-breakout-hud">
           <div className="stat-tile">
-            <strong>{hud.mode}</strong>
-            <span>Mode</span>
-          </div>
-          <div className="stat-tile">
-            <strong>{hud.resets}</strong>
-            <span>Resets</span>
-          </div>
-          <div className="stat-tile">
-            <strong>{hud.status === "clear" ? "GOAL" : "RUN"}</strong>
-            <span>State</span>
-          </div>
-          <div className="stat-tile">
-            <strong>池あり</strong>
+            <strong>{hud.stageLabel}</strong>
             <span>Stage</span>
+          </div>
+          <div className="stat-tile">
+            <strong>{"♥".repeat(hud.hp)}</strong>
+            <span>HP</span>
+          </div>
+          <div className="stat-tile">
+            <strong>{hud.checkpointLabel}</strong>
+            <span>Checkpoint</span>
+          </div>
+          <div className="stat-tile">
+            <strong>{hud.deaths}</strong>
+            <span>Falls / Deaths</span>
           </div>
         </div>
 
@@ -196,15 +349,30 @@ export function DuckPlatformerGame() {
           </div>
           <div className="stat-tile">
             <strong>空中</strong>
-            <span>Space長押しで羽ばたき</span>
+            <span>羽ばたきでゆっくり落下</span>
           </div>
           <div className="stat-tile">
             <strong>水中</strong>
             <span>遅いが自然に浮く</span>
           </div>
           <div className="stat-tile">
-            <strong>Goal</strong>
-            <span>右端の旗へ</span>
+            <strong>中間</strong>
+            <span>Stage 2 で途中復帰</span>
+          </div>
+        </div>
+
+        <div className="arcade-platformer-legend">
+          <div>
+            <span className="arcade-platformer-swatch is-stompable" />
+            <span>踏める敵: Walker / Hopper / Charger</span>
+          </div>
+          <div>
+            <span className="arcade-platformer-swatch is-air" />
+            <span>空敵: Flyer</span>
+          </div>
+          <div>
+            <span className="arcade-platformer-swatch is-water" />
+            <span>水面敵: Skimmer</span>
           </div>
         </div>
       </div>
@@ -212,48 +380,104 @@ export function DuckPlatformerGame() {
   );
 }
 
-function createGameState() {
-  const player = createPlayer();
+function createGameState(stageId, autoStart = false) {
+  const stage = STAGE_CONFIGS[stageId];
   return {
-    status: "start",
-    resets: 0,
-    player,
-    cameraX: 0
+    status: autoStart ? "playing" : "ready",
+    stageId,
+    stage,
+    time: 0,
+    deaths: 0,
+    hp: 3,
+    maxHp: 3,
+    cameraX: 0,
+    activeCheckpointIndex: -1,
+    player: createPlayer(stage.start),
+    enemies: createEnemies(stage.enemies)
   };
 }
 
-function createPlayer() {
+function createPlayer(spawn) {
   return {
-    x: START_POINT.x,
-    y: START_POINT.y,
-    width: PLAYER.width,
-    height: PLAYER.height,
+    x: spawn.x,
+    y: spawn.y,
+    width: PLAYER_SIZE.width,
+    height: PLAYER_SIZE.height,
     vx: 0,
     vy: 0,
+    prevX: spawn.x,
+    prevY: spawn.y,
     onGround: false,
     inWater: false,
-    facing: 1
+    currentWater: null,
+    facing: 1,
+    invincibleUntil: 0
   };
+}
+
+function createEnemies(specs) {
+  return specs.map((spec, index) => {
+    const stats = ENEMY_TYPES[spec.type];
+    return {
+      id: `${spec.type}-${index}`,
+      type: spec.type,
+      x: spec.x,
+      y: spec.y,
+      width: stats.width,
+      height: stats.height,
+      vx: 0,
+      vy: 0,
+      dir: spec.dir ?? 1,
+      alive: true,
+      patrolLeft: spec.patrolLeft ?? spec.x - 80,
+      patrolRight: spec.patrolRight ?? spec.x + 80,
+      baseX: spec.x,
+      baseY: spec.y,
+      floatAmplitude: spec.floatAmplitude ?? 10,
+      phase: spec.phase ?? index * 0.9,
+      jumpTimer: spec.jumpTimer ?? stats.jumpInterval ?? 1,
+      dashTime: 0,
+      dashCooldown: 0,
+      onGround: false
+    };
+  });
 }
 
 function buildHud(game) {
-  const { player } = game;
+  const { player, stage } = game;
   let mode = "Ground";
   if (!player.onGround && !player.inWater) mode = "Air";
   if (player.inWater) mode = "Water";
 
+  const checkpoint = game.activeCheckpointIndex >= 0 ? stage.checkpoints[game.activeCheckpointIndex] : null;
+
   return {
     status: game.status,
-    resets: game.resets,
-    mode
+    mode,
+    deaths: game.deaths,
+    hp: game.hp,
+    stageId: game.stageId,
+    stageLabel: stage.label,
+    stageName: stage.name,
+    checkpointLabel: checkpoint?.label ?? "START"
   };
 }
 
 function updateGame(game, input, delta) {
-  if (game.status !== "playing") return;
+  if (game.status !== "playing") {
+    input.jumpPressed = false;
+    return;
+  }
 
-  const { player } = game;
-  player.inWater = intersects(player, WATER);
+  const { stage, player } = game;
+  game.time += delta;
+
+  updateCheckpoints(game);
+
+  player.prevX = player.x;
+  player.prevY = player.y;
+  player.currentWater = getIntersectingWater(player, stage.waters);
+  player.inWater = Boolean(player.currentWater);
 
   if (input.jumpPressed) {
     if (player.onGround) {
@@ -266,19 +490,34 @@ function updateGame(game, input, delta) {
 
   applyHorizontalMovement(player, input, delta);
   applyVerticalForces(player, input, delta);
-  movePlayer(player, delta);
+  movePlayer(player, stage, delta);
 
-  player.inWater = intersects(player, WATER);
-  if (player.x + player.width >= GOAL.x && player.x <= GOAL.x + GOAL.width && player.y + player.height >= GOAL.y) {
+  player.currentWater = getIntersectingWater(player, stage.waters);
+  player.inWater = Boolean(player.currentWater);
+
+  updateEnemies(game, delta);
+  resolveEnemyCollisions(game);
+
+  if (touchesGoal(player, stage.goal)) {
     game.status = "clear";
   }
 
-  if (player.y > CANVAS_HEIGHT + 160) {
-    resetPlayer(game);
+  if (player.y > stage.fallLimit) {
+    respawnFromCheckpoint(game);
   }
 
-  game.cameraX = clamp(player.x - CANVAS_WIDTH * 0.34, 0, WORLD_WIDTH - CANVAS_WIDTH);
+  game.cameraX = clamp(player.x - CANVAS_WIDTH * 0.36, 0, stage.worldWidth - CANVAS_WIDTH);
   input.jumpPressed = false;
+}
+
+function updateCheckpoints(game) {
+  const playerCenter = game.player.x + game.player.width * 0.5;
+  for (let index = 0; index < game.stage.checkpoints.length; index += 1) {
+    const checkpoint = game.stage.checkpoints[index];
+    if (playerCenter >= checkpoint.x && index > game.activeCheckpointIndex) {
+      game.activeCheckpointIndex = index;
+    }
+  }
 }
 
 function applyHorizontalMovement(player, input, delta) {
@@ -302,10 +541,10 @@ function applyHorizontalMovement(player, input, delta) {
 }
 
 function applyVerticalForces(player, input, delta) {
-  if (player.inWater) {
-    const waterSurface = WATER.y + 12;
+  if (player.inWater && player.currentWater) {
+    const waterSurface = player.currentWater.y + 12;
     const bodyCenter = player.y + player.height * 0.55;
-    const submerge = clamp((bodyCenter - waterSurface) / (WATER.height - 12), 0, 1);
+    const submerge = clamp((bodyCenter - waterSurface) / (player.currentWater.height - 12), 0, 1);
 
     player.vy += PHYSICS.gravity * PHYSICS.waterGravityScale * delta;
     player.vy -= PHYSICS.waterBuoyancy * submerge * delta;
@@ -319,109 +558,280 @@ function applyVerticalForces(player, input, delta) {
   player.vy = Math.min(player.vy, PHYSICS.maxFallSpeed);
 }
 
-function movePlayer(player, delta) {
+function movePlayer(player, stage, delta) {
   player.x += player.vx * delta;
-  resolveHorizontal(player);
-  player.x = clamp(player.x, 0, WORLD_WIDTH - player.width);
+  resolveHorizontal(player, stage.solids);
+  player.x = clamp(player.x, 0, stage.worldWidth - player.width);
 
   player.y += player.vy * delta;
   player.onGround = false;
-  resolveVertical(player);
+  resolveVertical(player, stage.solids);
 }
 
-function resolveHorizontal(player) {
-  for (const solid of SOLIDS) {
-    if (!intersects(player, solid)) continue;
-    if (player.vx > 0) {
-      player.x = solid.x - player.width;
-    } else if (player.vx < 0) {
-      player.x = solid.x + solid.width;
+function resolveHorizontal(entity, solids) {
+  for (const solid of solids) {
+    if (!intersects(entity, solid)) continue;
+    if (entity.vx > 0) {
+      entity.x = solid.x - entity.width;
+    } else if (entity.vx < 0) {
+      entity.x = solid.x + solid.width;
     }
-    player.vx = 0;
+    entity.vx = 0;
   }
 }
 
-function resolveVertical(player) {
-  for (const solid of SOLIDS) {
-    if (!intersects(player, solid)) continue;
-    if (player.vy > 0) {
-      player.y = solid.y - player.height;
-      player.vy = 0;
-      player.onGround = true;
-    } else if (player.vy < 0) {
-      player.y = solid.y + solid.height;
-      player.vy = 0;
+function resolveVertical(entity, solids) {
+  for (const solid of solids) {
+    if (!intersects(entity, solid)) continue;
+    if (entity.vy > 0) {
+      entity.y = solid.y - entity.height;
+      entity.vy = 0;
+      entity.onGround = true;
+    } else if (entity.vy < 0) {
+      entity.y = solid.y + solid.height;
+      entity.vy = 0;
     }
   }
 }
 
-function resetPlayer(game) {
-  game.player = createPlayer();
-  game.resets += 1;
-  game.cameraX = 0;
+function updateEnemies(game, delta) {
+  const { stage, player } = game;
+  for (const enemy of game.enemies) {
+    if (!enemy.alive) continue;
+    const stats = ENEMY_TYPES[enemy.type];
+    if (stats.kind === "fly") {
+      updateFlyerEnemy(enemy, stats, delta);
+      continue;
+    }
+    if (stats.kind === "water") {
+      updateWaterEnemy(enemy, stats, delta);
+      continue;
+    }
+    updateGroundEnemy(enemy, stats, player, stage.solids, delta);
+  }
+}
+
+function updateFlyerEnemy(enemy, stats, delta) {
+  enemy.phase += delta * 3.2;
+  enemy.x += enemy.dir * stats.speed * delta;
+  if (enemy.x < enemy.patrolLeft) {
+    enemy.x = enemy.patrolLeft;
+    enemy.dir = 1;
+  } else if (enemy.x + enemy.width > enemy.patrolRight) {
+    enemy.x = enemy.patrolRight - enemy.width;
+    enemy.dir = -1;
+  }
+  enemy.y = enemy.baseY + Math.sin(enemy.phase) * enemy.floatAmplitude;
+}
+
+function updateWaterEnemy(enemy, stats, delta) {
+  enemy.phase += delta * 2.4;
+  enemy.x += enemy.dir * stats.speed * delta;
+  if (enemy.x < enemy.patrolLeft) {
+    enemy.x = enemy.patrolLeft;
+    enemy.dir = 1;
+  } else if (enemy.x + enemy.width > enemy.patrolRight) {
+    enemy.x = enemy.patrolRight - enemy.width;
+    enemy.dir = -1;
+  }
+  enemy.y = enemy.baseY + Math.sin(enemy.phase) * 8;
+}
+
+function updateGroundEnemy(enemy, stats, player, solids, delta) {
+  enemy.prevX = enemy.x;
+  enemy.prevY = enemy.y;
+
+  if (enemy.type === "hopper") {
+    enemy.jumpTimer -= delta;
+    if (enemy.onGround && enemy.jumpTimer <= 0) {
+      enemy.vy = -stats.jumpVelocity;
+      enemy.jumpTimer = stats.jumpInterval;
+    }
+  }
+
+  if (enemy.type === "charger") {
+    enemy.dashCooldown = Math.max(0, enemy.dashCooldown - delta);
+    if (enemy.dashTime > 0) {
+      enemy.dashTime -= delta;
+    } else if (
+      enemy.dashCooldown <= 0 &&
+      Math.abs(centerX(player) - centerX(enemy)) < stats.aggroRange &&
+      Math.abs(player.y - enemy.y) < 86
+    ) {
+      enemy.dir = centerX(player) >= centerX(enemy) ? 1 : -1;
+      enemy.dashTime = stats.dashDuration;
+      enemy.dashCooldown = stats.dashCooldown;
+    }
+  }
+
+  const moveSpeed = enemy.type === "charger" && enemy.dashTime > 0 ? stats.dashSpeed : stats.speed;
+  enemy.vx = moveSpeed * enemy.dir;
+  enemy.vy = Math.min(enemy.vy + PHYSICS.gravity * 0.9 * delta, 900);
+
+  enemy.x += enemy.vx * delta;
+  const collidedSide = resolveEnemyHorizontal(enemy, solids);
+
+  enemy.y += enemy.vy * delta;
+  enemy.onGround = false;
+  resolveVertical(enemy, solids);
+
+  const exceededPatrol = enemy.x < enemy.patrolLeft || enemy.x + enemy.width > enemy.patrolRight;
+  const missingGround = enemy.onGround && !hasGroundAhead(enemy, solids);
+
+  if (collidedSide || exceededPatrol || missingGround) {
+    enemy.dir *= -1;
+    enemy.x = clamp(enemy.x, enemy.patrolLeft, enemy.patrolRight - enemy.width);
+  }
+}
+
+function resolveEnemyHorizontal(enemy, solids) {
+  let collided = false;
+  for (const solid of solids) {
+    if (!intersects(enemy, solid)) continue;
+    if (enemy.vx > 0) {
+      enemy.x = solid.x - enemy.width;
+      collided = true;
+    } else if (enemy.vx < 0) {
+      enemy.x = solid.x + solid.width;
+      collided = true;
+    }
+  }
+  return collided;
+}
+
+function hasGroundAhead(enemy, solids) {
+  const probeX = enemy.dir > 0 ? enemy.x + enemy.width + 4 : enemy.x - 4;
+  const probeY = enemy.y + enemy.height + 4;
+  return solids.some(
+    (solid) => probeX >= solid.x && probeX <= solid.x + solid.width && probeY >= solid.y && probeY <= solid.y + solid.height
+  );
+}
+
+function resolveEnemyCollisions(game) {
+  const { player } = game;
+
+  for (const enemy of game.enemies) {
+    if (!enemy.alive) continue;
+    if (!intersects(player, enemy)) continue;
+
+    const canStomp =
+      ENEMY_TYPES[enemy.type].stompable &&
+      player.vy > 140 &&
+      player.prevY + player.height <= enemy.y + enemy.height * 0.55;
+
+    if (canStomp) {
+      enemy.alive = false;
+      player.vy = -420;
+      player.y = enemy.y - player.height - 2;
+      continue;
+    }
+
+    damagePlayer(game, centerX(enemy));
+  }
+}
+
+function damagePlayer(game, sourceX) {
+  const { player } = game;
+  if (game.time < player.invincibleUntil) return;
+
+  game.hp -= 1;
+  player.invincibleUntil = game.time + 1.15;
+  player.vx = sourceX < centerX(player) ? 300 : -300;
+  player.vy = -340;
+
+  if (game.hp <= 0) {
+    respawnFromCheckpoint(game);
+  }
+}
+
+function respawnFromCheckpoint(game) {
+  const checkpoint = game.activeCheckpointIndex >= 0 ? game.stage.checkpoints[game.activeCheckpointIndex] : null;
+  const spawn = checkpoint?.respawn ?? game.stage.start;
+  game.player = createPlayer(spawn);
+  game.player.invincibleUntil = game.time + 0.9;
+  game.enemies = createEnemies(game.stage.enemies);
+  game.hp = game.maxHp;
+  game.deaths += 1;
+  game.cameraX = clamp(spawn.x - CANVAS_WIDTH * 0.36, 0, game.stage.worldWidth - CANVAS_WIDTH);
+}
+
+function touchesGoal(player, goal) {
+  return player.x + player.width >= goal.x && player.x <= goal.x + goal.width && player.y + player.height >= goal.y;
+}
+
+function getIntersectingWater(entity, waters) {
+  for (const water of waters) {
+    if (intersects(entity, water)) return water;
+  }
+  return null;
 }
 
 function drawGame(context, game, timestamp) {
-  const { player, cameraX } = game;
+  const { player, cameraX, stage } = game;
 
   context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
   drawSky(context);
-  drawBackdrop(context, cameraX);
-  drawWater(context, cameraX, timestamp);
-  drawSolids(context, cameraX);
-  drawGoal(context, cameraX, timestamp);
-  drawStartMarker(context, cameraX);
-  drawDuck(context, player, cameraX, timestamp);
+  drawBackdrop(context, cameraX, stage.worldWidth);
+  drawWaters(context, cameraX, stage.waters, timestamp);
+  drawSolids(context, cameraX, stage.solids);
+  drawCheckpoints(context, cameraX, stage.checkpoints, game.activeCheckpointIndex);
+  drawGoal(context, cameraX, stage.goal, timestamp);
+  drawStartMarker(context, cameraX, stage.start);
+  drawEnemies(context, cameraX, game.enemies, game.time);
+  drawDuck(context, player, cameraX, timestamp, game.time);
   drawOverlay(context, game);
 }
 
 function drawSky(context) {
   const gradient = context.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
   gradient.addColorStop(0, "#dff7ff");
-  gradient.addColorStop(0.5, "#c7eff7");
-  gradient.addColorStop(1, "#96cdb7");
+  gradient.addColorStop(0.52, "#c4eef7");
+  gradient.addColorStop(1, "#8dc9ae");
   context.fillStyle = gradient;
   context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 }
 
-function drawBackdrop(context, cameraX) {
+function drawBackdrop(context, cameraX, worldWidth) {
   context.fillStyle = "rgba(72, 120, 138, 0.12)";
-  for (let index = 0; index < 5; index += 1) {
-    const hillX = index * 360 - cameraX * 0.22;
+  const hillCount = Math.ceil(worldWidth / 340);
+  for (let index = 0; index <= hillCount; index += 1) {
+    const hillX = index * 340 - cameraX * 0.22;
     context.beginPath();
     context.moveTo(hillX - 120, CANVAS_HEIGHT);
-    context.quadraticCurveTo(hillX + 20, 200, hillX + 180, CANVAS_HEIGHT);
+    context.quadraticCurveTo(hillX + 20, 200 + (index % 2) * 24, hillX + 180, CANVAS_HEIGHT);
     context.closePath();
     context.fill();
   }
 }
 
-function drawWater(context, cameraX, timestamp) {
-  const x = WATER.x - cameraX;
-  const y = WATER.y;
-  const wave = Math.sin(timestamp / 240) * 3;
+function drawWaters(context, cameraX, waters, timestamp) {
+  for (const water of waters) {
+    const x = water.x - cameraX;
+    if (x + water.width < -80 || x > CANVAS_WIDTH + 80) continue;
 
-  context.fillStyle = "rgba(85, 176, 223, 0.45)";
-  context.fillRect(x, y, WATER.width, WATER.height);
+    const wave = Math.sin(timestamp / 240) * 3;
+    context.fillStyle = "rgba(85, 176, 223, 0.45)";
+    context.fillRect(x, water.y, water.width, water.height);
 
-  context.fillStyle = "rgba(53, 124, 188, 0.22)";
-  context.fillRect(x, y + 36, WATER.width, WATER.height - 36);
+    context.fillStyle = "rgba(53, 124, 188, 0.22)";
+    context.fillRect(x, water.y + 36, water.width, water.height - 36);
 
-  context.strokeStyle = "rgba(229, 250, 255, 0.92)";
-  context.lineWidth = 3;
-  context.beginPath();
-  for (let offset = 0; offset <= WATER.width; offset += 24) {
-    const px = x + offset;
-    const py = y + 12 + Math.sin((offset + timestamp / 5) / 18) * wave;
-    if (offset === 0) context.moveTo(px, py);
-    else context.lineTo(px, py);
+    context.strokeStyle = "rgba(229, 250, 255, 0.92)";
+    context.lineWidth = 3;
+    context.beginPath();
+    for (let offset = 0; offset <= water.width; offset += 24) {
+      const px = x + offset;
+      const py = water.y + 12 + Math.sin((offset + timestamp / 5) / 18) * wave;
+      if (offset === 0) context.moveTo(px, py);
+      else context.lineTo(px, py);
+    }
+    context.stroke();
   }
-  context.stroke();
 }
 
-function drawSolids(context, cameraX) {
-  for (const solid of SOLIDS) {
+function drawSolids(context, cameraX, solids) {
+  for (const solid of solids) {
     const x = solid.x - cameraX;
     if (x + solid.width < -80 || x > CANVAS_WIDTH + 80) continue;
 
@@ -443,44 +853,113 @@ function drawSolids(context, cameraX) {
   }
 }
 
-function drawGoal(context, cameraX, timestamp) {
-  const x = GOAL.x - cameraX;
+function drawCheckpoints(context, cameraX, checkpoints, activeIndex) {
+  checkpoints.forEach((checkpoint, index) => {
+    const x = checkpoint.x - cameraX;
+    context.fillStyle = index <= activeIndex ? "#ffe09b" : "rgba(255, 255, 255, 0.82)";
+    context.fillRect(x, checkpoint.y, 66, 28);
+    context.fillStyle = "#406066";
+    context.font = '11px "IBM Plex Mono", monospace';
+    context.fillText(checkpoint.label, x + 13, checkpoint.y + 18);
+    context.fillStyle = "#7a5b35";
+    context.fillRect(x + 32, checkpoint.y + 28, 6, 64);
+  });
+}
+
+function drawGoal(context, cameraX, goal, timestamp) {
+  const x = goal.x - cameraX;
   const flutter = Math.sin(timestamp / 180) * 6;
 
   context.fillStyle = "#7a5b35";
-  context.fillRect(x + 8, GOAL.y - 60, 8, GOAL.height + 60);
+  context.fillRect(x + 8, goal.y - 60, 8, goal.height + 60);
   context.fillStyle = "#ff8c61";
   context.beginPath();
-  context.moveTo(x + 16, GOAL.y - 56);
-  context.lineTo(x + 16, GOAL.y - 18);
-  context.lineTo(x + 52 + flutter, GOAL.y - 36);
+  context.moveTo(x + 16, goal.y - 56);
+  context.lineTo(x + 16, goal.y - 18);
+  context.lineTo(x + 52 + flutter, goal.y - 36);
   context.closePath();
   context.fill();
 
   context.strokeStyle = "rgba(23, 29, 36, 0.15)";
   context.lineWidth = 2;
-  context.strokeRect(x, GOAL.y, GOAL.width, GOAL.height);
+  context.strokeRect(x, goal.y, goal.width, goal.height);
 }
 
-function drawStartMarker(context, cameraX) {
-  const x = 82 - cameraX;
+function drawStartMarker(context, cameraX, start) {
+  const x = start.x - 12 - cameraX;
   context.fillStyle = "rgba(255, 255, 255, 0.86)";
-  context.fillRect(x, 308, 68, 34);
+  context.fillRect(x, start.y - 44, 68, 34);
   context.fillStyle = "#406066";
   context.font = '12px "IBM Plex Mono", monospace';
-  context.fillText("START", x + 12, 329);
+  context.fillText("START", x + 12, start.y - 23);
 }
 
-function drawDuck(context, player, cameraX, timestamp) {
+function drawEnemies(context, cameraX, enemies, time) {
+  for (const enemy of enemies) {
+    if (!enemy.alive) continue;
+    const x = enemy.x - cameraX;
+    if (x + enemy.width < -60 || x > CANVAS_WIDTH + 60) continue;
+    drawEnemy(context, enemy, x, time);
+  }
+}
+
+function drawEnemy(context, enemy, screenX, time) {
+  const stats = ENEMY_TYPES[enemy.type];
+  const x = screenX;
+  const y = enemy.y;
+
+  if (enemy.type === "flyer") {
+    context.fillStyle = stats.color;
+    context.beginPath();
+    context.ellipse(x + enemy.width * 0.5, y + enemy.height * 0.52, 18, 12, 0, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = "rgba(255, 255, 255, 0.85)";
+    context.beginPath();
+    context.ellipse(x + 11, y + 8 + Math.sin(time * 9 + enemy.phase) * 2, 8, 4, -0.5, 0, Math.PI * 2);
+    context.ellipse(x + enemy.width - 11, y + 8 + Math.sin(time * 9 + enemy.phase + 1.3) * 2, 8, 4, 0.5, 0, Math.PI * 2);
+    context.fill();
+  } else if (enemy.type === "skimmer") {
+    context.fillStyle = stats.color;
+    context.beginPath();
+    context.ellipse(x + enemy.width * 0.5, y + enemy.height * 0.6, 18, 9, 0, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = "#d9f3ff";
+    context.fillRect(x + 4, y + enemy.height - 4, enemy.width - 8, 3);
+  } else if (enemy.type === "hopper") {
+    context.fillStyle = stats.color;
+    context.fillRect(x + 4, y + 8, enemy.width - 8, enemy.height - 8);
+    context.fillStyle = "#d7ffd8";
+    context.fillRect(x + 8, y + 4, enemy.width - 16, 10);
+  } else if (enemy.type === "charger") {
+    context.fillStyle = stats.color;
+    context.fillRect(x + 2, y + 8, enemy.width - 4, enemy.height - 8);
+    context.fillStyle = "#f2c9a5";
+    context.fillRect(x + (enemy.dir > 0 ? enemy.width - 14 : 4), y + 10, 10, 8);
+  } else {
+    context.fillStyle = stats.color;
+    context.fillRect(x + 4, y + 6, enemy.width - 8, enemy.height - 6);
+  }
+
+  context.fillStyle = "#1f2d39";
+  const eyeX = enemy.dir > 0 ? x + enemy.width - 12 : x + 10;
+  context.beginPath();
+  context.arc(eyeX, y + 11, 2, 0, Math.PI * 2);
+  context.fill();
+}
+
+function drawDuck(context, player, cameraX, timestamp, time) {
   const x = player.x - cameraX;
   const y = player.y;
   const wingLift = !player.onGround && !player.inWater ? Math.sin(timestamp / 110) * 6 : 0;
+  const blink = time < player.invincibleUntil && Math.floor(time * 14) % 2 === 0;
 
-  if (player.inWater) {
+  if (blink) return;
+
+  if (player.inWater && player.currentWater) {
     context.strokeStyle = "rgba(240, 252, 255, 0.75)";
     context.lineWidth = 2;
     context.beginPath();
-    context.ellipse(x + player.width * 0.54, WATER.y + 14, 26, 5, 0, 0, Math.PI * 2);
+    context.ellipse(x + player.width * 0.54, player.currentWater.y + 14, 26, 5, 0, 0, Math.PI * 2);
     context.stroke();
   }
 
@@ -527,18 +1006,24 @@ function drawOverlay(context, game) {
   context.fillStyle = "#f7f7f2";
   context.textAlign = "center";
   context.font = '700 30px "Fraunces", "Iowan Old Style", serif';
-  context.fillText(game.status === "clear" ? "GOAL!" : "Duck Run", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 10);
+  context.fillText(game.stage.label, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 34);
+  context.font = '700 24px "Fraunces", "Iowan Old Style", serif';
+  context.fillText(game.status === "clear" ? "CLEAR!" : game.stage.name, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 2);
   context.font = '15px "IBM Plex Mono", monospace';
   context.fillText(
     game.status === "clear" ? "Enterでやり直し" : "Enterでスタート",
     CANVAS_WIDTH / 2,
-    CANVAS_HEIGHT / 2 + 28
+    CANVAS_HEIGHT / 2 + 38
   );
   context.textAlign = "start";
 }
 
 function intersects(a, b) {
   return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+}
+
+function centerX(entity) {
+  return entity.x + entity.width * 0.5;
 }
 
 function clamp(value, min, max) {

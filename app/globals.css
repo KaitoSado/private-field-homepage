@@ -3418,6 +3418,76 @@ textarea {
   align-content: start;
 }
 
+.arcade-platformer-stage-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.arcade-platformer-stage-button {
+  display: grid;
+  gap: 2px;
+  min-width: 148px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(31, 111, 120, 0.14);
+  background: rgba(248, 248, 241, 0.84);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+
+.arcade-platformer-stage-button strong,
+.arcade-platformer-stage-button span {
+  display: block;
+}
+
+.arcade-platformer-stage-button span {
+  color: #5d676d;
+  font-size: 0.86rem;
+}
+
+.arcade-platformer-stage-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(23, 29, 36, 0.1);
+}
+
+.arcade-platformer-stage-button.is-active {
+  border-color: rgba(31, 111, 120, 0.34);
+  background: linear-gradient(145deg, rgba(222, 245, 243, 0.98), rgba(240, 248, 247, 0.92));
+  box-shadow: 0 18px 36px rgba(31, 111, 120, 0.12);
+}
+
+.arcade-platformer-legend {
+  display: grid;
+  gap: 10px;
+  color: #576167;
+}
+
+.arcade-platformer-legend div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arcade-platformer-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.arcade-platformer-swatch.is-stompable {
+  background: rgba(211, 103, 87, 0.75);
+}
+
+.arcade-platformer-swatch.is-air {
+  background: rgba(130, 103, 223, 0.72);
+}
+
+.arcade-platformer-swatch.is-water {
+  background: rgba(79, 162, 212, 0.72);
+}
+
 .arcade-defense-card {
   gap: 18px;
 }
