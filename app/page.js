@@ -3,21 +3,21 @@ import { HomeAuthEntry } from "@/components/home-auth-entry";
 
 const featureCards = [
   {
-    icon: "@" ,
+    icon: "@",
     title: "公開ページ",
-    body: "プロフィール、記事、記録、予定、リンクをひとつにまとめます。",
-    items: ["@username", "直接編集", "記事と記録", "リンク集"]
+    body: "プロフィール、ブログ、リンクをひとつのページに。そのまま編集して育てる。",
+    items: ["@username", "直接編集", "ブログ", "リンク集"]
   },
   {
     icon: "◎",
     title: "発見とつながり",
-    body: "発見から人や記事を見つけて、フォローや通知でつながります。",
+    body: "人や記事を見つけて、フォローや通知でゆるくつながる。",
     items: ["発見フィード", "フォロー", "通知", "匿名質問箱"]
   },
   {
     icon: "▦",
     title: "学内アプリ",
-    body: "授業レビュー、助け合い、情報共有、院生向け雑談まで揃います。",
+    body: "授業レビュー、助け合い、情報共有、院生雑談まで。",
     items: ["裏シラバス", "助け合い", "エッジ情報", "祈祷と呪詛"]
   }
 ];
@@ -76,9 +76,9 @@ export default function HomePage() {
           <div className="home-kicker-row">
             <span className="home-status-badge">Open Beta</span>
           </div>
-          <h1>自分のページを、今すぐ公開。記録も、情報も、協力プレーも、ここからつながる。</h1>
+          <h1>自分のページを、{"\n"}そのまま育てる。</h1>
           <p className="hero-lead home-hero-lead">
-            プロフィール、記事、記録、Apps がひとつにつながる、慶應 / SFC 寄りの学生ネットワークです。
+            プロフィール、ブログ、ソーシャルカードが一体の公開ページ。{"\n"}発見、助け合い、学内アプリもここから。
           </p>
           <div className="hero-actions">
             <HomeAuthEntry />
@@ -87,9 +87,9 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="home-inline-points">
-            <span>公開ページ</span>
+            <span>@username で公開</span>
             <span>学内Apps</span>
-            <span>慶應認証</span>
+            <span>慶應メール認証</span>
           </div>
         </div>
 
@@ -150,7 +150,7 @@ export default function HomePage() {
 
       <section id="features" className="home-section">
         <div className="home-section-copy">
-          <h2>使い方はシンプルです。</h2>
+          <h2>できること</h2>
         </div>
         <div className="home-feature-grid">
           {featureCards.map((feature) => (
@@ -198,16 +198,16 @@ export default function HomePage() {
 
       <section className="home-mini-grid">
         <article className="surface home-mini-card">
-          <strong>慶應認証</strong>
-          <p>@keio.jp / @keio.ac.jp の確認メール認証に対応。</p>
+          <strong>慶應メール認証</strong>
+          <p>@keio.jp / @keio.ac.jp で本人確認。</p>
         </article>
         <article className="surface home-mini-card">
           <strong>公開ページ起点</strong>
-          <p>自分のページをそのまま編集して育てます。</p>
+          <p>ページをそのまま編集。プロフィールが育つ。</p>
         </article>
         <article className="surface home-mini-card">
-          <strong>Apps</strong>
-          <p>授業、助け合い、情報、ゲームをまとめています。</p>
+          <strong>学内Apps</strong>
+          <p>授業レビュー、助け合い、情報、ゲーム。</p>
         </article>
       </section>
     </main>
