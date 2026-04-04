@@ -20,7 +20,7 @@ export function HomeAuthEntry() {
 
       {open ? (
         <section ref={panelRef} className="home-auth-reveal">
-          <div className="surface home-auth-shell">
+          <div className="home-auth-shell">
             <AuthPanel />
           </div>
         </section>
