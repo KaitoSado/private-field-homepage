@@ -22,6 +22,7 @@ export function NightWalkBoard({ initialSessions }) {
   const animationRef = useRef(0);
   const watchIdRef = useRef(null);
   const lastPersistRef = useRef({ at: 0, point: null });
+  const latestPointRef = useRef(null);
 
   const [sessions, setSessions] = useState(initialSessions);
   const [session, setSession] = useState(null);
@@ -33,12 +34,22 @@ export function NightWalkBoard({ initialSessions }) {
   const [geoStatus, setGeoStatus] = useState("待機中");
   const [realtimeStatus, setRealtimeStatus] = useState("未接続");
   const [latestPoint, setLatestPoint] = useState(null);
+  const [mapReady, setMapReady] = useState(false);
   const mapBounds = useMemo(() => computeBounds(sessions, latestPoint, focusedSessionId), [sessions, latestPoint, focusedSessionId]);
   const mapMarker = useMemo(
     () => getPreferredMapPoint(sessions, latestPoint, focusedSessionId, activeSessionId),
     [sessions, latestPoint, focusedSessionId, activeSessionId]
   );
   const mapUrl = useMemo(() => buildMapEmbedUrl(mapBounds, mapMarker), [mapBounds, mapMarker]);
+  const mapOpenUrl = useMemo(() => buildMapOpenUrl(mapMarker), [mapMarker]);
+
+  useEffect(() => {
+    latestPointRef.current = latestPoint;
+  }, [latestPoint]);
+
+  useEffect(() => {
+    setMapReady(false);
+  }, [mapUrl]);
 
   useEffect(() => {
     let mounted = true;
@@ -178,10 +189,10 @@ export function NightWalkBoard({ initialSessions }) {
       navigator.geolocation.clearWatch(watchIdRef.current);
     }
     watchIdRef.current = null;
-    setGeoStatus(latestPoint ? "現在地取得済み" : "待機中");
+    setGeoStatus(latestPointRef.current ? "現在地取得済み" : "待機中");
   }
 
-  function requestCurrentLocation({ silent = false } = {}) {
+  async function requestCurrentLocation({ silent = false } = {}) {
     if (!("geolocation" in navigator)) {
       setGeoStatus("位置情報API非対応");
       if (!silent) setStatus("このブラウザでは位置情報を取得できません。");
@@ -190,33 +201,26 @@ export function NightWalkBoard({ initialSessions }) {
 
     setGeoStatus(watchIdRef.current !== null ? "追跡中" : "現在地取得中");
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const point = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-          timestamp: new Date(position.timestamp).toISOString()
-        };
+    try {
+      const position = await getBestCurrentPosition();
+      const point = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        timestamp: new Date(position.timestamp).toISOString()
+      };
 
-        setLatestPoint(point);
-        setGeoStatus(watchIdRef.current !== null ? "追跡中" : "現在地取得済み");
+      setLatestPoint(point);
+      setGeoStatus(watchIdRef.current !== null ? "追跡中" : "現在地取得済み");
 
-        if (!activeSessionId && !silent) {
-          setStatus("現在地を取得しました。徘徊開始でルートを残せます。");
-        }
-      },
-      (error) => {
-        setGeoStatus("位置情報エラー");
-        if (!silent) {
-          setStatus(error.message || "位置情報が許可されていません。");
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 10000,
-        timeout: 15000
+      if (!activeSessionId && !silent) {
+        setStatus("現在地を取得しました。徘徊開始でルートを残せます。");
       }
-    );
+    } catch (error) {
+      setGeoStatus("位置情報エラー");
+      if (!silent) {
+        setStatus(describeGeolocationError(error));
+      }
+    }
   }
 
   function beginWatching(sessionId) {
@@ -548,13 +552,17 @@ export function NightWalkBoard({ initialSessions }) {
             <div className="night-walk-visuals">
               <div className="night-walk-map-frame">
                 {mapUrl ? (
-                  <iframe
-                    title="深夜徘徊マップ"
-                    src={mapUrl}
-                    className="night-walk-map"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
+                  <>
+                    {!mapReady ? <div className="night-walk-map-loading">マップを読み込み中…</div> : null}
+                    <iframe
+                      title="深夜徘徊マップ"
+                      src={mapUrl}
+                      className="night-walk-map"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      onLoad={() => setMapReady(true)}
+                    />
+                  </>
                 ) : (
                   <div className="night-walk-map-empty">
                     <strong>地図を表示するには現在地を取得してください。</strong>
@@ -574,6 +582,11 @@ export function NightWalkBoard({ initialSessions }) {
             <div className="night-walk-status-row">
               <p className="night-walk-status-text">{status}</p>
               <p className="night-walk-coordinate">{formatCoordinate(mapMarker)}</p>
+              {mapOpenUrl ? (
+                <a className="button button-ghost night-walk-map-link" href={mapOpenUrl} target="_blank" rel="noreferrer">
+                  外部地図で開く
+                </a>
+              ) : null}
               <label className="field night-walk-tag-field">
                 <span>今回のタグ</span>
                 <input
@@ -869,6 +882,13 @@ function buildMapEmbedUrl(bounds, marker) {
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${markerValue}`;
 }
 
+function buildMapOpenUrl(marker) {
+  if (!marker) return "";
+  return `https://www.openstreetmap.org/?mlat=${Number(marker.lat.toFixed(6))}&mlon=${Number(marker.lng.toFixed(6))}#map=17/${Number(
+    marker.lat.toFixed(6)
+  )}/${Number(marker.lng.toFixed(6))}`;
+}
+
 function findUserActiveSession(sessions, userId) {
   if (!userId) return null;
   return sessions.find((item) => item.user_id === userId && item.status === "active") || null;
@@ -911,4 +931,44 @@ function distanceMeters(left, right) {
 
 function uniq(values) {
   return [...new Set(values)];
+}
+
+function getCurrentPositionPromise(options) {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(resolve, reject, options);
+  });
+}
+
+async function getBestCurrentPosition() {
+  try {
+    return await getCurrentPositionPromise({
+      enableHighAccuracy: false,
+      maximumAge: 60000,
+      timeout: 10000
+    });
+  } catch (_error) {
+    return getCurrentPositionPromise({
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 20000
+    });
+  }
+}
+
+function describeGeolocationError(error) {
+  if (!error) return "位置情報を取得できませんでした。";
+
+  if (error.code === 1) {
+    return "位置情報が拒否されています。ブラウザの設定で許可してください。";
+  }
+
+  if (error.code === 2) {
+    return "位置情報を特定できませんでした。電波のよい場所で再試行してください。";
+  }
+
+  if (error.code === 3) {
+    return "位置情報の取得がタイムアウトしました。もう一度試してください。";
+  }
+
+  return error.message || "位置情報を取得できませんでした。";
 }

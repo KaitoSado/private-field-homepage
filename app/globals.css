@@ -3517,6 +3517,7 @@ textarea {
 }
 
 .night-walk-map-frame {
+  position: relative;
   overflow: hidden;
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -3529,6 +3530,19 @@ textarea {
   width: 100%;
   min-height: 280px;
   border: 0;
+}
+
+.night-walk-map-loading {
+  position: absolute;
+  z-index: 1;
+  top: 16px;
+  left: 16px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(13, 21, 32, 0.78);
+  color: rgba(235, 242, 255, 0.92);
+  font-size: 0.84rem;
+  letter-spacing: 0.02em;
 }
 
 .night-walk-map-empty {
@@ -3574,6 +3588,10 @@ textarea {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.78rem;
   letter-spacing: 0.04em;
+}
+
+.night-walk-map-link {
+  white-space: nowrap;
 }
 
 .night-walk-tag-field {
