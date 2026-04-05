@@ -4789,6 +4789,10 @@ textarea {
   background: rgba(34, 211, 238, 0.95);
 }
 
+.math-legend-dot.is-pink {
+  background: rgba(244, 114, 182, 0.95);
+}
+
 .math-legend-dot.is-dark {
   background: rgba(17, 24, 39, 0.95);
 }

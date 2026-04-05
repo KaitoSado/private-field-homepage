@@ -591,16 +591,19 @@ function IntegralPlaygroundPanel() {
   const canvasRef = useRef(null);
   const dragHandleRef = useRef(null);
   const animationRef = useRef(null);
+  const autoSweepRef = useRef(null);
   const [presetId, setPresetId] = useState(INTEGRAL_PRESETS[0].id);
   const preset = INTEGRAL_PRESETS.find((item) => item.id === presetId) || INTEGRAL_PRESETS[0];
   const [interval, setIntervalRange] = useState({ a: preset.interval[0], b: preset.interval[1] });
   const [partitions, setPartitions] = useState(12);
   const [fillProgress, setFillProgress] = useState(1);
   const [showRiemann, setShowRiemann] = useState(true);
+  const [autoSweep, setAutoSweep] = useState(false);
 
   useEffect(() => {
     setIntervalRange({ a: preset.interval[0], b: preset.interval[1] });
     setPartitions(12);
+    setAutoSweep(false);
   }, [preset]);
 
   useEffect(() => {
@@ -622,6 +625,33 @@ function IntegralPlaygroundPanel() {
     };
   }, [interval.a, interval.b, partitions, preset.id]);
 
+  useEffect(() => {
+    if (!autoSweep) {
+      if (autoSweepRef.current) cancelAnimationFrame(autoSweepRef.current);
+      return;
+    }
+
+    const startedAt = performance.now();
+    const startA = interval.a;
+    const endB = preset.xRange;
+
+    function frame(now) {
+      const progress = Math.min(1, (now - startedAt) / 2800);
+      const nextB = startA + (endB - startA) * progress;
+      setIntervalRange((current) => ({ a: current.a, b: Math.max(current.a + 0.2, nextB) }));
+      if (progress < 1) {
+        autoSweepRef.current = requestAnimationFrame(frame);
+      } else {
+        setAutoSweep(false);
+      }
+    }
+
+    autoSweepRef.current = requestAnimationFrame(frame);
+    return () => {
+      if (autoSweepRef.current) cancelAnimationFrame(autoSweepRef.current);
+    };
+  }, [autoSweep, interval.a, preset.xRange]);
+
   const compiled = useMemo(() => compileMathExpression(preset.expression, ["x"]), [preset.expression]);
   const exactArea = useMemo(() => {
     if (!compiled.fn) return Number.NaN;
@@ -633,6 +663,7 @@ function IntegralPlaygroundPanel() {
   }, [compiled, interval.a, interval.b, partitions]);
   const mission = useMemo(() => buildIntegralMissionState(preset, exactArea), [preset, exactArea]);
   const animatedEnd = interval.a + (interval.b - interval.a) * fillProgress;
+  const integralTone = exactArea < -0.15 ? "is-warm" : exactArea > 0.15 ? "is-positive" : "is-soft";
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -713,6 +744,7 @@ function IntegralPlaygroundPanel() {
 
           <div className="math-toggle-grid">
             <MathToggleField label="近似の長方形" checked={showRiemann} onChange={setShowRiemann} />
+            <MathToggleField label="左から自動でためる" checked={autoSweep} onChange={setAutoSweep} />
           </div>
 
           <div className="math-kpi-grid">
@@ -734,11 +766,36 @@ function IntegralPlaygroundPanel() {
             </div>
           </div>
 
+          <MathValueMeter
+            label="面積メーター"
+            value={exactArea}
+            displayValue={formatNumber(exactArea)}
+            min={-8}
+            max={8}
+            accentClass={integralTone}
+            valueLabel={exactArea > 0.15 ? "x軸より上のたまりが優勢です" : exactArea < -0.15 ? "x軸より下のたまりが優勢です" : "上と下がつり合いはじめています"}
+          />
+
           <div className="math-legend-row">
-            <span><i className="math-legend-dot is-cyan" /> ためている面積</span>
+            <span><i className="math-legend-dot is-cyan" /> プラスの面積</span>
+            <span><i className="math-legend-dot is-pink" /> マイナスの面積</span>
             <span><i className="math-legend-dot is-orange" /> 近似の長方形</span>
           </div>
-
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              積分は、今いる点の情報ではなく、区間の左から右までを <strong>ためた合計</strong> です。
+              {exactArea > 0.15
+                ? " 上側の面積が多いので、タンクが上にたまっています。"
+                : exactArea < -0.15
+                  ? " 下側の面積が多いので、タンクが下向きにたまっています。"
+                  : " 上と下がほぼ打ち消し合って、タンクが 0 に近づいています。"}
+            </p>
+          </div>
           <MathMissionCard mission={mission} />
         </>
       }
@@ -1765,20 +1822,45 @@ function drawIntegralFill(context, fn, left, right, xRange, yRange) {
   const a = Math.min(left, right);
   const b = Math.max(left, right);
   const axisY = worldToScreenY(0, canvas.height, yRange);
+  const positiveFill = "rgba(34, 211, 238, 0.24)";
+  const negativeFill = "rgba(244, 114, 182, 0.22)";
+  const steps = 180;
 
   context.save();
-  context.fillStyle = "rgba(34, 211, 238, 0.22)";
-  context.beginPath();
-  context.moveTo(worldToScreenX(a, canvas.width, xRange), axisY);
-  const steps = 160;
-  for (let index = 0; index <= steps; index += 1) {
-    const x = a + ((b - a) * index) / steps;
-    const y = safeEvaluate(fn, x);
-    context.lineTo(worldToScreenX(x, canvas.width, xRange), worldToScreenY(y, canvas.height, yRange));
+  for (let index = 0; index < steps; index += 1) {
+    const x1 = a + ((b - a) * index) / steps;
+    const x2 = a + ((b - a) * (index + 1)) / steps;
+    const y1 = safeEvaluate(fn, x1);
+    const y2 = safeEvaluate(fn, x2);
+    if (!Number.isFinite(y1) || !Number.isFinite(y2)) continue;
+
+    const sx1 = worldToScreenX(x1, canvas.width, xRange);
+    const sx2 = worldToScreenX(x2, canvas.width, xRange);
+    const sy1 = worldToScreenY(y1, canvas.height, yRange);
+    const sy2 = worldToScreenY(y2, canvas.height, yRange);
+
+    const fillStrip = (startX, endX, startY, endY, fillStyle) => {
+      context.fillStyle = fillStyle;
+      context.beginPath();
+      context.moveTo(startX, axisY);
+      context.lineTo(startX, startY);
+      context.lineTo(endX, endY);
+      context.lineTo(endX, axisY);
+      context.closePath();
+      context.fill();
+    };
+
+    if ((y1 >= 0 && y2 >= 0) || (y1 <= 0 && y2 <= 0)) {
+      fillStrip(sx1, sx2, sy1, sy2, y1 >= 0 ? positiveFill : negativeFill);
+      continue;
+    }
+
+    const ratio = Math.abs(y1) / (Math.abs(y1) + Math.abs(y2));
+    const crossX = x1 + (x2 - x1) * ratio;
+    const crossScreenX = worldToScreenX(crossX, canvas.width, xRange);
+    fillStrip(sx1, crossScreenX, sy1, axisY, y1 >= 0 ? positiveFill : negativeFill);
+    fillStrip(crossScreenX, sx2, axisY, sy2, y2 >= 0 ? positiveFill : negativeFill);
   }
-  context.lineTo(worldToScreenX(b, canvas.width, xRange), axisY);
-  context.closePath();
-  context.fill();
   context.restore();
 }
 
@@ -1803,6 +1885,8 @@ function drawRiemannBars(context, fn, left, right, partitions, xRange, yRange) {
     const screenY = worldToScreenY(y, canvas.height, yRange);
     const rectTop = Math.min(axisY, screenY);
     const rectHeight = Math.abs(axisY - screenY);
+    context.fillStyle = y >= 0 ? "rgba(249, 115, 22, 0.14)" : "rgba(236, 72, 153, 0.14)";
+    context.strokeStyle = y >= 0 ? "rgba(249, 115, 22, 0.42)" : "rgba(236, 72, 153, 0.4)";
     context.fillRect(screenX, rectTop, screenWidth, rectHeight);
     context.strokeRect(screenX, rectTop, screenWidth, rectHeight);
   }
