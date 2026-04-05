@@ -161,124 +161,98 @@ export function MeRedirectPanel() {
   }
 
   return (
-    <div className="dashboard-layout">
-      <section className="surface dashboard-hero my-page-gate">
-        <div className="dashboard-hero-head">
-          <h1>ハブ</h1>
-        </div>
-        <div className="hero-actions">
-          <Link href={state.path} className="button button-primary">
-            自分の公開ページへ
-          </Link>
-          <Link href="/notifications" className="button button-secondary">
-            通知を見る
-          </Link>
-        </div>
-      </section>
+    <div className="hub-layout">
+      <header className="hub-header">
+        <h1 className="hub-title">ハブ</h1>
+        <Link href={state.path} className="button button-primary">
+          公開ページへ
+        </Link>
+      </header>
 
-      <section className="section-grid my-page-economy">
-        <div className="surface feature-card my-page-economy-card">
-          <h2>ポイント</h2>
-          {economy ? (
-            <div className="economy-status-strip" aria-label="ポイント状況">
-              <div className="economy-chip">
-                <strong>{economy.point_balance}</strong>
-                <span>保有pt</span>
-              </div>
-              <div className="economy-chip">
-                <strong>{economy.evaluation_credits}</strong>
-                <span>今週の評価票</span>
-              </div>
-              <div className="economy-chip">
-                <strong>{economy.reputation_title}</strong>
-                <span>称号</span>
-              </div>
+      {economy ? (
+        <section className="surface hub-stats-card" aria-label="ポイント状況">
+          <div className="hub-stats-row">
+            <div className="hub-stat">
+              <strong className="hub-stat-value">{economy.point_balance}</strong>
+              <span className="hub-stat-label">保有pt</span>
             </div>
-          ) : null}
-          {economyStatus ? <p className="muted">{economyStatus}</p> : null}
-          <div className="hero-actions">
-            <Link href="/apps/classes" className="button button-ghost">
-              裏シラバスで使う
-            </Link>
-            <Link href="/apps/edge" className="button button-ghost">
-              エッジ情報で使う
-            </Link>
-            <button
-              type="button"
-              className="button button-ghost"
-              onClick={async () => {
-                const {
-                  data: { session }
-                } = await supabase.auth.getSession();
-
-                if (!session?.user?.id) return;
-
-                await loadEconomy(supabase, session.user.id, {
-                  onEconomy: setEconomy,
-                  onTransactions: setTransactions,
-                  onStatus: setEconomyStatus
-                });
-              }}
-            >
-              更新
-            </button>
+            <div className="hub-stat-divider" />
+            <div className="hub-stat">
+              <strong className="hub-stat-value">{economy.evaluation_credits}</strong>
+              <span className="hub-stat-label">今週の評価票</span>
+            </div>
+            <div className="hub-stat-divider" />
+            <div className="hub-stat">
+              <strong className="hub-stat-value">{economy.reputation_title}</strong>
+              <span className="hub-stat-label">称号</span>
+            </div>
           </div>
-        </div>
+        </section>
+      ) : economyStatus ? (
+        <p className="muted">{economyStatus}</p>
+      ) : null}
 
-        <div className="surface feature-card my-page-transactions-card">
-          <h2>最近の増減</h2>
-          {transactions.length ? (
-            <div className="my-page-transaction-list">
-              {transactions.map((transaction) => (
-                <div key={transaction.id} className="my-page-transaction-row">
-                  <div className="my-page-transaction-copy">
-                    <strong>{formatTransactionLabel(transaction)}</strong>
-                    <span>{formatTransactionMeta(transaction)}</span>
-                  </div>
-                  <div className="my-page-transaction-side">
-                    <strong className={transaction.direction === "credit" ? "status-success" : "status-error"}>
-                      {transaction.direction === "credit" ? "+" : "-"}
-                      {transaction.amount}pt
-                    </strong>
-                    <span>{formatShortDate(transaction.created_at)}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="muted">まだポイントの増減はありません。</p>
-          )}
-        </div>
-      </section>
-
-      <section className="section-grid my-page-grid">
-        <Link href={state.path} className="surface feature-card">
-          <h2>公開ページを開く</h2>
+      <nav className="hub-nav-grid">
+        <Link href={state.path} className="surface hub-nav-card">
+          <span className="hub-nav-glyph" aria-hidden="true">@</span>
+          <span className="hub-nav-label">公開ページ</span>
         </Link>
-
-        <Link href="/explore" className="surface feature-card">
-          <h2>発見</h2>
+        <Link href="/notifications" className="surface hub-nav-card">
+          <span className="hub-nav-glyph" aria-hidden="true">●</span>
+          <span className="hub-nav-label">通知</span>
         </Link>
-
-        <Link href="/settings" className="surface feature-card">
-          <h2>設定</h2>
+        <Link href="/explore" className="surface hub-nav-card">
+          <span className="hub-nav-glyph" aria-hidden="true">◎</span>
+          <span className="hub-nav-label">発見</span>
         </Link>
-
-        <Link href="/notifications" className="surface feature-card">
-          <h2>通知</h2>
+        <Link href="/settings" className="surface hub-nav-card">
+          <span className="hub-nav-glyph" aria-hidden="true">⚙</span>
+          <span className="hub-nav-label">設定</span>
         </Link>
-
+        <Link href="/apps/classes" className="surface hub-nav-card">
+          <span className="hub-nav-glyph" aria-hidden="true">⚖</span>
+          <span className="hub-nav-label">裏シラバス</span>
+        </Link>
+        <Link href="/apps/edge" className="surface hub-nav-card">
+          <span className="hub-nav-glyph" aria-hidden="true">◆</span>
+          <span className="hub-nav-label">エッジ情報</span>
+        </Link>
         {state.role === "admin" ? (
           <>
-            <Link href="/admin" className="surface feature-card">
-              <h2>モデレーション</h2>
+            <Link href="/admin" className="surface hub-nav-card">
+              <span className="hub-nav-glyph" aria-hidden="true">▣</span>
+              <span className="hub-nav-label">モデレーション</span>
             </Link>
-            <Link href="/ops" className="surface feature-card">
-              <h2>運用ログ</h2>
+            <Link href="/ops" className="surface hub-nav-card">
+              <span className="hub-nav-glyph" aria-hidden="true">▤</span>
+              <span className="hub-nav-label">運用ログ</span>
             </Link>
           </>
         ) : null}
-      </section>
+      </nav>
+
+      {transactions.length ? (
+        <section className="surface hub-history-card">
+          <h2 className="hub-section-label">最近の増減</h2>
+          <div className="my-page-transaction-list">
+            {transactions.map((transaction) => (
+              <div key={transaction.id} className="my-page-transaction-row">
+                <div className="my-page-transaction-copy">
+                  <strong>{formatTransactionLabel(transaction)}</strong>
+                  <span>{formatTransactionMeta(transaction)}</span>
+                </div>
+                <div className="my-page-transaction-side">
+                  <strong className={transaction.direction === "credit" ? "status-success" : "status-error"}>
+                    {transaction.direction === "credit" ? "+" : "-"}
+                    {transaction.amount}pt
+                  </strong>
+                  <span>{formatShortDate(transaction.created_at)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

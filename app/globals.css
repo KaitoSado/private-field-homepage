@@ -1807,6 +1807,118 @@ textarea {
   font-size: 0.74rem;
 }
 
+/* ── Hub (/me) ── */
+
+.hub-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.hub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.hub-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.hub-stats-card {
+  padding: 22px 28px;
+}
+
+.hub-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.hub-stat {
+  display: grid;
+  gap: 4px;
+}
+
+.hub-stat-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--line);
+}
+
+.hub-stat-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.hub-stat-label {
+  font-size: 0.74rem;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.03em;
+}
+
+.hub-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hub-nav-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.hub-nav-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(20, 29, 40, 0.1);
+}
+
+.hub-nav-glyph {
+  width: 38px;
+  height: 38px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(31, 111, 120, 0.12), rgba(178, 107, 42, 0.1));
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.hub-nav-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.hub-history-card {
+  padding: 22px 28px;
+  display: grid;
+  gap: 14px;
+}
+
+.hub-section-label {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── end Hub ── */
+
 .help-board-author {
   display: inline-flex;
   flex-wrap: wrap;
@@ -3222,6 +3334,19 @@ textarea {
 
   .my-page-economy {
     grid-template-columns: 1fr;
+  }
+
+  .hub-nav-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hub-stats-row {
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .hub-stat-divider {
+    display: none;
   }
 
   .home-auth-shell {
