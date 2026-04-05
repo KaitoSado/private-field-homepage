@@ -1,6 +1,8 @@
 "use client";
 
 export function ObjectListPanel({
+  sceneName,
+  onSceneNameChange,
   objects,
   selectedId,
   onSelect,
@@ -8,14 +10,28 @@ export function ObjectListPanel({
   onTriggerImport,
   onTriggerSceneImport,
   onExportScene,
-  onClearScene,
-  status
+  onShareScene,
+  onSaveScene,
+  status,
+  scenes,
+  currentSceneId,
+  onCreateScene,
+  onSwitchScene,
+  onDeleteScene
 }) {
   return (
     <aside className="flex h-full flex-col gap-4 rounded-[28px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_24px_60px_rgba(20,29,40,0.08)] backdrop-blur">
-      <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">objects</p>
-        <h2 className="text-lg font-semibold text-slate-900">読み込んだモデル</h2>
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">scene</p>
+          <h2 className="text-lg font-semibold text-slate-900">空間の管理</h2>
+        </div>
+        <input
+          value={sceneName}
+          onChange={(event) => onSceneNameChange(event.target.value)}
+          className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-cyan-300"
+          placeholder="シーン名"
+        />
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-1">
@@ -24,64 +40,125 @@ export function ObjectListPanel({
         </button>
         <button
           type="button"
-          onClick={onTriggerSceneImport}
-          className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+          onClick={onSaveScene}
+          className="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-semibold text-cyan-800 transition hover:border-cyan-300 hover:bg-cyan-100"
         >
-          JSON 読み込み
+          ローカル保存
         </button>
         <button
           type="button"
           onClick={onExportScene}
           className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800 transition hover:border-emerald-300 hover:bg-emerald-100"
         >
-          JSON 保存
+          ファイル書き出し
         </button>
         <button
           type="button"
-          onClick={onClearScene}
-          className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100"
+          onClick={onTriggerSceneImport}
+          className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
         >
-          全消し
+          ファイル読み込み
+        </button>
+        <button
+          type="button"
+          onClick={onShareScene}
+          className="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-800 transition hover:border-violet-300 hover:bg-violet-100 sm:col-span-2 xl:col-span-1"
+        >
+          URL共有
         </button>
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm text-slate-600">
-        {status || "GLB/GLTF をドラッグ&ドロップすると、ここに並びます。"}
+        {status || "GLB / GLTF を落として、シーンを保存しながら組みます。"}
       </div>
 
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
-        {objects.length ? (
-          objects.map((object, index) => (
-            <button
-              key={object.id}
-              type="button"
-              onClick={() => onSelect(object.id)}
-              className={`grid w-full gap-2 rounded-2xl border px-3 py-3 text-left transition ${
-                selectedId === object.id
-                  ? "border-cyan-300 bg-cyan-50 shadow-[0_16px_30px_rgba(8,145,178,0.14)]"
-                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">#{index + 1}</span>
-                <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">{object.mimeType?.includes("json") ? "GLTF" : "GLB"}</span>
-              </div>
-              <input
-                value={object.name}
-                onChange={(event) => onRename(object.id, event.target.value)}
-                onClick={(event) => event.stopPropagation()}
-                className="rounded-xl border border-transparent bg-transparent px-0 py-0 text-sm font-semibold text-slate-900 outline-none transition focus:border-slate-300 focus:bg-white focus:px-2 focus:py-1"
-              />
-            </button>
-          ))
-        ) : (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 px-4 py-8 text-center text-sm leading-7 text-slate-500">
-            左のボタンか、中央のビューポートへ
-            <br />
-            GLB / GLTF を落としてください。
+      <section className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-slate-900">読み込んだモデル</h3>
+            <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">{objects.length} 件</span>
           </div>
-        )}
-      </div>
+
+          {objects.length ? (
+            objects.map((object, index) => (
+              <button
+                key={object.id}
+                type="button"
+                onClick={() => onSelect(object.id)}
+                className={`grid w-full gap-2 rounded-2xl border px-3 py-3 text-left transition ${
+                  selectedId === object.id
+                    ? "border-cyan-300 bg-cyan-50 shadow-[0_16px_30px_rgba(8,145,178,0.14)]"
+                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">#{index + 1}</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">{object.mimeType?.includes("json") ? "GLTF" : "GLB"}</span>
+                </div>
+                <input
+                  value={object.name}
+                  onChange={(event) => onRename(object.id, event.target.value)}
+                  onClick={(event) => event.stopPropagation()}
+                  className="rounded-xl border border-transparent bg-transparent px-0 py-0 text-sm font-semibold text-slate-900 outline-none transition focus:border-slate-300 focus:bg-white focus:px-2 focus:py-1"
+                />
+              </button>
+            ))
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 px-4 py-8 text-center text-sm leading-7 text-slate-500">
+              GLB / GLTF を追加すると、
+              <br />
+              ここに一覧が並びます。
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2 border-t border-slate-200 pt-3">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-slate-900">シーン一覧</h3>
+            <button
+              type="button"
+              onClick={onCreateScene}
+              className="rounded-full border border-slate-300 px-3 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+            >
+              新規作成
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            {scenes.map((scene) => (
+              <div
+                key={scene.id}
+                className={`flex items-center gap-2 rounded-2xl border px-3 py-3 ${
+                  scene.id === currentSceneId ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-900"
+                }`}
+              >
+                <button type="button" onClick={() => onSwitchScene(scene.id)} className="min-w-0 flex-1 text-left">
+                  <div className="truncate text-sm font-semibold">{scene.name}</div>
+                  <div className={`mt-1 text-[11px] ${scene.id === currentSceneId ? "text-slate-300" : "text-slate-500"}`}>
+                    {formatUpdatedAt(scene.updatedAt)}
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDeleteScene(scene.id)}
+                  className={`rounded-full px-2 py-1 text-[11px] font-semibold transition ${
+                    scene.id === currentSceneId ? "bg-white/10 text-white hover:bg-white/20" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  削除
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </aside>
   );
+}
+
+function formatUpdatedAt(timestamp) {
+  if (!timestamp) return "未保存";
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return "未保存";
+  return `${date.getMonth() + 1}/${date.getDate()} ${`${date.getHours()}`.padStart(2, "0")}:${`${date.getMinutes()}`.padStart(2, "0")}`;
 }

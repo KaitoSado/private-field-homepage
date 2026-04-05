@@ -1,3 +1,5 @@
+import { buildObjectUrlFromAsset, saveAssetFile, saveAssetFromDataUrl } from "@/src/utils/asset-db";
+
 const GLTF_TYPES = new Set(["model/gltf-binary", "model/gltf+json", "application/octet-stream", ""]);
 
 export function isGltfFile(file) {
@@ -10,14 +12,14 @@ export async function filesToSceneObjects(files) {
   const objects = [];
 
   for (const [index, file] of valid.entries()) {
-    const dataUrl = await readFileAsDataUrl(file);
+    const { assetId, mimeType } = await saveAssetFile(file);
     const objectUrl = URL.createObjectURL(file);
     objects.push({
       id: createObjectId(),
       name: file.name.replace(/\.(glb|gltf)$/i, "") || `Model ${index + 1}`,
+      assetId,
       url: objectUrl,
-      mimeType: file.type || guessMimeType(file.name),
-      sourceData: dataUrl,
+      mimeType: mimeType || guessMimeType(file.name),
       position: [index * 1.8, 0, 0],
       rotation: [0, 0, 0],
       scale: [1, 1, 1]
@@ -41,11 +43,49 @@ export async function rebuildSceneObjectsFromSnapshot(objects) {
   const rebuilt = [];
 
   for (const object of objects || []) {
-    if (!object.sourceData) continue;
-    const file = dataUrlToFile(object.sourceData, `${object.name || "model"}.${guessExtension(object.mimeType)}`, object.mimeType);
-    const url = URL.createObjectURL(file);
+    let assetId = object.assetId;
+
+    if (!assetId && object.sourceData) {
+      const stored = await saveAssetFromDataUrl({
+        dataUrl: object.sourceData,
+        name: `${object.name || "model"}.${guessExtension(object.mimeType)}`,
+        mimeType: object.mimeType
+      });
+      assetId = stored.assetId;
+    }
+
+    if (!assetId) continue;
+    const { url, mimeType, name } = await buildObjectUrlFromAsset(assetId);
     rebuilt.push({
       ...object,
+      assetId,
+      name: object.name || name?.replace(/\.(glb|gltf)$/i, "") || "Model",
+      mimeType: object.mimeType || mimeType,
+      url
+    });
+  }
+
+  return rebuilt;
+}
+
+export async function rebuildSceneObjectsFromPortable({ objects, assets }) {
+  const assetMap = new Map((assets || []).map((asset) => [asset.id, asset]));
+  const rebuilt = [];
+
+  for (const object of objects || []) {
+    const asset = assetMap.get(object.assetId);
+    if (!asset?.dataUrl) continue;
+    const stored = await saveAssetFromDataUrl({
+      dataUrl: asset.dataUrl,
+      name: asset.name || `${object.name || "model"}.${guessExtension(asset.mimeType)}`,
+      mimeType: asset.mimeType || object.mimeType,
+      preferredId: object.assetId
+    });
+    const { url } = await buildObjectUrlFromAsset(stored.assetId);
+    rebuilt.push({
+      ...object,
+      assetId: stored.assetId,
+      mimeType: stored.mimeType || object.mimeType,
       url
     });
   }
@@ -60,30 +100,10 @@ function createObjectId() {
   return `object-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function readFileAsDataUrl(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(`${reader.result || ""}`);
-    reader.onerror = () => reject(reader.error || new Error("file read failed"));
-    reader.readAsDataURL(file);
-  });
-}
-
 function guessMimeType(filename) {
   return filename.toLowerCase().endsWith(".glb") ? "model/gltf-binary" : "model/gltf+json";
 }
 
 function guessExtension(mimeType) {
   return mimeType === "model/gltf+json" ? "gltf" : "glb";
-}
-
-function dataUrlToFile(dataUrl, name, type) {
-  const [header, body] = dataUrl.split(",");
-  const isBase64 = header.includes(";base64");
-  const bytes = isBase64 ? atob(body) : decodeURIComponent(body);
-  const array = new Uint8Array(bytes.length);
-  for (let index = 0; index < bytes.length; index += 1) {
-    array[index] = bytes.charCodeAt(index);
-  }
-  return new File([array], name, { type });
 }
