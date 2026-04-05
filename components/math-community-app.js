@@ -2,9 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  MathActionRow,
   MathKpi,
   MathLegendRow,
   MathMissionCard,
+  MathModeTabs,
+  MathNumberField,
   MathPlaygroundHeader,
   MathPlaygroundLayout,
   MathPresetRow,
@@ -35,6 +38,12 @@ const APP_TABS = [
   { id: "space", label: "空間図形" },
   { id: "cas", label: "数式処理(CAS)" },
   { id: "calculator", label: "科学計算電卓" }
+];
+
+const PLAYGROUND_MODES = [
+  { id: "play", label: "あそぶ" },
+  { id: "edit", label: "いじる" },
+  { id: "mission", label: "ミッション" }
 ];
 
 const GRAPH_PRESETS = [
@@ -112,6 +121,31 @@ const DERIVATIVE_PRESETS = [
   }
 ];
 
+const DERIVATIVE_MISSIONS = [
+  {
+    id: "flat",
+    label: "平らを探す",
+    title: "平らな場所を見つける",
+    description: "傾きが 0 に近い場所へ点を運ぶとクリアです。",
+    type: "zero"
+  },
+  {
+    id: "steep",
+    label: "急な上り",
+    title: "強い上り坂を見つける",
+    description: "傾きが 2 くらいになる場所を探します。",
+    type: "target",
+    target: 2
+  },
+  {
+    id: "kink",
+    label: "カクッを探す",
+    title: "接線が決まりにくい点を見つける",
+    description: "折れ曲がりの真ん中へ点を持っていきます。",
+    type: "nondiff"
+  }
+];
+
 const INTEGRAL_PRESETS = [
   {
     id: "wave",
@@ -155,6 +189,31 @@ const INTEGRAL_PRESETS = [
   }
 ];
 
+const INTEGRAL_MISSIONS = [
+  {
+    id: "balance",
+    label: "0 を狙う",
+    title: "ためた面積を 0 に近づける",
+    description: "正の面積と負の面積がつり合う区間を探します。",
+    type: "zero"
+  },
+  {
+    id: "fill-two",
+    label: "2 を狙う",
+    title: "面積を 2 くらいまでためる",
+    description: "区間を動かして、面積メーターを 2 付近まで持っていきます。",
+    type: "target",
+    target: 2
+  },
+  {
+    id: "negative",
+    label: "下側を勝たせる",
+    title: "下向きのたまりを強くする",
+    description: "x軸より下の面積が勝つ区間を探します。",
+    type: "negative"
+  }
+];
+
 const LINEAR_PRESETS = [
   {
     id: "identity",
@@ -195,6 +254,36 @@ const LINEAR_PRESETS = [
       [-1, 0],
       [0, 1]
     ]
+  }
+];
+
+const LINEAR_SHAPES = [
+  { id: "square", label: "正方形" },
+  { id: "circle", label: "円" },
+  { id: "triangle", label: "三角形" }
+];
+
+const LINEAR_MISSIONS = [
+  {
+    id: "double",
+    label: "2倍にする",
+    title: "面積を 2 倍にする",
+    description: "赤と青の矢印を動かして、図形の面積を 2 倍に近づけます。",
+    type: "double"
+  },
+  {
+    id: "flip",
+    label: "反転させる",
+    title: "向きをひっくり返す",
+    description: "左右どちらかの矢印を軸の向こう側へ越えて、向きを反転させます。",
+    type: "flip"
+  },
+  {
+    id: "rotate",
+    label: "回す",
+    title: "面積を保ったまま回してみる",
+    description: "広がりをほぼ 1 倍のまま、平面を回転に近い形へ近づけます。",
+    type: "rotate"
   }
 ];
 
@@ -464,24 +553,27 @@ function FunctionGraphPanel() {
 function DerivativePlaygroundPanel() {
   const canvasRef = useRef(null);
   const dragRef = useRef(false);
+  const autoplayRef = useRef(null);
   const [presetId, setPresetId] = useState(DERIVATIVE_PRESETS[0].id);
+  const [mode, setMode] = useState("play");
+  const [missionId, setMissionId] = useState(DERIVATIVE_MISSIONS[0].id);
   const preset = DERIVATIVE_PRESETS.find((item) => item.id === presetId) || DERIVATIVE_PRESETS[0];
+  const activeMission = DERIVATIVE_MISSIONS.find((item) => item.id === missionId) || DERIVATIVE_MISSIONS[0];
   const [pointX, setPointX] = useState(preset.pointX);
   const [h, setH] = useState(preset.h);
   const [showSecant, setShowSecant] = useState(true);
   const [showTangent, setShowTangent] = useState(true);
-
-  useEffect(() => {
-    setPointX(preset.pointX);
-    setH(preset.h);
-  }, [preset]);
+  const [viewScale, setViewScale] = useState(1);
+  const [autoPlay, setAutoPlay] = useState(false);
+  const viewXRange = preset.xRange * viewScale;
+  const viewYRange = preset.yRange * viewScale;
 
   const compiled = useMemo(() => compileMathExpression(preset.expression, ["x"]), [preset.expression]);
   const snapshot = useMemo(() => {
     if (!compiled.fn) return null;
     return buildDerivativeSnapshot(compiled.fn, pointX, h);
   }, [compiled, pointX, h]);
-  const mission = useMemo(() => buildDerivativeMissionState(preset, snapshot), [preset, snapshot]);
+  const mission = useMemo(() => buildDerivativeMissionState(activeMission, snapshot), [activeMission, snapshot]);
   const slopeLabel = useMemo(() => describeSlope(snapshot?.tangentSlope ?? snapshot?.secantSlope), [snapshot]);
 
   useEffect(() => {
@@ -490,18 +582,64 @@ function DerivativePlaygroundPanel() {
     const context = canvas.getContext("2d");
     drawDerivativeScene(context, {
       compiled,
-      preset,
+      xRange: viewXRange,
+      yRange: viewYRange,
       snapshot,
       showSecant,
       showTangent
     });
-  }, [compiled, preset, showSecant, showTangent, snapshot]);
+  }, [compiled, showSecant, showTangent, snapshot, viewXRange, viewYRange]);
+
+  useEffect(() => {
+    if (!autoPlay) {
+      if (autoplayRef.current) cancelAnimationFrame(autoplayRef.current);
+      return;
+    }
+
+    const startedAt = performance.now();
+    function frame(now) {
+      const phase = ((now - startedAt) / 2200) % 2;
+      const progress = phase <= 1 ? phase : 2 - phase;
+      const swing = -preset.xRange + progress * preset.xRange * 2;
+      setPointX(swing);
+      autoplayRef.current = requestAnimationFrame(frame);
+    }
+
+    autoplayRef.current = requestAnimationFrame(frame);
+    return () => {
+      if (autoplayRef.current) cancelAnimationFrame(autoplayRef.current);
+    };
+  }, [autoPlay, preset.xRange]);
 
   function updatePointFromEvent(event) {
     const canvas = canvasRef.current;
     if (!canvas || !compiled.fn) return;
     const point = eventToCanvasPoint(event, canvas);
-    setPointX(clampFloat(screenToWorldX(point.x, canvas.width, preset.xRange), -preset.xRange, preset.xRange, pointX));
+    setPointX(clampFloat(screenToWorldX(point.x, canvas.width, viewXRange), -preset.xRange, preset.xRange, pointX));
+  }
+
+  function applyPreset(id) {
+    const nextPreset = DERIVATIVE_PRESETS.find((item) => item.id === id);
+    if (!nextPreset) return;
+    setPresetId(id);
+    setPointX(nextPreset.pointX);
+    setH(nextPreset.h);
+    setViewScale(1);
+    setShowSecant(true);
+    setShowTangent(true);
+    setAutoPlay(false);
+  }
+
+  function resetScene() {
+    applyPreset(preset.id);
+  }
+
+  function randomizeScene() {
+    setPointX(clampFloat((Math.random() * 2 - 1) * preset.xRange * 0.92, -preset.xRange, preset.xRange, preset.pointX));
+    setH(clampFloat(0.15 + Math.random() * 1.8, 0.08, 2.2, preset.h));
+    setViewScale(clampFloat(0.7 + Math.random() * 0.7, 0.65, 1.45, 1));
+    setShowSecant(Math.random() > 0.2);
+    setShowTangent(true);
   }
 
   return (
@@ -537,18 +675,56 @@ function DerivativePlaygroundPanel() {
       controls={
         <>
           <MathPlaygroundHeader title="坂道ハンター" starter="まずは点を動かす" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
 
-          <MathPresetRow options={DERIVATIVE_PRESETS} activeId={presetId} onSelect={setPresetId} />
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={DERIVATIVE_PRESETS} activeId={presetId} onSelect={applyPreset} />
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={randomizeScene}>おまかせ</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>リセット</button>
+                <button type="button" className="button button-ghost button-small" onClick={() => setAutoPlay((current) => !current)}>
+                  {autoPlay ? "再生を止める" : "点を流す"}
+                </button>
+              </MathActionRow>
+              <MathStoryCard title="いま見ている曲線">
+                <span>{preset.expression}</span>
+                <span>上り・下り・平らな場所が続けて見つかります。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
 
-          <MathStoryCard title="いま見ている曲線">{preset.expression}</MathStoryCard>
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={DERIVATIVE_PRESETS} activeId={presetId} onSelect={applyPreset} />
+              <MathSliderField label="見る場所を動かす" min={-preset.xRange} max={preset.xRange} step="0.01" value={pointX} onChange={setPointX} />
+              <div className="math-number-grid">
+                <MathNumberField label="x の位置" value={formatNumber(pointX)} min={-preset.xRange} max={preset.xRange} step="0.1" onChange={(value) => setPointX(clampFloat(value, -preset.xRange, preset.xRange, pointX))} />
+                <MathNumberField label="h の大きさ" value={formatNumber(h)} min={0.08} max={2.2} step="0.05" onChange={(value) => setH(clampFloat(value, 0.08, 2.2, h))} />
+              </div>
+              <MathSliderField label="h を小さくする" min="0.08" max="2.2" step="0.01" value={h} onChange={setH} />
+              <MathSliderField label="ズーム" min="0.65" max="1.45" step="0.01" value={viewScale} onChange={setViewScale} />
+              <div className="math-toggle-grid">
+                <MathToggleField label="割線を表示" checked={showSecant} onChange={setShowSecant} />
+                <MathToggleField label="接線を表示" checked={showTangent} onChange={setShowTangent} />
+              </div>
+            </>
+          ) : null}
 
-          <MathSliderField label="見る場所を動かす" min={-preset.xRange} max={preset.xRange} step="0.01" value={pointX} onChange={setPointX} />
-          <MathSliderField label="h を小さくする" min="0.08" max="2.2" step="0.01" value={h} onChange={setH} />
-
-          <div className="math-toggle-grid">
-            <MathToggleField label="割線を表示" checked={showSecant} onChange={setShowSecant} />
-            <MathToggleField label="接線を表示" checked={showTangent} onChange={setShowTangent} />
-          </div>
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={DERIVATIVE_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStoryCard title="今回のねらい">
+                {activeMission.description}
+              </MathStoryCard>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={() => setAutoPlay((current) => !current)}>
+                  {autoPlay ? "観察を止める" : "観察を始める"}
+                </button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>やり直す</button>
+              </MathActionRow>
+            </>
+          ) : null}
 
           <div className="math-kpi-grid">
             <MathKpi label="x の位置" value={formatNumber(pointX)} />
@@ -599,18 +775,16 @@ function IntegralPlaygroundPanel() {
   const animationRef = useRef(null);
   const autoSweepRef = useRef(null);
   const [presetId, setPresetId] = useState(INTEGRAL_PRESETS[0].id);
+  const [mode, setMode] = useState("play");
+  const [missionId, setMissionId] = useState(INTEGRAL_MISSIONS[0].id);
   const preset = INTEGRAL_PRESETS.find((item) => item.id === presetId) || INTEGRAL_PRESETS[0];
+  const activeMission = INTEGRAL_MISSIONS.find((item) => item.id === missionId) || INTEGRAL_MISSIONS[0];
   const [interval, setIntervalRange] = useState({ a: preset.interval[0], b: preset.interval[1] });
   const [partitions, setPartitions] = useState(12);
   const [fillProgress, setFillProgress] = useState(1);
   const [showRiemann, setShowRiemann] = useState(true);
+  const [riemannMode, setRiemannMode] = useState("midpoint");
   const [autoSweep, setAutoSweep] = useState(false);
-
-  useEffect(() => {
-    setIntervalRange({ a: preset.interval[0], b: preset.interval[1] });
-    setPartitions(12);
-    setAutoSweep(false);
-  }, [preset]);
 
   useEffect(() => {
     if (animationRef.current) cancelAnimationFrame(animationRef.current);
@@ -665,9 +839,9 @@ function IntegralPlaygroundPanel() {
   }, [compiled, interval.a, interval.b]);
   const riemannArea = useMemo(() => {
     if (!compiled.fn) return Number.NaN;
-    return riemannSum(compiled.fn, interval.a, interval.b, partitions);
-  }, [compiled, interval.a, interval.b, partitions]);
-  const mission = useMemo(() => buildIntegralMissionState(preset, exactArea), [preset, exactArea]);
+    return riemannSum(compiled.fn, interval.a, interval.b, partitions, riemannMode);
+  }, [compiled, interval.a, interval.b, partitions, riemannMode]);
+  const mission = useMemo(() => buildIntegralMissionState(activeMission, exactArea), [activeMission, exactArea]);
   const animatedEnd = interval.a + (interval.b - interval.a) * fillProgress;
   const integralTone = exactArea < -0.15 ? "is-warm" : exactArea > 0.15 ? "is-positive" : "is-soft";
 
@@ -681,9 +855,10 @@ function IntegralPlaygroundPanel() {
       interval,
       animatedEnd,
       partitions,
-      showRiemann
+      showRiemann,
+      riemannMode
     });
-  }, [animatedEnd, compiled, interval, partitions, preset, showRiemann]);
+  }, [animatedEnd, compiled, interval, partitions, preset, riemannMode, showRiemann]);
 
   function updateBoundaryFromEvent(event) {
     const canvas = canvasRef.current;
@@ -705,6 +880,31 @@ function IntegralPlaygroundPanel() {
     const aX = worldToScreenX(interval.a, canvas.width, preset.xRange);
     const bX = worldToScreenX(interval.b, canvas.width, preset.xRange);
     return Math.abs(point.x - aX) <= Math.abs(point.x - bX) ? "a" : "b";
+  }
+
+  function applyPreset(id) {
+    const nextPreset = INTEGRAL_PRESETS.find((item) => item.id === id);
+    if (!nextPreset) return;
+    setPresetId(id);
+    setIntervalRange({ a: nextPreset.interval[0], b: nextPreset.interval[1] });
+    setPartitions(12);
+    setShowRiemann(true);
+    setRiemannMode("midpoint");
+    setAutoSweep(false);
+  }
+
+  function resetScene() {
+    applyPreset(preset.id);
+  }
+
+  function randomizeScene() {
+    const span = preset.xRange * 1.45;
+    const left = clampFloat((Math.random() * 2 - 1) * span * 0.45, -span, span, preset.interval[0]);
+    const right = clampFloat(left + 0.8 + Math.random() * span * 0.55, left + 0.2, span, preset.interval[1]);
+    setIntervalRange({ a: left, b: right });
+    setPartitions(4 + Math.floor(Math.random() * 28));
+    setShowRiemann(Math.random() > 0.18);
+    setRiemannMode(["left", "midpoint", "right"][Math.floor(Math.random() * 3)]);
   }
 
   const tankFill = Math.min(100, (Math.abs(exactArea) / 12) * 100);
@@ -742,22 +942,68 @@ function IntegralPlaygroundPanel() {
       controls={
         <>
           <MathPlaygroundHeader title="面積タンク" starter="まずは区間を動かす" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
 
-          <MathPresetRow options={INTEGRAL_PRESETS} activeId={presetId} onSelect={setPresetId} />
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={INTEGRAL_PRESETS} activeId={presetId} onSelect={applyPreset} />
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={randomizeScene}>おまかせ</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>リセット</button>
+                <button type="button" className="button button-ghost button-small" onClick={() => setAutoSweep((current) => !current)}>
+                  {autoSweep ? "ためるのを止める" : "左からためる"}
+                </button>
+              </MathActionRow>
+              <MathStoryCard title="いま見ている曲線">
+                <span>{preset.expression}</span>
+                <span>区間を動かすと、上と下のたまり方がすぐ変わります。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
 
-          <MathStoryCard title="いま見ている曲線">{preset.expression}</MathStoryCard>
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={INTEGRAL_PRESETS} activeId={presetId} onSelect={applyPreset} />
+              <MathSliderField label="分け方を細かくする" min="4" max="48" step="1" value={partitions} onChange={setPartitions} />
+              <div className="math-number-grid">
+                <MathNumberField label="左端 a" value={formatNumber(interval.a)} min={-preset.xRange} max={preset.xRange} step="0.1" onChange={(value) => setIntervalRange((current) => ({ a: Math.min(clampFloat(value, -preset.xRange, preset.xRange, current.a), current.b - 0.2), b: current.b }))} />
+                <MathNumberField label="右端 b" value={formatNumber(interval.b)} min={-preset.xRange} max={preset.xRange} step="0.1" onChange={(value) => setIntervalRange((current) => ({ a: current.a, b: Math.max(clampFloat(value, -preset.xRange, preset.xRange, current.b), current.a + 0.2) }))} />
+              </div>
+              <MathPresetRow
+                options={[
+                  { id: "left", label: "左リーマン" },
+                  { id: "midpoint", label: "中点" },
+                  { id: "right", label: "右リーマン" }
+                ]}
+                activeId={riemannMode}
+                onSelect={setRiemannMode}
+              />
+              <div className="math-toggle-grid">
+                <MathToggleField label="近似の長方形" checked={showRiemann} onChange={setShowRiemann} />
+                <MathToggleField label="左から自動でためる" checked={autoSweep} onChange={setAutoSweep} />
+              </div>
+            </>
+          ) : null}
 
-          <MathSliderField label="分け方を細かくする" min="4" max="48" step="1" value={partitions} onChange={setPartitions} />
-
-          <div className="math-toggle-grid">
-            <MathToggleField label="近似の長方形" checked={showRiemann} onChange={setShowRiemann} />
-            <MathToggleField label="左から自動でためる" checked={autoSweep} onChange={setAutoSweep} />
-          </div>
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={INTEGRAL_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStoryCard title="今回のねらい">
+                {activeMission.description}
+              </MathStoryCard>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>やり直す</button>
+                <button type="button" className="button button-ghost button-small" onClick={() => setAutoSweep((current) => !current)}>
+                  {autoSweep ? "観察を止める" : "観察を始める"}
+                </button>
+              </MathActionRow>
+            </>
+          ) : null}
 
           <div className="math-kpi-grid">
             <MathKpi label="区間の左端" value={formatNumber(interval.a)} />
             <MathKpi label="区間の右端" value={formatNumber(interval.b)} />
-            <MathKpi label="リーマン和" value={formatNumber(riemannArea)} />
+            <MathKpi label="近似の合計" value={formatNumber(riemannArea)} />
             <MathKpi label="積分値" value={formatNumber(exactArea)} />
           </div>
 
@@ -816,15 +1062,23 @@ function LinearAlgebraPlaygroundPanel() {
   const canvasRef = useRef(null);
   const dragRef = useRef(null);
   const linearRange = 5.5;
+  const [mode, setMode] = useState("play");
+  const [missionId, setMissionId] = useState(LINEAR_MISSIONS[0].id);
   const [showBaseGrid, setShowBaseGrid] = useState(true);
   const [presetId, setPresetId] = useState("identity");
+  const [shapeMode, setShapeMode] = useState("square");
   const [basis, setBasis] = useState({
     u: { x: 1, y: 0 },
     v: { x: 0, y: 1 }
   });
 
+  const activeMission = LINEAR_MISSIONS.find((item) => item.id === missionId) || LINEAR_MISSIONS[0];
+  const shapeLabel = LINEAR_SHAPES.find((item) => item.id === shapeMode)?.label || "図形";
   const determinant = useMemo(() => basis.u.x * basis.v.y - basis.u.y * basis.v.x, [basis]);
   const areaScale = Math.abs(determinant);
+  const dotProduct = basis.u.x * basis.v.x + basis.u.y * basis.v.y;
+  const uLength = Math.hypot(basis.u.x, basis.u.y);
+  const vLength = Math.hypot(basis.v.x, basis.v.y);
   const orientation = determinant > 0.08 ? "そのまま" : determinant < -0.08 ? "反転" : "ぺたんこに近い";
   const reflected = determinant < -0.08;
   const transformationLabel = areaScale < 0.2
@@ -834,32 +1088,53 @@ function LinearAlgebraPlaygroundPanel() {
       : areaScale > 1.15
         ? "平面が広がりながら、形が変わっています"
         : areaScale < 0.85
-          ? "平面が縮みながら、形が変わっています"
-          : "面積をほぼ保ったまま、形だけが変わっています";
+        ? "平面が縮みながら、形が変わっています"
+        : "面積をほぼ保ったまま、形だけが変わっています";
   const mission = useMemo(() => {
     const areaDone = Math.abs(areaScale - 2) < 0.18;
-    const flipDone = determinant < -0.85;
+    const flipDone = determinant < -0.85 && areaScale > 0.6;
+    const rotateDone =
+      Math.abs(areaScale - 1) < 0.12 &&
+      !reflected &&
+      Math.abs(dotProduct) < 0.18 &&
+      Math.abs(uLength - 1) < 0.18 &&
+      Math.abs(vLength - 1) < 0.18 &&
+      (Math.abs(basis.u.x - 1) > 0.15 || Math.abs(basis.v.y - 1) > 0.15);
+
+    if (activeMission.type === "flip") {
+      return {
+        ...activeMission,
+        done: flipDone,
+        statusText: flipDone
+          ? "向きが反転しました。空間が裏返っています。"
+          : `まだ向きは ${orientation} です。赤か青の矢印を軸の向こう側へ越えると反転が起きやすいです。`
+      };
+    }
+
+    if (activeMission.type === "rotate") {
+      return {
+        ...activeMission,
+        done: rotateDone,
+        statusText: rotateDone
+          ? "面積を保ったまま回転に近い変換になりました。"
+          : `面積は ${formatNumber(areaScale)} 倍、矢印どうしの角度は ${formatNumber(Math.acos(clampFloat(dotProduct / (uLength * vLength || 1), -1, 1, 0)) * 180 / Math.PI)}° です。`
+      };
+    }
+
     return {
-      title: areaDone ? "向きをひっくり返す" : "面積を 2 倍にする",
-      description: areaDone
-        ? "次は赤と青の矢印を動かして、黄色い図形の向きを反転させてみましょう。"
-        : "赤と青の矢印を動かして、黄色い図形の面積をちょうど 2 倍に近づけます。",
-      done: areaDone ? flipDone : areaDone,
-      statusText: areaDone
-        ? flipDone
-          ? "反転が起きました。空間の向きまで変わっています。"
-          : `まだ向きは ${orientation} です。左右どちらかの矢印を軸の向こう側へ越えると反転が起きやすいです。`
-        : `いまは ${formatNumber(areaScale)} 倍です。2 倍に近づけてみましょう。`
+      ...activeMission,
+      done: areaDone,
+      statusText: areaDone ? "2 倍の変形に到達しました。" : `いまは ${formatNumber(areaScale)} 倍です。2 倍に近づけてみましょう。`
     };
-  }, [areaScale, determinant, orientation]);
+  }, [activeMission, areaScale, basis.u.x, basis.v.y, determinant, dotProduct, orientation, reflected, uLength, vLength]);
   const matrixTone = reflected ? "is-warm" : areaScale > 1.15 ? "is-positive" : areaScale < 0.85 ? "is-cool" : "is-soft";
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
-    drawLinearAlgebraScene(context, basis, { showBaseGrid, range: linearRange });
-  }, [basis, showBaseGrid]);
+    drawLinearAlgebraScene(context, basis, { showBaseGrid, range: linearRange, shapeMode });
+  }, [basis, shapeMode, showBaseGrid]);
 
   function applyPreset(id) {
     const preset = LINEAR_PRESETS.find((item) => item.id === id);
@@ -869,6 +1144,41 @@ function LinearAlgebraPlaygroundPanel() {
       u: { x: preset.basis[0][0], y: preset.basis[0][1] },
       v: { x: preset.basis[1][0], y: preset.basis[1][1] }
     });
+  }
+
+  function updateBasisComponent(vectorKey, axis, value) {
+    setPresetId(null);
+    setBasis((current) => ({
+      ...current,
+      [vectorKey]: {
+        ...current[vectorKey],
+        [axis]: clampFloat(value, -3.2, 3.2, current[vectorKey][axis])
+      }
+    }));
+  }
+
+  function resetScene() {
+    applyPreset("identity");
+    setShapeMode("square");
+    setShowBaseGrid(true);
+  }
+
+  function randomizeTransform() {
+    let next = null;
+    for (let index = 0; index < 20; index += 1) {
+      const candidate = {
+        u: { x: clampFloat((Math.random() * 2 - 1) * 2.4, -3.2, 3.2, 1), y: clampFloat((Math.random() * 2 - 1) * 2.4, -3.2, 3.2, 0) },
+        v: { x: clampFloat((Math.random() * 2 - 1) * 2.4, -3.2, 3.2, 0), y: clampFloat((Math.random() * 2 - 1) * 2.4, -3.2, 3.2, 1) }
+      };
+      const candidateDet = candidate.u.x * candidate.v.y - candidate.u.y * candidate.v.x;
+      if (Math.abs(candidateDet) > 0.35 && Math.abs(candidateDet) < 3.4) {
+        next = candidate;
+        break;
+      }
+    }
+    if (!next) return;
+    setPresetId(null);
+    setBasis(next);
   }
 
   function updateHandleFromEvent(event) {
@@ -932,12 +1242,50 @@ function LinearAlgebraPlaygroundPanel() {
       controls={
         <>
           <MathPlaygroundHeader title="平面ゆがみ工房" starter="まずは矢印を引っぱる" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
 
-          <MathPresetRow options={LINEAR_PRESETS} activeId={presetId} onSelect={applyPreset} />
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={LINEAR_PRESETS} activeId={presetId} onSelect={applyPreset} />
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={randomizeTransform}>おまかせ</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>リセット</button>
+              </MathActionRow>
+              <MathStoryCard title="いま見ている図形">
+                <span>{shapeLabel} を、空間ごと変形しています。</span>
+                <span>格子まで一緒にゆがむのが、行列の面白さです。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
 
-          <div className="math-toggle-grid">
-            <MathToggleField label="元の格子も表示" checked={showBaseGrid} onChange={setShowBaseGrid} />
-          </div>
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={LINEAR_PRESETS} activeId={presetId} onSelect={applyPreset} />
+              <MathPresetRow options={LINEAR_SHAPES} activeId={shapeMode} onSelect={setShapeMode} />
+              <div className="math-toggle-grid">
+                <MathToggleField label="元の格子も表示" checked={showBaseGrid} onChange={setShowBaseGrid} />
+              </div>
+              <div className="math-number-grid">
+                <MathNumberField label="u の x" value={formatNumber(basis.u.x)} min={-3.2} max={3.2} step="0.1" onChange={(value) => updateBasisComponent("u", "x", value)} />
+                <MathNumberField label="u の y" value={formatNumber(basis.u.y)} min={-3.2} max={3.2} step="0.1" onChange={(value) => updateBasisComponent("u", "y", value)} />
+                <MathNumberField label="v の x" value={formatNumber(basis.v.x)} min={-3.2} max={3.2} step="0.1" onChange={(value) => updateBasisComponent("v", "x", value)} />
+                <MathNumberField label="v の y" value={formatNumber(basis.v.y)} min={-3.2} max={3.2} step="0.1" onChange={(value) => updateBasisComponent("v", "y", value)} />
+              </div>
+            </>
+          ) : null}
+
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={LINEAR_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStoryCard title="今回のねらい">
+                {activeMission.description}
+              </MathStoryCard>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={randomizeTransform}>変形を変える</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>やり直す</button>
+              </MathActionRow>
+            </>
+          ) : null}
 
           <div className="math-kpi-grid">
             <MathKpi label="赤い矢印" value={`${formatNumber(basis.u.x)}, ${formatNumber(basis.u.y)}`} />
@@ -957,7 +1305,7 @@ function LinearAlgebraPlaygroundPanel() {
 
           <MathStoryCard title="いまの変形" className="math-state-card">
             <span>
-              {transformationLabel} 単位正方形の面積は <strong>{formatNumber(areaScale)}</strong> 倍、向きは <strong>{orientation}</strong> です。
+              {transformationLabel} いま選んでいる{shapeLabel}の広がりは <strong>{formatNumber(areaScale)}</strong> 倍、向きは <strong>{orientation}</strong> です。
             </span>
             <div className="math-inline-matrix" aria-label="いまの変換ルール">
               <span className="math-inline-matrix-bracket">[</span>
@@ -975,8 +1323,8 @@ function LinearAlgebraPlaygroundPanel() {
             items={[
               { tone: "is-dark", label: "元の空間" },
               { tone: "is-cyan", label: "変形した格子" },
-              { tone: "is-purple", label: "変形した円" },
-              { tone: "is-orange", label: "単位正方形" }
+              { tone: "is-purple", label: `変形した${shapeLabel}` },
+              { tone: "is-orange", label: `元の${shapeLabel}` }
             ]}
           />
         </>
@@ -986,8 +1334,8 @@ function LinearAlgebraPlaygroundPanel() {
           <div className="math-footer-note">
             <strong>いま何が起きている？</strong>
             <p>
-              赤と青の 2 本の矢印は、平面の新しいものさしです。2 本を動かすと、黄色い図形だけでなく
-              <strong> 格子と円ごと空間全体 </strong>
+              赤と青の 2 本の矢印は、平面の新しいものさしです。2 本を動かすと、選んだ図形だけでなく
+              <strong> 格子ごと空間全体 </strong>
               が変わります。面積が大きくなるほど広がり、マイナスになると向きがひっくり返ります。
             </p>
           </div>
@@ -1743,27 +2091,29 @@ function drawGraphScene(context, config) {
 
 function drawDerivativeScene(context, config) {
   const { canvas } = context;
+  const xRange = config.xRange ?? config.preset?.xRange ?? 5;
+  const yRange = config.yRange ?? config.preset?.yRange ?? 5;
   context.clearRect(0, 0, canvas.width, canvas.height);
   paintMathBackground(context, canvas.width, canvas.height);
-  drawGraphGrid(context, canvas.width, canvas.height, config.preset.xRange, config.preset.yRange);
+  drawGraphGrid(context, canvas.width, canvas.height, xRange, yRange);
 
   if (!config.compiled.fn || !config.snapshot) {
     drawCanvasMessage(context, canvas.width, canvas.height, config.compiled.error || "式を入力してください。");
     return;
   }
 
-  drawFunctionCurve(context, config.compiled.fn, config.preset.xRange, config.preset.yRange, {
+  drawFunctionCurve(context, config.compiled.fn, xRange, yRange, {
     strokeStyle: "#0f766e",
     lineWidth: 3
   });
 
   const point = {
-    x: worldToScreenX(config.snapshot.x, canvas.width, config.preset.xRange),
-    y: worldToScreenY(config.snapshot.y, canvas.height, config.preset.yRange)
+    x: worldToScreenX(config.snapshot.x, canvas.width, xRange),
+    y: worldToScreenY(config.snapshot.y, canvas.height, yRange)
   };
   const secantPoint = {
-    x: worldToScreenX(config.snapshot.x + config.snapshot.h, canvas.width, config.preset.xRange),
-    y: worldToScreenY(config.snapshot.secantY, canvas.height, config.preset.yRange)
+    x: worldToScreenX(config.snapshot.x + config.snapshot.h, canvas.width, xRange),
+    y: worldToScreenY(config.snapshot.secantY, canvas.height, yRange)
   };
 
   context.save();
@@ -1784,8 +2134,8 @@ function drawDerivativeScene(context, config) {
       config.snapshot.x,
       config.snapshot.y,
       config.snapshot.tangentSlope,
-      config.preset.xRange,
-      config.preset.yRange,
+      xRange,
+      yRange,
       derivativeLineColor(config.snapshot.tangentSlope)
     );
   }
@@ -1810,24 +2160,26 @@ function drawDerivativeScene(context, config) {
 
 function drawIntegralScene(context, config) {
   const { canvas } = context;
+  const xRange = config.xRange ?? config.preset?.xRange ?? 5;
+  const yRange = config.yRange ?? config.preset?.yRange ?? 5;
   context.clearRect(0, 0, canvas.width, canvas.height);
   paintMathBackground(context, canvas.width, canvas.height);
-  drawGraphGrid(context, canvas.width, canvas.height, config.preset.xRange, config.preset.yRange);
+  drawGraphGrid(context, canvas.width, canvas.height, xRange, yRange);
 
   if (!config.compiled.fn) {
     drawCanvasMessage(context, canvas.width, canvas.height, config.compiled.error || "式を入力してください。");
     return;
   }
 
-  const axisY = worldToScreenY(0, canvas.height, config.preset.yRange);
-  drawFunctionCurve(context, config.compiled.fn, config.preset.xRange, config.preset.yRange, {
+  const axisY = worldToScreenY(0, canvas.height, yRange);
+  drawFunctionCurve(context, config.compiled.fn, xRange, yRange, {
     strokeStyle: "#0f766e",
     lineWidth: 3
   });
 
-  drawIntegralFill(context, config.compiled.fn, config.interval.a, config.animatedEnd, config.preset.xRange, config.preset.yRange);
+  drawIntegralFill(context, config.compiled.fn, config.interval.a, config.animatedEnd, xRange, yRange);
   if (config.showRiemann) {
-    drawRiemannBars(context, config.compiled.fn, config.interval.a, config.interval.b, config.partitions, config.preset.xRange, config.preset.yRange);
+    drawRiemannBars(context, config.compiled.fn, config.interval.a, config.interval.b, config.partitions, xRange, yRange, config.riemannMode);
   }
 
   context.save();
@@ -1836,7 +2188,7 @@ function drawIntegralScene(context, config) {
     b: "#1d4ed8"
   };
   for (const [key, xValue] of Object.entries({ a: config.interval.a, b: config.interval.b })) {
-    const screenX = worldToScreenX(xValue, canvas.width, config.preset.xRange);
+    const screenX = worldToScreenX(xValue, canvas.width, xRange);
     context.strokeStyle = handleColors[key];
     context.lineWidth = 2.5;
     context.beginPath();
@@ -1854,6 +2206,7 @@ function drawIntegralScene(context, config) {
 function drawLinearAlgebraScene(context, basis, options = {}) {
   const { canvas } = context;
   const range = options.range ?? 5.5;
+  const shapeMode = options.shapeMode ?? "square";
   const determinant = basis.u.x * basis.v.y - basis.u.y * basis.v.x;
   context.clearRect(0, 0, canvas.width, canvas.height);
   paintMathBackground(context, canvas.width, canvas.height);
@@ -1863,16 +2216,15 @@ function drawLinearAlgebraScene(context, basis, options = {}) {
   }
   drawLinearAxes(context, canvas.width, canvas.height, range);
   drawLinearGrid(context, canvas.width, canvas.height, range, basis, "rgba(15, 118, 110, 0.45)", 1.6);
-  drawLinearUnitCircle(context, canvas.width, canvas.height, range, null, {
+  drawLinearSampleShape(context, canvas.width, canvas.height, range, null, shapeMode, {
+    determinant: 1,
     strokeStyle: "rgba(17, 24, 39, 0.18)",
     fillStyle: "rgba(255, 255, 255, 0.18)",
     dashed: true
   });
-  drawLinearUnitCircle(context, canvas.width, canvas.height, range, basis, {
-    strokeStyle: determinant < 0 ? "rgba(236, 72, 153, 0.72)" : "rgba(124, 58, 237, 0.74)",
-    fillStyle: determinant < 0 ? "rgba(244, 114, 182, 0.14)" : "rgba(124, 58, 237, 0.12)"
+  drawLinearSampleShape(context, canvas.width, canvas.height, range, basis, shapeMode, {
+    determinant
   });
-  drawLinearShape(context, canvas.width, canvas.height, range, basis, determinant);
   drawLinearVector(context, canvas.width, canvas.height, range, basis.u, "#dc2626", "u");
   drawLinearVector(context, canvas.width, canvas.height, range, basis.v, "#2563eb", "v");
 }
@@ -1941,7 +2293,7 @@ function drawIntegralFill(context, fn, left, right, xRange, yRange) {
   context.restore();
 }
 
-function drawRiemannBars(context, fn, left, right, partitions, xRange, yRange) {
+function drawRiemannBars(context, fn, left, right, partitions, xRange, yRange, mode = "midpoint") {
   const { canvas } = context;
   const steps = Math.max(1, partitions);
   const width = (right - left) / steps;
@@ -1954,7 +2306,7 @@ function drawRiemannBars(context, fn, left, right, partitions, xRange, yRange) {
 
   for (let index = 0; index < steps; index += 1) {
     const x = left + width * index;
-    const sampleX = x + width / 2;
+    const sampleX = mode === "left" ? x : mode === "right" ? x + width : x + width / 2;
     const y = safeEvaluate(fn, sampleX);
     if (!Number.isFinite(y)) continue;
     const screenX = worldToScreenX(x, canvas.width, xRange);
@@ -2014,31 +2366,6 @@ function drawLinearAxes(context, width, height, range) {
   context.restore();
 }
 
-function drawLinearShape(context, width, height, range, basis, determinant) {
-  const originalSquare = [
-    { x: 0, y: 0 },
-    { x: 1, y: 0 },
-    { x: 1, y: 1 },
-    { x: 0, y: 1 }
-  ];
-  const transformed = originalSquare.map((point) => applyBasisTransform(point, basis));
-
-  context.save();
-  context.fillStyle = determinant < 0 ? "rgba(251, 113, 133, 0.24)" : "rgba(253, 224, 71, 0.32)";
-  context.strokeStyle = determinant < 0 ? "rgba(225, 29, 72, 0.82)" : "rgba(202, 138, 4, 0.82)";
-  context.lineWidth = 2;
-  context.beginPath();
-  transformed.forEach((point, index) => {
-    const screen = linearWorldToScreen(point.x, point.y, width, height, range);
-    if (index === 0) context.moveTo(screen.x, screen.y);
-    else context.lineTo(screen.x, screen.y);
-  });
-  context.closePath();
-  context.fill();
-  context.stroke();
-  context.restore();
-}
-
 function drawLinearUnitCircle(context, width, height, range, basis, options = {}) {
   const sampleCount = 80;
   context.save();
@@ -2062,6 +2389,59 @@ function drawLinearUnitCircle(context, width, height, range, basis, options = {}
   context.fill();
   context.stroke();
   context.restore();
+}
+
+function drawLinearSampleShape(context, width, height, range, basis, shapeMode, options = {}) {
+  if (shapeMode === "circle") {
+    drawLinearUnitCircle(context, width, height, range, basis, {
+      strokeStyle:
+        options.strokeStyle ||
+        (options.determinant < 0 ? "rgba(236, 72, 153, 0.72)" : "rgba(124, 58, 237, 0.74)"),
+      fillStyle:
+        options.fillStyle ||
+        (options.determinant < 0 ? "rgba(244, 114, 182, 0.14)" : "rgba(124, 58, 237, 0.12)"),
+      dashed: options.dashed
+    });
+    return;
+  }
+
+  const originalPoints = getLinearShapePoints(shapeMode);
+  const points = basis ? originalPoints.map((point) => applyBasisTransform(point, basis)) : originalPoints;
+
+  context.save();
+  context.fillStyle =
+    options.fillStyle || (options.determinant < 0 ? "rgba(251, 113, 133, 0.24)" : "rgba(253, 224, 71, 0.32)");
+  context.strokeStyle =
+    options.strokeStyle || (options.determinant < 0 ? "rgba(225, 29, 72, 0.82)" : "rgba(202, 138, 4, 0.82)");
+  context.lineWidth = 2;
+  if (options.dashed) context.setLineDash([8, 8]);
+  context.beginPath();
+  points.forEach((point, index) => {
+    const screen = linearWorldToScreen(point.x, point.y, width, height, range);
+    if (index === 0) context.moveTo(screen.x, screen.y);
+    else context.lineTo(screen.x, screen.y);
+  });
+  context.closePath();
+  context.fill();
+  context.stroke();
+  context.restore();
+}
+
+function getLinearShapePoints(shapeMode) {
+  if (shapeMode === "triangle") {
+    return [
+      { x: 0, y: 0 },
+      { x: 1.18, y: 0.14 },
+      { x: 0.26, y: 1.05 }
+    ];
+  }
+
+  return [
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 1, y: 1 },
+    { x: 0, y: 1 }
+  ];
 }
 
 function drawLinearVector(context, width, height, range, vector, color, label) {
@@ -2111,10 +2491,10 @@ function buildDerivativeSnapshot(fn, x, h) {
   };
 }
 
-function buildDerivativeMissionState(preset, snapshot) {
+function buildDerivativeMissionState(mission, snapshot) {
   if (!snapshot) {
     return {
-      ...preset.mission,
+      ...mission,
       done: false,
       statusText: "まず点を動かしてみてください。"
     };
@@ -2123,17 +2503,17 @@ function buildDerivativeMissionState(preset, snapshot) {
   let done = false;
   let statusText = "";
 
-  if (preset.mission.type === "zero") {
+  if (mission.type === "zero") {
     const slope = snapshot.differentiable ? snapshot.tangentSlope : snapshot.secantSlope;
     done = Number.isFinite(slope) && Math.abs(slope) < 0.18;
     statusText = done ? "ほとんど平らです。山や谷の近くに来ました。" : `いまの傾きは ${formatNumber(slope)}。まだ坂が残っています。`;
-  } else if (preset.mission.type === "target") {
+  } else if (mission.type === "target") {
     const slope = snapshot.differentiable ? snapshot.tangentSlope : snapshot.secantSlope;
-    done = Number.isFinite(slope) && Math.abs(slope - preset.mission.target) < 0.2;
+    done = Number.isFinite(slope) && Math.abs(slope - mission.target) < 0.2;
     statusText = done
-      ? `${preset.mission.target} くらいの上り坂を見つけました。`
-      : `いまの傾きは ${formatNumber(slope)}。${preset.mission.target} に近づけてみましょう。`;
-  } else if (preset.mission.type === "nondiff") {
+      ? `${mission.target} くらいの上り坂を見つけました。`
+      : `いまの傾きは ${formatNumber(slope)}。${mission.target} に近づけてみましょう。`;
+  } else if (mission.type === "nondiff") {
     done = !snapshot.differentiable && Math.abs(snapshot.x) < 0.18;
     statusText = done
       ? "左右の坂がちがうので、接線が 1 本に定まりません。"
@@ -2141,28 +2521,33 @@ function buildDerivativeMissionState(preset, snapshot) {
   }
 
   return {
-    ...preset.mission,
+    ...mission,
     done,
     statusText
   };
 }
 
-function buildIntegralMissionState(preset, area) {
+function buildIntegralMissionState(mission, area) {
   let done = false;
   let statusText = "";
 
-  if (preset.mission.type === "zero") {
+  if (mission.type === "zero") {
     done = Number.isFinite(area) && Math.abs(area) < 0.35;
     statusText = done ? "正と負がほぼつり合いました。" : `いまの合計は ${formatNumber(area)}。0 に近づけてみましょう。`;
-  } else if (preset.mission.type === "target") {
-    done = Number.isFinite(area) && Math.abs(area - preset.mission.target) < 0.35;
+  } else if (mission.type === "target") {
+    done = Number.isFinite(area) && Math.abs(area - mission.target) < 0.35;
     statusText = done
-      ? `${preset.mission.target} 付近までためられました。`
-      : `いまは ${formatNumber(area)}。${preset.mission.target} を目安に区間を動かします。`;
+      ? `${mission.target} 付近までためられました。`
+      : `いまは ${formatNumber(area)}。${mission.target} を目安に区間を動かします。`;
+  } else if (mission.type === "negative") {
+    done = Number.isFinite(area) && area < -0.8;
+    statusText = done
+      ? "下向きのたまりが優勢になりました。"
+      : `いまの合計は ${formatNumber(area)}。x軸より下の面積が勝つ区間を探してみましょう。`;
   }
 
   return {
-    ...preset.mission,
+    ...mission,
     done,
     statusText
   };
@@ -2191,13 +2576,14 @@ function derivativeMeterTone(value) {
   return "is-cool";
 }
 
-function riemannSum(fn, left, right, partitions) {
+function riemannSum(fn, left, right, partitions, mode = "midpoint") {
   const steps = Math.max(1, partitions);
   const width = (right - left) / steps;
   let total = 0;
   for (let index = 0; index < steps; index += 1) {
-    const x = left + width * (index + 0.5);
-    total += safeEvaluate(fn, x) * width;
+    const x = left + width * index;
+    const sampleX = mode === "left" ? x : mode === "right" ? x + width : x + width * 0.5;
+    total += safeEvaluate(fn, sampleX) * width;
   }
   return total;
 }

@@ -4570,6 +4570,52 @@ textarea {
   gap: 14px;
 }
 
+.math-mode-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 6px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.math-mode-tab {
+  min-height: 42px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-weight: 600;
+  transition:
+    transform 160ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.math-mode-tab:hover {
+  transform: translateY(-1px);
+}
+
+.math-mode-tab.is-active {
+  background: rgba(255, 255, 255, 0.92);
+  color: rgba(15, 23, 42, 0.94);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+}
+
+.math-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.math-number-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .math-mini-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4615,6 +4661,10 @@ textarea {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.math-number-field input {
+  margin-top: 8px;
 }
 
 .math-toggle {

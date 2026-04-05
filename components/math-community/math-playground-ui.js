@@ -1,5 +1,11 @@
 "use client";
 
+const DEFAULT_MODES = [
+  { id: "play", label: "あそぶ" },
+  { id: "edit", label: "いじる" },
+  { id: "mission", label: "ミッション" }
+];
+
 export function MathPlaygroundLayout({ workspace, controls, caption, footer }) {
   return (
     <div className="math-playground-shell">
@@ -28,6 +34,25 @@ export function MathPlaygroundHeader({ title, starter }) {
   );
 }
 
+export function MathModeTabs({ activeId, onSelect, items = DEFAULT_MODES }) {
+  return (
+    <div className="math-mode-tabs" role="tablist" aria-label="数学プレイグラウンドのモード">
+      {items.map((item) => (
+        <button
+          key={item.id}
+          type="button"
+          role="tab"
+          aria-selected={item.id === activeId}
+          className={`math-mode-tab ${item.id === activeId ? "is-active" : ""}`}
+          onClick={() => onSelect(item.id)}
+        >
+          {item.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function MathPresetRow({ options, activeId, onSelect }) {
   return (
     <div className="math-chip-row">
@@ -45,11 +70,31 @@ export function MathPresetRow({ options, activeId, onSelect }) {
   );
 }
 
+export function MathActionRow({ children }) {
+  return <div className="math-action-row">{children}</div>;
+}
+
 export function MathSliderField({ label, min, max, step = "1", value, onChange }) {
   return (
     <label className="field math-slider-field">
       <span>{label}</span>
       <input type="range" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} />
+    </label>
+  );
+}
+
+export function MathNumberField({ label, value, onChange, min, max, step = "0.1" }) {
+  return (
+    <label className="field math-number-field">
+      <span>{label}</span>
+      <input
+        type="number"
+        value={value}
+        min={min}
+        max={max}
+        step={step}
+        onChange={(event) => onChange(Number(event.target.value))}
+      />
     </label>
   );
 }
