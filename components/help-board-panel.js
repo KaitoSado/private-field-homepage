@@ -6,14 +6,13 @@ import { KeioBadge } from "@/components/keio-badge";
 
 const CATEGORIES = ["ノート共有", "過去問交換", "空きコマ同行", "機材貸し借り", "引っ越し手伝い", "その他"];
 const MODE_OPTIONS = ["お願い", "提供"];
-const STATUS_OPTIONS = ["募集中", "成立", "停止中"];
 
 const emptyForm = {
   title: "",
   category: "ノート共有",
   help_mode: "お願い",
   campus: "",
-  status: "募集中",
+  reward_points: "0",
   body: ""
 };
 
@@ -26,6 +25,7 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
   const [editingDraft, setEditingDraft] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState("");
+  const [economy, setEconomy] = useState(null);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [campusFilter, setCampusFilter] = useState("");
@@ -56,6 +56,15 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
       subscription.unsubscribe();
     };
   }, [supabase]);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      setEconomy(null);
+      return;
+    }
+
+    loadEconomySummary();
+  }, [session?.user?.id]);
 
   const categories = useMemo(() => uniq([...CATEGORIES, ...initialCategories, ...items.map((item) => item.category).filter(Boolean)]), [initialCategories, items]);
   const campuses = useMemo(() => uniq([...initialCampuses, ...items.map((item) => item.campus).filter(Boolean)]), [initialCampuses, items]);
@@ -107,6 +116,7 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
 
       setItems((current) => [result.item, ...current]);
       setForm(emptyForm);
+      await loadEconomySummary();
       setStatus("助け合い投稿を追加しました。");
     } catch (error) {
       setStatus(error.message || "助け合い投稿の保存に失敗しました。");
@@ -158,7 +168,7 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
       category: item.category || CATEGORIES[0],
       help_mode: item.help_mode || MODE_OPTIONS[0],
       campus: item.campus || "",
-      status: item.status || STATUS_OPTIONS[0],
+      reward_points: `${item.reward_points || 0}`,
       body: item.body || ""
     });
     setStatus("自分の募集を編集中です。");
@@ -170,6 +180,77 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
 
   function updateEditingField(key, value) {
     setEditingDraft((current) => ({ ...current, [key]: value }));
+  }
+
+  async function loadEconomySummary() {
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      if (!currentSession?.user?.id) return;
+
+      const { data, error } = await supabase.rpc("refresh_economy_account", {
+        p_user_id: currentSession.user.id
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const summaryRow = Array.isArray(data) ? data[0] : data;
+      setEconomy(summaryRow || null);
+    } catch (error) {
+      setStatus(error.message || "ポイント状況を読み込めませんでした。");
+    }
+  }
+
+  async function submitAction(itemId, action) {
+    if (!session?.user) {
+      setStatus("操作にはログインが必要です。");
+      return;
+    }
+
+    setSubmitting(true);
+    setStatus("");
+
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      const response = await fetch("/api/help-requests", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {})
+        },
+        body: JSON.stringify({ id: itemId, action })
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "助け合い投稿の更新に失敗しました。");
+      }
+
+      setItems((current) => current.map((item) => (item.id === itemId ? result.item : item)));
+
+      if (action === "complete" || action === "stop") {
+        await loadEconomySummary();
+      }
+
+      if (action === "claim") {
+        setStatus("募集を引き受けました。");
+      } else if (action === "complete") {
+        setStatus("助け合いを完了して、報酬ptを支払いました。");
+      } else if (action === "stop") {
+        setStatus("募集を停止しました。必要なら報酬ptは返金されています。");
+      }
+    } catch (error) {
+      setStatus(error.message || "助け合い投稿の更新に失敗しました。");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -201,6 +282,19 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
             <div className="section-copy">
               <h2>募集を探す</h2>
             </div>
+
+            {economy ? (
+              <div className="economy-status-strip" aria-label="ポイント状況">
+                <div className="economy-chip">
+                  <strong>{economy.point_balance}</strong>
+                  <span>保有pt</span>
+                </div>
+                <div className="economy-chip">
+                  <strong>{economy.reputation_title}</strong>
+                  <span>称号</span>
+                </div>
+              </div>
+            ) : null}
 
             <div className="class-form-grid">
               <label className="field">
@@ -278,21 +372,12 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
                           <span>キャンパス</span>
                           <input value={editingDraft.campus} onChange={(event) => updateEditingField("campus", event.target.value)} />
                         </label>
-                        <label className="field">
-                          <span>状態</span>
-                          <select value={editingDraft.status} onChange={(event) => updateEditingField("status", event.target.value)}>
-                            {STATUS_OPTIONS.map((nextStatus) => (
-                              <option key={nextStatus} value={nextStatus}>
-                                {nextStatus}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
                       </div>
                       <label className="field">
                         <span>内容</span>
                         <textarea rows="4" value={editingDraft.body} onChange={(event) => updateEditingField("body", event.target.value)} />
                       </label>
+                      <p className="muted">報酬ptは投稿時に預ける方式です。変更したい時はいったん停止して出し直してください。</p>
                       <div className="hero-actions">
                         <button type="button" className="button button-primary" disabled={submitting} onClick={() => saveEditing(item.id)}>
                           {submitting ? "保存中..." : "保存"}
@@ -310,6 +395,7 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
                             <span className={`pill ${item.help_mode === "提供" ? "published" : ""}`}>{item.help_mode}</span>
                             <span className="pill">{item.category || "その他"}</span>
                             <span className="pill">{item.status || "募集中"}</span>
+                            {item.reward_points ? <span className="pill">{item.reward_points}pt</span> : null}
                             {item.campus ? <span className="pill">{item.campus}</span> : null}
                           </div>
                           <h3>{item.title}</h3>
@@ -317,6 +403,16 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
                       </div>
 
                       <p className="class-note-body">{item.body}</p>
+                      {item.accepted_helper ? (
+                        <div className="class-reaction-head">
+                          <div className="help-board-author">
+                            <strong>{item.status === "完了" ? "担当" : "引受"}</strong>
+                            <span>@{item.accepted_helper.username || item.accepted_helper.display_name || "guest"}</span>
+                            <KeioBadge profile={item.accepted_helper} compact />
+                          </div>
+                          {item.status === "完了" && item.completed_at ? <span className="muted">{formatDate(item.completed_at)}</span> : null}
+                        </div>
+                      ) : null}
                       <div className="class-reaction-head">
                         <div className="help-board-author">
                           <strong>@{item.profiles?.username || item.profiles?.display_name || "guest"}</strong>
@@ -326,8 +422,25 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
                       </div>
                       {session?.user?.id === item.author_id ? (
                         <div className="hero-actions">
+                          {item.status === "成立" ? (
+                            <button type="button" className="button button-primary button-small" disabled={submitting} onClick={() => submitAction(item.id, "complete")}>
+                              {submitting ? "処理中..." : "完了して支払う"}
+                            </button>
+                          ) : null}
+                          {item.status !== "完了" ? (
+                            <button type="button" className="button button-ghost button-small" disabled={submitting} onClick={() => submitAction(item.id, "stop")}>
+                              {item.reward_escrowed ? "停止して返金" : "停止"}
+                            </button>
+                          ) : null}
                           <button type="button" className="button button-ghost button-small" onClick={() => startEditing(item)}>
                             編集
+                          </button>
+                        </div>
+                      ) : null}
+                      {session?.user?.id && session.user.id !== item.author_id && item.help_mode === "お願い" && item.status === "募集中" ? (
+                        <div className="hero-actions">
+                          <button type="button" className="button button-primary button-small" disabled={submitting} onClick={() => submitAction(item.id, "claim")}>
+                            {submitting ? "処理中..." : "引き受ける"}
                           </button>
                         </div>
                       ) : null}
@@ -378,6 +491,17 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
                 <span>キャンパス</span>
                 <input value={form.campus} onChange={(event) => updateField("campus", event.target.value)} placeholder="三田 / 日吉 / 湘南藤沢" />
               </label>
+              <label className="field">
+                <span>報酬pt</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="500"
+                  value={form.reward_points}
+                  onChange={(event) => updateField("reward_points", event.target.value)}
+                  placeholder="0"
+                />
+              </label>
             </div>
 
             <label className="field">
@@ -390,6 +514,7 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
                 required
               />
             </label>
+            <p className="muted">お願いを出す時は、設定した報酬ptを先に預けます。提供募集では 0pt のまま使ってください。</p>
 
             <div className="hero-actions">
               <button type="submit" className="button button-primary" disabled={submitting}>

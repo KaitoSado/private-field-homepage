@@ -213,12 +213,16 @@ create table if not exists public.helpful_votes (
 create table if not exists public.help_requests (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references public.profiles(id) on delete cascade,
+  accepted_helper_id uuid references public.profiles(id) on delete set null,
   title text not null,
   category text not null default 'その他',
   help_mode text not null default 'お願い',
   campus text not null default '',
   status text not null default '募集中',
+  reward_points integer not null default 0,
+  reward_escrowed integer not null default 0,
   body text not null,
+  completed_at timestamptz,
   created_at timestamptz not null default timezone('utc'::text, now()),
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
@@ -313,12 +317,16 @@ alter table public.helpful_votes add column if not exists target_id uuid;
 alter table public.helpful_votes add column if not exists points_awarded integer not null default 2;
 alter table public.helpful_votes add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.help_requests add column if not exists author_id uuid references public.profiles(id) on delete cascade;
+alter table public.help_requests add column if not exists accepted_helper_id uuid references public.profiles(id) on delete set null;
 alter table public.help_requests add column if not exists title text;
 alter table public.help_requests add column if not exists category text not null default 'その他';
 alter table public.help_requests add column if not exists help_mode text not null default 'お願い';
 alter table public.help_requests add column if not exists campus text not null default '';
 alter table public.help_requests add column if not exists status text not null default '募集中';
+alter table public.help_requests add column if not exists reward_points integer not null default 0;
+alter table public.help_requests add column if not exists reward_escrowed integer not null default 0;
 alter table public.help_requests add column if not exists body text;
+alter table public.help_requests add column if not exists completed_at timestamptz;
 alter table public.help_requests add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.help_requests add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
 alter table public.grad_ritual_posts add column if not exists author_id uuid references public.profiles(id) on delete cascade;
@@ -437,6 +445,7 @@ create index if not exists helpful_votes_target_idx on public.helpful_votes(targ
 create index if not exists helpful_votes_author_idx on public.helpful_votes(author_id, created_at desc);
 create index if not exists help_requests_updated_idx on public.help_requests(updated_at desc);
 create index if not exists help_requests_author_idx on public.help_requests(author_id);
+create index if not exists help_requests_accepted_helper_idx on public.help_requests(accepted_helper_id);
 create index if not exists help_requests_category_idx on public.help_requests(category, updated_at desc);
 create index if not exists grad_ritual_posts_updated_idx on public.grad_ritual_posts(updated_at desc);
 create index if not exists grad_ritual_posts_author_idx on public.grad_ritual_posts(author_id);
@@ -584,9 +593,15 @@ alter table public.help_requests
   drop constraint if exists help_requests_help_mode_check,
   add constraint help_requests_help_mode_check check (help_mode in ('お願い', '提供')),
   drop constraint if exists help_requests_status_check,
-  add constraint help_requests_status_check check (status in ('募集中', '成立', '停止中')),
+  add constraint help_requests_status_check check (status in ('募集中', '成立', '完了', '停止中')),
   drop constraint if exists help_requests_campus_length_check,
   add constraint help_requests_campus_length_check check (char_length(campus) <= 80),
+  drop constraint if exists help_requests_reward_points_check,
+  add constraint help_requests_reward_points_check check (reward_points >= 0 and reward_points <= 500),
+  drop constraint if exists help_requests_reward_escrowed_check,
+  add constraint help_requests_reward_escrowed_check check (reward_escrowed >= 0 and reward_escrowed <= reward_points),
+  drop constraint if exists help_requests_accepted_helper_check,
+  add constraint help_requests_accepted_helper_check check (accepted_helper_id is null or accepted_helper_id <> author_id),
   drop constraint if exists help_requests_body_length_check,
   add constraint help_requests_body_length_check check (char_length(body) between 1 and 2000);
 

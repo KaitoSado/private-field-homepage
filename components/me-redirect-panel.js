@@ -316,10 +316,26 @@ function formatTransactionLabel(transaction) {
     return "役に立った報酬";
   }
 
+  if (transaction.kind === "help_request_escrow") {
+    return "助け合いの預け入れ";
+  }
+
+  if (transaction.kind === "help_request_reward") {
+    return "助け合い報酬";
+  }
+
+  if (transaction.kind === "help_request_refund") {
+    return "助け合いの返金";
+  }
+
   return transaction.kind || "ポイント移動";
 }
 
 function formatTransactionMeta(transaction) {
+  if (transaction.meta?.request_title) {
+    return transaction.meta.request_title;
+  }
+
   const targetType = transaction.meta?.target_type;
   if (targetType === "class_note") {
     return "裏シラバス";
