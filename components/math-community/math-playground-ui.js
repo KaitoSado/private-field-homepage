@@ -78,6 +78,10 @@ export function MathPresetRow({ options, activeId, onSelect }) {
   );
 }
 
+export function PresetSwitcher(props) {
+  return <MathPresetRow {...props} />;
+}
+
 export function MathActionRow({ children }) {
   return <div className="math-action-row">{children}</div>;
 }
@@ -198,6 +202,10 @@ export function MathKpi({ label, value }) {
       <span>{label}</span>
     </div>
   );
+}
+
+export function ValueCard(props) {
+  return <MathKpi {...props} />;
 }
 
 export function MathValueMeter({ label, value, min, max, valueLabel, accentClass = "", displayValue }) {
