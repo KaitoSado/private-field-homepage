@@ -127,21 +127,29 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
         data: { session: currentSession }
       } = await supabase.auth.getSession();
 
-      if (!currentSession?.access_token) return;
+      if (!currentSession?.user?.id) return;
 
-      const response = await fetch("/api/economy/summary", {
-        headers: {
-          Authorization: `Bearer ${currentSession.access_token}`
-        }
-      });
+      const [{ data: refreshed, error: refreshError }, { data: votes, error: votesError }] = await Promise.all([
+        supabase.rpc("refresh_economy_account", {
+          p_user_id: currentSession.user.id
+        }),
+        supabase
+          .from("helpful_votes")
+          .select("target_type, target_id")
+          .eq("voter_id", currentSession.user.id)
+      ]);
 
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.error || "ポイント状況を読み込めませんでした。");
+      if (refreshError) {
+        throw refreshError;
       }
 
-      setEconomy(result.summary || null);
-      setVotedTipIds(result.votedTargets?.edge_tip || []);
+      if (votesError) {
+        throw votesError;
+      }
+
+      const summaryRow = Array.isArray(refreshed) ? refreshed[0] : refreshed;
+      setEconomy(summaryRow || null);
+      setVotedTipIds((votes || []).filter((vote) => vote.target_type === "edge_tip").map((vote) => vote.target_id));
     } catch (error) {
       setStatus(error.message || "ポイント状況を読み込めませんでした。");
     }
@@ -157,25 +165,32 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
     setStatus("");
 
     try {
-      const {
-        data: { session: currentSession }
-      } = await supabase.auth.getSession();
-
-      const response = await fetch("/api/helpful-votes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {})
-        },
-        body: JSON.stringify({
-          targetType: "edge_tip",
-          targetId: itemId
-        })
+      const { data: result, error } = await supabase.rpc("cast_helpful_vote", {
+        p_voter_id: session.user.id,
+        p_target_type: "edge_tip",
+        p_target_id: itemId
       });
 
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        throw new Error(result.error || "役に立った投票に失敗しました。");
+      if (error) {
+        const message = error.message || "役に立った投票に失敗しました。";
+
+        if (message.includes("already voted")) {
+          throw new Error("この投稿にはすでに投票しています。");
+        }
+
+        if (message.includes("no evaluation credits")) {
+          throw new Error("今週の評価ポイントを使い切りました。");
+        }
+
+        if (message.includes("cannot vote for own content")) {
+          throw new Error("自分の投稿には投票できません。");
+        }
+
+        if (message.includes("target not found")) {
+          throw new Error("投票対象が見つかりません。");
+        }
+
+        throw new Error(message);
       }
 
       setItems((current) =>
