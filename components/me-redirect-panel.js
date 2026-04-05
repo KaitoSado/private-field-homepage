@@ -137,7 +137,7 @@ export function MeRedirectPanel() {
   if (state.loading) {
     return (
       <section className="surface empty-state">
-        <h1>ハブを準備しています</h1>
+        <h1>拠点を準備しています</h1>
       </section>
     );
   }
@@ -163,7 +163,7 @@ export function MeRedirectPanel() {
   return (
     <div className="hub-layout">
       <header className="hub-header">
-        <h1 className="hub-title">ハブ</h1>
+        <h1 className="hub-title">拠点</h1>
         <Link href={state.path} className="button button-primary">
           公開ページへ
         </Link>

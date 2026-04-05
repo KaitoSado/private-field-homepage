@@ -90,7 +90,7 @@ async function reserveRewardPoints(supabase, { userId, amount, requestId, title 
 
   const account = await fetchEconomyAccount(supabase, userId);
   if (account.point_balance < amount) {
-    throw new Error("報酬ptが足りません。ハブで残高を確認してください。");
+    throw new Error("報酬ptが足りません。拠点で残高を確認してください。");
   }
 
   const nextBalance = account.point_balance - amount;

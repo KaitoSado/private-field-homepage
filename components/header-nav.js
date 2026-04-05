@@ -84,7 +84,7 @@ export function HeaderNav() {
 
   const menuLinks = session
     ? [
-        { href: "/me", label: "ハブ" },
+        { href: "/me", label: "拠点" },
         { href: "/settings", label: "設定" },
         ...(profileMeta.role === "admin"
           ? [
