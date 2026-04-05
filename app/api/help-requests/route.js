@@ -37,12 +37,12 @@ function normalizePoints(value) {
 }
 
 function deriveReputationTitle(score) {
-  if (score >= 400) return "守り手";
-  if (score >= 250) return "連結者";
-  if (score >= 120) return "支援者";
-  if (score >= 60) return "案内人";
-  if (score >= 20) return "記録者";
-  return "見習い";
+  if (score >= 2000) return "伝説";
+  if (score >= 1000) return "先駆者";
+  if (score >= 500) return "守護者";
+  if (score >= 200) return "匠";
+  if (score >= 50) return "旅人";
+  return "芽生え";
 }
 
 async function ensureEconomyAccount(supabase, userId) {
@@ -69,6 +69,20 @@ async function fetchEconomyAccount(supabase, userId) {
   }
 
   return data;
+}
+
+async function deriveUserReputationTitle(supabase, userId, score) {
+  const { data, error } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
+
+  if (error) {
+    throw new Error(error.message || "称号情報を読み込めませんでした。");
+  }
+
+  if (data?.role === "admin") {
+    return "創造主";
+  }
+
+  return deriveReputationTitle(score);
 }
 
 async function reserveRewardPoints(supabase, { userId, amount, requestId, title }) {
@@ -113,13 +127,14 @@ async function creditRewardPoints(supabase, { userId, amount, counterpartyUserId
   const account = await fetchEconomyAccount(supabase, userId);
   const nextContribution = account.contribution_score + contributionDelta;
   const nextBalance = account.point_balance + amount;
+  const nextTitle = await deriveUserReputationTitle(supabase, userId, nextContribution);
 
   const { error: updateError } = await supabase
     .from("economy_accounts")
     .update({
       point_balance: nextBalance,
       contribution_score: nextContribution,
-      reputation_title: deriveReputationTitle(nextContribution)
+      reputation_title: nextTitle
     })
     .eq("user_id", userId);
 

@@ -11,7 +11,7 @@ function formatSummary(row) {
     return {
       point_balance: 0,
       contribution_score: 0,
-      reputation_title: "見習い",
+      reputation_title: "芽生え",
       evaluation_credits: 0,
       evaluation_cycle_started_at: null
     };
@@ -20,7 +20,7 @@ function formatSummary(row) {
   return {
     point_balance: row.point_balance || 0,
     contribution_score: row.contribution_score || 0,
-    reputation_title: row.reputation_title || "見習い",
+    reputation_title: row.reputation_title || "芽生え",
     evaluation_credits: row.evaluation_credits || 0,
     evaluation_cycle_started_at: row.evaluation_cycle_started_at || null
   };

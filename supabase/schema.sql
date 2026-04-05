@@ -181,7 +181,7 @@ create table if not exists public.economy_accounts (
   user_id uuid primary key references public.profiles(id) on delete cascade,
   point_balance integer not null default 0,
   contribution_score integer not null default 0,
-  reputation_title text not null default '見習い',
+  reputation_title text not null default '芽生え',
   evaluation_credits integer not null default 0,
   evaluation_cycle_started_at timestamptz not null default timezone('utc'::text, now()),
   created_at timestamptz not null default timezone('utc'::text, now()),
@@ -310,7 +310,7 @@ alter table public.edge_tips add column if not exists updated_at timestamptz not
 
 alter table public.economy_accounts add column if not exists point_balance integer not null default 0;
 alter table public.economy_accounts add column if not exists contribution_score integer not null default 0;
-alter table public.economy_accounts add column if not exists reputation_title text not null default '見習い';
+alter table public.economy_accounts add column if not exists reputation_title text not null default '芽生え';
 alter table public.economy_accounts add column if not exists evaluation_credits integer not null default 0;
 alter table public.economy_accounts add column if not exists evaluation_cycle_started_at timestamptz not null default timezone('utc'::text, now());
 alter table public.economy_accounts add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
@@ -771,12 +771,30 @@ language sql
 immutable
 as $$
   select case
-    when p_score >= 400 then '守り手'
-    when p_score >= 250 then '連結者'
-    when p_score >= 120 then '支援者'
-    when p_score >= 60 then '案内人'
-    when p_score >= 20 then '記録者'
-    else '見習い'
+    when p_score >= 2000 then '伝説'
+    when p_score >= 1000 then '先駆者'
+    when p_score >= 500 then '守護者'
+    when p_score >= 200 then '匠'
+    when p_score >= 50 then '旅人'
+    else '芽生え'
+  end;
+$$;
+
+create or replace function public.effective_reputation_title(p_user_id uuid, p_score integer)
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select case
+    when exists (
+      select 1
+      from public.profiles
+      where id = p_user_id
+        and role = 'admin'
+    ) then '創造主'
+    else public.derive_reputation_title(p_score)
   end;
 $$;
 
@@ -816,7 +834,7 @@ begin
     p_user_id,
     v_initial_balance,
     0,
-    public.derive_reputation_title(0),
+    public.effective_reputation_title(p_user_id, 0),
     v_allowance,
     timezone('utc'::text, now())
   )
@@ -826,12 +844,12 @@ begin
   set
     evaluation_credits = v_allowance,
     evaluation_cycle_started_at = timezone('utc'::text, now()),
-    reputation_title = public.derive_reputation_title(account.contribution_score)
+    reputation_title = public.effective_reputation_title(p_user_id, account.contribution_score)
   where account.user_id = p_user_id
     and (
       account.evaluation_cycle_started_at is null
       or account.evaluation_cycle_started_at <= timezone('utc'::text, now()) - interval '7 days'
-      or account.reputation_title is distinct from public.derive_reputation_title(account.contribution_score)
+      or account.reputation_title is distinct from public.effective_reputation_title(p_user_id, account.contribution_score)
     );
 
   return query
@@ -923,7 +941,7 @@ begin
   set
     point_balance = point_balance + v_reward,
     contribution_score = contribution_score + 1,
-    reputation_title = public.derive_reputation_title(contribution_score + 1)
+    reputation_title = public.effective_reputation_title(v_author_id, contribution_score + 1)
   where user_id = v_author_id
   returning *
   into v_author_account;
@@ -1010,7 +1028,7 @@ select
   p.id,
   public.initial_point_balance(p.id),
   0,
-  public.derive_reputation_title(0),
+  public.effective_reputation_title(p.id, 0),
   public.weekly_evaluation_allowance(p.id),
   timezone('utc'::text, now())
 from public.profiles as p
