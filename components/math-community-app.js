@@ -806,25 +806,56 @@ function IntegralPlaygroundPanel() {
 function LinearAlgebraPlaygroundPanel() {
   const canvasRef = useRef(null);
   const dragRef = useRef(null);
+  const linearRange = 5.5;
   const [showBaseGrid, setShowBaseGrid] = useState(true);
+  const [presetId, setPresetId] = useState("identity");
   const [basis, setBasis] = useState({
     u: { x: 1, y: 0 },
     v: { x: 0, y: 1 }
   });
 
   const determinant = useMemo(() => basis.u.x * basis.v.y - basis.u.y * basis.v.x, [basis]);
-  const missionDone = Math.abs(Math.abs(determinant) - 2) < 0.18;
+  const areaScale = Math.abs(determinant);
+  const orientation = determinant > 0.08 ? "そのまま" : determinant < -0.08 ? "反転" : "ぺたんこに近い";
+  const reflected = determinant < -0.08;
+  const transformationLabel = areaScale < 0.2
+    ? "かなり押しつぶされています"
+    : reflected
+      ? "ひっくり返りながら、平面がゆがんでいます"
+      : areaScale > 1.15
+        ? "平面が広がりながら、形が変わっています"
+        : areaScale < 0.85
+          ? "平面が縮みながら、形が変わっています"
+          : "面積をほぼ保ったまま、形だけが変わっています";
+  const mission = useMemo(() => {
+    const areaDone = Math.abs(areaScale - 2) < 0.18;
+    const flipDone = determinant < -0.85;
+    return {
+      title: areaDone ? "向きをひっくり返す" : "面積を 2 倍にする",
+      description: areaDone
+        ? "次は赤と青の矢印を動かして、黄色い図形の向きを反転させてみましょう。"
+        : "赤と青の矢印を動かして、黄色い図形の面積をちょうど 2 倍に近づけます。",
+      done: areaDone ? flipDone : areaDone,
+      statusText: areaDone
+        ? flipDone
+          ? "反転が起きました。空間の向きまで変わっています。"
+          : `まだ向きは ${orientation} です。左右どちらかの矢印を軸の向こう側へ越えると反転が起きやすいです。`
+        : `いまは ${formatNumber(areaScale)} 倍です。2 倍に近づけてみましょう。`
+    };
+  }, [areaScale, determinant, orientation]);
+  const matrixTone = reflected ? "is-warm" : areaScale > 1.15 ? "is-positive" : areaScale < 0.85 ? "is-cool" : "is-soft";
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
-    drawLinearAlgebraScene(context, basis, { showBaseGrid });
+    drawLinearAlgebraScene(context, basis, { showBaseGrid, range: linearRange });
   }, [basis, showBaseGrid]);
 
   function applyPreset(id) {
     const preset = LINEAR_PRESETS.find((item) => item.id === id);
     if (!preset) return;
+    setPresetId(id);
     setBasis({
       u: { x: preset.basis[0][0], y: preset.basis[0][1] },
       v: { x: preset.basis[1][0], y: preset.basis[1][1] }
@@ -835,11 +866,12 @@ function LinearAlgebraPlaygroundPanel() {
     const canvas = canvasRef.current;
     if (!canvas || !dragRef.current) return;
     const point = eventToCanvasPoint(event, canvas);
-    const world = linearScreenToWorld(point.x, point.y, canvas.width, canvas.height, 5.5);
+    const world = linearScreenToWorld(point.x, point.y, canvas.width, canvas.height, linearRange);
     const next = {
       x: clampFloat(world.x, -3.2, 3.2, 0),
       y: clampFloat(world.y, -3.2, 3.2, 0)
     };
+    setPresetId(null);
     setBasis((current) => ({
       ...current,
       [dragRef.current]: next
@@ -850,8 +882,8 @@ function LinearAlgebraPlaygroundPanel() {
     const canvas = canvasRef.current;
     if (!canvas) return null;
     const point = eventToCanvasPoint(event, canvas);
-    const uTip = linearWorldToScreen(basis.u.x, basis.u.y, canvas.width, canvas.height, 5.5);
-    const vTip = linearWorldToScreen(basis.v.x, basis.v.y, canvas.width, canvas.height, 5.5);
+    const uTip = linearWorldToScreen(basis.u.x, basis.u.y, canvas.width, canvas.height, linearRange);
+    const vTip = linearWorldToScreen(basis.v.x, basis.v.y, canvas.width, canvas.height, linearRange);
     const uDistance = Math.hypot(point.x - uTip.x, point.y - uTip.y);
     const vDistance = Math.hypot(point.x - vTip.x, point.y - vTip.y);
     if (Math.min(uDistance, vDistance) > 28) return null;
@@ -888,7 +920,7 @@ function LinearAlgebraPlaygroundPanel() {
             <h2>平面ゆがみ工房</h2>
           </div>
 
-          <MathPresetRow options={LINEAR_PRESETS} activeId={null} onSelect={applyPreset} />
+          <MathPresetRow options={LINEAR_PRESETS} activeId={presetId} onSelect={applyPreset} />
 
           <div className="math-toggle-grid">
             <MathToggleField label="元の格子も表示" checked={showBaseGrid} onChange={setShowBaseGrid} />
@@ -897,34 +929,55 @@ function LinearAlgebraPlaygroundPanel() {
           <div className="math-kpi-grid">
             <MathKpi label="赤い矢印" value={`${formatNumber(basis.u.x)}, ${formatNumber(basis.u.y)}`} />
             <MathKpi label="青い矢印" value={`${formatNumber(basis.v.x)}, ${formatNumber(basis.v.y)}`} />
-            <MathKpi label="面積の広がり" value={`${formatNumber(Math.abs(determinant))} 倍`} />
-            <MathKpi label="向き" value={determinant > 0 ? "そのまま" : determinant < 0 ? "反転" : "つぶれかけ"} />
+            <MathKpi label="面積の広がり" value={`${formatNumber(areaScale)} 倍`} />
+            <MathKpi label="向き" value={orientation} />
           </div>
 
           <MathValueMeter
             label="面積の変わり方"
-            value={formatNumber(Math.abs(determinant))}
+            value={areaScale}
             min={0}
             max={4}
-            accentClass={determinant < 0 ? "is-warm" : ""}
-            valueLabel={determinant < 0 ? "向きが反転しています" : "1 を超えると広がり、1 未満だと縮みます"}
+            accentClass={matrixTone}
+            valueLabel={reflected ? "向きが反転しています" : "1 を超えると広がり、1 未満だと縮みます"}
           />
 
-          <div className="math-readout">
-            <strong>見どころ</strong>
+          <div className="math-readout math-state-card">
+            <strong>いまの変形</strong>
             <span>
-              単位正方形の面積は、変形後には <strong>{formatNumber(Math.abs(determinant))}</strong> 倍になります。マイナスなら裏返しも起きています。
+              {transformationLabel} 単位正方形の面積は <strong>{formatNumber(areaScale)}</strong> 倍、向きは <strong>{orientation}</strong> です。
             </span>
+            <div className="math-inline-matrix" aria-label="いまの変換ルール">
+              <span className="math-inline-matrix-bracket">[</span>
+              <div className="math-inline-matrix-grid">
+                <span>{formatNumber(basis.u.x)}</span>
+                <span>{formatNumber(basis.v.x)}</span>
+                <span>{formatNumber(basis.u.y)}</span>
+                <span>{formatNumber(basis.v.y)}</span>
+              </div>
+              <span className="math-inline-matrix-bracket">]</span>
+            </div>
           </div>
 
-          <MathMissionCard
-            mission={{
-              title: "面積を 2 倍にする",
-              description: "赤と青の矢印を動かして、黄色い図形の面積をちょうど 2 倍に近づけます。",
-              done: missionDone,
-              statusText: missionDone ? "2 倍の変形に到達しました。" : `いまは ${formatNumber(Math.abs(determinant))} 倍です。`
-            }}
-          />
+          <div className="math-legend-row">
+            <span><i className="math-legend-dot is-dark" /> 元の空間</span>
+            <span><i className="math-legend-dot is-cyan" /> 変形した格子</span>
+            <span><i className="math-legend-dot is-purple" /> 変形した円</span>
+            <span><i className="math-legend-dot is-orange" /> 単位正方形</span>
+          </div>
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              赤と青の 2 本の矢印は、平面の新しいものさしです。2 本を動かすと、黄色い図形だけでなく
+              <strong> 格子と円ごと空間全体 </strong>
+              が変わります。面積が大きくなるほど広がり、マイナスになると向きがひっくり返ります。
+            </p>
+          </div>
+          <MathMissionCard mission={mission} />
         </>
       }
     />
@@ -1786,7 +1839,8 @@ function drawIntegralScene(context, config) {
 
 function drawLinearAlgebraScene(context, basis, options = {}) {
   const { canvas } = context;
-  const range = 5.5;
+  const range = options.range ?? 5.5;
+  const determinant = basis.u.x * basis.v.y - basis.u.y * basis.v.x;
   context.clearRect(0, 0, canvas.width, canvas.height);
   paintMathBackground(context, canvas.width, canvas.height);
 
@@ -1795,7 +1849,16 @@ function drawLinearAlgebraScene(context, basis, options = {}) {
   }
   drawLinearAxes(context, canvas.width, canvas.height, range);
   drawLinearGrid(context, canvas.width, canvas.height, range, basis, "rgba(15, 118, 110, 0.45)", 1.6);
-  drawLinearShape(context, canvas.width, canvas.height, range, basis);
+  drawLinearUnitCircle(context, canvas.width, canvas.height, range, null, {
+    strokeStyle: "rgba(17, 24, 39, 0.18)",
+    fillStyle: "rgba(255, 255, 255, 0.18)",
+    dashed: true
+  });
+  drawLinearUnitCircle(context, canvas.width, canvas.height, range, basis, {
+    strokeStyle: determinant < 0 ? "rgba(236, 72, 153, 0.72)" : "rgba(124, 58, 237, 0.74)",
+    fillStyle: determinant < 0 ? "rgba(244, 114, 182, 0.14)" : "rgba(124, 58, 237, 0.12)"
+  });
+  drawLinearShape(context, canvas.width, canvas.height, range, basis, determinant);
   drawLinearVector(context, canvas.width, canvas.height, range, basis.u, "#dc2626", "u");
   drawLinearVector(context, canvas.width, canvas.height, range, basis.v, "#2563eb", "v");
 }
@@ -1937,7 +2000,7 @@ function drawLinearAxes(context, width, height, range) {
   context.restore();
 }
 
-function drawLinearShape(context, width, height, range, basis) {
+function drawLinearShape(context, width, height, range, basis, determinant) {
   const originalSquare = [
     { x: 0, y: 0 },
     { x: 1, y: 0 },
@@ -1947,8 +2010,8 @@ function drawLinearShape(context, width, height, range, basis) {
   const transformed = originalSquare.map((point) => applyBasisTransform(point, basis));
 
   context.save();
-  context.fillStyle = "rgba(253, 224, 71, 0.32)";
-  context.strokeStyle = "rgba(202, 138, 4, 0.82)";
+  context.fillStyle = determinant < 0 ? "rgba(251, 113, 133, 0.24)" : "rgba(253, 224, 71, 0.32)";
+  context.strokeStyle = determinant < 0 ? "rgba(225, 29, 72, 0.82)" : "rgba(202, 138, 4, 0.82)";
   context.lineWidth = 2;
   context.beginPath();
   transformed.forEach((point, index) => {
@@ -1956,6 +2019,31 @@ function drawLinearShape(context, width, height, range, basis) {
     if (index === 0) context.moveTo(screen.x, screen.y);
     else context.lineTo(screen.x, screen.y);
   });
+  context.closePath();
+  context.fill();
+  context.stroke();
+  context.restore();
+}
+
+function drawLinearUnitCircle(context, width, height, range, basis, options = {}) {
+  const sampleCount = 80;
+  context.save();
+  context.strokeStyle = options.strokeStyle || "rgba(124, 58, 237, 0.74)";
+  context.fillStyle = options.fillStyle || "rgba(124, 58, 237, 0.12)";
+  context.lineWidth = 2;
+  if (options.dashed) context.setLineDash([8, 8]);
+  context.beginPath();
+  for (let index = 0; index <= sampleCount; index += 1) {
+    const theta = (Math.PI * 2 * index) / sampleCount;
+    const point = {
+      x: Math.cos(theta),
+      y: Math.sin(theta)
+    };
+    const transformed = basis ? applyBasisTransform(point, basis) : point;
+    const screen = linearWorldToScreen(transformed.x, transformed.y, width, height, range);
+    if (index === 0) context.moveTo(screen.x, screen.y);
+    else context.lineTo(screen.x, screen.y);
+  }
   context.closePath();
   context.fill();
   context.stroke();
