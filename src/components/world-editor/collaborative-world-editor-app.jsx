@@ -31,6 +31,9 @@ export function CollaborativeWorldEditorApp() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const broadcastChannelRef = useRef(null);
   const settingsTimerRef = useRef(null);
+  const selectedIdRef = useRef(null);
+  const cameraPoseRef = useRef(null);
+  const profileRef = useRef(null);
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [project, setProject] = useState(null);
@@ -69,6 +72,7 @@ export function CollaborativeWorldEditorApp() {
   const removeObjectWithOptions = useSceneEditorStore((state) => state.removeObjectWithOptions);
   const setSceneName = useSceneEditorStore((state) => state.setSceneName);
   const replaceScene = useSceneEditorStore((state) => state.replaceScene);
+  const replaceSceneObjects = useSceneEditorStore((state) => state.replaceSceneObjects);
   const upsertObject = useSceneEditorStore((state) => state.upsertObject);
   const updateLightingField = useSceneEditorStore((state) => state.updateLightingField);
   const updateLightingFieldWithOptions = useSceneEditorStore((state) => state.updateLightingFieldWithOptions);
@@ -89,6 +93,18 @@ export function CollaborativeWorldEditorApp() {
   const selectedObject = useMemo(() => objects.find((item) => item.id === selectedId) || null, [objects, selectedId]);
   const canEdit = projectRole === "owner" || projectRole === "editor";
   const projectSettings = useMemo(() => buildProjectSettingsFromStore({ sceneName, lighting, environment, fog }), [sceneName, lighting, environment, fog]);
+
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
+
+  useEffect(() => {
+    cameraPoseRef.current = camera.currentPose;
+  }, [camera.currentPose]);
+
+  useEffect(() => {
+    profileRef.current = profile;
+  }, [profile]);
 
   const broadcastTransform = useMemo(
     () =>
@@ -166,7 +182,8 @@ export function CollaborativeWorldEditorApp() {
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
-          await channel.track(buildPresencePayload(profile, selectedId, camera.currentPose));
+          const currentProfile = profileRef.current || profile;
+          await channel.track(buildPresencePayload(currentProfile, selectedIdRef.current, cameraPoseRef.current));
         }
       });
 
@@ -175,7 +192,7 @@ export function CollaborativeWorldEditorApp() {
       broadcastChannelRef.current = null;
       supabase.removeChannel(channel);
     };
-  }, [camera.currentPose, profile, projectId, projectRole, selectedId, session?.user?.id, supabase]);
+  }, [profile, projectId, projectRole, session?.user?.id, supabase]);
 
   useEffect(() => {
     if (!profile || !session?.user || !broadcastChannelRef.current) return;
@@ -196,10 +213,10 @@ export function CollaborativeWorldEditorApp() {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "z") {
         event.preventDefault();
         if (event.shiftKey) {
-          redo();
+          void handleRedo();
           return;
         }
-        undo();
+        void handleUndo();
         return;
       }
 
@@ -214,7 +231,7 @@ export function CollaborativeWorldEditorApp() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [redo, undo]);
+  }, [handleDeleteSelected, handleRedo, handleUndo, saveProjectSettings, setTransformMode]);
 
   async function loadProject(userId, profileRow) {
     setLoading(true);
@@ -433,7 +450,7 @@ export function CollaborativeWorldEditorApp() {
         });
 
         uploadedObjects.push({
-          id: sourceObject.id,
+          id: createCollaborativeObjectId(),
           name: sourceObject.name,
           modelUrl,
           url: modelUrl,
@@ -507,6 +524,18 @@ export function CollaborativeWorldEditorApp() {
     setStatus("招待リンクをコピーしました。");
   }
 
+  async function handleUndo() {
+    const didUndo = undo();
+    if (!didUndo) return;
+    await syncEntireSceneState("1つ前の状態に戻しました。");
+  }
+
+  async function handleRedo() {
+    const didRedo = redo();
+    if (!didRedo) return;
+    await syncEntireSceneState("やり直しました。");
+  }
+
   async function handleSendChat() {
     if (!chatDraft.trim() || !session?.user) return;
     const content = chatDraft.trim();
@@ -566,6 +595,16 @@ export function CollaborativeWorldEditorApp() {
 
     if (payload.type === "settings:update" && payload.settings) {
       applyRemoteSceneSettings(payload.settings);
+      return;
+    }
+
+    if (payload.type === "scene:replace") {
+      if (payload.objects) {
+        replaceSceneObjects((payload.objects || []).map(sceneObjectRowToObject), null);
+      }
+      if (payload.settings) {
+        applyRemoteSceneSettings(payload.settings);
+      }
     }
   }
 
@@ -802,8 +841,8 @@ export function CollaborativeWorldEditorApp() {
           onRemoveCameraBookmark={removeCameraBookmark}
           canUndo={historyPast.length > 0}
           canRedo={historyFuture.length > 0}
-          onUndo={undo}
-          onRedo={redo}
+          onUndo={() => void handleUndo()}
+          onRedo={() => void handleRedo()}
         />
       </div>
 
@@ -831,6 +870,52 @@ export function CollaborativeWorldEditorApp() {
       selectedId: currentSelectedId,
       cameraPose: currentCameraPose
     };
+  }
+
+  async function syncEntireSceneState(nextStatus) {
+    if (!canEdit || !session?.user) return;
+
+    const state = useSceneEditorStore.getState();
+    const settings = buildProjectSettingsFromStore(state);
+    const rows = state.objects.map((object) => objectToSceneObjectRow({ object, projectId, userId: session.user.id }));
+
+    const { data: existingRows, error: existingError } = await supabase.from("scene_objects").select("id").eq("project_id", projectId);
+    if (existingError) {
+      setStatus(existingError.message || "シーンの同期に失敗しました。");
+      return;
+    }
+
+    if (rows.length) {
+      const { error: upsertError } = await supabase.from("scene_objects").upsert(rows);
+      if (upsertError) {
+        setStatus(upsertError.message || "シーンの保存に失敗しました。");
+        return;
+      }
+    }
+
+    const keepIds = new Set(rows.map((row) => row.id));
+    const deleteIds = (existingRows || []).map((row) => row.id).filter((id) => !keepIds.has(id));
+    if (deleteIds.length) {
+      const { error: deleteError } = await supabase.from("scene_objects").delete().eq("project_id", projectId).in("id", deleteIds);
+      if (deleteError) {
+        setStatus(deleteError.message || "削除差分の同期に失敗しました。");
+        return;
+      }
+    }
+
+    const { error: projectError } = await supabase.from("projects").update({ settings }).eq("id", projectId);
+    if (projectError) {
+      setStatus(projectError.message || "プロジェクト設定の保存に失敗しました。");
+      return;
+    }
+
+    broadcastEvent("scene-event", {
+      type: "scene:replace",
+      userId: session.user.id,
+      settings,
+      objects: rows
+    });
+    setStatus(nextStatus);
   }
 }
 
@@ -862,4 +947,11 @@ async function createFileFromDataUrl({ dataUrl, name, mimeType }) {
   const response = await fetch(dataUrl);
   const blob = await response.blob();
   return new File([blob], name, { type: mimeType || blob.type || "application/octet-stream" });
+}
+
+function createCollaborativeObjectId() {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `object-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }

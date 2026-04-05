@@ -112,38 +112,18 @@ export function VrProjectsDashboard() {
     setCreating(true);
     setStatus("");
 
-    const inviteToken = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const { data: project, error } = await supabase
-      .from("projects")
-      .insert({
-        name: createName.trim(),
-        owner_id: session.user.id,
-        invite_token: inviteToken,
-        settings: {}
-      })
-      .select("id, name, owner_id, created_at, updated_at, settings")
-      .single();
+    const { data: projectId, error } = await supabase.rpc("create_vr_project", {
+      p_name: createName.trim()
+    });
 
-    if (error || !project) {
+    if (error || !projectId) {
       setStatus(error?.message || "プロジェクトを作成できませんでした。");
       setCreating(false);
       return;
     }
 
-    const { error: memberError } = await supabase.from("project_members").insert({
-      project_id: project.id,
-      user_id: session.user.id,
-      role: "owner"
-    });
-
-    if (memberError) {
-      setStatus(memberError.message || "オーナー権限の作成に失敗しました。");
-      setCreating(false);
-      return;
-    }
-
     setCreateName("");
-    router.push(`/apps/vr/${project.id}`);
+    router.push(`/apps/vr/${projectId}`);
   }
 
   async function handleGoogleSignIn() {

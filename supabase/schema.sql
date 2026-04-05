@@ -834,6 +834,33 @@ as $$
   select public.project_role(p_project_id) in ('owner', 'editor');
 $$;
 
+create or replace function public.create_vr_project(p_name text)
+returns uuid
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_project_id uuid;
+  v_invite_token text;
+begin
+  if auth.uid() is null then
+    raise exception 'authentication required';
+  end if;
+
+  v_project_id := gen_random_uuid();
+  v_invite_token := coalesce(gen_random_uuid()::text, md5(random()::text || clock_timestamp()::text));
+
+  insert into public.projects (id, name, owner_id, invite_token, settings)
+  values (v_project_id, btrim(p_name), auth.uid(), v_invite_token, '{}'::jsonb);
+
+  insert into public.project_members (project_id, user_id, role, invited_at)
+  values (v_project_id, auth.uid(), 'owner', timezone('utc'::text, now()));
+
+  return v_project_id;
+end;
+$$;
+
 create or replace function public.accept_vr_project_invite(p_project_id uuid, p_token text)
 returns void
 language plpgsql
@@ -864,6 +891,33 @@ begin
   values (p_project_id, auth.uid(), 'editor', timezone('utc'::text, now()))
   on conflict (project_id, user_id)
   do update set invited_at = excluded.invited_at;
+end;
+$$;
+
+create or replace function public.guard_project_updates()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if public.is_admin() or old.owner_id = auth.uid() then
+    return new;
+  end if;
+
+  if new.owner_id is distinct from old.owner_id then
+    raise exception 'only the owner can change project owner';
+  end if;
+
+  if new.invite_token is distinct from old.invite_token then
+    raise exception 'only the owner can rotate the invite token';
+  end if;
+
+  if new.name is distinct from old.name then
+    raise exception 'only the owner can rename the project';
+  end if;
+
+  return new;
 end;
 $$;
 
@@ -1282,6 +1336,11 @@ drop trigger if exists projects_set_updated_at on public.projects;
 create trigger projects_set_updated_at
 before update on public.projects
 for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists projects_guard_updates on public.projects;
+create trigger projects_guard_updates
+before update on public.projects
+for each row execute procedure public.guard_project_updates();
 
 drop trigger if exists scene_objects_set_updated_at on public.scene_objects;
 create trigger scene_objects_set_updated_at
@@ -1738,6 +1797,7 @@ grant select, insert, update, delete on public.scene_objects to authenticated;
 grant select, insert, delete on public.chat_messages to authenticated;
 grant execute on function public.refresh_economy_account(uuid) to authenticated;
 grant execute on function public.cast_helpful_vote(uuid, text, uuid) to authenticated;
+grant execute on function public.create_vr_project(text) to authenticated;
 grant execute on function public.accept_vr_project_invite(uuid, text) to authenticated;
 
 drop policy if exists "help requests are public readable" on public.help_requests;
