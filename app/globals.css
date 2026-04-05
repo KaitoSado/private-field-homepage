@@ -4682,6 +4682,152 @@ textarea {
   grid-column: span 3;
 }
 
+.modeler-shell {
+  gap: 18px;
+}
+
+.modeler-history-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 16px;
+  align-items: center;
+  padding: 18px 20px;
+}
+
+.modeler-history-meta {
+  display: grid;
+  gap: 6px;
+}
+
+.modeler-history-meta strong {
+  font-size: 1rem;
+}
+
+.modeler-history-meta span {
+  color: var(--muted-foreground);
+  line-height: 1.55;
+}
+
+.modeler-history-controls {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.modeler-history-slider {
+  width: 100%;
+  accent-color: rgba(18, 121, 134, 0.95);
+}
+
+.modeler-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(320px, 0.95fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.modeler-stage-card,
+.modeler-side-card {
+  padding: 20px;
+}
+
+.modeler-stage-card {
+  min-height: 720px;
+}
+
+.modeler-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 28px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(244, 249, 248, 0.98));
+  cursor: grab;
+  touch-action: none;
+}
+
+.modeler-canvas:active {
+  cursor: grabbing;
+}
+
+.modeler-side-card {
+  display: grid;
+  gap: 18px;
+  position: sticky;
+  top: 104px;
+}
+
+.modeler-selection-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modeler-selection-strip .button.is-active {
+  background: rgba(18, 121, 134, 0.12);
+  border-color: rgba(18, 121, 134, 0.32);
+  color: rgba(10, 84, 94, 1);
+}
+
+.modeler-control-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.modeler-object-card {
+  display: grid;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.modeler-object-card span {
+  color: var(--muted-foreground);
+}
+
+.modeler-slider-block {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.modeler-slider-field {
+  gap: 8px;
+}
+
+.modeler-slider-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.96rem;
+}
+
+.modeler-slider-topline strong {
+  font-family: var(--font-mono, "SFMono-Regular", Consolas, monospace);
+  font-size: 0.95rem;
+}
+
+.modeler-slider-field input[type="range"] {
+  width: 100%;
+  accent-color: rgba(18, 121, 134, 0.95);
+}
+
+.modeler-color-input {
+  width: 100%;
+  min-height: 56px;
+  padding: 6px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+}
+
 @media (max-width: 1100px) {
   .math-panel-grid {
     grid-template-columns: 1fr;
@@ -4689,6 +4835,20 @@ textarea {
 
   .math-workspace-card {
     min-height: auto;
+  }
+
+  .modeler-history-bar,
+  .modeler-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modeler-stage-card {
+    min-height: auto;
+  }
+
+  .modeler-side-card {
+    position: static;
+    top: auto;
   }
 }
 
@@ -4706,5 +4866,38 @@ textarea {
 
   .math-calculator-keypad .button-primary {
     grid-column: span 2;
+  }
+
+  .modeler-history-bar,
+  .modeler-stage-card,
+  .modeler-side-card {
+    padding: 16px;
+  }
+
+  .modeler-history-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .modeler-history-controls .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modeler-selection-strip,
+  .modeler-control-stack .hero-actions,
+  .modeler-control-stack .math-chip-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .modeler-control-stack .hero-actions .button,
+  .modeler-control-stack .math-chip-row .button,
+  .modeler-selection-strip .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .modeler-selection-strip .button {
+    min-height: 44px;
   }
 }
