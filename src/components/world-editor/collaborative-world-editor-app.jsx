@@ -34,8 +34,7 @@ export function CollaborativeWorldEditorApp() {
   const selectedIdRef = useRef(null);
   const cameraPoseRef = useRef(null);
   const profileRef = useRef(null);
-  const importInputRef = useRef(null);
-  const sceneImportInputRef = useRef(null);
+  const handleDropFilesRef = useRef(null);
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [project, setProject] = useState(null);
@@ -235,6 +234,51 @@ export function CollaborativeWorldEditorApp() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleDeleteSelected, handleRedo, handleUndo, saveProjectSettings, setTransformMode]);
+
+  useEffect(() => {
+    handleDropFilesRef.current = handleDropFiles;
+  });
+
+  useEffect(() => {
+    if (!canEdit || !session?.user) return;
+
+    function preventDefault(event) {
+      event.preventDefault();
+    }
+
+    function handleDocDrop(event) {
+      event.preventDefault();
+      setDragActive(false);
+      const files = Array.from(event.dataTransfer?.files || []);
+      if (files.length && handleDropFilesRef.current) {
+        void handleDropFilesRef.current(files);
+      }
+    }
+
+    function handleDocDragEnter(event) {
+      event.preventDefault();
+      setDragActive(true);
+    }
+
+    function handleDocDragLeave(event) {
+      event.preventDefault();
+      if (!event.relatedTarget || event.relatedTarget === document.documentElement) {
+        setDragActive(false);
+      }
+    }
+
+    document.addEventListener("dragover", preventDefault);
+    document.addEventListener("drop", handleDocDrop);
+    document.addEventListener("dragenter", handleDocDragEnter);
+    document.addEventListener("dragleave", handleDocDragLeave);
+
+    return () => {
+      document.removeEventListener("dragover", preventDefault);
+      document.removeEventListener("drop", handleDocDrop);
+      document.removeEventListener("dragenter", handleDocDragEnter);
+      document.removeEventListener("dragleave", handleDocDragLeave);
+    };
+  }, [canEdit, session?.user]);
 
   async function loadProject(userId, profileRow) {
     setLoading(true);
@@ -468,72 +512,6 @@ export function CollaborativeWorldEditorApp() {
     if (!canEdit) return;
     const nextSettings = buildProjectSettingsFromStore(useSceneEditorStore.getState());
     await supabase.from("projects").update({ settings: nextSettings }).eq("id", projectId);
-  }
-
-  async function handleImportScene(event) {
-    if (!canEdit) return;
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      const parsed = parseSceneJson(await file.text());
-      const assetMap = new Map((parsed.assets || []).map((asset) => [asset.id, asset]));
-      if (!assetMap.size) {
-        throw new Error("このJSONには共有できるモデル本体が含まれていません。ポータブルJSONを書き出して取り込んでください。");
-      }
-
-      const uploadedObjects = [];
-
-      for (const sourceObject of parsed.objects || []) {
-        const asset = assetMap.get(sourceObject.assetId);
-        if (!asset?.dataUrl) continue;
-        const uploadFile = await createFileFromDataUrl({
-          dataUrl: asset.dataUrl,
-          name: asset.name || `${sourceObject.name || "model"}.${asset.mimeType === "model/gltf+json" ? "gltf" : "glb"}`,
-          mimeType: asset.mimeType || sourceObject.mimeType || "model/gltf-binary"
-        });
-
-        const modelUrl = await uploadPublicFile({
-          supabase,
-          bucket: getSceneModelBucket(),
-          userId: session.user.id,
-          file: uploadFile,
-          folder: `vr/${projectId}`
-        });
-
-        uploadedObjects.push({
-          id: createCollaborativeObjectId(),
-          name: sourceObject.name,
-          modelUrl,
-          url: modelUrl,
-          mimeType: uploadFile.type || asset.mimeType || sourceObject.mimeType,
-          position: sourceObject.position || [0, 0, 0],
-          rotation: sourceObject.rotation || [0, 0, 0],
-          scale: sourceObject.scale || [1, 1, 1],
-          isRemote: true
-        });
-      }
-
-      for (const object of uploadedObjects) {
-        upsertObject(object);
-      }
-
-      await Promise.all(
-        uploadedObjects.map(async (object) => {
-          const row = objectToSceneObjectRow({ object, projectId, userId: session?.user?.id });
-          await supabase.from("scene_objects").upsert(row);
-          broadcastEvent("scene-event", {
-            type: "object:add",
-            userId: session?.user?.id,
-            object: row
-          });
-        })
-      );
-      setStatus("JSON シーンを取り込みました。");
-    } catch (error) {
-      setStatus(error.message || "シーンJSONの読み込みに失敗しました。");
-    } finally {
-      event.target.value = "";
-    }
   }
 
   async function handleExportScene() {
@@ -806,14 +784,23 @@ export function CollaborativeWorldEditorApp() {
               setStatus("viewer は読み込みできません。");
               return;
             }
-            openFilePicker(importInputRef, "モデル読み込みの入力欄を開けませんでした。");
+            openFileDialog({
+              accept: ".glb,.gltf",
+              multiple: true,
+              onFiles: (files) => void handleDropFiles(files)
+            });
           }}
           onTriggerSceneImport={() => {
             if (!canEdit) {
               setStatus("viewer は読み込みできません。");
               return;
             }
-            openFilePicker(sceneImportInputRef, "シーン読み込みの入力欄を開けませんでした。");
+            openFileDialog({
+              accept: ".json",
+              onFiles: (files) => {
+                if (files[0]) void handleImportSceneFile(files[0]);
+              }
+            });
           }}
           onExportScene={() => void handleExportScene()}
           onShareScene={() => void handleCopyInvite()}
@@ -923,26 +910,6 @@ export function CollaborativeWorldEditorApp() {
         />
       </div>
 
-      <input
-        id="vr-project-import"
-        ref={importInputRef}
-        type="file"
-        accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
-        multiple
-        className="sr-only"
-        onChange={(event) => {
-          void handleDropFiles(Array.from(event.target.files || []));
-          event.target.value = "";
-        }}
-      />
-      <input
-        id="vr-project-scene-import"
-        ref={sceneImportInputRef}
-        type="file"
-        accept="application/json,.json"
-        className="sr-only"
-        onChange={(event) => void handleImportScene(event)}
-      />
     </section>
   );
 
@@ -1003,23 +970,81 @@ export function CollaborativeWorldEditorApp() {
     setStatus(nextStatus);
   }
 
-  function openFilePicker(inputRef, emptyMessage) {
-    const input = inputRef.current;
-    if (!input) {
-      setStatus(emptyMessage);
-      return;
-    }
-
-    try {
-      if (typeof input.showPicker === "function") {
-        input.showPicker();
-        return;
-      }
-    } catch {
-      /* SecurityError — fall through to click() */
-    }
-
+  function openFileDialog({ accept, multiple = false, onFiles }) {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = accept;
+    input.multiple = multiple;
+    input.style.cssText = "position:fixed;top:-9999px;opacity:0;pointer-events:none";
+    document.body.appendChild(input);
+    input.addEventListener("change", () => {
+      const files = Array.from(input.files || []);
+      document.body.removeChild(input);
+      if (files.length) onFiles(files);
+    });
     input.click();
+  }
+
+  async function handleImportSceneFile(file) {
+    if (!canEdit) return;
+    try {
+      const parsed = parseSceneJson(await file.text());
+      const assetMap = new Map((parsed.assets || []).map((asset) => [asset.id, asset]));
+      if (!assetMap.size) {
+        throw new Error("このJSONには共有できるモデル本体が含まれていません。ポータブルJSONを書き出して取り込んでください。");
+      }
+
+      const uploadedObjects = [];
+
+      for (const sourceObject of parsed.objects || []) {
+        const asset = assetMap.get(sourceObject.assetId);
+        if (!asset?.dataUrl) continue;
+        const uploadFile = await createFileFromDataUrl({
+          dataUrl: asset.dataUrl,
+          name: asset.name || `${sourceObject.name || "model"}.${asset.mimeType === "model/gltf+json" ? "gltf" : "glb"}`,
+          mimeType: asset.mimeType || sourceObject.mimeType || "model/gltf-binary"
+        });
+
+        const modelUrl = await uploadPublicFile({
+          supabase,
+          bucket: getSceneModelBucket(),
+          userId: session.user.id,
+          file: uploadFile,
+          folder: `vr/${projectId}`
+        });
+
+        uploadedObjects.push({
+          id: createCollaborativeObjectId(),
+          name: sourceObject.name,
+          modelUrl,
+          url: modelUrl,
+          mimeType: uploadFile.type || asset.mimeType || sourceObject.mimeType,
+          position: sourceObject.position || [0, 0, 0],
+          rotation: sourceObject.rotation || [0, 0, 0],
+          scale: sourceObject.scale || [1, 1, 1],
+          isRemote: true
+        });
+      }
+
+      for (const object of uploadedObjects) {
+        upsertObject(object);
+      }
+
+      await Promise.all(
+        uploadedObjects.map(async (object) => {
+          const row = objectToSceneObjectRow({ object, projectId, userId: session?.user?.id });
+          await supabase.from("scene_objects").upsert(row);
+          broadcastEvent("scene-event", {
+            type: "object:add",
+            userId: session?.user?.id,
+            object: row
+          });
+        })
+      );
+      setStatus("JSON シーンを取り込みました。");
+    } catch (error) {
+      setStatus(error.message || "シーンJSONの読み込みに失敗しました。");
+    }
   }
 }
 
