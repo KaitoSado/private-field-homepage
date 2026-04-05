@@ -479,6 +479,7 @@ function DerivativePlaygroundPanel() {
     return buildDerivativeSnapshot(compiled.fn, pointX, h);
   }, [compiled, pointX, h]);
   const mission = useMemo(() => buildDerivativeMissionState(preset, snapshot), [preset, snapshot]);
+  const slopeLabel = useMemo(() => describeSlope(snapshot?.tangentSlope ?? snapshot?.secantSlope), [snapshot]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -554,11 +555,12 @@ function DerivativePlaygroundPanel() {
 
           <MathValueMeter
             label="傾きメーター"
-            value={formatNumber(snapshot?.differentiable ? snapshot.tangentSlope : snapshot?.secantSlope || 0)}
+            value={snapshot?.differentiable ? snapshot.tangentSlope : snapshot?.secantSlope || 0}
             min={-4}
             max={4}
-            accentClass={snapshot?.differentiable ? "" : "is-warm"}
+            accentClass={snapshot?.differentiable ? derivativeMeterTone(snapshot?.tangentSlope) : "is-warm"}
             valueLabel={snapshot?.differentiable ? `${formatNumber(snapshot?.tangentSlope)} / その場の勢い` : "接線が決まりにくい点"}
+            displayValue={snapshot?.differentiable ? formatNumber(snapshot?.tangentSlope) : formatNumber(snapshot?.secantSlope || 0)}
           />
 
           <div className="math-legend-row">
@@ -566,7 +568,18 @@ function DerivativePlaygroundPanel() {
             <span><i className="math-legend-dot is-purple" /> 接線</span>
             <span><i className="math-legend-dot is-dark" /> いまの点</span>
           </div>
-
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              いまの点は <strong>{slopeLabel}</strong> です。{snapshot?.differentiable
+                ? " h を小さくすると、オレンジの割線が紫の接線にだんだん重なっていきます。"
+                : " 折れ曲がりの近くでは、左右の坂がそろわず、接線が 1 本に決まりにくくなります。"}
+            </p>
+          </div>
           <MathMissionCard mission={mission} />
         </>
       }
@@ -1642,7 +1655,15 @@ function drawDerivativeScene(context, config) {
   }
 
   if (config.showTangent && config.snapshot.differentiable) {
-    drawSlopeLine(context, config.snapshot.x, config.snapshot.y, config.snapshot.tangentSlope, config.preset.xRange, config.preset.yRange, "#7c3aed");
+    drawSlopeLine(
+      context,
+      config.snapshot.x,
+      config.snapshot.y,
+      config.snapshot.tangentSlope,
+      config.preset.xRange,
+      config.preset.yRange,
+      derivativeLineColor(config.snapshot.tangentSlope)
+    );
   }
 
   context.strokeStyle = "rgba(15, 23, 42, 0.18)";
@@ -1968,6 +1989,20 @@ function describeSlope(value) {
   if (value > 0) return "上り坂";
   if (value < -2) return "かなり急な下り";
   return "下り坂";
+}
+
+function derivativeLineColor(value) {
+  if (!Number.isFinite(value)) return "#7c3aed";
+  if (Math.abs(value) < 0.18) return "#f59e0b";
+  if (value > 0) return "#16a34a";
+  return "#2563eb";
+}
+
+function derivativeMeterTone(value) {
+  if (!Number.isFinite(value)) return "";
+  if (Math.abs(value) < 0.18) return "is-soft";
+  if (value > 0) return "is-positive";
+  return "is-cool";
 }
 
 function riemannSum(fn, left, right, partitions) {

@@ -4492,6 +4492,11 @@ textarea {
   gap: 18px;
 }
 
+.math-playground-shell {
+  display: grid;
+  gap: 16px;
+}
+
 .math-panel-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.95fr);
@@ -4505,7 +4510,8 @@ textarea {
 
 .math-workspace-card,
 .math-side-card,
-.math-card {
+.math-card,
+.math-footer-card {
   padding: 20px;
 }
 
@@ -4523,9 +4529,30 @@ textarea {
 }
 
 .math-side-card,
-.math-card {
+.math-card,
+.math-footer-card {
   display: grid;
   gap: 16px;
+}
+
+.math-footer-card {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+  align-items: start;
+}
+
+.math-footer-note {
+  display: grid;
+  gap: 8px;
+}
+
+.math-footer-note strong {
+  font-size: 1rem;
+}
+
+.math-footer-note p {
+  margin: 0;
+  color: var(--muted-foreground);
+  line-height: 1.7;
 }
 
 .math-control-stack,
@@ -4710,6 +4737,18 @@ textarea {
 
 .math-meter-card.is-warm .math-meter-fill {
   background: linear-gradient(90deg, rgba(249, 115, 22, 0.88), rgba(236, 72, 153, 0.84));
+}
+
+.math-meter-card.is-positive .math-meter-fill {
+  background: linear-gradient(90deg, rgba(34, 197, 94, 0.88), rgba(22, 163, 74, 0.92));
+}
+
+.math-meter-card.is-cool .math-meter-fill {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.88), rgba(37, 99, 235, 0.92));
+}
+
+.math-meter-card.is-soft .math-meter-fill {
+  background: linear-gradient(90deg, rgba(251, 191, 36, 0.9), rgba(245, 158, 11, 0.92));
 }
 
 .math-meter-note {
@@ -5055,6 +5094,10 @@ textarea {
 
   .math-workspace-card {
     min-height: auto;
+  }
+
+  .math-footer-card {
+    grid-template-columns: 1fr;
   }
 
   .modeler-history-bar,

@@ -1,16 +1,20 @@
 "use client";
 
-export function MathPlaygroundLayout({ workspace, controls, caption }) {
+export function MathPlaygroundLayout({ workspace, controls, caption, footer }) {
   return (
-    <div className="math-panel-grid">
-      <div className="surface math-workspace-card">
-        {workspace}
-        {caption ? <div className="math-canvas-caption">{caption}</div> : null}
+    <div className="math-playground-shell">
+      <div className="math-panel-grid">
+        <div className="surface math-workspace-card">
+          {workspace}
+          {caption ? <div className="math-canvas-caption">{caption}</div> : null}
+        </div>
+
+        <div className="surface math-side-card">
+          <div className="math-control-stack">{controls}</div>
+        </div>
       </div>
 
-      <div className="surface math-side-card">
-        <div className="math-control-stack">{controls}</div>
-      </div>
+      {footer ? <div className="surface math-footer-card">{footer}</div> : null}
     </div>
   );
 }
