@@ -364,7 +364,7 @@ export function CollaborativeWorldEditorApp() {
       setStatus("viewer はモデルを追加できません。owner か editor で開いてください。");
       return;
     }
-    const validFiles = files.filter((file) => /\.gltf?$/i.test(file.name));
+    const validFiles = files.filter((file) => /\.(glb|gltf)$/i.test(file.name));
     if (!validFiles.length) {
       setStatus("GLB / GLTF を落としてください。");
       return;
@@ -1010,9 +1010,13 @@ export function CollaborativeWorldEditorApp() {
       return;
     }
 
-    if (typeof input.showPicker === "function") {
-      input.showPicker();
-      return;
+    try {
+      if (typeof input.showPicker === "function") {
+        input.showPicker();
+        return;
+      }
+    } catch {
+      /* SecurityError — fall through to click() */
     }
 
     input.click();
