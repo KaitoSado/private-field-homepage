@@ -36,9 +36,9 @@ const APP_TABS = [
   { id: "derivative", label: "微分" },
   { id: "integral", label: "積分" },
   { id: "linear", label: "線形代数" },
-  { id: "probability", label: "確率" },
-  { id: "limit", label: "極限" },
-  { id: "newton", label: "ニュートン法" },
+  { id: "probability", label: "偶然観測室" },
+  { id: "limit", label: "近づきラボ" },
+  { id: "newton", label: "根っこハンター" },
   { id: "geometry", label: "幾何" },
   { id: "space", label: "空間図形" },
   { id: "cas", label: "数式処理(CAS)" },
@@ -47,14 +47,14 @@ const APP_TABS = [
 
 const TAB_SECTIONS = [
   {
-    id: "core-labs",
-    label: "変化を見る",
-    tabs: ["graph", "derivative", "integral", "linear"]
-  },
-  {
     id: "play-labs",
     label: "あそべる新ラボ",
     tabs: ["probability", "limit", "newton"]
+  },
+  {
+    id: "core-labs",
+    label: "変化を見る",
+    tabs: ["graph", "derivative", "integral", "linear"]
   },
   {
     id: "math-tools",
