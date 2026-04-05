@@ -102,6 +102,7 @@ function FunctionGraphPanel() {
   const [xRange, setXRange] = useState(10);
   const [yRange, setYRange] = useState(10);
   const [hoverPoint, setHoverPoint] = useState(null);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const compiled = useMemo(() => compileMathExpression(expression, ["x"]), [expression]);
 
@@ -195,6 +196,16 @@ function FunctionGraphPanel() {
             ))}
           </div>
 
+          <div className="hero-actions">
+            <button
+              type="button"
+              className={`button ${guideOpen ? "button-primary" : "button-secondary"}`}
+              onClick={() => setGuideOpen((current) => !current)}
+            >
+              関数グラフガイド
+            </button>
+          </div>
+
           <div className="math-readout">
             <strong>{compiled.error ? "式を確認してください" : "グラフを描画中"}</strong>
             <span>{compiled.error || "カーソルを重ねると座標を表示します。"}</span>
@@ -208,6 +219,66 @@ function FunctionGraphPanel() {
                 : "グラフ上にカーソルを置いてください。"}
             </span>
           </div>
+
+          {guideOpen ? (
+            <div className="math-guide-card">
+              <div className="math-guide-section">
+                <h3>関数グラフって何？</h3>
+                <p>
+                  関数グラフは、<strong>x を動かしたときに y がどう変わるか</strong>を線で見えるようにしたものです。
+                  たとえば <code>y = x^2</code> なら、x が大きくなるほど y も大きくなり、放物線が描かれます。
+                </p>
+              </div>
+
+              <div className="math-guide-section">
+                <h3>このアプリでやること</h3>
+                <p>
+                  右上の <code>f(x)</code> に式を書くと、左のキャンバスにグラフが出ます。まずは
+                  <code>sin(x)</code> や <code>x^2</code> を入れると動きが分かりやすいです。
+                </p>
+              </div>
+
+              <div className="math-guide-section">
+                <h3>どう遊ぶ？</h3>
+                <ul className="math-guide-list">
+                  <li>
+                    <strong>式を書く</strong>
+                    : 例 <code>sin(x)</code>, <code>x^2 - 4</code>, <code>sqrt(abs(x))</code>
+                  </li>
+                  <li>
+                    <strong>x 範囲 / y 範囲を変える</strong>
+                    : 拡大・縮小する感覚です
+                  </li>
+                  <li>
+                    <strong>グラフにカーソルを重ねる</strong>
+                    : その場所の <code>x</code> と <code>y</code> を読めます
+                  </li>
+                  <li>
+                    <strong>プリセットを押す</strong>
+                    : まずは形を眺めながら違いを見ます
+                  </li>
+                </ul>
+              </div>
+
+              <div className="math-guide-section">
+                <h3>入力のコツ</h3>
+                <ul className="math-guide-list">
+                  <li>
+                    掛け算は <code>2*x</code> のように <code>*</code> を書きます
+                  </li>
+                  <li>
+                    べき乗は <code>x^2</code>
+                  </li>
+                  <li>
+                    円周率は <code>pi</code>
+                  </li>
+                  <li>
+                    使いやすい関数: <code>sin</code>, <code>cos</code>, <code>sqrt</code>, <code>abs</code>, <code>exp</code>, <code>log</code>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

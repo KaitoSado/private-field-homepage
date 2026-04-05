@@ -4564,6 +4564,47 @@ textarea {
   line-height: 1.5;
 }
 
+.math-guide-card {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.math-guide-section {
+  display: grid;
+  gap: 8px;
+}
+
+.math-guide-section h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.math-guide-section p {
+  margin: 0;
+  color: var(--muted-foreground);
+  line-height: 1.7;
+}
+
+.math-guide-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--muted-foreground);
+  display: grid;
+  gap: 8px;
+  line-height: 1.7;
+}
+
+.math-guide-card code {
+  padding: 0.08rem 0.35rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.06);
+  font-family: var(--font-mono, "SFMono-Regular", Consolas, monospace);
+}
+
 .math-kpi-grid,
 .math-stats-grid {
   display: grid;
