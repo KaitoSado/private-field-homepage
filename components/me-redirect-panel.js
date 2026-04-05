@@ -86,6 +86,54 @@ export function MeRedirectPanel() {
     };
   }, [supabase]);
 
+  useEffect(() => {
+    if (!supabase || !state.authenticated) return;
+
+    let active = true;
+
+    async function refresh() {
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+
+      if (!active || !session?.user?.id) return;
+
+      await loadEconomy(supabase, session.user.id, {
+        onEconomy: (nextEconomy) => {
+          if (!active) return;
+          setEconomy(nextEconomy);
+        },
+        onTransactions: (nextTransactions) => {
+          if (!active) return;
+          setTransactions(nextTransactions);
+        },
+        onStatus: (nextStatus) => {
+          if (!active) return;
+          setEconomyStatus(nextStatus);
+        }
+      });
+    }
+
+    function handleFocus() {
+      refresh();
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        refresh();
+      }
+    }
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      active = false;
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [supabase, state.authenticated]);
+
   if (state.loading) {
     return (
       <section className="surface empty-state">
@@ -155,6 +203,25 @@ export function MeRedirectPanel() {
             <Link href="/apps/edge" className="button button-ghost">
               エッジ情報で使う
             </Link>
+            <button
+              type="button"
+              className="button button-ghost"
+              onClick={async () => {
+                const {
+                  data: { session }
+                } = await supabase.auth.getSession();
+
+                if (!session?.user?.id) return;
+
+                await loadEconomy(supabase, session.user.id, {
+                  onEconomy: setEconomy,
+                  onTransactions: setTransactions,
+                  onStatus: setEconomyStatus
+                });
+              }}
+            >
+              更新
+            </button>
           </div>
         </div>
 
