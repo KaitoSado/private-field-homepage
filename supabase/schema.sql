@@ -735,7 +735,7 @@ $$;
 
 create or replace function public.refresh_economy_account(p_user_id uuid)
 returns table (
-  user_id uuid,
+  account_user_id uuid,
   point_balance integer,
   contribution_score integer,
   reputation_title text,
@@ -789,7 +789,7 @@ begin
 
   return query
   select
-    account.user_id,
+    account.user_id as account_user_id,
     account.point_balance,
     account.contribution_score,
     account.reputation_title,
