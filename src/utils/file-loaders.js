@@ -28,7 +28,16 @@ export async function filesToSceneObjects(files) {
   const objects = [];
 
   for (const [index, file] of valid.entries()) {
-    const { assetId, mimeType } = await saveAssetFile(file);
+    let assetId = null;
+    let mimeType = file.type || guessMimeType(file.name);
+    try {
+      const stored = await saveAssetFile(file);
+      assetId = stored.assetId;
+      mimeType = stored.mimeType || mimeType;
+    } catch {
+      // Keep the model usable even if IndexedDB is unavailable.
+      assetId = null;
+    }
     const objectUrl = URL.createObjectURL(file);
     objects.push({
       id: createObjectId(),
