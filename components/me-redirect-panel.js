@@ -183,6 +183,11 @@ export function MeRedirectPanel() {
             </div>
             <div className="hub-stat-divider" />
             <div className="hub-stat">
+              <strong className="hub-stat-value">{economy.contribution_score}</strong>
+              <span className="hub-stat-label">貢献度</span>
+            </div>
+            <div className="hub-stat-divider" />
+            <div className="hub-stat">
               <strong className="hub-stat-value">{economy.reputation_title}</strong>
               <span className="hub-stat-label">称号</span>
             </div>
