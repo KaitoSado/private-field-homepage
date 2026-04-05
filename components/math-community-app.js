@@ -1303,6 +1303,17 @@ function LinearAlgebraPlaygroundPanel() {
             valueLabel={reflected ? "向きが反転しています" : "1 を超えると広がり、1 未満だと縮みます"}
           />
 
+          <div className="math-linear-preview-grid">
+            <LinearSnapshotCard title="もとの空間" shapeMode={shapeMode} note="基準の格子と図形" />
+            <LinearSnapshotCard
+              title="いまの空間"
+              basis={basis}
+              shapeMode={shapeMode}
+              note={reflected ? "向きが反転しています" : `${formatNumber(areaScale)} 倍に広がっています`}
+              accentClass={matrixTone}
+            />
+          </div>
+
           <MathStoryCard title="いまの変形" className="math-state-card">
             <span>
               {transformationLabel} いま選んでいる{shapeLabel}の広がりは <strong>{formatNumber(areaScale)}</strong> 倍、向きは <strong>{orientation}</strong> です。
@@ -1317,6 +1328,11 @@ function LinearAlgebraPlaygroundPanel() {
               </div>
               <span className="math-inline-matrix-bracket">]</span>
             </div>
+          </MathStoryCard>
+
+          <MathStoryCard title="3Dに広げると">
+            <span>いまは 2 本の矢印で「床の広がり」を見ています。</span>
+            <span>3D では 3 本目の矢印が増えて、面積の代わりに <strong>体積</strong> の変化が主役になります。</span>
           </MathStoryCard>
 
           <MathLegendRow
@@ -1343,6 +1359,83 @@ function LinearAlgebraPlaygroundPanel() {
         </>
       }
     />
+  );
+}
+
+function LinearSnapshotCard({ title, basis, shapeMode, note, accentClass = "" }) {
+  const width = 168;
+  const height = 124;
+  const range = 2.2;
+  const activeBasis = basis || { u: { x: 1, y: 0 }, v: { x: 0, y: 1 } };
+  const determinant = activeBasis.u.x * activeBasis.v.y - activeBasis.u.y * activeBasis.v.x;
+  const samplePoints = getLinearShapePoints(shapeMode).map((point) => applyBasisTransform(point, activeBasis));
+  const uTip = linearWorldToScreen(activeBasis.u.x, activeBasis.u.y, width, height, range);
+  const vTip = linearWorldToScreen(activeBasis.v.x, activeBasis.v.y, width, height, range);
+
+  return (
+    <div className={`math-linear-preview-card ${accentClass}`.trim()}>
+      <div className="math-linear-preview-head">
+        <strong>{title}</strong>
+        {note ? <span>{note}</span> : null}
+      </div>
+      <svg viewBox={`0 0 ${width} ${height}`} className="math-linear-preview-svg" aria-hidden="true">
+        {[-2, -1, 0, 1, 2].map((tick) => (
+          <g key={`grid-${tick}`}>
+            <line
+              x1={linearWorldToScreen(-range, tick, width, height, range).x}
+              y1={linearWorldToScreen(-range, tick, width, height, range).y}
+              x2={linearWorldToScreen(range, tick, width, height, range).x}
+              y2={linearWorldToScreen(range, tick, width, height, range).y}
+            />
+            <line
+              x1={linearWorldToScreen(tick, -range, width, height, range).x}
+              y1={linearWorldToScreen(tick, -range, width, height, range).y}
+              x2={linearWorldToScreen(tick, range, width, height, range).x}
+              y2={linearWorldToScreen(tick, range, width, height, range).y}
+            />
+          </g>
+        ))}
+        <line
+          className="math-linear-preview-axis"
+          x1={linearWorldToScreen(-range, 0, width, height, range).x}
+          y1={linearWorldToScreen(-range, 0, width, height, range).y}
+          x2={linearWorldToScreen(range, 0, width, height, range).x}
+          y2={linearWorldToScreen(range, 0, width, height, range).y}
+        />
+        <line
+          className="math-linear-preview-axis"
+          x1={linearWorldToScreen(0, -range, width, height, range).x}
+          y1={linearWorldToScreen(0, -range, width, height, range).y}
+          x2={linearWorldToScreen(0, range, width, height, range).x}
+          y2={linearWorldToScreen(0, range, width, height, range).y}
+        />
+        <polygon
+          className={determinant < 0 ? "is-reflected" : ""}
+          points={samplePoints
+            .map((point) => {
+              const screen = linearWorldToScreen(point.x, point.y, width, height, range);
+              return `${screen.x},${screen.y}`;
+            })
+            .join(" ")}
+        />
+        <line
+          className="math-linear-preview-u"
+          x1={linearWorldToScreen(0, 0, width, height, range).x}
+          y1={linearWorldToScreen(0, 0, width, height, range).y}
+          x2={uTip.x}
+          y2={uTip.y}
+        />
+        <line
+          className="math-linear-preview-v"
+          x1={linearWorldToScreen(0, 0, width, height, range).x}
+          y1={linearWorldToScreen(0, 0, width, height, range).y}
+          x2={vTip.x}
+          y2={vTip.y}
+        />
+        <circle className="math-linear-preview-u-dot" cx={uTip.x} cy={uTip.y} r="5" />
+        <circle className="math-linear-preview-v-dot" cx={vTip.x} cy={vTip.y} r="5" />
+      </svg>
+    </div>
   );
 }
 
@@ -2212,10 +2305,10 @@ function drawLinearAlgebraScene(context, basis, options = {}) {
   paintMathBackground(context, canvas.width, canvas.height);
 
   if (options.showBaseGrid) {
-    drawLinearGrid(context, canvas.width, canvas.height, range, null, "rgba(148, 163, 184, 0.2)", 1);
+    drawLinearGrid(context, canvas.width, canvas.height, range, null, "rgba(148, 163, 184, 0.26)", 1.05);
   }
   drawLinearAxes(context, canvas.width, canvas.height, range);
-  drawLinearGrid(context, canvas.width, canvas.height, range, basis, "rgba(15, 118, 110, 0.45)", 1.6);
+  drawLinearGrid(context, canvas.width, canvas.height, range, basis, "rgba(15, 118, 110, 0.32)", 1.35);
   drawLinearSampleShape(context, canvas.width, canvas.height, range, null, shapeMode, {
     determinant: 1,
     strokeStyle: "rgba(17, 24, 39, 0.18)",

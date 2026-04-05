@@ -4911,6 +4911,98 @@ textarea {
   gap: 10px;
 }
 
+.math-linear-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.math-linear-preview-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.math-linear-preview-card.is-positive {
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.math-linear-preview-card.is-cool {
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.math-linear-preview-card.is-warm {
+  border-color: rgba(236, 72, 153, 0.2);
+}
+
+.math-linear-preview-head {
+  display: grid;
+  gap: 2px;
+}
+
+.math-linear-preview-head strong {
+  font-size: 0.95rem;
+}
+
+.math-linear-preview-head span {
+  color: var(--muted-foreground);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.math-linear-preview-svg {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.92), rgba(247, 248, 245, 0.98));
+  border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.math-linear-preview-svg g line {
+  stroke: rgba(148, 163, 184, 0.28);
+  stroke-width: 1;
+}
+
+.math-linear-preview-axis {
+  stroke: rgba(15, 23, 42, 0.3);
+  stroke-width: 1.5;
+}
+
+.math-linear-preview-svg polygon {
+  fill: rgba(253, 224, 71, 0.3);
+  stroke: rgba(202, 138, 4, 0.8);
+  stroke-width: 2;
+}
+
+.math-linear-preview-svg polygon.is-reflected {
+  fill: rgba(251, 113, 133, 0.22);
+  stroke: rgba(225, 29, 72, 0.82);
+}
+
+.math-linear-preview-u,
+.math-linear-preview-v {
+  stroke-width: 2.5;
+}
+
+.math-linear-preview-u {
+  stroke: #dc2626;
+}
+
+.math-linear-preview-v {
+  stroke: #2563eb;
+}
+
+.math-linear-preview-u-dot {
+  fill: #dc2626;
+}
+
+.math-linear-preview-v-dot {
+  fill: #2563eb;
+}
+
 .math-inline-matrix {
   display: inline-flex;
   align-items: center;
@@ -5249,7 +5341,8 @@ textarea {
   .math-mini-grid-wide,
   .math-kpi-grid,
   .math-stats-grid,
-  .math-toggle-grid {
+  .math-toggle-grid,
+  .math-linear-preview-grid {
     grid-template-columns: 1fr;
   }
 
