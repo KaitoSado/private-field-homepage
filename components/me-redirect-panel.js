@@ -248,8 +248,7 @@ export function MeRedirectPanel() {
                 </div>
                 <div className="my-page-transaction-side">
                   <strong className={transaction.direction === "credit" ? "status-success" : "status-error"}>
-                    {transaction.direction === "credit" ? "+" : "-"}
-                    {transaction.amount}pt
+                    {formatTransactionAmount(transaction)}
                   </strong>
                   <span>{formatShortDate(transaction.created_at)}</span>
                 </div>
@@ -292,7 +291,7 @@ async function loadEconomy(supabase, userId, handlers) {
 
 function formatTransactionLabel(transaction) {
   if (transaction.kind === "helpful_reward") {
-    return "役に立った報酬";
+    return "役立ち票を受け取った";
   }
 
   if (transaction.kind === "help_request_escrow") {
@@ -315,6 +314,16 @@ function formatTransactionLabel(transaction) {
 }
 
 function formatTransactionMeta(transaction) {
+  if (transaction.kind === "helpful_reward") {
+    const source =
+      transaction.meta?.target_type === "class_note"
+        ? "裏シラバス"
+        : transaction.meta?.target_type === "edge_tip"
+          ? "エッジ情報"
+          : "コミュニティ";
+    return `${source} / 1票 / +${transaction.amount}pt / 貢献度+1`;
+  }
+
   if (transaction.meta?.request_title) {
     return transaction.meta.request_title;
   }
@@ -338,4 +347,12 @@ function formatShortDate(value) {
     month: "numeric",
     day: "numeric"
   }).format(new Date(value));
+}
+
+function formatTransactionAmount(transaction) {
+  if (transaction.kind === "helpful_reward") {
+    return "1票";
+  }
+
+  return `${transaction.direction === "credit" ? "+" : "-"}${transaction.amount}pt`;
 }

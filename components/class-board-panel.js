@@ -279,7 +279,9 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
       );
       setEconomy(result.summary || null);
       setVotedNoteIds((current) => (current.includes(noteId) ? current : [...current, noteId]));
-      setStatus(`役に立った投票を送信しました。+${result.points_awarded || 0}pt が投稿者に加算されます。`);
+      setStatus(
+        `役立ち票を1票送りました。投稿者に +${result.points_awarded || 0}pt / 貢献度+1 が加算されます。`
+      );
     } catch (error) {
       setStatus(error.message || "役に立った投票に失敗しました。");
     } finally {
