@@ -1,10 +1,26 @@
 import { buildObjectUrlFromAsset, saveAssetFile, saveAssetFromDataUrl } from "@/src/utils/asset-db";
 
-const GLTF_TYPES = new Set(["model/gltf-binary", "model/gltf+json", "application/octet-stream", ""]);
+const GLTF_TYPES = new Set([
+  "model/gltf-binary",
+  "model/gltf+json",
+  "model/gltf_binary",
+  "application/octet-stream",
+  "application/gltf-buffer",
+  ""
+]);
 
 export function isGltfFile(file) {
   const lower = file.name.toLowerCase();
-  return (lower.endsWith(".glb") || lower.endsWith(".gltf")) && GLTF_TYPES.has(file.type || "");
+  if (!(lower.endsWith(".glb") || lower.endsWith(".gltf"))) {
+    return false;
+  }
+
+  const mimeType = `${file.type || ""}`.toLowerCase();
+  if (!mimeType) {
+    return true;
+  }
+
+  return GLTF_TYPES.has(mimeType);
 }
 
 export async function filesToSceneObjects(files) {

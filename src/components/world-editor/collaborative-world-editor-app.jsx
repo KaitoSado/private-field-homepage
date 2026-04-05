@@ -361,6 +361,10 @@ export function CollaborativeWorldEditorApp() {
     }
 
     const localObjects = await filesToSceneObjects(validFiles);
+    if (!localObjects.length) {
+      setStatus("この GLB / GLTF は読み込めませんでした。別のファイルを試してください。");
+      return;
+    }
     addObjects(localObjects);
     setStatus(`${localObjects.length}個のモデルを追加し、同期しています。`);
 
