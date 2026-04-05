@@ -4609,6 +4609,13 @@ textarea {
   font-family: var(--font-mono, "SFMono-Regular", Consolas, monospace);
 }
 
+.math-canvas-caption {
+  margin-top: 14px;
+  color: var(--muted-foreground);
+  line-height: 1.65;
+  font-size: 0.95rem;
+}
+
 .math-kpi-grid,
 .math-stats-grid {
   display: grid;
@@ -4632,6 +4639,162 @@ textarea {
 .math-kpi span {
   color: var(--muted-foreground);
   font-size: 0.92rem;
+}
+
+.math-meter-card,
+.math-mission-card,
+.math-tank-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.math-meter-card h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.math-meter-track {
+  position: relative;
+  min-height: 12px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(148, 163, 184, 0.18);
+}
+
+.math-meter-fill {
+  min-height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(8, 145, 178, 0.85), rgba(59, 130, 246, 0.88));
+}
+
+.math-meter-card.is-warm .math-meter-fill {
+  background: linear-gradient(90deg, rgba(249, 115, 22, 0.88), rgba(236, 72, 153, 0.84));
+}
+
+.math-meter-note {
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+.math-legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--muted-foreground);
+  font-size: 0.92rem;
+}
+
+.math-legend-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.math-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.math-legend-dot.is-orange {
+  background: rgba(234, 88, 12, 0.95);
+}
+
+.math-legend-dot.is-purple {
+  background: rgba(124, 58, 237, 0.95);
+}
+
+.math-legend-dot.is-cyan {
+  background: rgba(34, 211, 238, 0.95);
+}
+
+.math-legend-dot.is-dark {
+  background: rgba(17, 24, 39, 0.95);
+}
+
+.math-mission-card {
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.9), rgba(252, 248, 240, 0.95));
+}
+
+.math-mission-card.is-complete {
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 18px 40px rgba(16, 185, 129, 0.08);
+}
+
+.math-mission-badge {
+  justify-self: start;
+  padding: 0.22rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.08);
+  color: rgba(15, 23, 42, 0.8);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.math-mission-card.is-complete .math-mission-badge {
+  background: rgba(16, 185, 129, 0.14);
+  color: rgba(5, 122, 85, 1);
+}
+
+.math-mission-card strong,
+.math-tank-copy strong {
+  font-size: 1rem;
+}
+
+.math-mission-card p,
+.math-mission-status,
+.math-tank-copy span {
+  margin: 0;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+
+.math-tank-card {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.math-tank {
+  position: relative;
+  width: 76px;
+  min-height: 160px;
+  border-radius: 28px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.9));
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.math-tank-fill {
+  position: absolute;
+  inset-inline: 10px;
+  bottom: 50%;
+  border-radius: 18px 18px 10px 10px;
+  background: linear-gradient(180deg, rgba(6, 182, 212, 0.92), rgba(59, 130, 246, 0.88));
+}
+
+.math-tank-fill.is-negative {
+  top: 50%;
+  bottom: auto;
+  border-radius: 10px 10px 18px 18px;
+  background: linear-gradient(180deg, rgba(244, 114, 182, 0.82), rgba(249, 115, 22, 0.88));
+}
+
+.math-tank-centerline {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  border-top: 2px dashed rgba(15, 23, 42, 0.16);
+}
+
+.math-tank-copy {
+  display: grid;
+  gap: 6px;
 }
 
 .math-card-head {
