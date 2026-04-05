@@ -26,6 +26,7 @@ import {
   linearScreenToWorld,
   linearWorldToScreen,
   paintMathBackground,
+  screenToWorldY,
   screenToWorldX,
   worldToScreenX,
   worldToScreenY
@@ -39,6 +40,9 @@ const APP_TABS = [
   { id: "probability", label: "確率・基本分布" },
   { id: "limit", label: "極限・連続性" },
   { id: "newton", label: "ニュートン法" },
+  { id: "regression", label: "回帰分析" },
+  { id: "taylor", label: "テイラー展開" },
+  { id: "eigen", label: "固有値・固有ベクトル" },
   { id: "geometry", label: "幾何" },
   { id: "space", label: "空間図形" },
   { id: "cas", label: "数式処理(CAS)" },
@@ -46,6 +50,11 @@ const APP_TABS = [
 ];
 
 const TAB_SECTIONS = [
+  {
+    id: "hidden-order",
+    label: "見えにくい秩序を見抜く",
+    tabs: ["regression", "taylor", "eigen"]
+  },
   {
     id: "play-labs",
     label: "観察して学ぶ",
@@ -501,6 +510,230 @@ const NEWTON_MISSIONS = [
   }
 ];
 
+const REGRESSION_PRESETS = [
+  {
+    id: "positive",
+    label: "右上がり",
+    title: "ゆるく右上がりの群れ",
+    slope: 0.72,
+    intercept: -0.8,
+    noise: 0.68,
+    pointCount: 18,
+    xRange: 5,
+    yRange: 5
+  },
+  {
+    id: "negative",
+    label: "右下がり",
+    title: "右下がりの気配",
+    slope: -0.82,
+    intercept: 1.2,
+    noise: 0.72,
+    pointCount: 18,
+    xRange: 5,
+    yRange: 5
+  },
+  {
+    id: "flat",
+    label: "ほぼ水平",
+    title: "平たい傾向",
+    slope: 0.18,
+    intercept: 0.15,
+    noise: 0.55,
+    pointCount: 16,
+    xRange: 5,
+    yRange: 4
+  }
+];
+
+const REGRESSION_MISSIONS = [
+  {
+    id: "fit",
+    label: "ぴったり線",
+    title: "ズレが少ない線を探す",
+    description: "線を引っぱって、点から線までのズレをできるだけ小さくします。",
+    type: "fit"
+  },
+  {
+    id: "outlier",
+    label: "外れ値観察",
+    title: "外れ値が線を引っぱる瞬間を見る",
+    description: "外れ値をオンにして、全体の傾向がどれくらいゆがむかを見ます。",
+    type: "outlier"
+  },
+  {
+    id: "trend",
+    label: "傾向を見抜く",
+    title: "隠れた傾向の向きを見抜く",
+    description: "点のばらつきにまどわされず、全体の向きを読み当てます。",
+    type: "trend"
+  }
+];
+
+const TAYLOR_DEGREES = [
+  { id: "1", label: "1次", value: 1 },
+  { id: "2", label: "2次", value: 2 },
+  { id: "3", label: "3次", value: 3 },
+  { id: "5", label: "5次", value: 5 }
+];
+
+const TAYLOR_PRESETS = [
+  {
+    id: "sin",
+    label: "sin(x)",
+    title: "波を近くでコピーする",
+    xRange: 7,
+    yRange: 2.7,
+    center: 0,
+    minCenter: -5.4,
+    maxCenter: 5.4,
+    fn: (x) => Math.sin(x),
+    derivativeAt: (x, order) => sinDerivativeAt(x, order)
+  },
+  {
+    id: "cos",
+    label: "cos(x)",
+    title: "山の近くを偽装する",
+    xRange: 7,
+    yRange: 2.7,
+    center: 0,
+    minCenter: -5.4,
+    maxCenter: 5.4,
+    fn: (x) => Math.cos(x),
+    derivativeAt: (x, order) => cosDerivativeAt(x, order)
+  },
+  {
+    id: "exp",
+    label: "exp(x)",
+    title: "伸びる曲線のコピー",
+    xRange: 3.2,
+    yRange: 8,
+    center: 0,
+    minCenter: -2.2,
+    maxCenter: 2.2,
+    fn: (x) => Math.exp(x),
+    derivativeAt: (x) => Math.exp(x)
+  },
+  {
+    id: "log1p",
+    label: "ln(1+x)",
+    title: "壁の近くをまねる",
+    xRange: 3.1,
+    yRange: 3.4,
+    center: 0.2,
+    minCenter: -0.75,
+    maxCenter: 2.4,
+    fn: (x) => (x <= -1 ? Number.NaN : Math.log(1 + x)),
+    derivativeAt: (x, order) => logOnePlusDerivativeAt(x, order)
+  }
+];
+
+const TAYLOR_MISSIONS = [
+  {
+    id: "local",
+    label: "近くでそっくり",
+    title: "近い範囲をそっくりにする",
+    description: "中心の近くで、元の曲線とコピーが重なる場所を作ります。",
+    type: "local"
+  },
+  {
+    id: "widen",
+    label: "範囲を広げる",
+    title: "似ている範囲を広げる",
+    description: "次数を上げて、コピーがばれにくい範囲を広げます。",
+    type: "widen"
+  },
+  {
+    id: "center",
+    label: "中心探し",
+    title: "一番うまくコピーできる中心を探す",
+    description: "中心点をずらしながら、一番自然に重なる場所を見つけます。",
+    type: "center"
+  }
+];
+
+const EIGEN_PRESETS = [
+  {
+    id: "stretch",
+    label: "伸ばす",
+    title: "伸びる方向がはっきりある",
+    basis: {
+      u: { x: 2.1, y: 0 },
+      v: { x: 0, y: 0.75 }
+    },
+    start: { x: 1.7, y: 0.9 },
+    range: 4.6
+  },
+  {
+    id: "shear",
+    label: "せん断",
+    title: "片方だけぶれにくい",
+    basis: {
+      u: { x: 1.35, y: 0 },
+      v: { x: 0.95, y: 1 }
+    },
+    start: { x: 1.3, y: 1.1 },
+    range: 4.8
+  },
+  {
+    id: "reflect",
+    label: "反転",
+    title: "向きを保つ軸と、裏返る軸がある",
+    basis: {
+      u: { x: -1.2, y: 0 },
+      v: { x: 0, y: 1.45 }
+    },
+    start: { x: 1.5, y: 0.8 },
+    range: 4.8
+  },
+  {
+    id: "mixed",
+    label: "斜めの軸",
+    title: "隠れた軸を見つける",
+    basis: {
+      u: { x: 1.55, y: 0.42 },
+      v: { x: 0.52, y: 1.08 }
+    },
+    start: { x: 1.2, y: 1.4 },
+    range: 4.8
+  },
+  {
+    id: "swirl",
+    label: "見つけにくい",
+    title: "ぶれない向きが見つけにくい",
+    basis: {
+      u: { x: 0.42, y: 1.08 },
+      v: { x: -1.08, y: 0.42 }
+    },
+    start: { x: 1.6, y: 0.1 },
+    range: 4.8
+  }
+];
+
+const EIGEN_MISSIONS = [
+  {
+    id: "one",
+    label: "1本探す",
+    title: "ぶれない向きを 1 本見つける",
+    description: "向きを変えて、変形してもほぼ同じ線上に残る方向を探します。",
+    type: "one"
+  },
+  {
+    id: "two",
+    label: "2本探す",
+    title: "特別な向きを 2 本見つける",
+    description: "伸ばす・反転のプリセットでは、2本見つかることがあります。",
+    type: "two"
+  },
+  {
+    id: "largest",
+    label: "一番伸びる",
+    title: "一番大きく伸びる向きを探す",
+    description: "ぶれない向きの中でも、一番ぐいっと伸びる軸を探します。",
+    type: "largest"
+  }
+];
+
 const GEOMETRY_TOOLS = [
   { id: "point", label: "点" },
   { id: "segment", label: "線分" },
@@ -580,6 +813,9 @@ export function MathCommunityApp() {
         {activeTab === "probability" ? <ProbabilityPlaygroundPanel /> : null}
         {activeTab === "limit" ? <LimitPlaygroundPanel /> : null}
         {activeTab === "newton" ? <NewtonPlaygroundPanel /> : null}
+        {activeTab === "regression" ? <RegressionPlaygroundPanel /> : null}
+        {activeTab === "taylor" ? <TaylorPlaygroundPanel /> : null}
+        {activeTab === "eigen" ? <EigenPlaygroundPanel /> : null}
         {activeTab === "geometry" ? <GeometryPanel /> : null}
         {activeTab === "space" ? <SpaceGeometryPanel /> : null}
         {activeTab === "cas" ? <CasPanel /> : null}
@@ -2290,6 +2526,695 @@ function NewtonPlaygroundPanel() {
   );
 }
 
+function RegressionPlaygroundPanel() {
+  const canvasRef = useRef(null);
+  const dragRef = useRef({ type: null, lastWorldY: 0 });
+  const [mode, setMode] = useState("play");
+  const [presetId, setPresetId] = useState(REGRESSION_PRESETS[0].id);
+  const [missionId, setMissionId] = useState(REGRESSION_MISSIONS[0].id);
+  const preset = REGRESSION_PRESETS.find((item) => item.id === presetId) || REGRESSION_PRESETS[0];
+  const activeMission = REGRESSION_MISSIONS.find((item) => item.id === missionId) || REGRESSION_MISSIONS[0];
+  const [noise, setNoise] = useState(preset.noise);
+  const [pointCount, setPointCount] = useState(preset.pointCount);
+  const [showOutlier, setShowOutlier] = useState(false);
+  const [showResiduals, setShowResiduals] = useState(true);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [lineLeftY, setLineLeftY] = useState(0);
+  const [lineRightY, setLineRightY] = useState(0);
+
+  const dataset = useMemo(
+    () => buildRegressionDataset(preset, noise, pointCount, showOutlier),
+    [noise, pointCount, preset, showOutlier]
+  );
+  const bestFit = useMemo(() => computeRegressionLine(dataset.points), [dataset.points]);
+  const outlierFreeFit = useMemo(() => computeRegressionLine(dataset.points.filter((point) => !point.isOutlier)), [dataset.points]);
+  const currentLine = useMemo(
+    () => buildLineModelFromEdges(-preset.xRange, lineLeftY, preset.xRange, lineRightY),
+    [lineLeftY, lineRightY, preset.xRange]
+  );
+  const currentScore = useMemo(() => computeRegressionScore(dataset.points, currentLine), [currentLine, dataset.points]);
+  const bestScore = useMemo(() => computeRegressionScore(dataset.points, bestFit), [bestFit, dataset.points]);
+  const fitPercent = useMemo(() => {
+    if (!Number.isFinite(currentScore.meanSquared) || !Number.isFinite(bestScore.meanSquared)) return 0;
+    return Math.max(0, Math.min(100, 100 - ((currentScore.meanSquared - bestScore.meanSquared) / (bestScore.meanSquared + 0.18)) * 100));
+  }, [bestScore.meanSquared, currentScore.meanSquared]);
+  const mission = useMemo(
+    () => buildRegressionMissionState(activeMission, currentLine, currentScore, bestFit, bestScore, outlierFreeFit, showOutlier),
+    [activeMission, bestFit, bestScore, currentLine, currentScore, outlierFreeFit, showOutlier]
+  );
+  const statusText = useMemo(
+    () => describeRegressionStatus(currentLine, currentScore, bestFit, bestScore, showOutlier, outlierFreeFit),
+    [bestFit, bestScore, currentLine, currentScore, outlierFreeFit, showOutlier]
+  );
+
+  useEffect(() => {
+    setNoise(preset.noise);
+    setPointCount(preset.pointCount);
+    setShowOutlier(false);
+    setShowAnswer(false);
+  }, [preset.id, preset.noise, preset.pointCount]);
+
+  useEffect(() => {
+    const seeded = makeRegressionSeedLine(preset, bestFit);
+    setLineLeftY(seeded.leftY);
+    setLineRightY(seeded.rightY);
+  }, [bestFit, pointCount, preset, showOutlier, noise]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    drawRegressionScene(context, {
+      preset,
+      dataset,
+      currentLine,
+      bestFit,
+      showAnswer,
+      showResiduals
+    });
+  }, [bestFit, currentLine, dataset, preset, showAnswer, showResiduals]);
+
+  function resetLine() {
+    const seeded = makeRegressionSeedLine(preset, bestFit);
+    setLineLeftY(seeded.leftY);
+    setLineRightY(seeded.rightY);
+    setShowAnswer(false);
+  }
+
+  function rerollNoise() {
+    setNoise(clampFloat(0.25 + Math.random() * 1.45, 0.1, 2.2, preset.noise));
+  }
+
+  function updateLineFromPointer(event) {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const point = eventToCanvasPoint(event, canvas);
+    const worldY = screenToWorldY(point.y, canvas.height, preset.yRange);
+    const dragState = dragRef.current;
+    if (dragState.type === "left") {
+      setLineLeftY(clampFloat(worldY, -preset.yRange * 1.3, preset.yRange * 1.3, lineLeftY));
+      return;
+    }
+    if (dragState.type === "right") {
+      setLineRightY(clampFloat(worldY, -preset.yRange * 1.3, preset.yRange * 1.3, lineRightY));
+      return;
+    }
+    if (dragState.type === "line") {
+      const delta = worldY - dragState.lastWorldY;
+      dragState.lastWorldY = worldY;
+      setLineLeftY((current) => clampFloat(current + delta, -preset.yRange * 1.3, preset.yRange * 1.3, current));
+      setLineRightY((current) => clampFloat(current + delta, -preset.yRange * 1.3, preset.yRange * 1.3, current));
+    }
+  }
+
+  function handlePointerDown(event) {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const point = eventToCanvasPoint(event, canvas);
+    const leftHandle = {
+      x: worldToScreenX(-preset.xRange, canvas.width, preset.xRange),
+      y: worldToScreenY(lineLeftY, canvas.height, preset.yRange)
+    };
+    const rightHandle = {
+      x: worldToScreenX(preset.xRange, canvas.width, preset.xRange),
+      y: worldToScreenY(lineRightY, canvas.height, preset.yRange)
+    };
+    const pointerWorld = {
+      x: screenToWorldX(point.x, canvas.width, preset.xRange),
+      y: screenToWorldY(point.y, canvas.height, preset.yRange)
+    };
+    const lineY = predictRegressionY(currentLine, pointerWorld.x);
+    const linePoint = {
+      x: point.x,
+      y: worldToScreenY(lineY, canvas.height, preset.yRange)
+    };
+    let type = null;
+    if (distanceBetween(point, leftHandle) < 18) type = "left";
+    else if (distanceBetween(point, rightHandle) < 18) type = "right";
+    else if (distanceBetween(point, linePoint) < 16) type = "line";
+    if (!type) return;
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    dragRef.current = {
+      type,
+      lastWorldY: pointerWorld.y
+    };
+    updateLineFromPointer(event);
+  }
+
+  function clearDrag(event) {
+    event?.currentTarget?.releasePointerCapture?.(event.pointerId);
+    dragRef.current = { type: null, lastWorldY: 0 };
+  }
+
+  return (
+    <MathPlaygroundLayout
+      workspace={
+        <canvas
+          ref={canvasRef}
+          width={960}
+          height={480}
+          className="math-canvas is-draggable"
+          onPointerDown={handlePointerDown}
+          onPointerMove={(event) => {
+            if (dragRef.current.type) updateLineFromPointer(event);
+          }}
+          onPointerUp={clearDrag}
+          onPointerLeave={() => {
+            dragRef.current = { type: null, lastWorldY: 0 };
+          }}
+          onPointerCancel={clearDrag}
+        />
+      }
+      caption="線の端を引っぱると、点とのズレがすぐ変わります。残差の線が短くなるほど、隠れた傾向に寄っていきます。"
+      controls={
+        <>
+          <MathPlaygroundHeader title="ぴったり線さがし" starter="まずは線を引っぱる" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
+
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={REGRESSION_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={rerollNoise}>点をふり直す</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetLine}>線を戻す</button>
+                <button
+                  type="button"
+                  className="button button-ghost button-small"
+                  onClick={() => setShowAnswer((current) => !current)}
+                >
+                  {showAnswer ? "答えを隠す" : "答えを見る"}
+                </button>
+              </MathActionRow>
+              <MathSliderField label="ノイズ量" min="0.1" max="2.2" step="0.01" value={noise} onChange={setNoise} />
+              <MathStoryCard title="いま見ている点群">
+                <span>{preset.title}</span>
+                <span>少し動かすだけで、残差の長さが大きく変わります。ぴったりの線は、点の真ん中をまっすぐ通ることが多いです。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
+
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={REGRESSION_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <div className="math-number-grid">
+                <MathNumberField
+                  label="左端の高さ"
+                  value={formatNumber(lineLeftY)}
+                  min={-preset.yRange * 1.3}
+                  max={preset.yRange * 1.3}
+                  step="0.1"
+                  onChange={(value) => setLineLeftY(clampFloat(value, -preset.yRange * 1.3, preset.yRange * 1.3, lineLeftY))}
+                />
+                <MathNumberField
+                  label="右端の高さ"
+                  value={formatNumber(lineRightY)}
+                  min={-preset.yRange * 1.3}
+                  max={preset.yRange * 1.3}
+                  step="0.1"
+                  onChange={(value) => setLineRightY(clampFloat(value, -preset.yRange * 1.3, preset.yRange * 1.3, lineRightY))}
+                />
+              </div>
+              <MathSliderField label="点の数" min="8" max="34" step="1" value={pointCount} onChange={setPointCount} />
+              <MathSliderField label="ノイズ量" min="0.1" max="2.2" step="0.01" value={noise} onChange={setNoise} />
+              <div className="math-toggle-grid">
+                <MathToggleField label="残差を表示" checked={showResiduals} onChange={setShowResiduals} />
+                <MathToggleField label="外れ値を入れる" checked={showOutlier} onChange={setShowOutlier} />
+              </div>
+            </>
+          ) : null}
+
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={REGRESSION_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStatusMessage title="今回のねらい">{activeMission.description}</MathStatusMessage>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={resetLine}>線を戻す</button>
+                <button type="button" className="button button-ghost button-small" onClick={() => setShowOutlier((current) => !current)}>
+                  {showOutlier ? "外れ値を外す" : "外れ値を入れる"}
+                </button>
+                <button type="button" className="button button-ghost button-small" onClick={() => setShowAnswer((current) => !current)}>
+                  {showAnswer ? "答えを隠す" : "答えを見る"}
+                </button>
+              </MathActionRow>
+            </>
+          ) : null}
+
+          <div className="math-kpi-grid">
+            <MathKpi label="点の数" value={dataset.points.length} />
+            <MathKpi label="いまの傾き" value={formatNumber(currentLine.slope)} />
+            <MathKpi label="ズレ合計" value={formatNumber(currentScore.meanSquared)} />
+            <MathKpi label="最適との差" value={formatNumber(Math.abs(currentLine.slope - bestFit.slope))} />
+          </div>
+
+          <MathValueMeter
+            label="ズレメーター"
+            value={fitPercent}
+            min={0}
+            max={100}
+            displayValue={`${Math.round(fitPercent)}%`}
+            accentClass={fitPercent > 80 ? "is-positive" : fitPercent > 55 ? "is-soft" : "is-warm"}
+            valueLabel={fitPercent > 80 ? "かなりそれっぽい線です" : fitPercent > 55 ? "だいぶ傾向をつかめています" : "まだズレが大きいです"}
+          />
+
+          <MathStatusMessage title="状態メッセージ">{statusText}</MathStatusMessage>
+
+          <MathLegendRow
+            items={[
+              { tone: "is-dark", label: "散布図" },
+              { tone: "is-orange", label: "今の線" },
+              { tone: "is-purple", label: "答えの線" },
+              { tone: "is-cool", label: "残差" }
+            ]}
+          />
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              回帰分析は、ばらついた点の中から <strong>一番それっぽい流れ</strong> を見抜く遊びです。線を少し動かすだけで、
+              ずれの総量がぐっと変わります。
+            </p>
+          </div>
+          <MathMissionCard mission={mission} />
+        </>
+      }
+    />
+  );
+}
+
+function TaylorPlaygroundPanel() {
+  const canvasRef = useRef(null);
+  const dragRef = useRef(false);
+  const [mode, setMode] = useState("play");
+  const [presetId, setPresetId] = useState(TAYLOR_PRESETS[0].id);
+  const [missionId, setMissionId] = useState(TAYLOR_MISSIONS[0].id);
+  const [degreeId, setDegreeId] = useState(TAYLOR_DEGREES[1].id);
+  const preset = TAYLOR_PRESETS.find((item) => item.id === presetId) || TAYLOR_PRESETS[0];
+  const activeMission = TAYLOR_MISSIONS.find((item) => item.id === missionId) || TAYLOR_MISSIONS[0];
+  const degree = Number(TAYLOR_DEGREES.find((item) => item.id === degreeId)?.value || 2);
+  const [centerX, setCenterX] = useState(preset.center);
+  const [windowRadius, setWindowRadius] = useState(1.15);
+  const [showErrorBand, setShowErrorBand] = useState(true);
+  const [showOriginal, setShowOriginal] = useState(true);
+
+  const approximation = useMemo(() => buildTaylorApproximation(preset, centerX, degree), [centerX, degree, preset]);
+  const localError = useMemo(
+    () => measureTaylorError(preset.fn, approximation.fn, centerX, windowRadius, preset.minCenter, preset.maxCenter),
+    [approximation.fn, centerX, preset, windowRadius]
+  );
+  const globalError = useMemo(
+    () => measureTaylorError(preset.fn, approximation.fn, centerX, windowRadius * 2.4, preset.minCenter, preset.maxCenter),
+    [approximation.fn, centerX, preset, windowRadius]
+  );
+  const mission = useMemo(
+    () => buildTaylorMissionState(activeMission, centerX, degree, windowRadius, localError),
+    [activeMission, centerX, degree, localError, windowRadius]
+  );
+  const statusText = useMemo(
+    () => describeTaylorStatus(localError, globalError, degree, centerX, preset),
+    [centerX, degree, globalError, localError, preset]
+  );
+  const similarity = Math.max(0, Math.min(100, 100 - localError * 180));
+
+  useEffect(() => {
+    setCenterX(preset.center);
+    setWindowRadius(1.15);
+    setDegreeId(TAYLOR_DEGREES[1].id);
+  }, [preset.center, preset.id]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    drawTaylorScene(context, {
+      preset,
+      approximation,
+      centerX,
+      windowRadius,
+      degree,
+      showErrorBand,
+      showOriginal
+    });
+  }, [approximation, centerX, degree, preset, showErrorBand, showOriginal, windowRadius]);
+
+  function resetScene() {
+    setCenterX(preset.center);
+    setWindowRadius(1.15);
+    setDegreeId(TAYLOR_DEGREES[1].id);
+  }
+
+  function randomCenter() {
+    setCenterX(clampFloat(preset.minCenter + Math.random() * (preset.maxCenter - preset.minCenter), preset.minCenter, preset.maxCenter, preset.center));
+  }
+
+  function updateCenterFromEvent(event) {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const point = eventToCanvasPoint(event, canvas);
+    setCenterX(clampFloat(screenToWorldX(point.x, canvas.width, preset.xRange), preset.minCenter, preset.maxCenter, centerX));
+  }
+
+  return (
+    <MathPlaygroundLayout
+      workspace={
+        <canvas
+          ref={canvasRef}
+          width={960}
+          height={480}
+          className="math-canvas is-draggable"
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture?.(event.pointerId);
+            dragRef.current = true;
+            updateCenterFromEvent(event);
+          }}
+          onPointerMove={(event) => {
+            if (dragRef.current) updateCenterFromEvent(event);
+          }}
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
+            dragRef.current = false;
+          }}
+          onPointerLeave={() => {
+            dragRef.current = false;
+          }}
+          onPointerCancel={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
+            dragRef.current = false;
+          }}
+        />
+      }
+      caption="中心点を動かすと、近似が得意な場所が変わります。次数を上げると、近く限定のコピーが少しずつうまくなります。"
+      controls={
+        <>
+          <MathPlaygroundHeader title="近く限定コピー機" starter="まずは中心を動かす" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
+
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={TAYLOR_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathPresetRow options={TAYLOR_DEGREES} activeId={degreeId} onSelect={setDegreeId} />
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={randomCenter}>中心をずらす</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>リセット</button>
+              </MathActionRow>
+              <MathSliderField label="観察範囲" min="0.4" max="2.4" step="0.01" value={windowRadius} onChange={setWindowRadius} />
+              <MathStoryCard title="いま見ているコピー">
+                <span>{preset.title}</span>
+                <span>近くではそっくりでも、少し離れると正体がばれます。次数を上げるとコピーが育ちます。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
+
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={TAYLOR_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathPresetRow options={TAYLOR_DEGREES} activeId={degreeId} onSelect={setDegreeId} />
+              <div className="math-number-grid">
+                <MathNumberField
+                  label="中心"
+                  value={formatNumber(centerX)}
+                  min={preset.minCenter}
+                  max={preset.maxCenter}
+                  step="0.1"
+                  onChange={(value) => setCenterX(clampFloat(value, preset.minCenter, preset.maxCenter, centerX))}
+                />
+                <MathNumberField
+                  label="観察範囲"
+                  value={formatNumber(windowRadius)}
+                  min={0.4}
+                  max={2.4}
+                  step="0.1"
+                  onChange={(value) => setWindowRadius(clampFloat(value, 0.4, 2.4, windowRadius))}
+                />
+              </div>
+              <div className="math-toggle-grid">
+                <MathToggleField label="元の曲線を表示" checked={showOriginal} onChange={setShowOriginal} />
+                <MathToggleField label="誤差の帯を表示" checked={showErrorBand} onChange={setShowErrorBand} />
+              </div>
+            </>
+          ) : null}
+
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={TAYLOR_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStatusMessage title="今回のねらい">{activeMission.description}</MathStatusMessage>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={() => setDegreeId(TAYLOR_DEGREES[Math.min(TAYLOR_DEGREES.length - 1, TAYLOR_DEGREES.findIndex((item) => item.id === degreeId) + 1)].id)}>
+                  次数を上げる
+                </button>
+                <button type="button" className="button button-ghost button-small" onClick={randomCenter}>中心をずらす</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>やり直す</button>
+              </MathActionRow>
+            </>
+          ) : null}
+
+          <div className="math-kpi-grid">
+            <MathKpi label="中心" value={formatNumber(centerX)} />
+            <MathKpi label="次数" value={`${degree}次`} />
+            <MathKpi label="近くの誤差" value={formatNumber(localError)} />
+            <MathKpi label="広めの誤差" value={formatNumber(globalError)} />
+          </div>
+
+          <MathValueMeter
+            label="そっくり度"
+            value={similarity}
+            min={0}
+            max={100}
+            displayValue={`${Math.round(similarity)}%`}
+            accentClass={similarity > 82 ? "is-positive" : similarity > 55 ? "is-soft" : "is-warm"}
+            valueLabel={similarity > 82 ? "この近くではかなりそっくりです" : similarity > 55 ? "少し離れると正体がばれます" : "まだかなりズレています"}
+          />
+
+          <MathStatusMessage title="状態メッセージ">{statusText}</MathStatusMessage>
+
+          <MathLegendRow
+            items={[
+              { tone: "is-dark", label: "元の曲線" },
+              { tone: "is-purple", label: "近似曲線" },
+              { tone: "is-orange", label: "観察範囲" }
+            ]}
+          />
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              テイラー展開は、複雑な曲線を <strong>その場の近く限定でまねる</strong> 遊びです。中心を変えると似る場所が変わり、
+              次数を上げるとコピーの精度が育っていきます。
+            </p>
+          </div>
+          <MathMissionCard mission={mission} />
+        </>
+      }
+    />
+  );
+}
+
+function EigenPlaygroundPanel() {
+  const canvasRef = useRef(null);
+  const dragRef = useRef(false);
+  const [mode, setMode] = useState("play");
+  const [presetId, setPresetId] = useState(EIGEN_PRESETS[0].id);
+  const [missionId, setMissionId] = useState(EIGEN_MISSIONS[0].id);
+  const preset = EIGEN_PRESETS.find((item) => item.id === presetId) || EIGEN_PRESETS[0];
+  const activeMission = EIGEN_MISSIONS.find((item) => item.id === missionId) || EIGEN_MISSIONS[0];
+  const [vector, setVector] = useState(preset.start);
+  const [showBaseGrid, setShowBaseGrid] = useState(true);
+  const [showAxesHint, setShowAxesHint] = useState(false);
+  const [foundAxes, setFoundAxes] = useState([]);
+
+  const transformed = useMemo(() => applyBasisTransform(vector, preset.basis), [preset.basis, vector]);
+  const eigenData = useMemo(() => computeEigenDirections(preset.basis), [preset.basis]);
+  const axisInfo = useMemo(() => analyzeEigenDirection(vector, transformed, eigenData), [eigenData, transformed, vector]);
+  const mission = useMemo(
+    () => buildEigenMissionState(activeMission, axisInfo, eigenData, foundAxes),
+    [activeMission, axisInfo, eigenData, foundAxes]
+  );
+  const statusText = useMemo(() => describeEigenStatus(axisInfo, eigenData), [axisInfo, eigenData]);
+
+  useEffect(() => {
+    setVector(preset.start);
+    setFoundAxes([]);
+  }, [preset.id, preset.start]);
+
+  useEffect(() => {
+    if (!axisInfo.matchId) return;
+    setFoundAxes((current) => (current.includes(axisInfo.matchId) ? current : [...current, axisInfo.matchId]));
+  }, [axisInfo.matchId]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    drawEigenScene(context, {
+      preset,
+      vector,
+      transformed,
+      eigenData,
+      axisInfo,
+      showBaseGrid,
+      showAxesHint
+    });
+  }, [axisInfo, eigenData, preset, showAxesHint, showBaseGrid, transformed, vector]);
+
+  function resetScene() {
+    setVector(preset.start);
+    setFoundAxes([]);
+  }
+
+  function randomVector() {
+    const angle = Math.random() * Math.PI * 2;
+    const length = 0.9 + Math.random() * 2.2;
+    setVector({
+      x: Math.cos(angle) * length,
+      y: Math.sin(angle) * length
+    });
+  }
+
+  function updateVectorFromEvent(event) {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const point = eventToCanvasPoint(event, canvas);
+    const world = linearScreenToWorld(point.x, point.y, canvas.width, canvas.height, preset.range);
+    setVector(clampVectorMagnitude(world, preset.range * 0.92));
+  }
+
+  return (
+    <MathPlaygroundLayout
+      workspace={
+        <canvas
+          ref={canvasRef}
+          width={960}
+          height={480}
+          className="math-canvas is-draggable"
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture?.(event.pointerId);
+            dragRef.current = true;
+            updateVectorFromEvent(event);
+          }}
+          onPointerMove={(event) => {
+            if (dragRef.current) updateVectorFromEvent(event);
+          }}
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
+            dragRef.current = false;
+          }}
+          onPointerLeave={() => {
+            dragRef.current = false;
+          }}
+          onPointerCancel={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
+            dragRef.current = false;
+          }}
+        />
+      }
+      caption="黒い矢印を動かすと、変換後のオレンジの矢印がどうぶれるかが見えます。向きがほとんど変わらない瞬間が、特別な軸です。"
+      controls={
+        <>
+          <MathPlaygroundHeader title="ぶれない向き探し" starter="まずは矢印を回す" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
+
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={EIGEN_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={randomVector}>向きを変える</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>リセット</button>
+              </MathActionRow>
+              <MathStoryCard title="いま見ている変形">
+                <span>{preset.title}</span>
+                <span>ほとんどの向きはぶれますが、一部だけ向きを保ったまま伸び縮みします。それが特別な軸です。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
+
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={EIGEN_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <div className="math-number-grid">
+                <MathNumberField
+                  label="x"
+                  value={formatNumber(vector.x)}
+                  min={-preset.range}
+                  max={preset.range}
+                  step="0.1"
+                  onChange={(value) => setVector((current) => clampVectorMagnitude({ ...current, x: value }, preset.range * 0.92))}
+                />
+                <MathNumberField
+                  label="y"
+                  value={formatNumber(vector.y)}
+                  min={-preset.range}
+                  max={preset.range}
+                  step="0.1"
+                  onChange={(value) => setVector((current) => clampVectorMagnitude({ ...current, y: value }, preset.range * 0.92))}
+                />
+              </div>
+              <div className="math-toggle-grid">
+                <MathToggleField label="もとの格子を表示" checked={showBaseGrid} onChange={setShowBaseGrid} />
+                <MathToggleField label="特別な軸のヒント" checked={showAxesHint} onChange={setShowAxesHint} />
+              </div>
+            </>
+          ) : null}
+
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={EIGEN_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStatusMessage title="今回のねらい">{activeMission.description}</MathStatusMessage>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={randomVector}>別の向きを試す</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>やり直す</button>
+              </MathActionRow>
+            </>
+          ) : null}
+
+          <div className="math-kpi-grid">
+            <MathKpi label="ズレ角" value={`${formatNumber(axisInfo.axisDriftDeg)}°`} />
+            <MathKpi label="倍率" value={formatNumber(axisInfo.scale)} />
+            <MathKpi label="見つけた軸" value={foundAxes.length} />
+            <MathKpi label="向き" value={axisInfo.reversed ? "反転あり" : "そのまま"} />
+          </div>
+
+          <MathValueMeter
+            label="ぶれなさメーター"
+            value={Math.max(0, 100 - axisInfo.axisDriftDeg * 8)}
+            min={0}
+            max={100}
+            displayValue={`${Math.round(Math.max(0, 100 - axisInfo.axisDriftDeg * 8))}%`}
+            accentClass={axisInfo.isEigenLike ? "is-positive" : axisInfo.axisDriftDeg < 18 ? "is-soft" : "is-cool"}
+            valueLabel={axisInfo.isEigenLike ? "特別な向きを見つけました" : axisInfo.axisDriftDeg < 18 ? "かなり近い向きです" : "この向きはかなりぶれます"}
+          />
+
+          <MathStatusMessage title="状態メッセージ">{statusText}</MathStatusMessage>
+
+          <MathLegendRow
+            items={[
+              { tone: "is-dark", label: "入力ベクトル" },
+              { tone: "is-orange", label: "変換後ベクトル" },
+              { tone: "is-purple", label: "特別な軸" }
+            ]}
+          />
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              固有値・固有ベクトルは、変形しても <strong>向きがぶれない特別な方向</strong> を見つける遊びです。
+              その方向だけ、向きを保ったまま伸び縮みします。
+            </p>
+          </div>
+          <MathMissionCard mission={mission} />
+        </>
+      }
+    />
+  );
+}
+
 function GeometryPanel() {
   const canvasRef = useRef(null);
   const [tool, setTool] = useState("point");
@@ -3406,6 +4331,561 @@ function drawLinearVector(context, width, height, range, vector, color, label) {
   context.font = "600 15px var(--font-sans, sans-serif)";
   context.fillText(label, tip.x + 12, tip.y - 10);
   context.restore();
+}
+
+function buildRegressionDataset(preset, noise, pointCount, includeOutlier) {
+  const random = createSeededRandom(`${preset.id}:${noise.toFixed(3)}:${pointCount}:${includeOutlier ? "1" : "0"}`);
+  const points = [];
+  const minX = -preset.xRange * 0.84;
+  const maxX = preset.xRange * 0.84;
+
+  for (let index = 0; index < pointCount; index += 1) {
+    const ratio = pointCount <= 1 ? 0.5 : index / (pointCount - 1);
+    const x = minX + (maxX - minX) * ratio + (random() - 0.5) * 0.55;
+    const y = preset.slope * x + preset.intercept + randomNormal(random) * noise;
+    points.push({ x, y, isOutlier: false });
+  }
+
+  if (includeOutlier) {
+    const outlierX = preset.xRange * 0.76;
+    const outlierY = preset.slope * outlierX + preset.intercept + noise * 3.8 + 2.4;
+    points.push({ x: outlierX, y: outlierY, isOutlier: true });
+  }
+
+  return { points };
+}
+
+function createSeededRandom(seedText) {
+  let seed = 1779033703 ^ seedText.length;
+  for (let index = 0; index < seedText.length; index += 1) {
+    seed = Math.imul(seed ^ seedText.charCodeAt(index), 3432918353);
+    seed = (seed << 13) | (seed >>> 19);
+  }
+  return function next() {
+    seed = Math.imul(seed ^ (seed >>> 16), 2246822507);
+    seed = Math.imul(seed ^ (seed >>> 13), 3266489909);
+    seed ^= seed >>> 16;
+    return (seed >>> 0) / 4294967296;
+  };
+}
+
+function randomNormal(random) {
+  const u1 = Math.max(1e-9, random());
+  const u2 = Math.max(1e-9, random());
+  return Math.sqrt(-2 * Math.log(u1)) * Math.cos(Math.PI * 2 * u2);
+}
+
+function computeRegressionLine(points) {
+  if (!points.length) return { slope: 0, intercept: 0 };
+  const meanX = points.reduce((sum, point) => sum + point.x, 0) / points.length;
+  const meanY = points.reduce((sum, point) => sum + point.y, 0) / points.length;
+  const numerator = points.reduce((sum, point) => sum + (point.x - meanX) * (point.y - meanY), 0);
+  const denominator = points.reduce((sum, point) => sum + (point.x - meanX) ** 2, 0);
+  const slope = Math.abs(denominator) < 1e-9 ? 0 : numerator / denominator;
+  return {
+    slope,
+    intercept: meanY - slope * meanX
+  };
+}
+
+function buildLineModelFromEdges(leftX, leftY, rightX, rightY) {
+  const dx = rightX - leftX;
+  const slope = Math.abs(dx) < 1e-9 ? 0 : (rightY - leftY) / dx;
+  return {
+    slope,
+    intercept: leftY - slope * leftX,
+    leftX,
+    leftY,
+    rightX,
+    rightY
+  };
+}
+
+function predictRegressionY(line, x) {
+  return line.slope * x + line.intercept;
+}
+
+function computeRegressionScore(points, line) {
+  if (!points.length) return { meanSquared: 0, meanAbsolute: 0 };
+  let squared = 0;
+  let absolute = 0;
+  points.forEach((point) => {
+    const residual = point.y - predictRegressionY(line, point.x);
+    squared += residual * residual;
+    absolute += Math.abs(residual);
+  });
+  return {
+    meanSquared: squared / points.length,
+    meanAbsolute: absolute / points.length
+  };
+}
+
+function makeRegressionSeedLine(preset, bestFit) {
+  const leftX = -preset.xRange;
+  const rightX = preset.xRange;
+  return {
+    leftY: predictRegressionY(bestFit, leftX) + 0.9,
+    rightY: predictRegressionY(bestFit, rightX) - 0.7
+  };
+}
+
+function buildRegressionMissionState(mission, currentLine, currentScore, bestFit, bestScore, outlierFreeFit, showOutlier) {
+  if (mission.type === "fit") {
+    const done = currentScore.meanSquared <= bestScore.meanSquared * 1.25 + 0.08;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "かなりズレの少ない線です。" : "線を少しずつ寄せて、残差が短くなる位置を探しましょう。"
+    };
+  }
+
+  if (mission.type === "outlier") {
+    const pull = Math.abs(bestFit.slope - outlierFreeFit.slope);
+    const done = showOutlier && pull > 0.18;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "外れ値 1 つで線の傾きがかなり変わりました。" : "外れ値を入れて、答えの線がどれだけ引っぱられるか見てみましょう。"
+    };
+  }
+
+  const sameSign = Math.sign(currentLine.slope || 0) === Math.sign(bestFit.slope || 0);
+  const done = sameSign && currentScore.meanSquared <= bestScore.meanSquared * 1.8 + 0.16;
+  return {
+    ...mission,
+    done,
+    statusText: done ? "ばらつきの中から全体の向きを読み当てました。" : "まずは右上がりか右下がりか、大まかな流れを見抜いてみましょう。"
+  };
+}
+
+function describeRegressionStatus(currentLine, currentScore, bestFit, bestScore, showOutlier, outlierFreeFit) {
+  if (currentScore.meanSquared <= bestScore.meanSquared * 1.18 + 0.06) return "かなりそれっぽい線です。点群の芯にうまく乗っています。";
+  if (showOutlier && Math.abs(bestFit.slope - outlierFreeFit.slope) > 0.18) return "外れ値 1 つが全体を引っぱっています。答えの線も大きく傾きます。";
+  if (Math.sign(currentLine.slope || 0) !== Math.sign(bestFit.slope || 0)) return "傾向の向きが逆です。点のかたまり全体の流れを見てみましょう。";
+  return "まだズレが大きいです。点から線までの残差が短くなるように寄せてみてください。";
+}
+
+function drawRegressionScene(context, config) {
+  const { canvas } = context;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  paintMathBackground(context, canvas.width, canvas.height);
+  drawGraphGrid(context, canvas.width, canvas.height, config.preset.xRange, config.preset.yRange);
+
+  const points = config.dataset.points;
+  const currentLine = config.currentLine;
+  const bestFit = config.bestFit;
+  const leftHandle = {
+    x: worldToScreenX(-config.preset.xRange, canvas.width, config.preset.xRange),
+    y: worldToScreenY(predictRegressionY(currentLine, -config.preset.xRange), canvas.height, config.preset.yRange)
+  };
+  const rightHandle = {
+    x: worldToScreenX(config.preset.xRange, canvas.width, config.preset.xRange),
+    y: worldToScreenY(predictRegressionY(currentLine, config.preset.xRange), canvas.height, config.preset.yRange)
+  };
+
+  if (config.showResiduals) {
+    context.save();
+    context.strokeStyle = "rgba(14, 165, 233, 0.32)";
+    context.lineWidth = 1.8;
+    points.forEach((point) => {
+      const x = worldToScreenX(point.x, canvas.width, config.preset.xRange);
+      const y = worldToScreenY(point.y, canvas.height, config.preset.yRange);
+      const lineY = worldToScreenY(predictRegressionY(currentLine, point.x), canvas.height, config.preset.yRange);
+      context.beginPath();
+      context.moveTo(x, y);
+      context.lineTo(x, lineY);
+      context.stroke();
+    });
+    context.restore();
+  }
+
+  drawRegressionLine(context, bestFit, config.preset.xRange, config.preset.yRange, "rgba(124, 58, 237, 0.78)", config.showAnswer ? [] : [10, 8]);
+  drawRegressionLine(context, currentLine, config.preset.xRange, config.preset.yRange, "#f97316", []);
+
+  context.save();
+  points.forEach((point) => {
+    const screen = {
+      x: worldToScreenX(point.x, canvas.width, config.preset.xRange),
+      y: worldToScreenY(point.y, canvas.height, config.preset.yRange)
+    };
+    context.fillStyle = point.isOutlier ? "#ef4444" : "#111827";
+    context.beginPath();
+    context.arc(screen.x, screen.y, point.isOutlier ? 6.5 : 5.5, 0, Math.PI * 2);
+    context.fill();
+  });
+
+  context.fillStyle = "#f97316";
+  [leftHandle, rightHandle].forEach((handle) => {
+    context.beginPath();
+    context.arc(handle.x, handle.y, 8, 0, Math.PI * 2);
+    context.fill();
+  });
+  context.restore();
+}
+
+function drawRegressionLine(context, line, xRange, yRange, strokeStyle, dash = []) {
+  const { canvas } = context;
+  context.save();
+  context.strokeStyle = strokeStyle;
+  context.lineWidth = 3;
+  if (dash.length) context.setLineDash(dash);
+  const leftY = predictRegressionY(line, -xRange);
+  const rightY = predictRegressionY(line, xRange);
+  context.beginPath();
+  context.moveTo(worldToScreenX(-xRange, canvas.width, xRange), worldToScreenY(leftY, canvas.height, yRange));
+  context.lineTo(worldToScreenX(xRange, canvas.width, xRange), worldToScreenY(rightY, canvas.height, yRange));
+  context.stroke();
+  context.restore();
+}
+
+function sinDerivativeAt(x, order) {
+  const cycle = [Math.sin(x), Math.cos(x), -Math.sin(x), -Math.cos(x)];
+  return cycle[order % 4];
+}
+
+function cosDerivativeAt(x, order) {
+  const cycle = [Math.cos(x), -Math.sin(x), -Math.cos(x), Math.sin(x)];
+  return cycle[order % 4];
+}
+
+function logOnePlusDerivativeAt(x, order) {
+  if (x <= -1) return Number.NaN;
+  if (order === 0) return Math.log(1 + x);
+  const sign = order % 2 === 0 ? -1 : 1;
+  return (sign * factorial(order - 1)) / (1 + x) ** order;
+}
+
+function factorial(value) {
+  let total = 1;
+  for (let index = 2; index <= value; index += 1) total *= index;
+  return total;
+}
+
+function buildTaylorApproximation(preset, centerX, degree) {
+  const coefficients = [];
+  for (let order = 0; order <= degree; order += 1) {
+    const derivative = preset.derivativeAt(centerX, order);
+    coefficients.push(Number.isFinite(derivative) ? derivative / factorial(order) : 0);
+  }
+
+  return {
+    coefficients,
+    fn: (x) => {
+      if (x < preset.minCenter - 1.2 || x > preset.maxCenter + 1.2) return Number.NaN;
+      const dx = x - centerX;
+      return coefficients.reduce((sum, coefficient, order) => sum + coefficient * dx ** order, 0);
+    }
+  };
+}
+
+function measureTaylorError(fn, approxFn, centerX, radius, minX, maxX) {
+  const left = Math.max(minX, centerX - radius);
+  const right = Math.min(maxX, centerX + radius);
+  const samples = 80;
+  let total = 0;
+  let count = 0;
+  for (let index = 0; index <= samples; index += 1) {
+    const x = left + ((right - left) * index) / samples;
+    const actual = safeEvaluate(fn, x);
+    const approx = safeEvaluate(approxFn, x);
+    if (!Number.isFinite(actual) || !Number.isFinite(approx)) continue;
+    total += Math.abs(actual - approx);
+    count += 1;
+  }
+  return count ? total / count : Number.POSITIVE_INFINITY;
+}
+
+function buildTaylorMissionState(mission, centerX, degree, windowRadius, localError) {
+  if (mission.type === "local") {
+    const done = localError < 0.12;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "この近くではかなりそっくりです。" : "中心の近くで、2本の曲線が重なる場所を探してみましょう。"
+    };
+  }
+  if (mission.type === "widen") {
+    const done = degree >= 3 && windowRadius >= 1.4 && localError < 0.18;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "似ている範囲がかなり広がりました。" : "次数を上げて、観察範囲を少しずつ広げてみましょう。"
+    };
+  }
+  const done = Math.abs(centerX) > 0.25 && localError < 0.16;
+  return {
+    ...mission,
+    done,
+    statusText: done ? "中心を動かして、一番よく重なる場所を見つけました。" : "中心点を左右に動かすと、どこが得意かが変わります。"
+  };
+}
+
+function describeTaylorStatus(localError, globalError, degree, centerX, preset) {
+  if (!Number.isFinite(localError)) return "この中心ではコピーが不安定です。別の場所を試してみてください。";
+  if (localError < 0.1 && globalError > localError * 2.6) return "この近くではかなりそっくりです。少し離れると正体がバレます。";
+  if (degree >= 3 && localError < 0.16) return "次数を上げたので、コピーの精度が育っています。";
+  if (Math.abs(centerX - preset.center) > 0.45) return "中心を変えると、似る場所も一緒に移動します。";
+  return "近く限定ならかなり似せられます。コピーの得意な範囲を探してみましょう。";
+}
+
+function drawTaylorScene(context, config) {
+  const { canvas } = context;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  paintMathBackground(context, canvas.width, canvas.height);
+  drawGraphGrid(context, canvas.width, canvas.height, config.preset.xRange, config.preset.yRange);
+
+  const left = Math.max(config.preset.minCenter, config.centerX - config.windowRadius);
+  const right = Math.min(config.preset.maxCenter, config.centerX + config.windowRadius);
+  const leftScreen = worldToScreenX(left, canvas.width, config.preset.xRange);
+  const rightScreen = worldToScreenX(right, canvas.width, config.preset.xRange);
+
+  context.save();
+  context.fillStyle = "rgba(249, 115, 22, 0.08)";
+  context.fillRect(leftScreen, 0, rightScreen - leftScreen, canvas.height);
+  context.restore();
+
+  if (config.showErrorBand) {
+    drawTaylorErrorBand(context, config.preset.fn, config.approximation.fn, left, right, config.preset.xRange, config.preset.yRange);
+  }
+
+  if (config.showOriginal) {
+    drawFunctionCurve(context, config.preset.fn, config.preset.xRange, config.preset.yRange, {
+      strokeStyle: "#111827",
+      lineWidth: 3
+    });
+  }
+
+  drawFunctionCurve(context, config.approximation.fn, config.preset.xRange, config.preset.yRange, {
+    strokeStyle: "#7c3aed",
+    lineWidth: 3
+  });
+
+  context.save();
+  context.setLineDash([8, 8]);
+  context.strokeStyle = "rgba(249, 115, 22, 0.45)";
+  context.lineWidth = 2;
+  [left, config.centerX, right].forEach((value, index) => {
+    const x = worldToScreenX(value, canvas.width, config.preset.xRange);
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, canvas.height);
+    context.stroke();
+    if (index === 1) {
+      const y = safeEvaluate(config.preset.fn, config.centerX);
+      if (Number.isFinite(y)) {
+        drawFilledPoint(context, x, worldToScreenY(y, canvas.height, config.preset.yRange), "#f97316");
+      }
+    }
+  });
+  context.restore();
+}
+
+function drawTaylorErrorBand(context, originalFn, approxFn, left, right, xRange, yRange) {
+  const { canvas } = context;
+  const steps = 120;
+  context.save();
+  context.fillStyle = "rgba(124, 58, 237, 0.08)";
+  for (let index = 0; index < steps; index += 1) {
+    const x1 = left + ((right - left) * index) / steps;
+    const x2 = left + ((right - left) * (index + 1)) / steps;
+    const y1 = safeEvaluate(originalFn, x1);
+    const y2 = safeEvaluate(approxFn, x1);
+    const y3 = safeEvaluate(approxFn, x2);
+    const y4 = safeEvaluate(originalFn, x2);
+    if (![y1, y2, y3, y4].every(Number.isFinite)) continue;
+    context.beginPath();
+    context.moveTo(worldToScreenX(x1, canvas.width, xRange), worldToScreenY(y1, canvas.height, yRange));
+    context.lineTo(worldToScreenX(x1, canvas.width, xRange), worldToScreenY(y2, canvas.height, yRange));
+    context.lineTo(worldToScreenX(x2, canvas.width, xRange), worldToScreenY(y3, canvas.height, yRange));
+    context.lineTo(worldToScreenX(x2, canvas.width, xRange), worldToScreenY(y4, canvas.height, yRange));
+    context.closePath();
+    context.fill();
+  }
+  context.restore();
+}
+
+function normalizeVector(vector) {
+  const length = Math.hypot(vector.x, vector.y);
+  if (length < 1e-9) return null;
+  return {
+    x: vector.x / length,
+    y: vector.y / length
+  };
+}
+
+function clampVectorMagnitude(vector, maxMagnitude) {
+  const length = Math.hypot(vector.x, vector.y);
+  if (length <= maxMagnitude || length < 1e-9) return vector;
+  return {
+    x: (vector.x / length) * maxMagnitude,
+    y: (vector.y / length) * maxMagnitude
+  };
+}
+
+function computeEigenDirections(basis) {
+  const a = basis.u.x;
+  const b = basis.v.x;
+  const c = basis.u.y;
+  const d = basis.v.y;
+  const trace = a + d;
+  const determinant = a * d - b * c;
+  const discriminant = trace * trace - 4 * determinant;
+  if (discriminant < -1e-9) return [];
+  const safeDisc = Math.max(0, discriminant);
+  const sqrtDisc = Math.sqrt(safeDisc);
+  const values = [(trace + sqrtDisc) / 2, (trace - sqrtDisc) / 2];
+  const directions = [];
+
+  values.forEach((value, index) => {
+    let vector = Math.abs(b) > Math.abs(c)
+      ? { x: value - d, y: b }
+      : { x: c, y: value - a };
+    if (Math.hypot(vector.x, vector.y) < 1e-9) {
+      vector = Math.abs(a - value) > Math.abs(d - value) ? { x: b, y: value - a } : { x: value - d, y: c };
+    }
+    const normalized = normalizeVector(vector);
+    if (!normalized) return;
+    const exists = directions.some((direction) => axisAngleDifference(direction.vector, normalized) < 0.02);
+    if (!exists) {
+      directions.push({
+        id: `eig-${index}`,
+        value,
+        vector: normalized
+      });
+    }
+  });
+
+  return directions;
+}
+
+function axisAngleDifference(left, right) {
+  const leftNorm = normalizeVector(left);
+  const rightNorm = normalizeVector(right);
+  if (!leftNorm || !rightNorm) return 180;
+  const dot = Math.max(-1, Math.min(1, leftNorm.x * rightNorm.x + leftNorm.y * rightNorm.y));
+  const absoluteDot = Math.min(1, Math.abs(dot));
+  return (Math.acos(absoluteDot) * 180) / Math.PI;
+}
+
+function analyzeEigenDirection(vector, transformed, eigenData) {
+  const inputNorm = normalizeVector(vector);
+  const transformedNorm = normalizeVector(transformed);
+  const axisDriftDeg = inputNorm && transformedNorm ? axisAngleDifference(inputNorm, transformedNorm) : 180;
+  const scale = Math.hypot(vector.x, vector.y) < 1e-9 ? 0 : ((transformed.x * vector.x + transformed.y * vector.y) / (vector.x * vector.x + vector.y * vector.y));
+  const reversed = inputNorm && transformedNorm ? inputNorm.x * transformedNorm.x + inputNorm.y * transformedNorm.y < 0 : false;
+  let matchId = null;
+  let matchValue = null;
+  let strongestValue = null;
+
+  if (eigenData.length) {
+    const closest = eigenData.reduce((best, direction) => {
+      const drift = axisAngleDifference(vector, direction.vector);
+      if (!best || drift < best.drift) return { direction, drift };
+      return best;
+    }, null);
+    if (closest) {
+      strongestValue = eigenData.reduce((best, direction) => (!best || Math.abs(direction.value) > Math.abs(best.value) ? direction : best), null)?.value ?? null;
+      if (closest.drift < 7.5) {
+        matchId = closest.direction.id;
+        matchValue = closest.direction.value;
+      }
+    }
+  }
+
+  return {
+    axisDriftDeg,
+    scale,
+    reversed,
+    matchId,
+    matchValue,
+    strongestValue,
+    isEigenLike: axisDriftDeg < 7.5
+  };
+}
+
+function buildEigenMissionState(mission, axisInfo, eigenData, foundAxes) {
+  if (mission.type === "one") {
+    const done = axisInfo.isEigenLike;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "ぶれない向きを 1 本見つけました。" : "向きのズレ角が小さくなる場所を探してみましょう。"
+    };
+  }
+  if (mission.type === "two") {
+    const done = foundAxes.length >= 2;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "特別な向きを 2 本見つけました。" : eigenData.length < 2 ? "この変形は 2 本見つけにくいです。別のプリセットも試してみましょう。" : "別の向きでも、ぶれない軸が見つかるか探してみましょう。"
+    };
+  }
+  const strongest = eigenData.reduce((best, direction) => (!best || Math.abs(direction.value) > Math.abs(best.value) ? direction : best), null);
+  const done = Boolean(strongest && axisInfo.matchId === strongest.id && axisInfo.isEigenLike);
+  return {
+    ...mission,
+    done,
+    statusText: done ? "一番大きく伸びる軸を見つけました。" : "ぶれない向きの中でも、倍率が一番大きい軸を探してみましょう。"
+  };
+}
+
+function describeEigenStatus(axisInfo, eigenData) {
+  if (!eigenData.length) return "この変形では、ぶれない向きが見つかりにくいです。向きがくるくる回ります。";
+  if (axisInfo.isEigenLike) return axisInfo.reversed ? "方向は線上に残っています。反転しながら伸び縮みしています。" : "方向がほとんど変わっていません。特別な向きを見つけました。";
+  if (axisInfo.axisDriftDeg < 16) return "かなり近いです。あと少しで、ぶれない軸に乗れます。";
+  return "この向きはかなりぶれます。変形しても同じ線上に残る方向を探してみましょう。";
+}
+
+function drawEigenScene(context, config) {
+  const { canvas } = context;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  paintMathBackground(context, canvas.width, canvas.height);
+  if (config.showBaseGrid) {
+    drawLinearGrid(context, canvas.width, canvas.height, config.preset.range, null, "rgba(148, 163, 184, 0.18)", 1);
+  }
+  drawLinearAxes(context, canvas.width, canvas.height, config.preset.range);
+  drawLinearGrid(context, canvas.width, canvas.height, config.preset.range, config.preset.basis, "rgba(15, 118, 110, 0.26)", 1.25);
+  drawLinearUnitCircle(context, canvas.width, canvas.height, config.preset.range, null, {
+    strokeStyle: "rgba(15, 23, 42, 0.2)",
+    fillStyle: "rgba(255, 255, 255, 0.12)",
+    dashed: true
+  });
+  drawLinearUnitCircle(context, canvas.width, canvas.height, config.preset.range, config.preset.basis, {
+    strokeStyle: "rgba(124, 58, 237, 0.72)",
+    fillStyle: "rgba(124, 58, 237, 0.08)"
+  });
+
+  if (config.showAxesHint) {
+    context.save();
+    context.setLineDash([10, 8]);
+    context.strokeStyle = "rgba(124, 58, 237, 0.4)";
+    context.lineWidth = 2;
+    config.eigenData.forEach((direction) => {
+      const left = linearWorldToScreen(-direction.vector.x * config.preset.range, -direction.vector.y * config.preset.range, canvas.width, canvas.height, config.preset.range);
+      const right = linearWorldToScreen(direction.vector.x * config.preset.range, direction.vector.y * config.preset.range, canvas.width, canvas.height, config.preset.range);
+      context.beginPath();
+      context.moveTo(left.x, left.y);
+      context.lineTo(right.x, right.y);
+      context.stroke();
+    });
+    context.restore();
+  }
+
+  const inputLabel = "v";
+  const outputLabel = config.axisInfo.isEigenLike ? "A(v) ★" : "A(v)";
+  drawLinearVector(context, canvas.width, canvas.height, config.preset.range, config.vector, "#111827", inputLabel);
+  drawLinearVector(context, canvas.width, canvas.height, config.preset.range, config.transformed, "#f97316", outputLabel);
+
+  if (config.axisInfo.isEigenLike) {
+    const tip = linearWorldToScreen(config.transformed.x, config.transformed.y, canvas.width, canvas.height, config.preset.range);
+    context.save();
+    context.strokeStyle = "rgba(250, 204, 21, 0.88)";
+    context.lineWidth = 3;
+    context.beginPath();
+    context.arc(tip.x, tip.y, 16, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
 }
 
 function buildProbabilitySpec(preset, bias) {
