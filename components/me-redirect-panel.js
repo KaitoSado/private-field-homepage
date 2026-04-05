@@ -16,6 +16,9 @@ export function MeRedirectPanel() {
     path: "/auth",
     role: "user"
   });
+  const [economy, setEconomy] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [economyStatus, setEconomyStatus] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -48,7 +51,24 @@ export function MeRedirectPanel() {
         return;
       }
 
-      const nextMeta = await fetchOwnProfileMeta(supabase, session.user);
+      const [nextMeta] = await Promise.all([
+        fetchOwnProfileMeta(supabase, session.user),
+        loadEconomy(supabase, session.user.id, {
+          onEconomy: (nextEconomy) => {
+            if (!active) return;
+            setEconomy(nextEconomy);
+          },
+          onTransactions: (nextTransactions) => {
+            if (!active) return;
+            setTransactions(nextTransactions);
+          },
+          onStatus: (nextStatus) => {
+            if (!active) return;
+            setEconomyStatus(nextStatus);
+          }
+        })
+      ]);
+
       if (!active) return;
 
       setState({
@@ -108,6 +128,62 @@ export function MeRedirectPanel() {
         </div>
       </section>
 
+      <section className="section-grid my-page-economy">
+        <div className="surface feature-card my-page-economy-card">
+          <h2>ポイント</h2>
+          {economy ? (
+            <div className="economy-status-strip" aria-label="ポイント状況">
+              <div className="economy-chip">
+                <strong>{economy.point_balance}</strong>
+                <span>保有pt</span>
+              </div>
+              <div className="economy-chip">
+                <strong>{economy.evaluation_credits}</strong>
+                <span>今週の評価票</span>
+              </div>
+              <div className="economy-chip">
+                <strong>{economy.reputation_title}</strong>
+                <span>称号</span>
+              </div>
+            </div>
+          ) : null}
+          {economyStatus ? <p className="muted">{economyStatus}</p> : null}
+          <div className="hero-actions">
+            <Link href="/apps/classes" className="button button-ghost">
+              裏シラバスで使う
+            </Link>
+            <Link href="/apps/edge" className="button button-ghost">
+              エッジ情報で使う
+            </Link>
+          </div>
+        </div>
+
+        <div className="surface feature-card my-page-transactions-card">
+          <h2>最近の増減</h2>
+          {transactions.length ? (
+            <div className="my-page-transaction-list">
+              {transactions.map((transaction) => (
+                <div key={transaction.id} className="my-page-transaction-row">
+                  <div className="my-page-transaction-copy">
+                    <strong>{formatTransactionLabel(transaction)}</strong>
+                    <span>{formatTransactionMeta(transaction)}</span>
+                  </div>
+                  <div className="my-page-transaction-side">
+                    <strong className={transaction.direction === "credit" ? "status-success" : "status-error"}>
+                      {transaction.direction === "credit" ? "+" : "-"}
+                      {transaction.amount}pt
+                    </strong>
+                    <span>{formatShortDate(transaction.created_at)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="muted">まだポイントの増減はありません。</p>
+          )}
+        </div>
+      </section>
+
       <section className="section-grid my-page-grid">
         <Link href={state.path} className="surface feature-card">
           <h2>公開ページを開く</h2>
@@ -138,4 +214,62 @@ export function MeRedirectPanel() {
       </section>
     </div>
   );
+}
+
+async function loadEconomy(supabase, userId, handlers) {
+  try {
+    const [{ data: refreshed, error: refreshError }, { data: history, error: historyError }] = await Promise.all([
+      supabase.rpc("refresh_economy_account", {
+        p_user_id: userId
+      }),
+      supabase
+        .from("point_transactions")
+        .select("id, direction, amount, kind, meta, created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(12)
+    ]);
+
+    if (refreshError) throw refreshError;
+    if (historyError) throw historyError;
+
+    const summaryRow = Array.isArray(refreshed) ? refreshed[0] : refreshed;
+    handlers.onEconomy(summaryRow || null);
+    handlers.onTransactions(history || []);
+    handlers.onStatus("");
+  } catch (error) {
+    handlers.onEconomy(null);
+    handlers.onTransactions([]);
+    handlers.onStatus(error.message || "ポイント状況を読み込めませんでした。");
+  }
+}
+
+function formatTransactionLabel(transaction) {
+  if (transaction.kind === "helpful_reward") {
+    return "役に立った報酬";
+  }
+
+  return transaction.kind || "ポイント移動";
+}
+
+function formatTransactionMeta(transaction) {
+  const targetType = transaction.meta?.target_type;
+  if (targetType === "class_note") {
+    return "裏シラバス";
+  }
+
+  if (targetType === "edge_tip") {
+    return "エッジ情報";
+  }
+
+  return "コミュニティ経済";
+}
+
+function formatShortDate(value) {
+  if (!value) return "";
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    month: "numeric",
+    day: "numeric"
+  }).format(new Date(value));
 }
