@@ -264,6 +264,8 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
               </div>
             ) : null}
 
+            {status && !economy ? <p className="muted">{status}</p> : null}
+
             <div className="class-form-grid">
               <label className="field">
                 <span>検索</span>

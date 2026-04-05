@@ -1468,6 +1468,13 @@ for all
 using (public.is_admin())
 with check (public.is_admin());
 
+grant usage on schema public to authenticated;
+grant select on public.economy_accounts to authenticated;
+grant select on public.point_transactions to authenticated;
+grant select, insert on public.helpful_votes to authenticated;
+grant execute on function public.refresh_economy_account(uuid) to authenticated;
+grant execute on function public.cast_helpful_vote(uuid, text, uuid) to authenticated;
+
 drop policy if exists "help requests are public readable" on public.help_requests;
 create policy "help requests are public readable"
 on public.help_requests
