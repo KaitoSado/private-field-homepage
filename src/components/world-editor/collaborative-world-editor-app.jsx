@@ -19,7 +19,7 @@ import { ObjectListPanel } from "@/src/components/world-editor/object-list-panel
 import { SceneViewport } from "@/src/components/world-editor/scene-viewport";
 import { createEmptySceneState, useSceneEditorStore } from "@/src/stores/scene-editor-store";
 import { exportAssetsForObjects } from "@/src/utils/asset-db";
-import { filesToSceneObjects, revokeSceneObjectUrl } from "@/src/utils/file-loaders";
+import { revokeSceneObjectUrl } from "@/src/utils/file-loaders";
 import { parseSceneJson, serializePortableScene } from "@/src/utils/scene-serialize";
 import { buildProjectSettingsFromStore, buildInviteUrl, colorForUser, normalizeProjectSettings, objectToSceneObjectRow, sceneObjectRowToObject, throttle } from "@/src/utils/world-projects";
 
@@ -370,17 +370,7 @@ export function CollaborativeWorldEditorApp() {
       return;
     }
 
-    let localObjects;
-    try {
-      localObjects = await filesToSceneObjects(validFiles);
-    } catch (error) {
-      setStatus(error.message || "モデルの読み込み準備に失敗しました。");
-      return;
-    }
-    if (!localObjects.length) {
-      setStatus("この GLB / GLTF は読み込めませんでした。別のファイルを試してください。");
-      return;
-    }
+    const localObjects = validFiles.map((file, index) => buildLocalSceneObject(file, index));
     addObjects(localObjects);
     setStatus(`${localObjects.length}個のモデルを追加し、同期しています。`);
 
@@ -1064,4 +1054,16 @@ function createCollaborativeObjectId() {
     return crypto.randomUUID();
   }
   return `object-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function buildLocalSceneObject(file, index) {
+  return {
+    id: createCollaborativeObjectId(),
+    name: file.name.replace(/\.(glb|gltf)$/i, "") || `Model ${index + 1}`,
+    url: URL.createObjectURL(file),
+    mimeType: file.name.toLowerCase().endsWith(".gltf") ? "model/gltf+json" : "model/gltf-binary",
+    position: [index * 1.8, 0, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1]
+  };
 }
