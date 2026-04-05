@@ -163,6 +163,21 @@ async function fetchHelpRequest(supabase, requestId) {
   return data;
 }
 
+async function fetchHelpRequestFeedback(supabase, requestId, fromUserId) {
+  const { data, error } = await supabase
+    .from("help_request_feedback")
+    .select("id")
+    .eq("help_request_id", requestId)
+    .eq("from_user_id", fromUserId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message || "相互評価の状態を読み込めませんでした。");
+  }
+
+  return data;
+}
+
 async function fetchSessionUser(supabase, request) {
   const authHeader = request.headers.get("authorization") || "";
   const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
@@ -436,6 +451,75 @@ export async function PATCH(request) {
     }
 
     return NextResponse.json({ item: data });
+  }
+
+  if (action === "feedback") {
+    if (currentItem.status !== "完了" || !currentItem.accepted_helper_id) {
+      return NextResponse.json({ error: "完了済みの助け合いだけ評価できます。" }, { status: 400 });
+    }
+
+    const isRequester = currentItem.author_id === user.id;
+    const isHelper = currentItem.accepted_helper_id === user.id;
+
+    if (!isRequester && !isHelper) {
+      return NextResponse.json({ error: "当事者だけが相互評価できます。" }, { status: 403 });
+    }
+
+    const targetUserId = isRequester ? currentItem.accepted_helper_id : currentItem.author_id;
+
+    try {
+      const existingFeedback = await fetchHelpRequestFeedback(supabase, currentItem.id, user.id);
+      if (existingFeedback) {
+        return NextResponse.json({ error: "この助け合いにはすでに評価を送っています。" }, { status: 400 });
+      }
+    } catch (error) {
+      return NextResponse.json({ error: error.message || "相互評価の状態を読み込めませんでした。" }, { status: 400 });
+    }
+
+    let insertedFeedback = null;
+
+    try {
+      const { data: feedback, error: feedbackError } = await supabase
+        .from("help_request_feedback")
+        .insert({
+          help_request_id: currentItem.id,
+          from_user_id: user.id,
+          to_user_id: targetUserId,
+          kind: "thanks",
+          points_awarded: 1,
+          contribution_awarded: 2
+        })
+        .select("id")
+        .single();
+
+      if (feedbackError || !feedback) {
+        throw new Error(feedbackError?.message || "相互評価を保存できませんでした。");
+      }
+
+      insertedFeedback = feedback;
+
+      await creditRewardPoints(supabase, {
+        userId: targetUserId,
+        amount: 1,
+        counterpartyUserId: user.id,
+        kind: "help_request_feedback",
+        contributionDelta: 2,
+        meta: {
+          request_id: currentItem.id,
+          request_title: currentItem.title,
+          from_user_id: user.id
+        }
+      });
+    } catch (error) {
+      if (insertedFeedback?.id) {
+        await supabase.from("help_request_feedback").delete().eq("id", insertedFeedback.id);
+      }
+
+      return NextResponse.json({ error: error.message || "相互評価に失敗しました。" }, { status: 400 });
+    }
+
+    const refreshedItem = await fetchHelpRequest(supabase, currentItem.id);
+    return NextResponse.json({ item: refreshedItem, feedbackRecorded: true });
   }
 
   const payload = buildBasePayload(body);

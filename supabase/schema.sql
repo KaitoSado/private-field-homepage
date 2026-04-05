@@ -227,6 +227,18 @@ create table if not exists public.help_requests (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.help_request_feedback (
+  id uuid primary key default gen_random_uuid(),
+  help_request_id uuid not null references public.help_requests(id) on delete cascade,
+  from_user_id uuid not null references public.profiles(id) on delete cascade,
+  to_user_id uuid not null references public.profiles(id) on delete cascade,
+  kind text not null default 'thanks',
+  points_awarded integer not null default 1,
+  contribution_awarded integer not null default 2,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  unique (help_request_id, from_user_id)
+);
+
 create table if not exists public.grad_ritual_posts (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references public.profiles(id) on delete cascade,
@@ -329,6 +341,13 @@ alter table public.help_requests add column if not exists body text;
 alter table public.help_requests add column if not exists completed_at timestamptz;
 alter table public.help_requests add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.help_requests add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.help_request_feedback add column if not exists help_request_id uuid references public.help_requests(id) on delete cascade;
+alter table public.help_request_feedback add column if not exists from_user_id uuid references public.profiles(id) on delete cascade;
+alter table public.help_request_feedback add column if not exists to_user_id uuid references public.profiles(id) on delete cascade;
+alter table public.help_request_feedback add column if not exists kind text not null default 'thanks';
+alter table public.help_request_feedback add column if not exists points_awarded integer not null default 1;
+alter table public.help_request_feedback add column if not exists contribution_awarded integer not null default 2;
+alter table public.help_request_feedback add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.grad_ritual_posts add column if not exists author_id uuid references public.profiles(id) on delete cascade;
 alter table public.grad_ritual_posts add column if not exists room text not null default '呪詛ログ';
 alter table public.grad_ritual_posts add column if not exists vibe text not null default '吐き出したい';
@@ -447,6 +466,9 @@ create index if not exists help_requests_updated_idx on public.help_requests(upd
 create index if not exists help_requests_author_idx on public.help_requests(author_id);
 create index if not exists help_requests_accepted_helper_idx on public.help_requests(accepted_helper_id);
 create index if not exists help_requests_category_idx on public.help_requests(category, updated_at desc);
+create index if not exists help_request_feedback_request_idx on public.help_request_feedback(help_request_id, created_at desc);
+create index if not exists help_request_feedback_from_idx on public.help_request_feedback(from_user_id, created_at desc);
+create index if not exists help_request_feedback_to_idx on public.help_request_feedback(to_user_id, created_at desc);
 create index if not exists grad_ritual_posts_updated_idx on public.grad_ritual_posts(updated_at desc);
 create index if not exists grad_ritual_posts_author_idx on public.grad_ritual_posts(author_id);
 create index if not exists grad_ritual_posts_room_idx on public.grad_ritual_posts(room, updated_at desc);
@@ -604,6 +626,16 @@ alter table public.help_requests
   add constraint help_requests_accepted_helper_check check (accepted_helper_id is null or accepted_helper_id <> author_id),
   drop constraint if exists help_requests_body_length_check,
   add constraint help_requests_body_length_check check (char_length(body) between 1 and 2000);
+
+alter table public.help_request_feedback
+  drop constraint if exists help_request_feedback_kind_check,
+  add constraint help_request_feedback_kind_check check (kind in ('thanks')),
+  drop constraint if exists help_request_feedback_points_awarded_check,
+  add constraint help_request_feedback_points_awarded_check check (points_awarded > 0 and points_awarded <= 5),
+  drop constraint if exists help_request_feedback_contribution_awarded_check,
+  add constraint help_request_feedback_contribution_awarded_check check (contribution_awarded > 0 and contribution_awarded <= 10),
+  drop constraint if exists help_request_feedback_not_self_check,
+  add constraint help_request_feedback_not_self_check check (from_user_id <> to_user_id);
 
 alter table public.grad_ritual_posts
   drop constraint if exists grad_ritual_posts_title_length_check,
@@ -1110,6 +1142,7 @@ alter table public.economy_accounts enable row level security;
 alter table public.point_transactions enable row level security;
 alter table public.helpful_votes enable row level security;
 alter table public.help_requests enable row level security;
+alter table public.help_request_feedback enable row level security;
 alter table public.grad_ritual_posts enable row level security;
 alter table public.walk_sessions enable row level security;
 alter table public.location_points enable row level security;
@@ -1487,6 +1520,7 @@ grant usage on schema public to authenticated;
 grant select on public.economy_accounts to authenticated;
 grant select on public.point_transactions to authenticated;
 grant select, insert on public.helpful_votes to authenticated;
+grant select on public.help_request_feedback to authenticated;
 grant execute on function public.refresh_economy_account(uuid) to authenticated;
 grant execute on function public.cast_helpful_vote(uuid, text, uuid) to authenticated;
 
@@ -1527,6 +1561,19 @@ using (auth.uid() = author_id);
 drop policy if exists "admins can manage help requests" on public.help_requests;
 create policy "admins can manage help requests"
 on public.help_requests
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "participants can read help request feedback" on public.help_request_feedback;
+create policy "participants can read help request feedback"
+on public.help_request_feedback
+for select
+using (auth.uid() = from_user_id or auth.uid() = to_user_id or public.is_admin());
+
+drop policy if exists "admins can manage help request feedback" on public.help_request_feedback;
+create policy "admins can manage help request feedback"
+on public.help_request_feedback
 for all
 using (public.is_admin())
 with check (public.is_admin());

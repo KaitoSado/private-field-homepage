@@ -26,6 +26,7 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState("");
   const [economy, setEconomy] = useState(null);
+  const [reviewedRequestIds, setReviewedRequestIds] = useState([]);
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [campusFilter, setCampusFilter] = useState("");
@@ -60,10 +61,12 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
   useEffect(() => {
     if (!session?.user?.id) {
       setEconomy(null);
+      setReviewedRequestIds([]);
       return;
     }
 
     loadEconomySummary();
+    loadFeedbackState();
   }, [session?.user?.id]);
 
   const categories = useMemo(() => uniq([...CATEGORIES, ...initialCategories, ...items.map((item) => item.category).filter(Boolean)]), [initialCategories, items]);
@@ -205,6 +208,29 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
     }
   }
 
+  async function loadFeedbackState() {
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      if (!currentSession?.user?.id) return;
+
+      const { data, error } = await supabase
+        .from("help_request_feedback")
+        .select("help_request_id")
+        .eq("from_user_id", currentSession.user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      setReviewedRequestIds((data || []).map((item) => item.help_request_id));
+    } catch (error) {
+      setStatus(error.message || "相互評価の状態を読み込めませんでした。");
+    }
+  }
+
   async function submitAction(itemId, action) {
     if (!session?.user) {
       setStatus("操作にはログインが必要です。");
@@ -235,8 +261,12 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
 
       setItems((current) => current.map((item) => (item.id === itemId ? result.item : item)));
 
-      if (action === "complete" || action === "stop") {
+      if (action === "complete" || action === "stop" || action === "feedback") {
         await loadEconomySummary();
+      }
+
+      if (action === "feedback") {
+        setReviewedRequestIds((current) => (current.includes(itemId) ? current : [...current, itemId]));
       }
 
       if (action === "claim") {
@@ -245,6 +275,8 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
         setStatus("助け合いを完了して、報酬ptを支払いました。");
       } else if (action === "stop") {
         setStatus("募集を停止しました。必要なら報酬ptは返金されています。");
+      } else if (action === "feedback") {
+        setStatus("相手にありがとう評価を送りました。");
       }
     } catch (error) {
       setStatus(error.message || "助け合い投稿の更新に失敗しました。");
@@ -442,6 +474,19 @@ export function HelpBoardPanel({ initialItems, initialCategories, initialCampuse
                           <button type="button" className="button button-primary button-small" disabled={submitting} onClick={() => submitAction(item.id, "claim")}>
                             {submitting ? "処理中..." : "引き受ける"}
                           </button>
+                        </div>
+                      ) : null}
+                      {session?.user?.id &&
+                      item.status === "完了" &&
+                      (session.user.id === item.author_id || session.user.id === item.accepted_helper_id) ? (
+                        <div className="hero-actions">
+                          {reviewedRequestIds.includes(item.id) ? (
+                            <span className="muted">相互評価済み</span>
+                          ) : (
+                            <button type="button" className="button button-ghost button-small" disabled={submitting} onClick={() => submitAction(item.id, "feedback")}>
+                              {submitting ? "処理中..." : "ありがとうを送る"}
+                            </button>
+                          )}
                         </div>
                       ) : null}
                     </>

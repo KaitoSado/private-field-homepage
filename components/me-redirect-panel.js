@@ -328,6 +328,10 @@ function formatTransactionLabel(transaction) {
     return "助け合いの返金";
   }
 
+  if (transaction.kind === "help_request_feedback") {
+    return "助け合いの相互評価";
+  }
+
   return transaction.kind || "ポイント移動";
 }
 
