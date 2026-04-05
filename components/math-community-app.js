@@ -1,6 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  MathKpi,
+  MathMissionCard,
+  MathPlaygroundLayout,
+  MathPresetRow,
+  MathSliderField,
+  MathToggleField,
+  MathValueMeter
+} from "@/components/math-community/math-playground-ui";
+import {
+  drawCanvasMessage,
+  drawFunctionCurve,
+  drawGraphGrid,
+  eventToCanvasPoint,
+  linearScreenToWorld,
+  linearWorldToScreen,
+  paintMathBackground,
+  screenToWorldX,
+  worldToScreenX,
+  worldToScreenY
+} from "@/lib/math-community/math-canvas";
 
 const APP_TABS = [
   { id: "graph", label: "関数グラフ" },
@@ -444,6 +465,8 @@ function DerivativePlaygroundPanel() {
   const preset = DERIVATIVE_PRESETS.find((item) => item.id === presetId) || DERIVATIVE_PRESETS[0];
   const [pointX, setPointX] = useState(preset.pointX);
   const [h, setH] = useState(preset.h);
+  const [showSecant, setShowSecant] = useState(true);
+  const [showTangent, setShowTangent] = useState(true);
 
   useEffect(() => {
     setPointX(preset.pointX);
@@ -464,9 +487,11 @@ function DerivativePlaygroundPanel() {
     drawDerivativeScene(context, {
       compiled,
       preset,
-      snapshot
+      snapshot,
+      showSecant,
+      showTangent
     });
-  }, [compiled, preset, snapshot]);
+  }, [compiled, preset, showSecant, showTangent, snapshot]);
 
   function updatePointFromEvent(event) {
     const canvas = canvasRef.current;
@@ -476,8 +501,8 @@ function DerivativePlaygroundPanel() {
   }
 
   return (
-    <div className="math-panel-grid">
-      <div className="surface math-workspace-card">
+    <MathPlaygroundLayout
+      workspace={
         <canvas
           ref={canvasRef}
           width={960}
@@ -497,51 +522,28 @@ function DerivativePlaygroundPanel() {
             dragRef.current = false;
           }}
         />
-        <div className="math-canvas-caption">
-          点を左右にドラッグすると、その場所の坂のきつさが変わります。オレンジの割線と紫の接線を見比べてください。
-        </div>
-      </div>
-
-      <div className="surface math-side-card">
-        <div className="math-control-stack">
+      }
+      caption="点を左右にドラッグすると、その場所の坂のきつさが変わります。オレンジの割線と紫の接線を見比べてください。"
+      controls={
+        <>
           <div className="math-card-head">
             <h2>坂道ハンター</h2>
           </div>
 
-          <div className="math-chip-row">
-            {DERIVATIVE_PRESETS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`button button-ghost button-small ${item.id === presetId ? "is-active" : ""}`}
-                onClick={() => setPresetId(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <MathPresetRow options={DERIVATIVE_PRESETS} activeId={presetId} onSelect={setPresetId} />
 
           <div className="math-readout">
             <strong>いま見ている曲線</strong>
             <span>{preset.expression}</span>
           </div>
 
-          <label className="field math-slider-field">
-            <span>見る場所を動かす</span>
-            <input
-              type="range"
-              min={-preset.xRange}
-              max={preset.xRange}
-              step="0.01"
-              value={pointX}
-              onChange={(event) => setPointX(Number(event.target.value))}
-            />
-          </label>
+          <MathSliderField label="見る場所を動かす" min={-preset.xRange} max={preset.xRange} step="0.01" value={pointX} onChange={setPointX} />
+          <MathSliderField label="h を小さくする" min="0.08" max="2.2" step="0.01" value={h} onChange={setH} />
 
-          <label className="field math-slider-field">
-            <span>h を小さくする</span>
-            <input type="range" min="0.08" max="2.2" step="0.01" value={h} onChange={(event) => setH(Number(event.target.value))} />
-          </label>
+          <div className="math-toggle-grid">
+            <MathToggleField label="割線を表示" checked={showSecant} onChange={setShowSecant} />
+            <MathToggleField label="接線を表示" checked={showTangent} onChange={setShowTangent} />
+          </div>
 
           <div className="math-kpi-grid">
             <MathKpi label="x の位置" value={formatNumber(pointX)} />
@@ -552,7 +554,7 @@ function DerivativePlaygroundPanel() {
 
           <MathValueMeter
             label="傾きメーター"
-            value={snapshot?.differentiable ? snapshot.tangentSlope : snapshot?.secantSlope || 0}
+            value={formatNumber(snapshot?.differentiable ? snapshot.tangentSlope : snapshot?.secantSlope || 0)}
             min={-4}
             max={4}
             accentClass={snapshot?.differentiable ? "" : "is-warm"}
@@ -566,9 +568,9 @@ function DerivativePlaygroundPanel() {
           </div>
 
           <MathMissionCard mission={mission} />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }
 
@@ -581,6 +583,7 @@ function IntegralPlaygroundPanel() {
   const [interval, setIntervalRange] = useState({ a: preset.interval[0], b: preset.interval[1] });
   const [partitions, setPartitions] = useState(12);
   const [fillProgress, setFillProgress] = useState(1);
+  const [showRiemann, setShowRiemann] = useState(true);
 
   useEffect(() => {
     setIntervalRange({ a: preset.interval[0], b: preset.interval[1] });
@@ -627,9 +630,10 @@ function IntegralPlaygroundPanel() {
       preset,
       interval,
       animatedEnd,
-      partitions
+      partitions,
+      showRiemann
     });
-  }, [animatedEnd, compiled, interval, partitions, preset]);
+  }, [animatedEnd, compiled, interval, partitions, preset, showRiemann]);
 
   function updateBoundaryFromEvent(event) {
     const canvas = canvasRef.current;
@@ -656,8 +660,8 @@ function IntegralPlaygroundPanel() {
   const tankFill = Math.min(100, (Math.abs(exactArea) / 12) * 100);
 
   return (
-    <div className="math-panel-grid">
-      <div className="surface math-workspace-card">
+    <MathPlaygroundLayout
+      workspace={
         <canvas
           ref={canvasRef}
           width={960}
@@ -677,46 +681,26 @@ function IntegralPlaygroundPanel() {
             dragHandleRef.current = null;
           }}
         />
-        <div className="math-canvas-caption">
-          水色の区間をドラッグして面積をためます。左から右へ、少しずつタンクに流れ込む感覚で見てください。
-        </div>
-      </div>
-
-      <div className="surface math-side-card">
-        <div className="math-control-stack">
+      }
+      caption="水色の区間をドラッグして面積をためます。左から右へ、少しずつタンクに流れ込む感覚で見てください。"
+      controls={
+        <>
           <div className="math-card-head">
             <h2>面積タンク</h2>
           </div>
 
-          <div className="math-chip-row">
-            {INTEGRAL_PRESETS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`button button-ghost button-small ${item.id === presetId ? "is-active" : ""}`}
-                onClick={() => setPresetId(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <MathPresetRow options={INTEGRAL_PRESETS} activeId={presetId} onSelect={setPresetId} />
 
           <div className="math-readout">
             <strong>いま見ている曲線</strong>
             <span>{preset.expression}</span>
           </div>
 
-          <label className="field math-slider-field">
-            <span>分け方を細かくする</span>
-            <input
-              type="range"
-              min="4"
-              max="48"
-              step="1"
-              value={partitions}
-              onChange={(event) => setPartitions(Number(event.target.value))}
-            />
-          </label>
+          <MathSliderField label="分け方を細かくする" min="4" max="48" step="1" value={partitions} onChange={setPartitions} />
+
+          <div className="math-toggle-grid">
+            <MathToggleField label="近似の長方形" checked={showRiemann} onChange={setShowRiemann} />
+          </div>
 
           <div className="math-kpi-grid">
             <MathKpi label="区間の左端" value={formatNumber(interval.a)} />
@@ -743,15 +727,16 @@ function IntegralPlaygroundPanel() {
           </div>
 
           <MathMissionCard mission={mission} />
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }
 
 function LinearAlgebraPlaygroundPanel() {
   const canvasRef = useRef(null);
   const dragRef = useRef(null);
+  const [showBaseGrid, setShowBaseGrid] = useState(true);
   const [basis, setBasis] = useState({
     u: { x: 1, y: 0 },
     v: { x: 0, y: 1 }
@@ -764,8 +749,8 @@ function LinearAlgebraPlaygroundPanel() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
-    drawLinearAlgebraScene(context, basis);
-  }, [basis]);
+    drawLinearAlgebraScene(context, basis, { showBaseGrid });
+  }, [basis, showBaseGrid]);
 
   function applyPreset(id) {
     const preset = LINEAR_PRESETS.find((item) => item.id === id);
@@ -804,8 +789,8 @@ function LinearAlgebraPlaygroundPanel() {
   }
 
   return (
-    <div className="math-panel-grid">
-      <div className="surface math-workspace-card">
+    <MathPlaygroundLayout
+      workspace={
         <canvas
           ref={canvasRef}
           width={960}
@@ -825,23 +810,18 @@ function LinearAlgebraPlaygroundPanel() {
             dragRef.current = null;
           }}
         />
-        <div className="math-canvas-caption">
-          赤と青の矢印をドラッグすると、格子全体が同じルールで変形します。数字より先に、平面がどうゆがむかを見てください。
-        </div>
-      </div>
-
-      <div className="surface math-side-card">
-        <div className="math-control-stack">
+      }
+      caption="赤と青の矢印をドラッグすると、格子全体が同じルールで変形します。数字より先に、平面がどうゆがむかを見てください。"
+      controls={
+        <>
           <div className="math-card-head">
             <h2>平面ゆがみ工房</h2>
           </div>
 
-          <div className="math-chip-row">
-            {LINEAR_PRESETS.map((item) => (
-              <button key={item.id} type="button" className="button button-ghost button-small" onClick={() => applyPreset(item.id)}>
-                {item.label}
-              </button>
-            ))}
+          <MathPresetRow options={LINEAR_PRESETS} activeId={null} onSelect={applyPreset} />
+
+          <div className="math-toggle-grid">
+            <MathToggleField label="元の格子も表示" checked={showBaseGrid} onChange={setShowBaseGrid} />
           </div>
 
           <div className="math-kpi-grid">
@@ -853,7 +833,7 @@ function LinearAlgebraPlaygroundPanel() {
 
           <MathValueMeter
             label="面積の変わり方"
-            value={Math.abs(determinant)}
+            value={formatNumber(Math.abs(determinant))}
             min={0}
             max={4}
             accentClass={determinant < 0 ? "is-warm" : ""}
@@ -875,46 +855,9 @@ function LinearAlgebraPlaygroundPanel() {
               statusText: missionDone ? "2 倍の変形に到達しました。" : `いまは ${formatNumber(Math.abs(determinant))} 倍です。`
             }}
           />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MathKpi({ label, value }) {
-  return (
-    <div className="math-kpi">
-      <strong>{value}</strong>
-      <span>{label}</span>
-    </div>
-  );
-}
-
-function MathValueMeter({ label, value, min, max, valueLabel, accentClass = "" }) {
-  const ratio = Math.min(100, Math.max(0, ((value - min) / (max - min || 1)) * 100));
-
-  return (
-    <div className={`math-meter-card ${accentClass}`.trim()}>
-      <div className="math-card-head">
-        <h3>{label}</h3>
-        <strong>{formatNumber(value)}</strong>
-      </div>
-      <div className="math-meter-track">
-        <div className="math-meter-fill" style={{ width: `${ratio}%` }} />
-      </div>
-      <span className="math-meter-note">{valueLabel}</span>
-    </div>
-  );
-}
-
-function MathMissionCard({ mission }) {
-  return (
-    <div className={`math-mission-card ${mission.done ? "is-complete" : ""}`}>
-      <span className="math-mission-badge">{mission.done ? "達成" : "ミッション"}</span>
-      <strong>{mission.title}</strong>
-      <p>{mission.description}</p>
-      <span className="math-mission-status">{mission.statusText}</span>
-    </div>
+        </>
+      }
+    />
   );
 }
 
@@ -1687,16 +1630,18 @@ function drawDerivativeScene(context, config) {
   };
 
   context.save();
-  context.strokeStyle = "#ea580c";
-  context.lineWidth = 2.2;
-  context.setLineDash([10, 8]);
-  context.beginPath();
-  context.moveTo(point.x, point.y);
-  context.lineTo(secantPoint.x, secantPoint.y);
-  context.stroke();
-  context.setLineDash([]);
+  if (config.showSecant) {
+    context.strokeStyle = "#ea580c";
+    context.lineWidth = 2.2;
+    context.setLineDash([10, 8]);
+    context.beginPath();
+    context.moveTo(point.x, point.y);
+    context.lineTo(secantPoint.x, secantPoint.y);
+    context.stroke();
+    context.setLineDash([]);
+  }
 
-  if (config.snapshot.differentiable) {
+  if (config.showTangent && config.snapshot.differentiable) {
     drawSlopeLine(context, config.snapshot.x, config.snapshot.y, config.snapshot.tangentSlope, config.preset.xRange, config.preset.yRange, "#7c3aed");
   }
 
@@ -1736,7 +1681,9 @@ function drawIntegralScene(context, config) {
   });
 
   drawIntegralFill(context, config.compiled.fn, config.interval.a, config.animatedEnd, config.preset.xRange, config.preset.yRange);
-  drawRiemannBars(context, config.compiled.fn, config.interval.a, config.interval.b, config.partitions, config.preset.xRange, config.preset.yRange);
+  if (config.showRiemann) {
+    drawRiemannBars(context, config.compiled.fn, config.interval.a, config.interval.b, config.partitions, config.preset.xRange, config.preset.yRange);
+  }
 
   context.save();
   const handleColors = {
@@ -1759,44 +1706,20 @@ function drawIntegralScene(context, config) {
   context.restore();
 }
 
-function drawLinearAlgebraScene(context, basis) {
+function drawLinearAlgebraScene(context, basis, options = {}) {
   const { canvas } = context;
   const range = 5.5;
   context.clearRect(0, 0, canvas.width, canvas.height);
   paintMathBackground(context, canvas.width, canvas.height);
 
-  drawLinearGrid(context, canvas.width, canvas.height, range, null, "rgba(148, 163, 184, 0.2)", 1);
+  if (options.showBaseGrid) {
+    drawLinearGrid(context, canvas.width, canvas.height, range, null, "rgba(148, 163, 184, 0.2)", 1);
+  }
   drawLinearAxes(context, canvas.width, canvas.height, range);
   drawLinearGrid(context, canvas.width, canvas.height, range, basis, "rgba(15, 118, 110, 0.45)", 1.6);
   drawLinearShape(context, canvas.width, canvas.height, range, basis);
   drawLinearVector(context, canvas.width, canvas.height, range, basis.u, "#dc2626", "u");
   drawLinearVector(context, canvas.width, canvas.height, range, basis.v, "#2563eb", "v");
-}
-
-function drawFunctionCurve(context, fn, xRange, yRange, options = {}) {
-  const { canvas } = context;
-  context.save();
-  context.strokeStyle = options.strokeStyle || "#0f766e";
-  context.lineWidth = options.lineWidth || 3;
-  context.beginPath();
-  let open = false;
-  for (let pixel = 0; pixel <= canvas.width; pixel += 1) {
-    const x = screenToWorldX(pixel, canvas.width, xRange);
-    const y = fn(x);
-    if (!Number.isFinite(y) || Math.abs(y) > yRange * 4) {
-      open = false;
-      continue;
-    }
-    const screenY = worldToScreenY(y, canvas.height, yRange);
-    if (!open) {
-      context.moveTo(pixel, screenY);
-      open = true;
-    } else {
-      context.lineTo(pixel, screenY);
-    }
-  }
-  context.stroke();
-  context.restore();
 }
 
 function drawSlopeLine(context, x, y, slope, xRange, yRange, color) {
@@ -2047,14 +1970,6 @@ function describeSlope(value) {
   return "下り坂";
 }
 
-function eventToCanvasPoint(event, canvas) {
-  const rect = canvas.getBoundingClientRect();
-  return {
-    x: ((event.clientX - rect.left) / rect.width) * canvas.width,
-    y: ((event.clientY - rect.top) / rect.height) * canvas.height
-  };
-}
-
 function riemannSum(fn, left, right, partitions) {
   const steps = Math.max(1, partitions);
   const width = (right - left) / steps;
@@ -2070,22 +1985,6 @@ function applyBasisTransform(point, basis) {
   return {
     x: point.x * basis.u.x + point.y * basis.v.x,
     y: point.x * basis.u.y + point.y * basis.v.y
-  };
-}
-
-function linearWorldToScreen(x, y, width, height, range) {
-  const scale = Math.min(width, height) / (range * 2);
-  return {
-    x: width / 2 + x * scale,
-    y: height / 2 - y * scale
-  };
-}
-
-function linearScreenToWorld(x, y, width, height, range) {
-  const scale = Math.min(width, height) / (range * 2);
-  return {
-    x: (x - width / 2) / scale,
-    y: -(y - height / 2) / scale
   };
 }
 
@@ -2259,68 +2158,6 @@ function projectSurfacePoint(point, config, canvas) {
     x: canvas.width / 2 + x1 * config.zoom,
     y: canvas.height / 2 + y1 * config.zoom
   };
-}
-
-function drawGraphGrid(context, width, height, xRange, yRange) {
-  context.save();
-  context.strokeStyle = "rgba(148, 163, 184, 0.14)";
-  context.lineWidth = 1;
-
-  for (let x = -xRange; x <= xRange; x += 1) {
-    const screenX = worldToScreenX(x, width, xRange);
-    context.beginPath();
-    context.moveTo(screenX, 0);
-    context.lineTo(screenX, height);
-    context.stroke();
-  }
-
-  for (let y = -yRange; y <= yRange; y += 1) {
-    const screenY = worldToScreenY(y, height, yRange);
-    context.beginPath();
-    context.moveTo(0, screenY);
-    context.lineTo(width, screenY);
-    context.stroke();
-  }
-
-  context.strokeStyle = "rgba(15, 23, 42, 0.35)";
-  context.lineWidth = 2;
-  context.beginPath();
-  context.moveTo(0, worldToScreenY(0, height, yRange));
-  context.lineTo(width, worldToScreenY(0, height, yRange));
-  context.moveTo(worldToScreenX(0, width, xRange), 0);
-  context.lineTo(worldToScreenX(0, width, xRange), height);
-  context.stroke();
-
-  context.restore();
-}
-
-function paintMathBackground(context, width, height) {
-  const gradient = context.createLinearGradient(0, 0, width, height);
-  gradient.addColorStop(0, "#fcfcf9");
-  gradient.addColorStop(0.5, "#f6f8f6");
-  gradient.addColorStop(1, "#fdf8ef");
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, width, height);
-}
-
-function drawCanvasMessage(context, width, height, message) {
-  context.save();
-  context.fillStyle = "#1f2937";
-  context.font = "600 22px var(--font-sans, sans-serif)";
-  context.fillText(message, 36, height / 2);
-  context.restore();
-}
-
-function worldToScreenX(value, width, xRange) {
-  return ((value + xRange) / (xRange * 2)) * width;
-}
-
-function worldToScreenY(value, height, yRange) {
-  return height - ((value + yRange) / (yRange * 2)) * height;
-}
-
-function screenToWorldX(value, width, xRange) {
-  return (value / width) * (xRange * 2) - xRange;
 }
 
 function geometryScreenToWorld(x, y, width, height) {
