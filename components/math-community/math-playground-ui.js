@@ -19,6 +19,15 @@ export function MathPlaygroundLayout({ workspace, controls, caption, footer }) {
   );
 }
 
+export function MathPlaygroundHeader({ title, starter }) {
+  return (
+    <div className="math-card-head math-playground-head">
+      <h2>{title}</h2>
+      {starter ? <span className="math-starter-pill">{starter}</span> : null}
+    </div>
+  );
+}
+
 export function MathPresetRow({ options, activeId, onSelect }) {
   return (
     <div className="math-chip-row">
@@ -56,6 +65,28 @@ export function MathToggleField({ label, checked, onChange }) {
       <span>{label}</span>
       <span className="math-toggle-pill">{checked ? "ON" : "OFF"}</span>
     </button>
+  );
+}
+
+export function MathStoryCard({ title, children, className = "" }) {
+  return (
+    <div className={`math-readout ${className}`.trim()}>
+      <strong>{title}</strong>
+      {typeof children === "string" ? <span>{children}</span> : children}
+    </div>
+  );
+}
+
+export function MathLegendRow({ items }) {
+  return (
+    <div className="math-legend-row">
+      {items.map((item) => (
+        <span key={item.label}>
+          <i className={`math-legend-dot ${item.tone}`.trim()} />
+          {item.label}
+        </span>
+      ))}
+    </div>
   );
 }
 

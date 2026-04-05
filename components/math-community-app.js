@@ -3,10 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MathKpi,
+  MathLegendRow,
   MathMissionCard,
+  MathPlaygroundHeader,
   MathPlaygroundLayout,
   MathPresetRow,
   MathSliderField,
+  MathStoryCard,
   MathToggleField,
   MathValueMeter
 } from "@/components/math-community/math-playground-ui";
@@ -508,18 +511,24 @@ function DerivativePlaygroundPanel() {
           ref={canvasRef}
           width={960}
           height={480}
-          className="math-canvas"
-          onMouseDown={(event) => {
+          className="math-canvas is-draggable"
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture?.(event.pointerId);
             dragRef.current = true;
             updatePointFromEvent(event);
           }}
-          onMouseMove={(event) => {
+          onPointerMove={(event) => {
             if (dragRef.current) updatePointFromEvent(event);
           }}
-          onMouseUp={() => {
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
             dragRef.current = false;
           }}
-          onMouseLeave={() => {
+          onPointerLeave={() => {
+            dragRef.current = false;
+          }}
+          onPointerCancel={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
             dragRef.current = false;
           }}
         />
@@ -527,16 +536,11 @@ function DerivativePlaygroundPanel() {
       caption="点を左右にドラッグすると、その場所の坂のきつさが変わります。オレンジの割線と紫の接線を見比べてください。"
       controls={
         <>
-          <div className="math-card-head">
-            <h2>坂道ハンター</h2>
-          </div>
+          <MathPlaygroundHeader title="坂道ハンター" starter="まずは点を動かす" />
 
           <MathPresetRow options={DERIVATIVE_PRESETS} activeId={presetId} onSelect={setPresetId} />
 
-          <div className="math-readout">
-            <strong>いま見ている曲線</strong>
-            <span>{preset.expression}</span>
-          </div>
+          <MathStoryCard title="いま見ている曲線">{preset.expression}</MathStoryCard>
 
           <MathSliderField label="見る場所を動かす" min={-preset.xRange} max={preset.xRange} step="0.01" value={pointX} onChange={setPointX} />
           <MathSliderField label="h を小さくする" min="0.08" max="2.2" step="0.01" value={h} onChange={setH} />
@@ -563,11 +567,13 @@ function DerivativePlaygroundPanel() {
             displayValue={snapshot?.differentiable ? formatNumber(snapshot?.tangentSlope) : formatNumber(snapshot?.secantSlope || 0)}
           />
 
-          <div className="math-legend-row">
-            <span><i className="math-legend-dot is-orange" /> 割線</span>
-            <span><i className="math-legend-dot is-purple" /> 接線</span>
-            <span><i className="math-legend-dot is-dark" /> いまの点</span>
-          </div>
+          <MathLegendRow
+            items={[
+              { tone: "is-orange", label: "割線" },
+              { tone: "is-purple", label: "接線" },
+              { tone: "is-dark", label: "いまの点" }
+            ]}
+          />
         </>
       }
       footer={
@@ -710,18 +716,24 @@ function IntegralPlaygroundPanel() {
           ref={canvasRef}
           width={960}
           height={480}
-          className="math-canvas"
-          onMouseDown={(event) => {
+          className="math-canvas is-draggable"
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture?.(event.pointerId);
             dragHandleRef.current = selectHandle(event);
             updateBoundaryFromEvent(event);
           }}
-          onMouseMove={(event) => {
+          onPointerMove={(event) => {
             if (dragHandleRef.current) updateBoundaryFromEvent(event);
           }}
-          onMouseUp={() => {
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
             dragHandleRef.current = null;
           }}
-          onMouseLeave={() => {
+          onPointerLeave={() => {
+            dragHandleRef.current = null;
+          }}
+          onPointerCancel={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
             dragHandleRef.current = null;
           }}
         />
@@ -729,16 +741,11 @@ function IntegralPlaygroundPanel() {
       caption="水色の区間をドラッグして面積をためます。左から右へ、少しずつタンクに流れ込む感覚で見てください。"
       controls={
         <>
-          <div className="math-card-head">
-            <h2>面積タンク</h2>
-          </div>
+          <MathPlaygroundHeader title="面積タンク" starter="まずは区間を動かす" />
 
           <MathPresetRow options={INTEGRAL_PRESETS} activeId={presetId} onSelect={setPresetId} />
 
-          <div className="math-readout">
-            <strong>いま見ている曲線</strong>
-            <span>{preset.expression}</span>
-          </div>
+          <MathStoryCard title="いま見ている曲線">{preset.expression}</MathStoryCard>
 
           <MathSliderField label="分け方を細かくする" min="4" max="48" step="1" value={partitions} onChange={setPartitions} />
 
@@ -776,11 +783,13 @@ function IntegralPlaygroundPanel() {
             valueLabel={exactArea > 0.15 ? "x軸より上のたまりが優勢です" : exactArea < -0.15 ? "x軸より下のたまりが優勢です" : "上と下がつり合いはじめています"}
           />
 
-          <div className="math-legend-row">
-            <span><i className="math-legend-dot is-cyan" /> プラスの面積</span>
-            <span><i className="math-legend-dot is-pink" /> マイナスの面積</span>
-            <span><i className="math-legend-dot is-orange" /> 近似の長方形</span>
-          </div>
+          <MathLegendRow
+            items={[
+              { tone: "is-cyan", label: "プラスの面積" },
+              { tone: "is-pink", label: "マイナスの面積" },
+              { tone: "is-orange", label: "近似の長方形" }
+            ]}
+          />
         </>
       }
       footer={
@@ -897,18 +906,24 @@ function LinearAlgebraPlaygroundPanel() {
           ref={canvasRef}
           width={960}
           height={480}
-          className="math-canvas"
-          onMouseDown={(event) => {
+          className="math-canvas is-draggable"
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture?.(event.pointerId);
             dragRef.current = pickHandle(event);
             if (dragRef.current) updateHandleFromEvent(event);
           }}
-          onMouseMove={(event) => {
+          onPointerMove={(event) => {
             if (dragRef.current) updateHandleFromEvent(event);
           }}
-          onMouseUp={() => {
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
             dragRef.current = null;
           }}
-          onMouseLeave={() => {
+          onPointerLeave={() => {
+            dragRef.current = null;
+          }}
+          onPointerCancel={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
             dragRef.current = null;
           }}
         />
@@ -916,9 +931,7 @@ function LinearAlgebraPlaygroundPanel() {
       caption="赤と青の矢印をドラッグすると、格子全体が同じルールで変形します。数字より先に、平面がどうゆがむかを見てください。"
       controls={
         <>
-          <div className="math-card-head">
-            <h2>平面ゆがみ工房</h2>
-          </div>
+          <MathPlaygroundHeader title="平面ゆがみ工房" starter="まずは矢印を引っぱる" />
 
           <MathPresetRow options={LINEAR_PRESETS} activeId={presetId} onSelect={applyPreset} />
 
@@ -942,8 +955,7 @@ function LinearAlgebraPlaygroundPanel() {
             valueLabel={reflected ? "向きが反転しています" : "1 を超えると広がり、1 未満だと縮みます"}
           />
 
-          <div className="math-readout math-state-card">
-            <strong>いまの変形</strong>
+          <MathStoryCard title="いまの変形" className="math-state-card">
             <span>
               {transformationLabel} 単位正方形の面積は <strong>{formatNumber(areaScale)}</strong> 倍、向きは <strong>{orientation}</strong> です。
             </span>
@@ -957,14 +969,16 @@ function LinearAlgebraPlaygroundPanel() {
               </div>
               <span className="math-inline-matrix-bracket">]</span>
             </div>
-          </div>
+          </MathStoryCard>
 
-          <div className="math-legend-row">
-            <span><i className="math-legend-dot is-dark" /> 元の空間</span>
-            <span><i className="math-legend-dot is-cyan" /> 変形した格子</span>
-            <span><i className="math-legend-dot is-purple" /> 変形した円</span>
-            <span><i className="math-legend-dot is-orange" /> 単位正方形</span>
-          </div>
+          <MathLegendRow
+            items={[
+              { tone: "is-dark", label: "元の空間" },
+              { tone: "is-cyan", label: "変形した格子" },
+              { tone: "is-purple", label: "変形した円" },
+              { tone: "is-orange", label: "単位正方形" }
+            ]}
+          />
         </>
       }
       footer={
