@@ -775,16 +775,16 @@ begin
   )
   on conflict (user_id) do nothing;
 
-  update public.economy_accounts
+  update public.economy_accounts as account
   set
     evaluation_credits = v_allowance,
     evaluation_cycle_started_at = timezone('utc'::text, now()),
-    reputation_title = public.derive_reputation_title(contribution_score)
-  where user_id = p_user_id
+    reputation_title = public.derive_reputation_title(account.contribution_score)
+  where account.user_id = p_user_id
     and (
-      evaluation_cycle_started_at is null
-      or evaluation_cycle_started_at <= timezone('utc'::text, now()) - interval '7 days'
-      or reputation_title is distinct from public.derive_reputation_title(contribution_score)
+      account.evaluation_cycle_started_at is null
+      or account.evaluation_cycle_started_at <= timezone('utc'::text, now()) - interval '7 days'
+      or account.reputation_title is distinct from public.derive_reputation_title(account.contribution_score)
     );
 
   return query
