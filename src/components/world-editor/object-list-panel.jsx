@@ -160,9 +160,9 @@ export function ObjectListPanel({
             ))
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white/60 px-4 py-8 text-center text-sm leading-7 text-slate-500">
-              GLB / GLTF を追加すると、
+              上の「GLB / GLTF を追加」か、
               <br />
-              ここに一覧が並びます。
+              画面中央へのドラッグ&ドロップで追加できます。
             </div>
           )}
         </div>

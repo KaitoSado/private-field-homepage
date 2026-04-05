@@ -34,6 +34,8 @@ export function CollaborativeWorldEditorApp() {
   const selectedIdRef = useRef(null);
   const cameraPoseRef = useRef(null);
   const profileRef = useRef(null);
+  const importInputRef = useRef(null);
+  const sceneImportInputRef = useRef(null);
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [project, setProject] = useState(null);
@@ -800,14 +802,14 @@ export function CollaborativeWorldEditorApp() {
               setStatus("viewer は読み込みできません。");
               return;
             }
-            document.getElementById("vr-project-import")?.click();
+            openFilePicker(importInputRef, "モデル読み込みの入力欄を開けませんでした。");
           }}
           onTriggerSceneImport={() => {
             if (!canEdit) {
               setStatus("viewer は読み込みできません。");
               return;
             }
-            document.getElementById("vr-project-scene-import")?.click();
+            openFilePicker(sceneImportInputRef, "シーン読み込みの入力欄を開けませんでした。");
           }}
           onExportScene={() => void handleExportScene()}
           onShareScene={() => void handleCopyInvite()}
@@ -919,16 +921,24 @@ export function CollaborativeWorldEditorApp() {
 
       <input
         id="vr-project-import"
+        ref={importInputRef}
         type="file"
         accept=".glb,.gltf,model/gltf-binary,model/gltf+json"
         multiple
-        hidden
+        className="sr-only"
         onChange={(event) => {
           void handleDropFiles(Array.from(event.target.files || []));
           event.target.value = "";
         }}
       />
-      <input id="vr-project-scene-import" type="file" accept="application/json,.json" hidden onChange={(event) => void handleImportScene(event)} />
+      <input
+        id="vr-project-scene-import"
+        ref={sceneImportInputRef}
+        type="file"
+        accept="application/json,.json"
+        className="sr-only"
+        onChange={(event) => void handleImportScene(event)}
+      />
     </section>
   );
 
@@ -987,6 +997,21 @@ export function CollaborativeWorldEditorApp() {
       objects: rows
     });
     setStatus(nextStatus);
+  }
+
+  function openFilePicker(inputRef, emptyMessage) {
+    const input = inputRef.current;
+    if (!input) {
+      setStatus(emptyMessage);
+      return;
+    }
+
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+      return;
+    }
+
+    input.click();
   }
 }
 
