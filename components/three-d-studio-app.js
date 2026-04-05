@@ -16,6 +16,8 @@ const PRIMITIVES = [
   { type: "cylinder", label: "円柱", color: "#66c68f" }
 ];
 
+const COLOR_SWATCHES = ["#4f8fff", "#ff8f66", "#66c68f", "#ff6b8a", "#ffd166", "#7c88ff", "#1fb5a4", "#23262d"];
+
 const CAMERA_PRESETS = [
   { label: "正面", yaw: 0, pitch: 0.2 },
   { label: "斜め", yaw: -0.8, pitch: 0.48 },
@@ -556,7 +558,15 @@ export function ThreeDStudioApp() {
                     onChange={(value) => updateSelectedObject((target) => (target.shape.roundness = value))}
                   />
                   <ModelerSlider
-                    label="のびる"
+                    label="曲げる"
+                    min={-1}
+                    max={1}
+                    step={0.01}
+                    value={selectedObject.shape.bend}
+                    onChange={(value) => updateSelectedObject((target) => (target.shape.bend = value))}
+                  />
+                  <ModelerSlider
+                    label="のばす"
                     min={0.4}
                     max={2.6}
                     step={0.05}
@@ -583,6 +593,19 @@ export function ThreeDStudioApp() {
                     className="modeler-color-input"
                   />
                 </label>
+
+                <div className="math-chip-row">
+                  {COLOR_SWATCHES.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`modeler-swatch ${selectedObject.material.color === color ? "is-active" : ""}`}
+                      style={{ "--swatch-color": color }}
+                      onClick={() => updateMaterial("color", color)}
+                      aria-label={`色 ${color}`}
+                    />
+                  ))}
+                </div>
 
                 <div className="modeler-slider-block">
                   <ModelerSlider
@@ -811,7 +834,8 @@ function normalizeObject(object, index) {
     scale: cloneVector(object.scale || { x: 1.2, y: 1.2, z: 1.2 }),
     shape: {
       extrude: object.shape?.extrude ?? 0.2,
-      roundness: object.shape?.roundness ?? 0.12
+      roundness: object.shape?.roundness ?? 0.12,
+      bend: object.shape?.bend ?? 0
     },
     material: {
       color: object.material?.color || primitiveColor(fallbackType),
@@ -949,13 +973,19 @@ function drawStudioScene(context, scene) {
 
       const normal = normalizeVector(faceNormal(worldFace[0], worldFace[1], worldFace[2]));
       const centroid = averageVertices(worldFace);
+      const outward = subtractVectors(centroid, objectCenter);
+      const correctedNormal = dotProduct(normal, outward) < 0
+        ? { x: -normal.x, y: -normal.y, z: -normal.z }
+        : normal;
       const toCamera = normalizeVector(subtractVectors(cameraState.position, centroid));
-      const facing = dotProduct(normal, toCamera);
+      const facing = dotProduct(correctedNormal, toCamera);
       if (facing <= 0.02) continue;
 
       const brightness =
         scene.light.ambient +
-        Math.max(0, dotProduct(normal, lightDirection)) * scene.light.intensity * (1 - object.material.roughness * 0.35);
+        Math.max(0, dotProduct(correctedNormal, lightDirection)) *
+          scene.light.intensity *
+          (1 - object.material.roughness * 0.35);
       const fill = shadeColor(object.material.color, brightness, object.material.metalness, object.material.emission);
 
       surfaces.push({
@@ -1199,11 +1229,23 @@ function transformObjectVertex(vertex, object) {
     y: vertex.y * object.scale.y,
     z: vertex.z * object.scale.z
   };
+  next = bendVertex(next, object.shape?.bend ?? 0);
   next = rotateVertex(next, object.rotation);
   return {
     x: next.x + object.position.x,
     y: next.y + object.position.y,
     z: next.z + object.position.z
+  };
+}
+
+function bendVertex(vertex, amount) {
+  if (Math.abs(amount) < 0.001) return vertex;
+  const clamped = clampFloat(amount, -1, 1, 0);
+  const bendStrength = clamped * 0.8;
+  return {
+    x: vertex.x + bendStrength * vertex.y * Math.abs(vertex.y) * 0.65,
+    y: vertex.y,
+    z: vertex.z
   };
 }
 
