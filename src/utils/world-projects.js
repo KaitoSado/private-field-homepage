@@ -50,7 +50,9 @@ export function objectToSceneObjectRow({ object, projectId, userId }) {
 
 export function buildInviteUrl({ origin, projectId, token }) {
   const url = new URL(`/apps/vr/${projectId}`, origin);
-  url.searchParams.set("invite", token);
+  if (token) {
+    url.searchParams.set("invite", token);
+  }
   return url.toString();
 }
 

@@ -277,6 +277,7 @@ create table if not exists public.projects (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   owner_id uuid not null references public.profiles(id) on delete cascade,
+  access_mode text not null default 'invite_only',
   invite_token text,
   settings jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default timezone('utc'::text, now()),
@@ -413,6 +414,7 @@ alter table public.location_points add column if not exists lng double precision
 alter table public.location_points add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.projects add column if not exists name text;
 alter table public.projects add column if not exists owner_id uuid references public.profiles(id) on delete cascade;
+alter table public.projects add column if not exists access_mode text not null default 'invite_only';
 alter table public.projects add column if not exists invite_token text;
 alter table public.projects add column if not exists settings jsonb not null default '{}'::jsonb;
 alter table public.projects add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
@@ -725,6 +727,8 @@ alter table public.walk_sessions
 alter table public.projects
   drop constraint if exists projects_name_length_check,
   add constraint projects_name_length_check check (char_length(name) between 1 and 120),
+  drop constraint if exists projects_access_mode_check,
+  add constraint projects_access_mode_check check (access_mode in ('invite_only', 'open')),
   drop constraint if exists projects_invite_token_length_check,
   add constraint projects_invite_token_length_check check (invite_token is null or char_length(invite_token) between 8 and 120);
 
@@ -834,7 +838,9 @@ as $$
   select public.project_role(p_project_id) in ('owner', 'editor');
 $$;
 
-create or replace function public.create_vr_project(p_name text)
+drop function if exists public.create_vr_project(text);
+
+create or replace function public.create_vr_project(p_name text, p_access_mode text default 'invite_only')
 returns uuid
 language plpgsql
 security definer
@@ -848,16 +854,53 @@ begin
     raise exception 'authentication required';
   end if;
 
+  if p_access_mode not in ('invite_only', 'open') then
+    raise exception 'invalid access mode';
+  end if;
+
   v_project_id := gen_random_uuid();
   v_invite_token := coalesce(gen_random_uuid()::text, md5(random()::text || clock_timestamp()::text));
 
-  insert into public.projects (id, name, owner_id, invite_token, settings)
-  values (v_project_id, btrim(p_name), auth.uid(), v_invite_token, '{}'::jsonb);
+  insert into public.projects (id, name, owner_id, access_mode, invite_token, settings)
+  values (v_project_id, btrim(p_name), auth.uid(), p_access_mode, v_invite_token, '{}'::jsonb);
 
   insert into public.project_members (project_id, user_id, role, invited_at)
   values (v_project_id, auth.uid(), 'owner', timezone('utc'::text, now()));
 
   return v_project_id;
+end;
+$$;
+
+create or replace function public.join_open_vr_project(p_project_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_project public.projects;
+begin
+  if auth.uid() is null then
+    raise exception 'authentication required';
+  end if;
+
+  select *
+  into v_project
+  from public.projects
+  where id = p_project_id;
+
+  if not found then
+    raise exception 'project not found';
+  end if;
+
+  if v_project.access_mode <> 'open' then
+    raise exception 'project is not open';
+  end if;
+
+  insert into public.project_members (project_id, user_id, role, invited_at)
+  values (p_project_id, auth.uid(), 'editor', timezone('utc'::text, now()))
+  on conflict (project_id, user_id)
+  do update set invited_at = excluded.invited_at;
 end;
 $$;
 
@@ -911,6 +954,10 @@ begin
 
   if new.invite_token is distinct from old.invite_token then
     raise exception 'only the owner can rotate the invite token';
+  end if;
+
+  if new.access_mode is distinct from old.access_mode then
+    raise exception 'only the owner can change project access mode';
   end if;
 
   if new.name is distinct from old.name then
@@ -1797,8 +1844,9 @@ grant select, insert, update, delete on public.scene_objects to authenticated;
 grant select, insert, delete on public.chat_messages to authenticated;
 grant execute on function public.refresh_economy_account(uuid) to authenticated;
 grant execute on function public.cast_helpful_vote(uuid, text, uuid) to authenticated;
-grant execute on function public.create_vr_project(text) to authenticated;
+grant execute on function public.create_vr_project(text, text) to authenticated;
 grant execute on function public.accept_vr_project_invite(uuid, text) to authenticated;
+grant execute on function public.join_open_vr_project(uuid) to authenticated;
 
 drop policy if exists "help requests are public readable" on public.help_requests;
 create policy "help requests are public readable"
@@ -2150,7 +2198,7 @@ drop policy if exists "members can read projects" on public.projects;
 create policy "members can read projects"
 on public.projects
 for select
-using (owner_id = auth.uid() or public.is_project_member(id) or public.is_admin());
+using (owner_id = auth.uid() or public.is_project_member(id) or access_mode = 'open' or public.is_admin());
 
 drop policy if exists "authenticated users can create projects" on public.projects;
 create policy "authenticated users can create projects"

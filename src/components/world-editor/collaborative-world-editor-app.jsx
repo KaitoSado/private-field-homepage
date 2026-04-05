@@ -244,31 +244,72 @@ export function CollaborativeWorldEditorApp() {
       });
     }
 
-    const [{ data: memberRows, error: memberError }, { data: projectRow, error: projectError }, { data: objectRows, error: objectError }, { data: chatRows, error: chatError }] =
-      await Promise.all([
-        supabase
-          .from("project_members")
-          .select("project_id, user_id, role, profiles!project_members_user_id_fkey(id, username, display_name, avatar_url)")
-          .eq("project_id", projectId),
-        supabase.from("projects").select("id, name, owner_id, created_at, updated_at, settings, invite_token").eq("id", projectId).maybeSingle(),
-        supabase.from("scene_objects").select("id, project_id, name, model_url, mime_type, position, rotation, scale, updated_by, updated_at").eq("project_id", projectId).order("updated_at", { ascending: true }),
-        supabase
-          .from("chat_messages")
-          .select("id, project_id, user_id, content, created_at, profiles!chat_messages_user_id_fkey(id, username, display_name, avatar_url)")
-          .eq("project_id", projectId)
-          .order("created_at", { ascending: true })
-          .limit(100)
-      ]);
+    const { data: projectRow, error: projectError } = await supabase
+      .from("projects")
+      .select("id, name, owner_id, created_at, updated_at, settings, invite_token, access_mode")
+      .eq("id", projectId)
+      .maybeSingle();
 
-    if (memberError || projectError || objectError || chatError) {
-      setStatus(memberError?.message || projectError?.message || objectError?.message || chatError?.message || "プロジェクトを開けませんでした。");
+    if (projectError || !projectRow) {
+      setStatus(projectError?.message || "プロジェクトを開けませんでした。");
       setLoading(false);
       return;
     }
 
-    const myMembership = (memberRows || []).find((member) => member.user_id === userId);
+    let { data: memberRows, error: memberError } = await supabase
+      .from("project_members")
+      .select("project_id, user_id, role, profiles!project_members_user_id_fkey(id, username, display_name, avatar_url)")
+      .eq("project_id", projectId);
+
+    if (memberError) {
+      setStatus(memberError.message || "メンバー情報を取得できませんでした。");
+      setLoading(false);
+      return;
+    }
+
+    let myMembership = (memberRows || []).find((member) => member.user_id === userId);
+    if (!myMembership && projectRow.access_mode === "open") {
+      const { error: joinError } = await supabase.rpc("join_open_vr_project", {
+        p_project_id: projectId
+      });
+      if (joinError) {
+        setStatus(joinError.message || "開放モードの参加に失敗しました。");
+        setLoading(false);
+        return;
+      }
+
+      const membershipResult = await supabase
+        .from("project_members")
+        .select("project_id, user_id, role, profiles!project_members_user_id_fkey(id, username, display_name, avatar_url)")
+        .eq("project_id", projectId);
+      memberRows = membershipResult.data || [];
+      memberError = membershipResult.error;
+      if (memberError) {
+        setStatus(memberError.message || "メンバー情報を更新できませんでした。");
+        setLoading(false);
+        return;
+      }
+      myMembership = memberRows.find((member) => member.user_id === userId);
+    }
+
     if (!myMembership || !projectRow) {
       setStatus("このプロジェクトに参加する権限がありません。");
+      setLoading(false);
+      return;
+    }
+
+    const [{ data: objectRows, error: objectError }, { data: chatRows, error: chatError }] = await Promise.all([
+      supabase.from("scene_objects").select("id, project_id, name, model_url, mime_type, position, rotation, scale, updated_by, updated_at").eq("project_id", projectId).order("updated_at", { ascending: true }),
+      supabase
+        .from("chat_messages")
+        .select("id, project_id, user_id, content, created_at, profiles!chat_messages_user_id_fkey(id, username, display_name, avatar_url)")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: true })
+        .limit(100)
+    ]);
+
+    if (objectError || chatError) {
+      setStatus(objectError?.message || chatError?.message || "プロジェクトを開けませんでした。");
       setLoading(false);
       return;
     }
@@ -308,7 +349,7 @@ export function CollaborativeWorldEditorApp() {
       }))
     );
     setLoading(false);
-    setStatus(inviteToken ? "招待リンクから参加しました。" : "プロジェクトを開きました。");
+    setStatus(inviteToken ? "招待リンクから参加しました。" : projectRow.access_mode === "open" && !inviteToken ? "開放モードの空間に参加しました。" : "プロジェクトを開きました。");
   }
 
   async function handleDropFiles(files) {
@@ -510,6 +551,11 @@ export function CollaborativeWorldEditorApp() {
 
   async function handleCopyInvite() {
     if (!project || projectRole !== "owner") return;
+    if (project.access_mode === "open") {
+      await navigator.clipboard.writeText(buildInviteUrl({ origin: window.location.origin, projectId: project.id }));
+      setStatus("開放リンクをコピーしました。");
+      return;
+    }
     let token = project.invite_token;
     if (!token) {
       token = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -522,6 +568,18 @@ export function CollaborativeWorldEditorApp() {
     }
     await navigator.clipboard.writeText(buildInviteUrl({ origin: window.location.origin, projectId: project.id, token }));
     setStatus("招待リンクをコピーしました。");
+  }
+
+  async function handleToggleAccessMode() {
+    if (!project || projectRole !== "owner") return;
+    const nextMode = project.access_mode === "open" ? "invite_only" : "open";
+    const { error } = await supabase.from("projects").update({ access_mode: nextMode }).eq("id", project.id);
+    if (error) {
+      setStatus(error.message || "アクセスモードを変更できませんでした。");
+      return;
+    }
+    setProject((previous) => (previous ? { ...previous, access_mode: nextMode } : previous));
+    setStatus(nextMode === "open" ? "この空間を開放モードにしました。" : "この空間を招待制に戻しました。");
   }
 
   async function handleUndo() {
@@ -692,9 +750,14 @@ export function CollaborativeWorldEditorApp() {
             一覧へ戻る
           </Link>
           {projectRole === "owner" ? (
-            <button type="button" onClick={() => void handleCopyInvite()} className="button button-primary">
-              招待リンクをコピー
-            </button>
+            <>
+              <button type="button" onClick={() => void handleToggleAccessMode()} className="button button-secondary">
+                {project?.access_mode === "open" ? "招待制に戻す" : "開放モードにする"}
+              </button>
+              <button type="button" onClick={() => void handleCopyInvite()} className="button button-primary">
+                {project?.access_mode === "open" ? "開放リンクをコピー" : "招待リンクをコピー"}
+              </button>
+            </>
           ) : null}
         </div>
       </div>
@@ -752,6 +815,10 @@ export function CollaborativeWorldEditorApp() {
           members={members}
           onCopyInvite={() => void handleCopyInvite()}
           inviteEnabled={projectRole === "owner"}
+          inviteLabel={project?.access_mode === "open" ? "開放リンク" : "招待リンク"}
+          projectAccessMode={project?.access_mode || "invite_only"}
+          onToggleProjectAccessMode={() => void handleToggleAccessMode()}
+          accessModeEnabled={projectRole === "owner"}
         />
 
         <div className="relative grid gap-4">

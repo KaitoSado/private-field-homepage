@@ -23,10 +23,14 @@ export function ObjectListPanel({
   projectRole,
   members = [],
   onCopyInvite,
-  inviteEnabled = false
+  inviteEnabled = false,
+  inviteLabel = "招待リンク",
+  projectAccessMode = "invite_only",
+  onToggleProjectAccessMode,
+  accessModeEnabled = false
 }) {
   const saveLabel = showSceneManager ? "ローカル保存" : "変更を保存";
-  const shareLabel = showSceneManager ? "URL共有" : "招待を共有";
+  const shareLabel = showSceneManager ? "URL共有" : `${inviteLabel}を共有`;
 
   return (
     <aside className="flex h-full flex-col gap-4 rounded-[28px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_24px_60px_rgba(20,29,40,0.08)] backdrop-blur">
@@ -89,16 +93,28 @@ export function ObjectListPanel({
                 <div className="text-xs uppercase tracking-[0.16em] text-slate-400">project</div>
                 <div className="mt-1 text-sm font-semibold text-slate-900">{projectLabel}</div>
                 {projectRole ? <div className="mt-1 text-xs text-slate-500">あなたの権限: {projectRole}</div> : null}
+                <div className="mt-1 text-xs text-slate-500">{projectAccessMode === "open" ? "現在: 開放モード" : "現在: 招待制"}</div>
               </div>
-              {inviteEnabled && onCopyInvite ? (
-                <button
-                  type="button"
-                  onClick={onCopyInvite}
-                  className="rounded-full border border-slate-300 px-3 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
-                >
-                  招待リンク
-                </button>
-              ) : null}
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                {accessModeEnabled && onToggleProjectAccessMode ? (
+                  <button
+                    type="button"
+                    onClick={onToggleProjectAccessMode}
+                    className="rounded-full border border-slate-300 px-3 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+                  >
+                    {projectAccessMode === "open" ? "招待制に戻す" : "開放モードにする"}
+                  </button>
+                ) : null}
+                {inviteEnabled && onCopyInvite ? (
+                  <button
+                    type="button"
+                    onClick={onCopyInvite}
+                    className="rounded-full border border-slate-300 px-3 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+                  >
+                    {inviteLabel}
+                  </button>
+                ) : null}
+              </div>
             </div>
             {members.length ? (
               <div className="flex flex-wrap gap-2">
