@@ -71,6 +71,9 @@ export function SceneViewport({
       }}
       onDragOver={(event) => {
         event.preventDefault();
+        if (event.dataTransfer) {
+          event.dataTransfer.dropEffect = "copy";
+        }
         onDragStateChange(true);
       }}
       onDragLeave={(event) => {
@@ -82,7 +85,9 @@ export function SceneViewport({
       onDrop={(event) => {
         event.preventDefault();
         onDragStateChange(false);
-        onDropFiles(Array.from(event.dataTransfer.files || []));
+        void extractDroppedFiles(event.dataTransfer).then((files) => {
+          onDropFiles(files);
+        });
       }}
     >
       <Canvas camera={{ position: cameraPose.position, fov: 45 }} shadows onPointerMissed={() => onSelect(null)}>
@@ -126,6 +131,23 @@ export function SceneViewport({
       </div>
     </div>
   );
+}
+
+async function extractDroppedFiles(dataTransfer) {
+  const directFiles = Array.from(dataTransfer?.files || []);
+  if (directFiles.length) {
+    return directFiles;
+  }
+
+  const nextFiles = [];
+  for (const item of Array.from(dataTransfer?.items || [])) {
+    if (item.kind !== "file") continue;
+    const file = item.getAsFile();
+    if (file) {
+      nextFiles.push(file);
+    }
+  }
+  return nextFiles;
 }
 
 function SceneViewportInner({
