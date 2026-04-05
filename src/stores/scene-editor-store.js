@@ -150,9 +150,18 @@ export const useSceneEditorStore = create((set, get) => ({
   },
 
   renameObject(id, name) {
-    withHistory(set, get, (state) => ({
+    return get().renameObjectWithOptions(id, name, { recordHistory: true });
+  },
+
+  renameObjectWithOptions(id, name, options = {}) {
+    const apply = (state) => ({
       objects: state.objects.map((object) => (object.id === id ? { ...object, name: name || object.name } : object))
-    }));
+    });
+    if (options.recordHistory) {
+      withHistory(set, get, apply);
+      return;
+    }
+    set((state) => apply(state));
   },
 
   updateObjectTransform(id, updates, options = {}) {
@@ -196,8 +205,12 @@ export const useSceneEditorStore = create((set, get) => ({
   },
 
   removeObject(id) {
+    return get().removeObjectWithOptions(id, { recordHistory: true });
+  },
+
+  removeObjectWithOptions(id, options = {}) {
     let removed = null;
-    withHistory(set, get, (state) => {
+    const apply = (state) => {
       const objects = state.objects.filter((object) => {
         if (object.id === id) {
           removed = object;
@@ -209,7 +222,13 @@ export const useSceneEditorStore = create((set, get) => ({
         objects,
         selectedId: state.selectedId === id ? objects[0]?.id || null : state.selectedId
       };
-    });
+    };
+
+    if (options.recordHistory) {
+      withHistory(set, get, apply);
+    } else {
+      set((state) => apply(state));
+    }
     return removed;
   },
 
@@ -226,7 +245,11 @@ export const useSceneEditorStore = create((set, get) => ({
   },
 
   updateLightingField(scope, field, value) {
-    withHistory(set, get, (state) => ({
+    return get().updateLightingFieldWithOptions(scope, field, value, { recordHistory: true });
+  },
+
+  updateLightingFieldWithOptions(scope, field, value, options = {}) {
+    const apply = (state) => ({
       lighting: {
         ...state.lighting,
         [scope]: {
@@ -234,25 +257,48 @@ export const useSceneEditorStore = create((set, get) => ({
           [field]: Array.isArray(value) ? [...value] : value
         }
       }
-    }));
+    });
+    if (options.recordHistory) {
+      withHistory(set, get, apply);
+      return;
+    }
+    set((state) => apply(state));
   },
 
   updateEnvironmentField(field, value) {
-    withHistory(set, get, (state) => ({
+    return get().updateEnvironmentFieldWithOptions(field, value, { recordHistory: true });
+  },
+
+  updateEnvironmentFieldWithOptions(field, value, options = {}) {
+    const apply = (state) => ({
       environment: {
         ...state.environment,
         [field]: value
       }
-    }));
+    });
+    if (options.recordHistory) {
+      withHistory(set, get, apply);
+      return;
+    }
+    set((state) => apply(state));
   },
 
   updateFogField(field, value) {
-    withHistory(set, get, (state) => ({
+    return get().updateFogFieldWithOptions(field, value, { recordHistory: true });
+  },
+
+  updateFogFieldWithOptions(field, value, options = {}) {
+    const apply = (state) => ({
       fog: {
         ...state.fog,
         [field]: value
       }
-    }));
+    });
+    if (options.recordHistory) {
+      withHistory(set, get, apply);
+      return;
+    }
+    set((state) => apply(state));
   },
 
   updateCurrentCameraPose(pose) {
@@ -275,6 +321,40 @@ export const useSceneEditorStore = create((set, get) => ({
 
   clearCameraRequest() {
     set({ cameraRequest: null });
+  },
+
+  replaceSceneObjects(objects, selectedId = null) {
+    set((state) => ({
+      objects: deepCopy(objects || []),
+      selectedId: selectedId ?? state.selectedId
+    }));
+  },
+
+  upsertObject(nextObject, options = {}) {
+    const apply = (state) => {
+      const exists = state.objects.some((object) => object.id === nextObject.id);
+      const objects = exists
+        ? state.objects.map((object) => (object.id === nextObject.id ? { ...object, ...deepCopy(nextObject) } : object))
+        : [...state.objects, deepCopy(nextObject)];
+      return {
+        objects,
+        selectedId: options.select ? nextObject.id : state.selectedId
+      };
+    };
+    if (options.recordHistory) {
+      withHistory(set, get, apply);
+      return;
+    }
+    set((state) => apply(state));
+  },
+
+  applyRemoteSceneSettings(settings) {
+    set((state) => ({
+      sceneName: settings.sceneName ?? state.sceneName,
+      lighting: settings.lighting ? deepCopy(settings.lighting) : state.lighting,
+      environment: settings.environment ? deepCopy(settings.environment) : state.environment,
+      fog: settings.fog ? deepCopy(settings.fog) : state.fog
+    }));
   },
 
   saveCurrentCameraBookmark(label) {

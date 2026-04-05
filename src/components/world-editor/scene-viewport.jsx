@@ -56,7 +56,9 @@ export function SceneViewport({
   onDragStateChange,
   onCameraPoseChange,
   onCameraRequestSettled,
-  onRequestCameraPose
+  onRequestCameraPose,
+  remoteSelections = {},
+  presenceCameras = []
 }) {
   return (
     <div
@@ -100,6 +102,8 @@ export function SceneViewport({
           onTransformCommit={onTransformCommit}
           onCameraPoseChange={onCameraPoseChange}
           onCameraRequestSettled={onCameraRequestSettled}
+          remoteSelections={remoteSelections}
+          presenceCameras={presenceCameras}
         />
       </Canvas>
 
@@ -139,7 +143,9 @@ function SceneViewportInner({
   onTransformEnd,
   onTransformCommit,
   onCameraPoseChange,
-  onCameraRequestSettled
+  onCameraRequestSettled,
+  remoteSelections,
+  presenceCameras
 }) {
   const controlsRef = useRef(null);
 
@@ -176,6 +182,7 @@ function SceneViewportInner({
             key={object.id}
             object={object}
             selected={object.id === selectedId}
+            remoteSelection={remoteSelections[object.id] || null}
             transformMode={transformMode}
             onSelect={onSelect}
             onTransformStart={onTransformStart}
@@ -184,6 +191,7 @@ function SceneViewportInner({
           />
         ))}
       </Suspense>
+      <PresenceCameraMarkers items={presenceCameras} />
       <OrbitControls ref={controlsRef} makeDefault enabled={orbitEnabled} target={cameraPose.target} />
       <CameraRig controlsRef={controlsRef} request={cameraRequest} onPoseChange={onCameraPoseChange} onSettled={onCameraRequestSettled} />
       <CameraPoseSync controlsRef={controlsRef} onPoseChange={onCameraPoseChange} />
@@ -191,7 +199,7 @@ function SceneViewportInner({
   );
 }
 
-function SceneObjectNode({ object, selected, transformMode, onSelect, onTransformStart, onTransformEnd, onTransformCommit }) {
+function SceneObjectNode({ object, selected, remoteSelection, transformMode, onSelect, onTransformStart, onTransformEnd, onTransformCommit }) {
   const groupRef = useRef(null);
   const { scene } = useGLTF(object.url);
   const clonedScene = useMemo(() => cloneSkinned(scene), [scene]);
@@ -214,6 +222,7 @@ function SceneObjectNode({ object, selected, transformMode, onSelect, onTransfor
     >
       <primitive object={clonedScene} />
       {selected ? <SelectionBounds targetRef={groupRef} /> : null}
+      {!selected && remoteSelection ? <RemoteSelectionBounds targetRef={groupRef} color={remoteSelection.color} /> : null}
     </group>
   );
 
@@ -259,6 +268,33 @@ function SelectionBounds({ targetRef }) {
       helperRef.current = null;
     };
   }, [scene, targetRef]);
+
+  useFrame(() => {
+    helperRef.current?.update();
+  });
+
+  return null;
+}
+
+function RemoteSelectionBounds({ targetRef, color }) {
+  const helperRef = useRef(null);
+  const scene = useThree((state) => state.scene);
+
+  useEffect(() => {
+    if (!targetRef.current) return undefined;
+    const helper = new THREE.BoxHelper(targetRef.current, color || "#f59e0b");
+    helper.material.transparent = true;
+    helper.material.opacity = 0.78;
+    scene.add(helper);
+    helperRef.current = helper;
+
+    return () => {
+      scene.remove(helper);
+      helper.geometry.dispose();
+      helper.material.dispose();
+      helperRef.current = null;
+    };
+  }, [color, scene, targetRef]);
 
   useFrame(() => {
     helperRef.current?.update();
@@ -330,4 +366,28 @@ function CameraRig({ controlsRef, request, onPoseChange, onSettled }) {
   });
 
   return null;
+}
+
+function PresenceCameraMarkers({ items }) {
+  return (
+    <>
+      {items.map((item) => (
+        <group key={item.userId} position={item.position}>
+          <mesh>
+            <boxGeometry args={[0.26, 0.18, 0.18]} />
+            <meshStandardMaterial color={item.color} emissive={item.color} emissiveIntensity={0.35} />
+          </mesh>
+          <mesh position={[0, 0, -0.16]}>
+            <coneGeometry args={[0.12, 0.18, 12]} />
+            <meshStandardMaterial color={item.color} emissive={item.color} emissiveIntensity={0.25} />
+          </mesh>
+          <Html position={[0, 0.36, 0]} center>
+            <div className="rounded-full border border-white/20 bg-slate-950/80 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur">
+              {item.name}
+            </div>
+          </Html>
+        </group>
+      ))}
+    </>
+  );
 }

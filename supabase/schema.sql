@@ -273,6 +273,47 @@ create table if not exists public.location_points (
   created_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.projects (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  owner_id uuid not null references public.profiles(id) on delete cascade,
+  invite_token text,
+  settings jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.project_members (
+  project_id uuid not null references public.projects(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  role text not null default 'viewer',
+  invited_at timestamptz not null default timezone('utc'::text, now()),
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (project_id, user_id)
+);
+
+create table if not exists public.scene_objects (
+  id text primary key,
+  project_id uuid not null references public.projects(id) on delete cascade,
+  name text not null,
+  model_url text not null,
+  mime_type text not null default 'model/gltf-binary',
+  position jsonb not null default '[0,0,0]'::jsonb,
+  rotation jsonb not null default '[0,0,0]'::jsonb,
+  scale jsonb not null default '[1,1,1]'::jsonb,
+  updated_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.chat_messages (
+  id uuid primary key default gen_random_uuid(),
+  project_id uuid not null references public.projects(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  content text not null,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
 alter table public.anonymous_questions add column if not exists sender_profile_id uuid references public.profiles(id) on delete set null;
 alter table public.class_notes add column if not exists author_id uuid references public.profiles(id) on delete cascade;
 alter table public.class_notes add column if not exists course_name text;
@@ -370,6 +411,28 @@ alter table public.location_points add column if not exists session_id uuid refe
 alter table public.location_points add column if not exists lat double precision;
 alter table public.location_points add column if not exists lng double precision;
 alter table public.location_points add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.projects add column if not exists name text;
+alter table public.projects add column if not exists owner_id uuid references public.profiles(id) on delete cascade;
+alter table public.projects add column if not exists invite_token text;
+alter table public.projects add column if not exists settings jsonb not null default '{}'::jsonb;
+alter table public.projects add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.projects add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.project_members add column if not exists role text not null default 'viewer';
+alter table public.project_members add column if not exists invited_at timestamptz not null default timezone('utc'::text, now());
+alter table public.project_members add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.scene_objects add column if not exists name text;
+alter table public.scene_objects add column if not exists model_url text not null default '';
+alter table public.scene_objects add column if not exists mime_type text not null default 'model/gltf-binary';
+alter table public.scene_objects add column if not exists position jsonb not null default '[0,0,0]'::jsonb;
+alter table public.scene_objects add column if not exists rotation jsonb not null default '[0,0,0]'::jsonb;
+alter table public.scene_objects add column if not exists scale jsonb not null default '[1,1,1]'::jsonb;
+alter table public.scene_objects add column if not exists updated_by uuid references public.profiles(id) on delete set null;
+alter table public.scene_objects add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.scene_objects add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.chat_messages add column if not exists project_id uuid references public.projects(id) on delete cascade;
+alter table public.chat_messages add column if not exists user_id uuid references public.profiles(id) on delete cascade;
+alter table public.chat_messages add column if not exists content text;
+alter table public.chat_messages add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 
 create table if not exists public.notifications (
   id uuid primary key default gen_random_uuid(),
@@ -475,6 +538,10 @@ create index if not exists grad_ritual_posts_room_idx on public.grad_ritual_post
 create index if not exists walk_sessions_status_started_idx on public.walk_sessions(status, started_at desc);
 create index if not exists walk_sessions_user_idx on public.walk_sessions(user_id, started_at desc);
 create index if not exists location_points_session_created_idx on public.location_points(session_id, created_at asc);
+create index if not exists projects_owner_idx on public.projects(owner_id, updated_at desc);
+create index if not exists project_members_user_idx on public.project_members(user_id, created_at desc);
+create index if not exists scene_objects_project_updated_idx on public.scene_objects(project_id, updated_at desc);
+create index if not exists chat_messages_project_created_idx on public.chat_messages(project_id, created_at asc);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
@@ -655,12 +722,47 @@ alter table public.walk_sessions
   drop constraint if exists walk_sessions_tags_count_check,
   add constraint walk_sessions_tags_count_check check (coalesce(array_length(tags, 1), 0) <= 6);
 
+alter table public.projects
+  drop constraint if exists projects_name_length_check,
+  add constraint projects_name_length_check check (char_length(name) between 1 and 120),
+  drop constraint if exists projects_invite_token_length_check,
+  add constraint projects_invite_token_length_check check (invite_token is null or char_length(invite_token) between 8 and 120);
+
+alter table public.project_members
+  drop constraint if exists project_members_role_check,
+  add constraint project_members_role_check check (role in ('owner', 'editor', 'viewer'));
+
+alter table public.scene_objects
+  drop constraint if exists scene_objects_name_length_check,
+  add constraint scene_objects_name_length_check check (char_length(name) between 1 and 140),
+  drop constraint if exists scene_objects_model_url_length_check,
+  add constraint scene_objects_model_url_length_check check (char_length(model_url) between 1 and 2000),
+  drop constraint if exists scene_objects_position_shape_check,
+  add constraint scene_objects_position_shape_check check (jsonb_typeof(position) = 'array' and jsonb_array_length(position) = 3),
+  drop constraint if exists scene_objects_rotation_shape_check,
+  add constraint scene_objects_rotation_shape_check check (jsonb_typeof(rotation) = 'array' and jsonb_array_length(rotation) = 3),
+  drop constraint if exists scene_objects_scale_shape_check,
+  add constraint scene_objects_scale_shape_check check (jsonb_typeof(scale) = 'array' and jsonb_array_length(scale) = 3);
+
+alter table public.chat_messages
+  drop constraint if exists chat_messages_content_length_check,
+  add constraint chat_messages_content_length_check check (char_length(content) between 1 and 1000);
+
 insert into storage.buckets (id, name, public)
 values ('avatars', 'avatars', true)
 on conflict (id) do update set public = excluded.public;
 
 insert into storage.buckets (id, name, public)
 values ('post-media', 'post-media', true)
+on conflict (id) do update set public = excluded.public;
+
+-- Collaborative VR editor setup:
+-- 1. Enable Email auth and Google auth in Supabase Auth.
+-- 2. Apply this schema so project tables, invite RPC, and storage rules are created.
+-- 3. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to the app.
+-- 4. The first realtime version uses Realtime broadcast + presence for live sync.
+insert into storage.buckets (id, name, public)
+values ('scene-models', 'scene-models', true)
 on conflict (id) do update set public = excluded.public;
 
 create or replace function public.handle_updated_at()
@@ -686,6 +788,83 @@ as $$
     where id = auth.uid()
       and role = 'admin'
   );
+$$;
+
+create or replace function public.is_project_member(p_project_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.project_members
+    where project_id = p_project_id
+      and user_id = auth.uid()
+  );
+$$;
+
+create or replace function public.project_role(p_project_id uuid)
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (
+      select role
+      from public.project_members
+      where project_id = p_project_id
+        and user_id = auth.uid()
+      limit 1
+    ),
+    ''
+  );
+$$;
+
+create or replace function public.can_edit_project(p_project_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.project_role(p_project_id) in ('owner', 'editor');
+$$;
+
+create or replace function public.accept_vr_project_invite(p_project_id uuid, p_token text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_project public.projects;
+begin
+  if auth.uid() is null then
+    raise exception 'authentication required';
+  end if;
+
+  select *
+  into v_project
+  from public.projects
+  where id = p_project_id;
+
+  if not found then
+    raise exception 'project not found';
+  end if;
+
+  if coalesce(v_project.invite_token, '') = '' or v_project.invite_token <> coalesce(p_token, '') then
+    raise exception 'invite token is invalid';
+  end if;
+
+  insert into public.project_members (project_id, user_id, role, invited_at)
+  values (p_project_id, auth.uid(), 'editor', timezone('utc'::text, now()))
+  on conflict (project_id, user_id)
+  do update set invited_at = excluded.invited_at;
+end;
 $$;
 
 create or replace function public.handle_new_user()
@@ -1099,6 +1278,16 @@ create trigger walk_sessions_set_updated_at
 before update on public.walk_sessions
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists projects_set_updated_at on public.projects;
+create trigger projects_set_updated_at
+before update on public.projects
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists scene_objects_set_updated_at on public.scene_objects;
+create trigger scene_objects_set_updated_at
+before update on public.scene_objects
+for each row execute procedure public.handle_updated_at();
+
 create or replace view public.profile_stats as
 select
   p.id as profile_id,
@@ -1164,6 +1353,10 @@ alter table public.help_request_feedback enable row level security;
 alter table public.grad_ritual_posts enable row level security;
 alter table public.walk_sessions enable row level security;
 alter table public.location_points enable row level security;
+alter table public.projects enable row level security;
+alter table public.project_members enable row level security;
+alter table public.scene_objects enable row level security;
+alter table public.chat_messages enable row level security;
 alter table public.notifications enable row level security;
 alter table public.reports enable row level security;
 alter table public.telemetry_page_views enable row level security;
@@ -1539,8 +1732,13 @@ grant select on public.economy_accounts to authenticated;
 grant select on public.point_transactions to authenticated;
 grant select, insert on public.helpful_votes to authenticated;
 grant select on public.help_request_feedback to authenticated;
+grant select, insert, update, delete on public.projects to authenticated;
+grant select, insert, update, delete on public.project_members to authenticated;
+grant select, insert, update, delete on public.scene_objects to authenticated;
+grant select, insert, delete on public.chat_messages to authenticated;
 grant execute on function public.refresh_economy_account(uuid) to authenticated;
 grant execute on function public.cast_helpful_vote(uuid, text, uuid) to authenticated;
+grant execute on function public.accept_vr_project_invite(uuid, text) to authenticated;
 
 drop policy if exists "help requests are public readable" on public.help_requests;
 create policy "help requests are public readable"
@@ -1888,6 +2086,155 @@ on public.admin_alerts
 for delete
 using (public.is_admin());
 
+drop policy if exists "members can read projects" on public.projects;
+create policy "members can read projects"
+on public.projects
+for select
+using (owner_id = auth.uid() or public.is_project_member(id) or public.is_admin());
+
+drop policy if exists "authenticated users can create projects" on public.projects;
+create policy "authenticated users can create projects"
+on public.projects
+for insert
+to authenticated
+with check (owner_id = auth.uid());
+
+drop policy if exists "owners and editors can update projects" on public.projects;
+create policy "owners and editors can update projects"
+on public.projects
+for update
+using (owner_id = auth.uid() or public.can_edit_project(id) or public.is_admin())
+with check (owner_id = auth.uid() or public.can_edit_project(id) or public.is_admin());
+
+drop policy if exists "owners can delete projects" on public.projects;
+create policy "owners can delete projects"
+on public.projects
+for delete
+using (owner_id = auth.uid() or public.is_admin());
+
+drop policy if exists "members can read project memberships" on public.project_members;
+create policy "members can read project memberships"
+on public.project_members
+for select
+using (public.is_project_member(project_id) or public.is_admin());
+
+drop policy if exists "owners can create memberships" on public.project_members;
+create policy "owners can create memberships"
+on public.project_members
+for insert
+to authenticated
+with check (
+  (
+    auth.uid() = user_id
+    and role = 'owner'
+    and exists (
+      select 1
+      from public.projects
+      where projects.id = project_members.project_id
+        and projects.owner_id = auth.uid()
+    )
+  )
+  or public.is_admin()
+);
+
+drop policy if exists "owners can update project memberships" on public.project_members;
+create policy "owners can update project memberships"
+on public.project_members
+for update
+using (
+  exists (
+    select 1
+    from public.projects
+    where projects.id = project_members.project_id
+      and projects.owner_id = auth.uid()
+  )
+  or public.is_admin()
+)
+with check (
+  exists (
+    select 1
+    from public.projects
+    where projects.id = project_members.project_id
+      and projects.owner_id = auth.uid()
+  )
+  or public.is_admin()
+);
+
+drop policy if exists "owners can delete project memberships" on public.project_members;
+create policy "owners can delete project memberships"
+on public.project_members
+for delete
+using (
+  project_members.user_id = auth.uid()
+  or exists (
+    select 1
+    from public.projects
+    where projects.id = project_members.project_id
+      and projects.owner_id = auth.uid()
+  )
+  or public.is_admin()
+);
+
+drop policy if exists "members can read scene objects" on public.scene_objects;
+create policy "members can read scene objects"
+on public.scene_objects
+for select
+using (public.is_project_member(project_id) or public.is_admin());
+
+drop policy if exists "editors can create scene objects" on public.scene_objects;
+create policy "editors can create scene objects"
+on public.scene_objects
+for insert
+to authenticated
+with check (
+  public.can_edit_project(project_id)
+  and updated_by = auth.uid()
+);
+
+drop policy if exists "editors can update scene objects" on public.scene_objects;
+create policy "editors can update scene objects"
+on public.scene_objects
+for update
+using (public.can_edit_project(project_id) or public.is_admin())
+with check ((public.can_edit_project(project_id) and updated_by = auth.uid()) or public.is_admin());
+
+drop policy if exists "editors can delete scene objects" on public.scene_objects;
+create policy "editors can delete scene objects"
+on public.scene_objects
+for delete
+using (public.can_edit_project(project_id) or public.is_admin());
+
+drop policy if exists "members can read project chat" on public.chat_messages;
+create policy "members can read project chat"
+on public.chat_messages
+for select
+using (public.is_project_member(project_id) or public.is_admin());
+
+drop policy if exists "members can send project chat" on public.chat_messages;
+create policy "members can send project chat"
+on public.chat_messages
+for insert
+to authenticated
+with check (
+  public.is_project_member(project_id)
+  and user_id = auth.uid()
+);
+
+drop policy if exists "authors or owners can delete project chat" on public.chat_messages;
+create policy "authors or owners can delete project chat"
+on public.chat_messages
+for delete
+using (
+  user_id = auth.uid()
+  or exists (
+    select 1
+    from public.projects
+    where projects.id = chat_messages.project_id
+      and projects.owner_id = auth.uid()
+  )
+  or public.is_admin()
+);
+
 drop policy if exists "avatars are public" on storage.objects;
 create policy "avatars are public"
 on storage.objects
@@ -1965,5 +2312,45 @@ for delete
 to authenticated
 using (
   bucket_id = 'post-media'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "scene models are public" on storage.objects;
+create policy "scene models are public"
+on storage.objects
+for select
+using (bucket_id = 'scene-models');
+
+drop policy if exists "users can upload own scene models" on storage.objects;
+create policy "users can upload own scene models"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'scene-models'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "users can update own scene models" on storage.objects;
+create policy "users can update own scene models"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'scene-models'
+  and auth.uid()::text = (storage.foldername(name))[1]
+)
+with check (
+  bucket_id = 'scene-models'
+  and auth.uid()::text = (storage.foldername(name))[1]
+);
+
+drop policy if exists "users can delete own scene models" on storage.objects;
+create policy "users can delete own scene models"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'scene-models'
   and auth.uid()::text = (storage.foldername(name))[1]
 );

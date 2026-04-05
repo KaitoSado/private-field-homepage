@@ -13,12 +13,21 @@ export function ObjectListPanel({
   onShareScene,
   onSaveScene,
   status,
-  scenes,
+  scenes = [],
   currentSceneId,
   onCreateScene,
   onSwitchScene,
-  onDeleteScene
+  onDeleteScene,
+  showSceneManager = true,
+  projectLabel,
+  projectRole,
+  members = [],
+  onCopyInvite,
+  inviteEnabled = false
 }) {
+  const saveLabel = showSceneManager ? "ローカル保存" : "変更を保存";
+  const shareLabel = showSceneManager ? "URL共有" : "招待を共有";
+
   return (
     <aside className="flex h-full flex-col gap-4 rounded-[28px] border border-slate-200/80 bg-white/85 p-4 shadow-[0_24px_60px_rgba(20,29,40,0.08)] backdrop-blur">
       <div className="space-y-3">
@@ -43,7 +52,7 @@ export function ObjectListPanel({
           onClick={onSaveScene}
           className="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm font-semibold text-cyan-800 transition hover:border-cyan-300 hover:bg-cyan-100"
         >
-          ローカル保存
+          {saveLabel}
         </button>
         <button
           type="button"
@@ -64,7 +73,7 @@ export function ObjectListPanel({
           onClick={onShareScene}
           className="rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-800 transition hover:border-violet-300 hover:bg-violet-100 sm:col-span-2 xl:col-span-1"
         >
-          URL共有
+          {shareLabel}
         </button>
       </div>
 
@@ -73,6 +82,36 @@ export function ObjectListPanel({
       </div>
 
       <section className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+        {projectLabel ? (
+          <div className="space-y-2 rounded-2xl border border-slate-200 bg-slate-50/80 px-3 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-xs uppercase tracking-[0.16em] text-slate-400">project</div>
+                <div className="mt-1 text-sm font-semibold text-slate-900">{projectLabel}</div>
+                {projectRole ? <div className="mt-1 text-xs text-slate-500">あなたの権限: {projectRole}</div> : null}
+              </div>
+              {inviteEnabled && onCopyInvite ? (
+                <button
+                  type="button"
+                  onClick={onCopyInvite}
+                  className="rounded-full border border-slate-300 px-3 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+                >
+                  招待リンク
+                </button>
+              ) : null}
+            </div>
+            {members.length ? (
+              <div className="flex flex-wrap gap-2">
+                {members.map((member) => (
+                  <span key={member.userId} className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-700">
+                    {member.name}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-sm font-semibold text-slate-900">読み込んだモデル</h3>
@@ -112,45 +151,47 @@ export function ObjectListPanel({
           )}
         </div>
 
-        <div className="space-y-2 border-t border-slate-200 pt-3">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-sm font-semibold text-slate-900">シーン一覧</h3>
-            <button
-              type="button"
-              onClick={onCreateScene}
-              className="rounded-full border border-slate-300 px-3 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
-            >
-              新規作成
-            </button>
-          </div>
-
-          <div className="space-y-2">
-            {scenes.map((scene) => (
-              <div
-                key={scene.id}
-                className={`flex items-center gap-2 rounded-2xl border px-3 py-3 ${
-                  scene.id === currentSceneId ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-900"
-                }`}
+        {showSceneManager ? (
+          <div className="space-y-2 border-t border-slate-200 pt-3">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-slate-900">シーン一覧</h3>
+              <button
+                type="button"
+                onClick={onCreateScene}
+                className="rounded-full border border-slate-300 px-3 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
               >
-                <button type="button" onClick={() => onSwitchScene(scene.id)} className="min-w-0 flex-1 text-left">
-                  <div className="truncate text-sm font-semibold">{scene.name}</div>
-                  <div className={`mt-1 text-[11px] ${scene.id === currentSceneId ? "text-slate-300" : "text-slate-500"}`}>
-                    {formatUpdatedAt(scene.updatedAt)}
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDeleteScene(scene.id)}
-                  className={`rounded-full px-2 py-1 text-[11px] font-semibold transition ${
-                    scene.id === currentSceneId ? "bg-white/10 text-white hover:bg-white/20" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                新規作成
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {scenes.map((scene) => (
+                <div
+                  key={scene.id}
+                  className={`flex items-center gap-2 rounded-2xl border px-3 py-3 ${
+                    scene.id === currentSceneId ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 bg-white text-slate-900"
                   }`}
                 >
-                  削除
-                </button>
-              </div>
-            ))}
+                  <button type="button" onClick={() => onSwitchScene(scene.id)} className="min-w-0 flex-1 text-left">
+                    <div className="truncate text-sm font-semibold">{scene.name}</div>
+                    <div className={`mt-1 text-[11px] ${scene.id === currentSceneId ? "text-slate-300" : "text-slate-500"}`}>
+                      {formatUpdatedAt(scene.updatedAt)}
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDeleteScene(scene.id)}
+                    className={`rounded-full px-2 py-1 text-[11px] font-semibold transition ${
+                      scene.id === currentSceneId ? "bg-white/10 text-white hover:bg-white/20" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    削除
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        ) : null}
       </section>
     </aside>
   );

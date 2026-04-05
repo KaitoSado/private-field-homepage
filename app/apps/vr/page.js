@@ -1,14 +1,14 @@
-import { WorldEditorApp } from "@/src/components/world-editor/world-editor-app";
+import { VrProjectsDashboard } from "@/src/components/world-editor/vr-projects-dashboard";
 
 export const metadata = {
   title: "みんなで作るVR空間 | Apps | FieldCard Social",
-  description: "GLB / GLTF を持ち寄って、ブラウザ上で3D空間を組み立てるシーンエディタ。"
+  description: "GLB / GLTF を持ち寄って、ブラウザ上で3D空間を共同制作するプロジェクト一覧。"
 };
 
 export default function VrWorldPage() {
   return (
     <main className="shell">
-      <WorldEditorApp />
+      <VrProjectsDashboard />
     </main>
   );
 }
