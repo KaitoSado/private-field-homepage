@@ -47,6 +47,7 @@ export function CollaborativeWorldEditorApp() {
   const [chatDraft, setChatDraft] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [presenceUsers, setPresenceUsers] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
 
   const sceneName = useSceneEditorStore((state) => state.sceneName);
   const objects = useSceneEditorStore((state) => state.objects);
@@ -355,7 +356,14 @@ export function CollaborativeWorldEditorApp() {
   }
 
   async function handleDropFiles(files) {
-    if (!canEdit || !session?.user) return;
+    if (!session?.user) {
+      setStatus("モデルを追加するにはログインが必要です。");
+      return;
+    }
+    if (!canEdit) {
+      setStatus("viewer はモデルを追加できません。owner か editor で開いてください。");
+      return;
+    }
     const validFiles = files.filter((file) => /\.gltf?$/i.test(file.name));
     if (!validFiles.length) {
       setStatus("GLB / GLTF を落としてください。");
@@ -846,8 +854,8 @@ export function CollaborativeWorldEditorApp() {
             onTransformEnd={() => void handleTransformEnd()}
             onTransformCommit={handleTransformChange}
             onDropFiles={(files) => void handleDropFiles(files)}
-            dragActive={false}
-            onDragStateChange={() => {}}
+            dragActive={dragActive}
+            onDragStateChange={setDragActive}
             onCameraPoseChange={updateCurrentCameraPose}
             onCameraRequestSettled={clearCameraRequest}
             onRequestCameraPose={requestCameraPose}
