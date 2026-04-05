@@ -8,10 +8,12 @@ import {
   MathMissionCard,
   MathModeTabs,
   MathNumberField,
+  MathPlayPauseResetBar,
   MathPlaygroundHeader,
   MathPlaygroundLayout,
   MathPresetRow,
   MathSliderField,
+  MathStatusMessage,
   MathStoryCard,
   MathToggleField,
   MathValueMeter
@@ -34,6 +36,9 @@ const APP_TABS = [
   { id: "derivative", label: "微分" },
   { id: "integral", label: "積分" },
   { id: "linear", label: "線形代数" },
+  { id: "probability", label: "確率" },
+  { id: "limit", label: "極限" },
+  { id: "newton", label: "ニュートン法" },
   { id: "geometry", label: "幾何" },
   { id: "space", label: "空間図形" },
   { id: "cas", label: "数式処理(CAS)" },
@@ -287,6 +292,195 @@ const LINEAR_MISSIONS = [
   }
 ];
 
+const PROBABILITY_PRESETS = [
+  {
+    id: "coin",
+    label: "コイン",
+    kind: "coin",
+    title: "公平コイン",
+    hint: "短い目線では偏って見えることがあります。",
+    bias: 0.5
+  },
+  {
+    id: "die",
+    label: "サイコロ",
+    kind: "die",
+    title: "1個のサイコロ",
+    hint: "高い目寄り、低い目寄りを少しずつ変えられます。",
+    bias: 0.5
+  },
+  {
+    id: "two-dice",
+    label: "2個の和",
+    kind: "two-dice",
+    title: "サイコロ2個の和",
+    hint: "真ん中の数が出やすい形が見えてきます。",
+    bias: 0.5
+  }
+];
+
+const PROBABILITY_MISSIONS = [
+  {
+    id: "swing",
+    label: "偏る瞬間",
+    title: "公平なのに偏る瞬間を見つける",
+    description: "公平なコインでも、少ない回数ではかなり偏ることがあります。",
+    type: "swing"
+  },
+  {
+    id: "shape",
+    label: "形を見る",
+    title: "一番出やすい結果を見抜く",
+    description: "2個のサイコロの和で、真ん中の数がふくらみやすい形を見つけます。",
+    type: "mode"
+  },
+  {
+    id: "bias",
+    label: "偏りをつくる",
+    title: "偏りを変えて形の違いを見る",
+    description: "同じゲームでも、偏りを加えると棒の並び方が変わります。",
+    type: "bias"
+  }
+];
+
+const LIMIT_PRESETS = [
+  {
+    id: "continuous",
+    label: "そのまま続く",
+    title: "連続カーブ",
+    pointX: 1.4,
+    xRange: 5,
+    yRange: 5,
+    startDistance: 2.6,
+    fn: (x) => 0.22 * x * x - 1.2,
+    pointValue: (x) => 0.22 * x * x - 1.2,
+    ghostY: null
+  },
+  {
+    id: "hole",
+    label: "穴があく",
+    title: "穴のあるカーブ",
+    pointX: 1,
+    xRange: 5,
+    yRange: 5,
+    startDistance: 2.3,
+    fn: (x) => (Math.abs(x - 1) < 1e-6 ? Number.NaN : x + 1),
+    pointValue: () => -1.2,
+    ghostY: () => 2
+  },
+  {
+    id: "jump",
+    label: "飛びこえる",
+    title: "飛びがある",
+    pointX: 0,
+    xRange: 4.5,
+    yRange: 3.5,
+    startDistance: 2.1,
+    fn: (x) => (x < 0 ? -1.35 : 1.15),
+    pointValue: () => 0,
+    ghostY: null
+  },
+  {
+    id: "wall",
+    label: "壁がある",
+    title: "近づけない壁",
+    pointX: 0,
+    xRange: 5,
+    yRange: 6,
+    startDistance: 2.8,
+    fn: (x) => (Math.abs(x) < 1e-4 ? Number.NaN : 1 / x),
+    pointValue: () => null,
+    ghostY: null
+  }
+];
+
+const LIMIT_MISSIONS = [
+  {
+    id: "same",
+    label: "左右が同じ",
+    title: "左右が同じ場所に近づくか見抜く",
+    description: "左右から来る点の行き先がそろうかを見ます。",
+    type: "same"
+  },
+  {
+    id: "point",
+    label: "点がズレる",
+    title: "点の値と近づいた先がズレる例を探す",
+    description: "真ん中の点だけ別の場所に置かれている例を見つけます。",
+    type: "point-mismatch"
+  },
+  {
+    id: "split",
+    label: "左右で別",
+    title: "左右で行き先が分かれる例を探す",
+    description: "左と右で別々の高さに行くと、ひとつの答えにまとまりません。",
+    type: "split"
+  }
+];
+
+const NEWTON_PRESETS = [
+  {
+    id: "quadratic",
+    label: "まっすぐ着地",
+    expression: "x^2 - 2",
+    xRange: 4.5,
+    yRange: 5,
+    startX: 1.8,
+    title: "きれいに収束する"
+  },
+  {
+    id: "multi-root",
+    label: "分かれ道",
+    expression: "x^3 - x",
+    xRange: 3.5,
+    yRange: 3,
+    startX: 0.72,
+    title: "別の根へ吸い寄せられる"
+  },
+  {
+    id: "cosine",
+    label: "じわっと追う",
+    expression: "cos(x) - x",
+    xRange: 3.2,
+    yRange: 2.5,
+    startX: 1.6,
+    title: "少しずつ着地する"
+  },
+  {
+    id: "unstable",
+    label: "不安定",
+    expression: "x^3 - 2*x + 2",
+    xRange: 3.5,
+    yRange: 5,
+    startX: 0.2,
+    title: "うまくいかない出発点もある"
+  }
+];
+
+const NEWTON_MISSIONS = [
+  {
+    id: "quick",
+    label: "3手で着地",
+    title: "3手以内で根にたどり着く",
+    description: "よい出発点を選ぶと、少ない手数で着地できます。",
+    type: "quick"
+  },
+  {
+    id: "other-root",
+    label: "別の根へ",
+    title: "ちがう出発点から別の根へ行く",
+    description: "同じルールでも、出発点しだいで別の答えへ向かいます。",
+    type: "other-root"
+  },
+  {
+    id: "unstable",
+    label: "不安定探し",
+    title: "不安定な出発点を見つける",
+    description: "接線が危ない向きになると、答えから遠ざかることがあります。",
+    type: "unstable"
+  }
+];
+
 const GEOMETRY_TOOLS = [
   { id: "point", label: "点" },
   { id: "segment", label: "線分" },
@@ -352,6 +546,9 @@ export function MathCommunityApp() {
         {activeTab === "derivative" ? <DerivativePlaygroundPanel /> : null}
         {activeTab === "integral" ? <IntegralPlaygroundPanel /> : null}
         {activeTab === "linear" ? <LinearAlgebraPlaygroundPanel /> : null}
+        {activeTab === "probability" ? <ProbabilityPlaygroundPanel /> : null}
+        {activeTab === "limit" ? <LimitPlaygroundPanel /> : null}
+        {activeTab === "newton" ? <NewtonPlaygroundPanel /> : null}
         {activeTab === "geometry" ? <GeometryPanel /> : null}
         {activeTab === "space" ? <SpaceGeometryPanel /> : null}
         {activeTab === "cas" ? <CasPanel /> : null}
@@ -1436,6 +1633,629 @@ function LinearSnapshotCard({ title, basis, shapeMode, note, accentClass = "" })
         <circle className="math-linear-preview-v-dot" cx={vTip.x} cy={vTip.y} r="5" />
       </svg>
     </div>
+  );
+}
+
+function ProbabilityPlaygroundPanel() {
+  const canvasRef = useRef(null);
+  const autoRunRef = useRef(null);
+  const [mode, setMode] = useState("play");
+  const [presetId, setPresetId] = useState(PROBABILITY_PRESETS[0].id);
+  const [missionId, setMissionId] = useState(PROBABILITY_MISSIONS[0].id);
+  const preset = PROBABILITY_PRESETS.find((item) => item.id === presetId) || PROBABILITY_PRESETS[0];
+  const [bias, setBias] = useState(preset.bias);
+  const [counts, setCounts] = useState([]);
+  const [totalTrials, setTotalTrials] = useState(0);
+  const [lastIndex, setLastIndex] = useState(null);
+  const [autoRun, setAutoRun] = useState(false);
+  const [showGuide, setShowGuide] = useState(true);
+  const [showExpectation, setShowExpectation] = useState(true);
+  const [runSpeed, setRunSpeed] = useState(140);
+
+  const probabilitySpec = useMemo(() => buildProbabilitySpec(preset, bias), [preset, bias]);
+  const activeMission = PROBABILITY_MISSIONS.find((item) => item.id === missionId) || PROBABILITY_MISSIONS[0];
+  const maxCount = counts.length ? Math.max(...counts, 0) : 0;
+  const leadingIndex = counts.length ? counts.findIndex((count) => count === maxCount) : -1;
+  const mission = useMemo(
+    () => buildProbabilityMissionState(activeMission, preset, probabilitySpec, counts, totalTrials),
+    [activeMission, counts, preset, probabilitySpec, totalTrials]
+  );
+  const stability = useMemo(() => {
+    if (totalTrials === 0) return 0;
+    return Math.min(100, totalTrials / 2.2);
+  }, [totalTrials]);
+  const statusText = useMemo(() => describeProbabilityStatus(preset, probabilitySpec, counts, totalTrials), [counts, preset, probabilitySpec, totalTrials]);
+
+  useEffect(() => {
+    setBias(preset.bias);
+    setCounts(new Array(buildProbabilitySpec(preset, preset.bias).labels.length).fill(0));
+    setTotalTrials(0);
+    setLastIndex(null);
+    setAutoRun(false);
+  }, [preset.id, preset.bias]);
+
+  useEffect(() => {
+    if (counts.length === probabilitySpec.labels.length) return;
+    setCounts(new Array(probabilitySpec.labels.length).fill(0));
+    setTotalTrials(0);
+    setLastIndex(null);
+  }, [counts.length, probabilitySpec.labels.length]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    drawProbabilityScene(context, {
+      labels: probabilitySpec.labels,
+      counts,
+      expected: probabilitySpec.probabilities,
+      totalTrials,
+      lastIndex,
+      title: preset.title,
+      showExpectation
+    });
+  }, [counts, lastIndex, preset.title, probabilitySpec, showExpectation, totalTrials]);
+
+  useEffect(() => {
+    if (!autoRun) {
+      if (autoRunRef.current) window.clearInterval(autoRunRef.current);
+      return;
+    }
+
+    autoRunRef.current = window.setInterval(() => {
+      runProbabilityTrials(1);
+    }, runSpeed);
+
+    return () => {
+      if (autoRunRef.current) window.clearInterval(autoRunRef.current);
+    };
+  }, [autoRun, runSpeed, probabilitySpec]);
+
+  function runProbabilityTrials(amount) {
+    setCounts((current) => {
+      const next = current.length ? [...current] : new Array(probabilitySpec.labels.length).fill(0);
+      let latest = null;
+      for (let index = 0; index < amount; index += 1) {
+        latest = sampleProbabilityIndex(probabilitySpec);
+        next[latest] += 1;
+      }
+      setLastIndex(latest);
+      return next;
+    });
+    setTotalTrials((current) => current + amount);
+  }
+
+  function resetScene() {
+    setCounts(new Array(probabilitySpec.labels.length).fill(0));
+    setTotalTrials(0);
+    setLastIndex(null);
+    setAutoRun(false);
+  }
+
+  function randomizeBias() {
+    setBias(clampFloat(0.12 + Math.random() * 0.76, 0.05, 0.95, preset.bias));
+    resetScene();
+  }
+
+  return (
+    <MathPlaygroundLayout
+      workspace={<canvas ref={canvasRef} width={960} height={480} className="math-canvas" />}
+      caption="ボタンを押すたびに棒グラフが育ちます。偏りを変えると、期待される形と実際の揺れ方が一緒に見えてきます。"
+      controls={
+        <>
+          <MathPlaygroundHeader title="偶然観測室" starter="まずは 10 回押す" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
+
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={PROBABILITY_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={() => runProbabilityTrials(1)}>1回</button>
+                <button type="button" className="button button-ghost button-small" onClick={() => runProbabilityTrials(10)}>10回</button>
+                <button type="button" className="button button-ghost button-small" onClick={() => runProbabilityTrials(100)}>100回</button>
+              </MathActionRow>
+              <MathPlayPauseResetBar
+                isRunning={autoRun}
+                onToggleRun={() => setAutoRun((current) => !current)}
+                onReset={resetScene}
+                onRandom={randomizeBias}
+                runLabel="自動で観測"
+                stopLabel="観測を止める"
+                randomLabel="偏りをゆらす"
+              />
+              <MathSliderField label="偏り" min="0.05" max="0.95" step="0.01" value={bias} onChange={setBias} />
+              <MathStoryCard title="いまの観測">
+                <span>{preset.hint}</span>
+                <span>公平でも短い目線では偏って見えます。回数が増えるほど、棒の形に傾向が出てきます。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
+
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={PROBABILITY_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathSliderField label="偏り" min="0.05" max="0.95" step="0.01" value={bias} onChange={setBias} />
+              <div className="math-number-grid">
+                <MathNumberField
+                  label="偏りの数値"
+                  value={formatNumber(bias)}
+                  min={0.05}
+                  max={0.95}
+                  step="0.01"
+                  onChange={(value) => setBias(clampFloat(value, 0.05, 0.95, bias))}
+                />
+                <MathNumberField
+                  label="自動の速さ(ms)"
+                  value={runSpeed}
+                  min={50}
+                  max={400}
+                  step="10"
+                  onChange={(value) => setRunSpeed(clampNumber(value, 50, 400, runSpeed))}
+                />
+              </div>
+              <div className="math-toggle-grid">
+                <MathToggleField label="期待の形も表示" checked={showExpectation} onChange={setShowExpectation} />
+                <MathToggleField label="短いヒントを表示" checked={showGuide} onChange={setShowGuide} />
+              </div>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={() => runProbabilityTrials(25)}>25回追加</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>まっさらに戻す</button>
+              </MathActionRow>
+            </>
+          ) : null}
+
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={PROBABILITY_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStatusMessage title="今回のねらい">{activeMission.description}</MathStatusMessage>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={() => runProbabilityTrials(10)}>10回観測</button>
+                <button type="button" className="button button-ghost button-small" onClick={() => runProbabilityTrials(100)}>100回観測</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>やり直す</button>
+              </MathActionRow>
+            </>
+          ) : null}
+
+          <div className="math-kpi-grid">
+            <MathKpi label="観測した回数" value={totalTrials} />
+            <MathKpi label="最後の結果" value={lastIndex == null ? "—" : probabilitySpec.labels[lastIndex]} />
+            <MathKpi label="一番高い棒" value={leadingIndex >= 0 ? probabilitySpec.labels[leadingIndex] : "—"} />
+            <MathKpi label="偏りの目安" value={formatProbabilityBias(preset, bias)} />
+          </div>
+
+          <MathValueMeter
+            label="形の安定感"
+            value={stability}
+            min={0}
+            max={100}
+            displayValue={`${Math.round(stability)}%`}
+            accentClass={stability > 70 ? "is-positive" : stability > 35 ? "is-soft" : "is-cool"}
+            valueLabel={totalTrials < 20 ? "まだかなり揺れています" : totalTrials < 80 ? "少しずつ形が見えてきました" : "かなり形が安定してきました"}
+          />
+
+          {showGuide ? <MathStatusMessage title="状態メッセージ">{statusText}</MathStatusMessage> : null}
+
+          <MathLegendRow
+            items={[
+              { tone: "is-cyan", label: "観測された高さ" },
+              { tone: "is-purple", label: "期待される形" },
+              { tone: "is-orange", label: "いま増えた棒" }
+            ]}
+          />
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              ランダムでも、回数を重ねると <strong>形</strong> が見えてきます。公平でも短い目線では大きく偏り、
+              長い目線になるとだんだん落ち着いていきます。
+            </p>
+          </div>
+          <MathMissionCard mission={mission} />
+        </>
+      }
+    />
+  );
+}
+
+function LimitPlaygroundPanel() {
+  const canvasRef = useRef(null);
+  const autoRef = useRef(null);
+  const [mode, setMode] = useState("play");
+  const [presetId, setPresetId] = useState(LIMIT_PRESETS[0].id);
+  const [missionId, setMissionId] = useState(LIMIT_MISSIONS[0].id);
+  const preset = LIMIT_PRESETS.find((item) => item.id === presetId) || LIMIT_PRESETS[0];
+  const activeMission = LIMIT_MISSIONS.find((item) => item.id === missionId) || LIMIT_MISSIONS[0];
+  const [progress, setProgress] = useState(0.12);
+  const [zoom, setZoom] = useState(1);
+  const [autoApproach, setAutoApproach] = useState(false);
+  const [showValue, setShowValue] = useState(true);
+  const [showGuide, setShowGuide] = useState(true);
+
+  const snapshot = useMemo(() => buildLimitSnapshot(preset, progress), [preset, progress]);
+  const mission = useMemo(() => buildLimitMissionState(activeMission, snapshot), [activeMission, snapshot]);
+  const statusText = useMemo(() => describeLimitStatus(snapshot), [snapshot]);
+  const viewXRange = preset.xRange * zoom;
+  const viewYRange = preset.yRange * zoom;
+
+  useEffect(() => {
+    setProgress(0.12);
+    setZoom(1);
+    setAutoApproach(false);
+    setShowValue(true);
+  }, [preset.id]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    drawLimitScene(context, {
+      preset,
+      snapshot,
+      xRange: viewXRange,
+      yRange: viewYRange,
+      showValue
+    });
+  }, [preset, showValue, snapshot, viewXRange, viewYRange]);
+
+  useEffect(() => {
+    if (!autoApproach) {
+      if (autoRef.current) cancelAnimationFrame(autoRef.current);
+      return;
+    }
+
+    const startedAt = performance.now();
+    function frame(now) {
+      const phase = Math.min(1, (now - startedAt) / 2200);
+      setProgress(phase);
+      if (phase < 1) {
+        autoRef.current = requestAnimationFrame(frame);
+      } else {
+        setAutoApproach(false);
+      }
+    }
+
+    autoRef.current = requestAnimationFrame(frame);
+    return () => {
+      if (autoRef.current) cancelAnimationFrame(autoRef.current);
+    };
+  }, [autoApproach, preset.id]);
+
+  function resetScene() {
+    setProgress(0.12);
+    setZoom(1);
+    setAutoApproach(false);
+  }
+
+  function randomizeProgress() {
+    setProgress(clampFloat(0.08 + Math.random() * 0.88, 0, 1, progress));
+    setZoom(clampFloat(0.7 + Math.random() * 0.8, 0.65, 1.5, zoom));
+  }
+
+  return (
+    <MathPlaygroundLayout
+      workspace={<canvas ref={canvasRef} width={960} height={480} className="math-canvas" />}
+      caption="左と右の点が問題の点へ近づきます。真ん中の値と、近づいた先が同じとは限らないところを見てください。"
+      controls={
+        <>
+          <MathPlaygroundHeader title="近づきラボ" starter="まずは近づける" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
+
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={LIMIT_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathPlayPauseResetBar
+                isRunning={autoApproach}
+                onToggleRun={() => setAutoApproach((current) => !current)}
+                onReset={resetScene}
+                onRandom={randomizeProgress}
+                runLabel="左右から近づく"
+                stopLabel="近づくのを止める"
+                randomLabel="おまかせ"
+              />
+              <MathSliderField label="近づき具合" min="0" max="1" step="0.01" value={progress} onChange={setProgress} />
+              <MathStoryCard title="いま見ている現象">
+                <span>{preset.title}</span>
+                <span>左右から来る点と、真ん中に置かれた点は、別々のふるまいをすることがあります。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
+
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={LIMIT_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathSliderField label="近づき具合" min="0" max="1" step="0.01" value={progress} onChange={setProgress} />
+              <MathSliderField label="ズーム" min="0.65" max="1.5" step="0.01" value={zoom} onChange={setZoom} />
+              <div className="math-toggle-grid">
+                <MathToggleField label="真ん中の値も見る" checked={showValue} onChange={setShowValue} />
+                <MathToggleField label="短いヒントを表示" checked={showGuide} onChange={setShowGuide} />
+              </div>
+            </>
+          ) : null}
+
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={LIMIT_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStatusMessage title="今回のねらい">{activeMission.description}</MathStatusMessage>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={() => setProgress(1)}>いっきに近づく</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>やり直す</button>
+              </MathActionRow>
+            </>
+          ) : null}
+
+          <div className="math-kpi-grid">
+            <MathKpi label="左の行き先" value={formatNumber(snapshot.leftY)} />
+            <MathKpi label="右の行き先" value={formatNumber(snapshot.rightY)} />
+            <MathKpi label="真ん中の値" value={snapshot.pointValue == null ? "—" : formatNumber(snapshot.pointValue)} />
+            <MathKpi label="判定" value={snapshot.kindLabel} />
+          </div>
+
+          <MathValueMeter
+            label="左右のズレ"
+            value={snapshot.sideGap}
+            min={0}
+            max={6}
+            displayValue={formatNumber(snapshot.sideGap)}
+            accentClass={snapshot.sideGap < 0.18 ? "is-positive" : snapshot.sideGap < 0.8 ? "is-soft" : "is-warm"}
+            valueLabel={snapshot.sideGap < 0.18 ? "左右はかなり近いです" : snapshot.sideGap < 0.8 ? "左右はまだ少しズレています" : "左右の行き先がはっきり違います"}
+          />
+
+          {showGuide ? <MathStatusMessage title="状態メッセージ">{statusText}</MathStatusMessage> : null}
+
+          <MathLegendRow
+            items={[
+              { tone: "is-orange", label: "左から近づく点" },
+              { tone: "is-cool", label: "右から近づく点" },
+              { tone: "is-dark", label: "真ん中の値" }
+            ]}
+          />
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              極限は、<strong>その点に置いてある値</strong> ではなく、左右から近づいたときにどこへ向かうかを見る遊びです。
+              同じ場所へ向かえば落ち着き、左右で分かれれば答えはひとつにまとまりません。
+            </p>
+          </div>
+          <MathMissionCard mission={mission} />
+        </>
+      }
+    />
+  );
+}
+
+function NewtonPlaygroundPanel() {
+  const canvasRef = useRef(null);
+  const dragRef = useRef(false);
+  const autoRef = useRef(null);
+  const [mode, setMode] = useState("play");
+  const [presetId, setPresetId] = useState(NEWTON_PRESETS[0].id);
+  const [missionId, setMissionId] = useState(NEWTON_MISSIONS[0].id);
+  const preset = NEWTON_PRESETS.find((item) => item.id === presetId) || NEWTON_PRESETS[0];
+  const activeMission = NEWTON_MISSIONS.find((item) => item.id === missionId) || NEWTON_MISSIONS[0];
+  const compiled = useMemo(() => compileMathExpression(preset.expression, ["x"]), [preset.expression]);
+  const [startX, setStartX] = useState(preset.startX);
+  const [stepCount, setStepCount] = useState(0);
+  const [autoRun, setAutoRun] = useState(false);
+  const [showTrail, setShowTrail] = useState(true);
+  const [showRoots, setShowRoots] = useState(true);
+
+  const roots = useMemo(() => (compiled.fn ? solveEquationRoots(compiled.fn, -preset.xRange, preset.xRange) : []), [compiled, preset.xRange]);
+  const journey = useMemo(() => {
+    if (!compiled.fn) return null;
+    return buildNewtonJourney(compiled.fn, startX, stepCount, 8);
+  }, [compiled, startX, stepCount]);
+  const mission = useMemo(() => buildNewtonMissionState(activeMission, journey, roots), [activeMission, journey, roots]);
+  const statusText = useMemo(() => describeNewtonStatus(journey), [journey]);
+
+  useEffect(() => {
+    setStartX(preset.startX);
+    setStepCount(0);
+    setAutoRun(false);
+  }, [preset.id, preset.startX]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !journey) return;
+    const context = canvas.getContext("2d");
+    drawNewtonScene(context, {
+      compiled,
+      preset,
+      journey,
+      roots,
+      showTrail,
+      showRoots
+    });
+  }, [compiled, journey, preset, roots, showRoots, showTrail]);
+
+  useEffect(() => {
+    if (!autoRun || !journey || journey.status !== "running" || stepCount >= 8) {
+      if (autoRef.current) window.clearTimeout(autoRef.current);
+      return;
+    }
+
+    autoRef.current = window.setTimeout(() => {
+      setStepCount((current) => current + 1);
+    }, 700);
+
+    return () => {
+      if (autoRef.current) window.clearTimeout(autoRef.current);
+    };
+  }, [autoRun, journey, stepCount]);
+
+  function resetScene() {
+    setStartX(preset.startX);
+    setStepCount(0);
+    setAutoRun(false);
+  }
+
+  function randomStart() {
+    setStartX(clampFloat((Math.random() * 2 - 1) * preset.xRange * 0.9, -preset.xRange, preset.xRange, preset.startX));
+    setStepCount(0);
+    setAutoRun(false);
+  }
+
+  function stepOnce() {
+    setStepCount((current) => Math.min(8, current + 1));
+  }
+
+  function updateStartFromEvent(event) {
+    const canvas = canvasRef.current;
+    if (!canvas || !compiled.fn) return;
+    const point = eventToCanvasPoint(event, canvas);
+    setStartX(clampFloat(screenToWorldX(point.x, canvas.width, preset.xRange), -preset.xRange, preset.xRange, startX));
+    setStepCount(0);
+    setAutoRun(false);
+  }
+
+  return (
+    <MathPlaygroundLayout
+      workspace={
+        <canvas
+          ref={canvasRef}
+          width={960}
+          height={480}
+          className="math-canvas is-draggable"
+          onPointerDown={(event) => {
+            event.currentTarget.setPointerCapture?.(event.pointerId);
+            dragRef.current = true;
+            updateStartFromEvent(event);
+          }}
+          onPointerMove={(event) => {
+            if (dragRef.current) updateStartFromEvent(event);
+          }}
+          onPointerUp={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
+            dragRef.current = false;
+          }}
+          onPointerLeave={() => {
+            dragRef.current = false;
+          }}
+          onPointerCancel={(event) => {
+            event.currentTarget.releasePointerCapture?.(event.pointerId);
+            dragRef.current = false;
+          }}
+        />
+      }
+      caption="白い出発点を左右に動かすと、接線の飛び方が変わります。接線で x 軸に飛び、そこからまた登るリズムを見てください。"
+      controls={
+        <>
+          <MathPlaygroundHeader title="根っこハンター" starter="まずは出発点を動かす" />
+          <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
+
+          {mode === "play" ? (
+            <>
+              <MathPresetRow options={NEWTON_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={stepOnce}>1手進める</button>
+                <button type="button" className="button button-ghost button-small" onClick={() => setAutoRun((current) => !current)}>
+                  {autoRun ? "追跡を止める" : "自動で追う"}
+                </button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>リセット</button>
+                <button type="button" className="button button-ghost button-small" onClick={randomStart}>おまかせ</button>
+              </MathActionRow>
+              <MathStoryCard title="いま見ている曲線">
+                <span>{preset.title}</span>
+                <span>接線を引いて x 軸に飛ぶたび、答えへ近づくことも、遠ざかることもあります。</span>
+              </MathStoryCard>
+            </>
+          ) : null}
+
+          {mode === "edit" ? (
+            <>
+              <MathPresetRow options={NEWTON_PRESETS} activeId={presetId} onSelect={setPresetId} />
+              <MathSliderField label="出発点" min={-preset.xRange} max={preset.xRange} step="0.01" value={startX} onChange={(value) => {
+                setStartX(value);
+                setStepCount(0);
+                setAutoRun(false);
+              }} />
+              <div className="math-number-grid">
+                <MathNumberField
+                  label="x の出発点"
+                  value={formatNumber(startX)}
+                  min={-preset.xRange}
+                  max={preset.xRange}
+                  step="0.1"
+                  onChange={(value) => {
+                    setStartX(clampFloat(value, -preset.xRange, preset.xRange, startX));
+                    setStepCount(0);
+                  }}
+                />
+                <MathNumberField
+                  label="手数"
+                  value={stepCount}
+                  min={0}
+                  max={8}
+                  step="1"
+                  onChange={(value) => setStepCount(clampNumber(value, 0, 8, stepCount))}
+                />
+              </div>
+              <div className="math-toggle-grid">
+                <MathToggleField label="軌跡を表示" checked={showTrail} onChange={setShowTrail} />
+                <MathToggleField label="根の候補を表示" checked={showRoots} onChange={setShowRoots} />
+              </div>
+            </>
+          ) : null}
+
+          {mode === "mission" ? (
+            <>
+              <MathPresetRow options={NEWTON_MISSIONS} activeId={missionId} onSelect={setMissionId} />
+              <MathStatusMessage title="今回のねらい">{activeMission.description}</MathStatusMessage>
+              <MathActionRow>
+                <button type="button" className="button button-ghost button-small" onClick={stepOnce}>1手進める</button>
+                <button type="button" className="button button-ghost button-small" onClick={randomStart}>出発点を変える</button>
+                <button type="button" className="button button-ghost button-small" onClick={resetScene}>やり直す</button>
+              </MathActionRow>
+            </>
+          ) : null}
+
+          <div className="math-kpi-grid">
+            <MathKpi label="出発点" value={formatNumber(startX)} />
+            <MathKpi label="いまの x" value={journey ? formatNumber(journey.currentX) : "—"} />
+            <MathKpi label="いまの高さ" value={journey ? formatNumber(journey.currentY) : "—"} />
+            <MathKpi label="反復回数" value={journey ? journey.steps.length : 0} />
+          </div>
+
+          <MathValueMeter
+            label="着地メーター"
+            value={journey ? Math.max(0, 1 - Math.min(1, Math.abs(journey.currentY) / 4)) * 100 : 0}
+            min={0}
+            max={100}
+            displayValue={journey?.status === "success" ? "着地" : `${journey ? Math.round(Math.max(0, 1 - Math.min(1, Math.abs(journey.currentY) / 4)) * 100) : 0}%`}
+            accentClass={journey?.status === "success" ? "is-positive" : journey?.status === "failed" ? "is-warm" : "is-soft"}
+            valueLabel={journey?.status === "success" ? "かなり良い出発点でした" : journey?.status === "failed" ? "この出発点は不安定です" : "接線を使って少しずつ根へ向かいます"}
+          />
+
+          <MathStatusMessage title="状態メッセージ">{statusText}</MathStatusMessage>
+
+          <MathLegendRow
+            items={[
+              { tone: "is-purple", label: "接線のジャンプ" },
+              { tone: "is-orange", label: "いま見ている接線" },
+              { tone: "is-dark", label: "出発点" }
+            ]}
+          />
+        </>
+      }
+      footer={
+        <>
+          <div className="math-footer-note">
+            <strong>いま何が起きている？</strong>
+            <p>
+              ニュートン法は、いまの場所で引いた接線を使って <strong>x軸に着地する場所</strong> を予想し、
+              それを次の出発点にする遊びです。同じルールでも、出発点しだいで着き方が変わります。
+            </p>
+          </div>
+          <MathMissionCard mission={mission} />
+        </>
+      }
+    />
   );
 }
 
@@ -2555,6 +3375,589 @@ function drawLinearVector(context, width, height, range, vector, color, label) {
   context.font = "600 15px var(--font-sans, sans-serif)";
   context.fillText(label, tip.x + 12, tip.y - 10);
   context.restore();
+}
+
+function buildProbabilitySpec(preset, bias) {
+  if (preset.kind === "coin") {
+    return {
+      labels: ["表", "裏"],
+      probabilities: [bias, 1 - bias]
+    };
+  }
+
+  if (preset.kind === "die") {
+    const probabilities = buildBiasedDieProbabilities(bias);
+    return {
+      labels: ["1", "2", "3", "4", "5", "6"],
+      probabilities
+    };
+  }
+
+  if (preset.kind === "two-dice") {
+    const dieProbabilities = buildBiasedDieProbabilities(bias);
+    const probabilities = new Array(11).fill(0);
+    for (let left = 0; left < 6; left += 1) {
+      for (let right = 0; right < 6; right += 1) {
+        probabilities[left + right] += dieProbabilities[left] * dieProbabilities[right];
+      }
+    }
+    return {
+      labels: ["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"],
+      probabilities
+    };
+  }
+
+  return {
+    labels: ["A", "B"],
+    probabilities: [0.5, 0.5]
+  };
+}
+
+function buildBiasedDieProbabilities(bias) {
+  const center = 2.5;
+  const tilt = (bias - 0.5) * 1.35;
+  const weights = new Array(6).fill(null).map((_, index) => {
+    const centered = index - center;
+    return Math.max(0.12, 1 + centered * tilt);
+  });
+  const total = weights.reduce((sum, value) => sum + value, 0);
+  return weights.map((value) => value / total);
+}
+
+function sampleProbabilityIndex(spec) {
+  const roll = Math.random();
+  let cumulative = 0;
+  for (let index = 0; index < spec.probabilities.length; index += 1) {
+    cumulative += spec.probabilities[index];
+    if (roll <= cumulative) return index;
+  }
+  return spec.probabilities.length - 1;
+}
+
+function drawProbabilityScene(context, config) {
+  const { canvas } = context;
+  const width = canvas.width;
+  const height = canvas.height;
+  context.clearRect(0, 0, width, height);
+  paintMathBackground(context, width, height);
+
+  const labels = config.labels || [];
+  const counts = config.counts || [];
+  const total = config.totalTrials || 0;
+  const maxCount = Math.max(...counts, 1);
+  const chart = {
+    left: 72,
+    right: width - 42,
+    top: 52,
+    bottom: height - 72
+  };
+  const barAreaWidth = chart.right - chart.left;
+  const barAreaHeight = chart.bottom - chart.top;
+  const barWidth = labels.length ? barAreaWidth / labels.length : barAreaWidth;
+
+  context.save();
+  context.fillStyle = "#16202a";
+  context.font = "700 22px var(--font-sans, sans-serif)";
+  context.fillText(config.title || "偶然観測室", chart.left, 30);
+  context.fillStyle = "rgba(31, 41, 55, 0.64)";
+  context.font = "500 13px var(--font-sans, sans-serif)";
+  context.fillText(total ? `${total}回観測` : "まだ観測していません", chart.right - 120, 30);
+  context.restore();
+
+  context.save();
+  context.strokeStyle = "rgba(15, 23, 42, 0.08)";
+  context.lineWidth = 1;
+  for (let line = 0; line <= 4; line += 1) {
+    const y = chart.bottom - (barAreaHeight * line) / 4;
+    context.beginPath();
+    context.moveTo(chart.left, y);
+    context.lineTo(chart.right, y);
+    context.stroke();
+  }
+  context.strokeStyle = "rgba(15, 23, 42, 0.28)";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(chart.left, chart.bottom);
+  context.lineTo(chart.right, chart.bottom);
+  context.stroke();
+  context.restore();
+
+  if (config.showExpectation && total > 0) {
+    context.save();
+    context.strokeStyle = "rgba(124, 58, 237, 0.72)";
+    context.setLineDash([6, 6]);
+    context.lineWidth = 2;
+    config.expected.forEach((probability, index) => {
+      const expectedHeight = (probability * total / maxCount) * barAreaHeight;
+      const centerX = chart.left + index * barWidth + barWidth / 2;
+      const y = chart.bottom - expectedHeight;
+      context.beginPath();
+      context.moveTo(centerX - barWidth * 0.28, y);
+      context.lineTo(centerX + barWidth * 0.28, y);
+      context.stroke();
+    });
+    context.restore();
+  }
+
+  labels.forEach((label, index) => {
+    const count = counts[index] || 0;
+    const x = chart.left + index * barWidth + 8;
+    const widthValue = Math.max(18, barWidth - 16);
+    const heightValue = maxCount === 0 ? 0 : (count / maxCount) * (barAreaHeight - 8);
+    const y = chart.bottom - heightValue;
+    const isLatest = config.lastIndex === index;
+
+    context.save();
+    context.fillStyle = isLatest
+      ? "rgba(249, 115, 22, 0.9)"
+      : "rgba(34, 211, 238, 0.76)";
+    context.strokeStyle = isLatest ? "rgba(234, 88, 12, 0.9)" : "rgba(14, 116, 144, 0.42)";
+    context.lineWidth = 1.5;
+    roundRect(context, x, y, widthValue, heightValue, 18);
+    context.fill();
+    context.stroke();
+
+    context.fillStyle = "#1f2937";
+    context.font = "600 13px var(--font-sans, sans-serif)";
+    context.textAlign = "center";
+    context.fillText(label, x + widthValue / 2, chart.bottom + 24);
+    context.fillText(String(count), x + widthValue / 2, y - 10);
+    context.restore();
+  });
+}
+
+function buildProbabilityMissionState(mission, preset, spec, counts, totalTrials) {
+  const maxCount = counts.length ? Math.max(...counts, 0) : 0;
+  const leadingIndex = counts.length ? counts.findIndex((count) => count === maxCount) : -1;
+  const leadingRatio = totalTrials > 0 ? maxCount / totalTrials : 0;
+
+  if (mission.type === "swing") {
+    const done = preset.kind === "coin" && totalTrials >= 12 && leadingRatio > 0.68;
+    return {
+      ...mission,
+      done,
+      statusText: done
+        ? "公平でもかなり偏って見える瞬間が出ました。"
+        : "コインをもう少し観測すると、短期の偏りが見えやすくなります。"
+    };
+  }
+
+  if (mission.type === "mode") {
+    const sevenIndex = spec.labels.indexOf("7");
+    const done = preset.kind === "two-dice" && totalTrials >= 20 && leadingIndex === sevenIndex;
+    return {
+      ...mission,
+      done,
+      statusText: done
+        ? "7 が一番高くなりました。真ん中がふくらむ形が見えています。"
+        : "2個の和を観測して、どの棒が一番高くなるか見てみましょう。"
+    };
+  }
+
+  const done = Math.abs(preset.bias - 0.5) > 0.18 || Math.abs(spec.probabilities[0] - 0.5) > 0.18;
+  return {
+    ...mission,
+    done,
+    statusText: done
+      ? "偏りを動かして、形の変わり方が見えてきました。"
+      : "偏りスライダーを公平から少し外すと、形の変化がはっきりします。"
+  };
+}
+
+function describeProbabilityStatus(preset, spec, counts, totalTrials) {
+  if (!totalTrials) return "まだ観測が空です。まずは 10 回くらい押して、棒が育つ様子を見てみましょう。";
+  if (totalTrials < 12) return "まだかなり揺れています。公平でも短い目線だと偏って見えます。";
+  if (preset.kind === "two-dice") {
+    const sevenIndex = spec.labels.indexOf("7");
+    const leadingIndex = counts.findIndex((count) => count === Math.max(...counts));
+    if (leadingIndex === sevenIndex) return "真ん中の和が少しずつ目立ってきました。";
+  }
+  if (Math.abs(spec.probabilities[0] - 0.5) > 0.18) return "偏りをかけたので、棒の形が片側へ寄りやすくなっています。";
+  if (totalTrials < 70) return "少しずつ形が安定してきました。まだ揺れも残っています。";
+  return "かなり形が安定してきました。同じルールでも、短い観測と長い観測で印象が変わります。";
+}
+
+function formatProbabilityBias(preset, bias) {
+  if (preset.kind === "coin") {
+    return bias > 0.54 ? "表より" : bias < 0.46 ? "裏より" : "ほぼ公平";
+  }
+  if (preset.kind === "two-dice" || preset.kind === "die") {
+    return bias > 0.54 ? "高い数より" : bias < 0.46 ? "低い数より" : "ほぼ公平";
+  }
+  return "ふつう";
+}
+
+function buildLimitSnapshot(preset, progress) {
+  const distance = Math.max(0.03, preset.startDistance * (1 - progress) + 0.03);
+  const leftX = preset.pointX - distance;
+  const rightX = preset.pointX + distance;
+  const leftY = safeEvaluate(preset.fn, leftX);
+  const rightY = safeEvaluate(preset.fn, rightX);
+  const pointValue = preset.pointValue?.(preset.pointX);
+  const ghostY = preset.ghostY?.(preset.pointX) ?? null;
+  const sideGap = Number.isFinite(leftY) && Number.isFinite(rightY) ? Math.abs(leftY - rightY) : Number.POSITIVE_INFINITY;
+  let kindLabel = "まだ観察中";
+
+  if (!Number.isFinite(leftY) || !Number.isFinite(rightY)) {
+    kindLabel = "壁に近い";
+  } else if (sideGap < 0.16 && (pointValue == null || !Number.isFinite(pointValue) || Math.abs(leftY - pointValue) < 0.2)) {
+    kindLabel = "ほぼ連続";
+  } else if (sideGap < 0.16) {
+    kindLabel = "穴やズレ";
+  } else {
+    kindLabel = "左右で別";
+  }
+
+  return {
+    pointX: preset.pointX,
+    leftX,
+    rightX,
+    leftY,
+    rightY,
+    pointValue,
+    ghostY,
+    sideGap,
+    kindLabel
+  };
+}
+
+function drawLimitScene(context, config) {
+  const { canvas } = context;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  paintMathBackground(context, canvas.width, canvas.height);
+  drawGraphGrid(context, canvas.width, canvas.height, config.xRange, config.yRange);
+
+  context.save();
+  context.strokeStyle = "#0f766e";
+  context.lineWidth = 3;
+  context.beginPath();
+  let open = false;
+
+  for (let pixel = 0; pixel <= canvas.width; pixel += 1) {
+    const x = screenToWorldX(pixel, canvas.width, config.xRange);
+    const y = config.preset.fn(x);
+    if (!Number.isFinite(y) || Math.abs(y) > config.yRange * 4) {
+      open = false;
+      continue;
+    }
+
+    const screenY = worldToScreenY(y, canvas.height, config.yRange);
+    if (!open) {
+      context.moveTo(pixel, screenY);
+      open = true;
+    } else {
+      context.lineTo(pixel, screenY);
+    }
+  }
+  context.stroke();
+  context.restore();
+
+  const leftPoint = {
+    x: worldToScreenX(config.snapshot.leftX, canvas.width, config.xRange),
+    y: worldToScreenY(config.snapshot.leftY, canvas.height, config.yRange)
+  };
+  const rightPoint = {
+    x: worldToScreenX(config.snapshot.rightX, canvas.width, config.xRange),
+    y: worldToScreenY(config.snapshot.rightY, canvas.height, config.yRange)
+  };
+  const targetX = worldToScreenX(config.snapshot.pointX, canvas.width, config.xRange);
+
+  context.save();
+  context.setLineDash([8, 8]);
+  context.strokeStyle = "rgba(15, 23, 42, 0.22)";
+  context.lineWidth = 2;
+  context.beginPath();
+  context.moveTo(targetX, 0);
+  context.lineTo(targetX, canvas.height);
+  context.stroke();
+  context.setLineDash([]);
+  context.restore();
+
+  if (Number.isFinite(config.snapshot.ghostY)) {
+    drawOpenPoint(
+      context,
+      targetX,
+      worldToScreenY(config.snapshot.ghostY, canvas.height, config.yRange),
+      "rgba(124, 58, 237, 0.82)"
+    );
+  }
+
+  if (config.showValue && config.snapshot.pointValue != null && Number.isFinite(config.snapshot.pointValue)) {
+    context.save();
+    context.fillStyle = "#111827";
+    context.beginPath();
+    context.arc(targetX, worldToScreenY(config.snapshot.pointValue, canvas.height, config.yRange), 7, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
+  }
+
+  drawFilledPoint(context, leftPoint.x, leftPoint.y, "rgba(249, 115, 22, 0.95)");
+  drawFilledPoint(context, rightPoint.x, rightPoint.y, "rgba(59, 130, 246, 0.95)");
+}
+
+function drawOpenPoint(context, x, y, strokeStyle) {
+  context.save();
+  context.fillStyle = "rgba(255, 255, 255, 0.96)";
+  context.strokeStyle = strokeStyle;
+  context.lineWidth = 3;
+  context.beginPath();
+  context.arc(x, y, 8, 0, Math.PI * 2);
+  context.fill();
+  context.stroke();
+  context.restore();
+}
+
+function drawFilledPoint(context, x, y, fillStyle) {
+  context.save();
+  context.fillStyle = fillStyle;
+  context.beginPath();
+  context.arc(x, y, 7, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
+}
+
+function buildLimitMissionState(mission, snapshot) {
+  if (mission.type === "same") {
+    const done = snapshot.sideGap < 0.18 && Number.isFinite(snapshot.leftY) && Number.isFinite(snapshot.rightY);
+    return {
+      ...mission,
+      done,
+      statusText: done ? "左右はほぼ同じ場所に近づいています。" : "左右の行き先をもっと近づけてみましょう。"
+    };
+  }
+
+  if (mission.type === "point-mismatch") {
+    const done =
+      snapshot.sideGap < 0.18 &&
+      snapshot.pointValue != null &&
+      Number.isFinite(snapshot.pointValue) &&
+      Number.isFinite(snapshot.leftY) &&
+      Math.abs(snapshot.leftY - snapshot.pointValue) > 0.6;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "真ん中の値と、近づいた先がズレています。" : "穴のある例や、点だけズラした例を選ぶと見つけやすいです。"
+    };
+  }
+
+  const done = snapshot.sideGap > 0.9;
+  return {
+    ...mission,
+    done,
+    statusText: done ? "左右で行き先がはっきり分かれました。" : "飛びや壁のプリセットを選ぶと、左右の違いが見えやすくなります。"
+  };
+}
+
+function describeLimitStatus(snapshot) {
+  if (!Number.isFinite(snapshot.leftY) || !Number.isFinite(snapshot.rightY)) {
+    return "そこには近づけません。壁の近くでは、点がどんどん遠くへ飛んでいきます。";
+  }
+  if (snapshot.sideGap < 0.18 && snapshot.pointValue != null && Number.isFinite(snapshot.pointValue) && Math.abs(snapshot.leftY - snapshot.pointValue) > 0.45) {
+    return "左右は同じ場所に近づいていますが、その点の値は別の場所に置かれています。";
+  }
+  if (snapshot.sideGap < 0.18) {
+    return "左右は同じ場所に近づいています。";
+  }
+  return "左右で行き先が一致していません。ひとつの答えに落ち着きません。";
+}
+
+function buildNewtonJourney(fn, startX, requestedSteps, maxSteps = 8) {
+  const points = [{ x: startX, y: safeEvaluate(fn, startX) }];
+  const steps = [];
+  let status = "running";
+  let reason = "まだ探索中です。";
+  let currentX = startX;
+  let currentY = safeEvaluate(fn, currentX);
+
+  if (!Number.isFinite(currentY)) {
+    return {
+      points,
+      steps,
+      currentX,
+      currentY,
+      status: "failed",
+      reason: "その出発点では高さを読めません。"
+    };
+  }
+
+  for (let index = 0; index < Math.min(requestedSteps, maxSteps); index += 1) {
+    const slope = numericDerivative(fn, currentX);
+    if (!Number.isFinite(slope) || Math.abs(slope) < 0.04) {
+      status = "failed";
+      reason = "接線が寝すぎていて、次の一手が決めにくいです。";
+      break;
+    }
+
+    const nextX = currentX - currentY / slope;
+    const nextY = safeEvaluate(fn, nextX);
+    steps.push({
+      fromX: currentX,
+      fromY: currentY,
+      slope,
+      nextX,
+      nextY
+    });
+    points.push({ x: nextX, y: nextY });
+    currentX = nextX;
+    currentY = nextY;
+
+    if (!Number.isFinite(nextY) || Math.abs(nextX) > 20) {
+      status = "failed";
+      reason = "この出発点は不安定です。かなり遠くへ飛びました。";
+      break;
+    }
+
+    if (Math.abs(nextY) < 0.02) {
+      status = "success";
+      reason = "かなり根に近づきました。";
+      break;
+    }
+  }
+
+  if (status === "running" && requestedSteps >= maxSteps) {
+    status = "failed";
+    reason = "まだ着地しきれません。別の出発点を試すと変わります。";
+  }
+
+  return {
+    points,
+    steps,
+    currentX,
+    currentY,
+    status,
+    reason
+  };
+}
+
+function drawNewtonScene(context, config) {
+  const { canvas } = context;
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  paintMathBackground(context, canvas.width, canvas.height);
+  drawGraphGrid(context, canvas.width, canvas.height, config.preset.xRange, config.preset.yRange);
+
+  if (!config.compiled.fn || !config.journey) {
+    drawCanvasMessage(context, canvas.width, canvas.height, config.compiled.error || "式を入力してください。");
+    return;
+  }
+
+  drawFunctionCurve(context, config.compiled.fn, config.preset.xRange, config.preset.yRange, {
+    strokeStyle: "#0f766e",
+    lineWidth: 3
+  });
+
+  if (config.showRoots) {
+    context.save();
+    context.fillStyle = "rgba(17, 24, 39, 0.4)";
+    config.roots.forEach((root) => {
+      const x = worldToScreenX(root, canvas.width, config.preset.xRange);
+      const y = worldToScreenY(0, canvas.height, config.preset.yRange);
+      context.beginPath();
+      context.arc(x, y, 4.5, 0, Math.PI * 2);
+      context.fill();
+    });
+    context.restore();
+  }
+
+  context.save();
+  const axisY = worldToScreenY(0, canvas.height, config.preset.yRange);
+  config.journey.steps.forEach((step, index) => {
+    const fromX = worldToScreenX(step.fromX, canvas.width, config.preset.xRange);
+    const fromY = worldToScreenY(step.fromY, canvas.height, config.preset.yRange);
+    const nextX = worldToScreenX(step.nextX, canvas.width, config.preset.xRange);
+    const nextY = worldToScreenY(step.nextY, canvas.height, config.preset.yRange);
+    const isLatest = index === config.journey.steps.length - 1;
+
+    if (config.showTrail) {
+      context.strokeStyle = isLatest ? "rgba(249, 115, 22, 0.9)" : "rgba(124, 58, 237, 0.38)";
+      context.lineWidth = isLatest ? 3 : 2;
+      context.beginPath();
+      context.moveTo(fromX, fromY);
+      context.lineTo(nextX, axisY);
+      context.lineTo(nextX, nextY);
+      context.stroke();
+    }
+
+    if (isLatest) {
+      drawSlopeLine(
+        context,
+        step.fromX,
+        step.fromY,
+        step.slope,
+        config.preset.xRange,
+        config.preset.yRange,
+        "#f97316"
+      );
+    }
+  });
+  context.restore();
+
+  const startMarkerX = worldToScreenX(config.journey.points[0].x, canvas.width, config.preset.xRange);
+  const startMarkerY = axisY;
+  drawOpenPoint(context, startMarkerX, startMarkerY, "rgba(17, 24, 39, 0.82)");
+
+  const currentPoint = config.journey.points[config.journey.points.length - 1];
+  drawFilledPoint(
+    context,
+    worldToScreenX(currentPoint.x, canvas.width, config.preset.xRange),
+    worldToScreenY(currentPoint.y, canvas.height, config.preset.yRange),
+    config.journey.status === "success" ? "rgba(34, 197, 94, 0.94)" : "rgba(17, 24, 39, 0.92)"
+  );
+}
+
+function buildNewtonMissionState(mission, journey, roots) {
+  if (!journey) {
+    return {
+      ...mission,
+      done: false,
+      statusText: "まず出発点を決めてください。"
+    };
+  }
+
+  if (mission.type === "quick") {
+    const done = journey.status === "success" && journey.steps.length <= 3;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "3手以内で着地できました。" : "よい出発点を選ぶと、少ない手数で着地できます。"
+    };
+  }
+
+  if (mission.type === "other-root") {
+    const rightmostRoot = roots.length ? Math.max(...roots) : null;
+    const done = journey.status === "success" && rightmostRoot != null && Math.abs(journey.currentX - rightmostRoot) < 0.18;
+    return {
+      ...mission,
+      done,
+      statusText: done ? "右側の別の根へ着地しました。" : "出発点を変えると、別の根へ吸い寄せられることがあります。"
+    };
+  }
+
+  const done = journey.status === "failed";
+  return {
+    ...mission,
+    done,
+    statusText: done ? "不安定な出発点が見つかりました。" : "不安定なプリセットで、根から遠ざかる出発点を探してみましょう。"
+  };
+}
+
+function describeNewtonStatus(journey) {
+  if (!journey) return "まず出発点を置いてみてください。";
+  if (journey.status === "success") return "かなり良い出発点です。あと少しで着地です。";
+  if (journey.status === "failed") return journey.reason;
+  if (!journey.steps.length) return "接線をまだ引いていません。まずは 1 手進めてみましょう。";
+  return "外しながら当てにいっています。接線がどこへ飛ぶかを見てみましょう。";
+}
+
+function roundRect(context, x, y, width, height, radius) {
+  if (height <= 0 || width <= 0) return;
+  const r = Math.min(radius, width / 2, height / 2);
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + width, y, x + width, y + height, r);
+  context.arcTo(x + width, y + height, x, y + height, r);
+  context.arcTo(x, y + height, x, y, r);
+  context.arcTo(x, y, x + width, y, r);
+  context.closePath();
 }
 
 function buildDerivativeSnapshot(fn, x, h) {

@@ -4716,6 +4716,30 @@ textarea {
   line-height: 1.5;
 }
 
+.math-status-message {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.92));
+}
+
+.math-status-message.is-positive {
+  border-color: rgba(34, 197, 94, 0.18);
+  background: linear-gradient(145deg, rgba(240, 253, 244, 0.96), rgba(255, 255, 255, 0.88));
+}
+
+.math-status-message.is-soft {
+  border-color: rgba(245, 158, 11, 0.18);
+  background: linear-gradient(145deg, rgba(255, 251, 235, 0.95), rgba(255, 255, 255, 0.88));
+}
+
+.math-status-message.is-warm {
+  border-color: rgba(249, 115, 22, 0.18);
+  background: linear-gradient(145deg, rgba(255, 247, 237, 0.96), rgba(255, 255, 255, 0.88));
+}
+
+.math-status-message.is-cool {
+  border-color: rgba(59, 130, 246, 0.18);
+  background: linear-gradient(145deg, rgba(239, 246, 255, 0.96), rgba(255, 255, 255, 0.88));
+}
+
 .math-guide-card {
   display: grid;
   gap: 14px;

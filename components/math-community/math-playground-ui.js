@@ -74,6 +74,37 @@ export function MathActionRow({ children }) {
   return <div className="math-action-row">{children}</div>;
 }
 
+export function MathPlayPauseResetBar({
+  isRunning,
+  onToggleRun,
+  onReset,
+  onRandom,
+  runLabel = "自動で動かす",
+  stopLabel = "止める",
+  resetLabel = "リセット",
+  randomLabel = "おまかせ"
+}) {
+  return (
+    <MathActionRow>
+      {onRandom ? (
+        <button type="button" className="button button-ghost button-small" onClick={onRandom}>
+          {randomLabel}
+        </button>
+      ) : null}
+      {onReset ? (
+        <button type="button" className="button button-ghost button-small" onClick={onReset}>
+          {resetLabel}
+        </button>
+      ) : null}
+      {onToggleRun ? (
+        <button type="button" className="button button-ghost button-small" onClick={onToggleRun}>
+          {isRunning ? stopLabel : runLabel}
+        </button>
+      ) : null}
+    </MathActionRow>
+  );
+}
+
 export function MathSliderField({ label, min, max, step = "1", value, onChange }) {
   return (
     <label className="field math-slider-field">
@@ -116,6 +147,15 @@ export function MathToggleField({ label, checked, onChange }) {
 export function MathStoryCard({ title, children, className = "" }) {
   return (
     <div className={`math-readout ${className}`.trim()}>
+      <strong>{title}</strong>
+      {typeof children === "string" ? <span>{children}</span> : children}
+    </div>
+  );
+}
+
+export function MathStatusMessage({ title, children, tone = "" }) {
+  return (
+    <div className={`math-readout math-status-message ${tone}`.trim()}>
       <strong>{title}</strong>
       {typeof children === "string" ? <span>{children}</span> : children}
     </div>
