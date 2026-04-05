@@ -177,6 +177,39 @@ create table if not exists public.edge_tips (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.economy_accounts (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  point_balance integer not null default 0,
+  contribution_score integer not null default 0,
+  reputation_title text not null default '見習い',
+  evaluation_credits integer not null default 0,
+  evaluation_cycle_started_at timestamptz not null default timezone('utc'::text, now()),
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.point_transactions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  counterparty_user_id uuid references public.profiles(id) on delete set null,
+  direction text not null,
+  amount integer not null,
+  kind text not null,
+  meta jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.helpful_votes (
+  id uuid primary key default gen_random_uuid(),
+  voter_id uuid not null references public.profiles(id) on delete cascade,
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  target_type text not null,
+  target_id uuid not null,
+  points_awarded integer not null default 2,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  unique (voter_id, target_type, target_id)
+);
+
 create table if not exists public.help_requests (
   id uuid primary key default gen_random_uuid(),
   author_id uuid not null references public.profiles(id) on delete cascade,
@@ -258,6 +291,27 @@ alter table public.edge_tips add column if not exists link_url text not null def
 alter table public.edge_tips add column if not exists body text;
 alter table public.edge_tips add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.edge_tips add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+
+alter table public.economy_accounts add column if not exists point_balance integer not null default 0;
+alter table public.economy_accounts add column if not exists contribution_score integer not null default 0;
+alter table public.economy_accounts add column if not exists reputation_title text not null default '見習い';
+alter table public.economy_accounts add column if not exists evaluation_credits integer not null default 0;
+alter table public.economy_accounts add column if not exists evaluation_cycle_started_at timestamptz not null default timezone('utc'::text, now());
+alter table public.economy_accounts add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.economy_accounts add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+
+alter table public.point_transactions add column if not exists counterparty_user_id uuid references public.profiles(id) on delete set null;
+alter table public.point_transactions add column if not exists direction text;
+alter table public.point_transactions add column if not exists amount integer;
+alter table public.point_transactions add column if not exists kind text;
+alter table public.point_transactions add column if not exists meta jsonb not null default '{}'::jsonb;
+alter table public.point_transactions add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+
+alter table public.helpful_votes add column if not exists author_id uuid references public.profiles(id) on delete cascade;
+alter table public.helpful_votes add column if not exists target_type text;
+alter table public.helpful_votes add column if not exists target_id uuid;
+alter table public.helpful_votes add column if not exists points_awarded integer not null default 2;
+alter table public.helpful_votes add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.help_requests add column if not exists author_id uuid references public.profiles(id) on delete cascade;
 alter table public.help_requests add column if not exists title text;
 alter table public.help_requests add column if not exists category text not null default 'その他';
@@ -376,6 +430,11 @@ create index if not exists special_articles_author_idx on public.special_article
 create index if not exists edge_tips_updated_idx on public.edge_tips(updated_at desc);
 create index if not exists edge_tips_author_idx on public.edge_tips(author_id);
 create index if not exists edge_tips_category_idx on public.edge_tips(category, updated_at desc);
+create index if not exists economy_accounts_balance_idx on public.economy_accounts(point_balance desc);
+create index if not exists point_transactions_user_idx on public.point_transactions(user_id, created_at desc);
+create index if not exists point_transactions_kind_idx on public.point_transactions(kind, created_at desc);
+create index if not exists helpful_votes_target_idx on public.helpful_votes(target_type, target_id, created_at desc);
+create index if not exists helpful_votes_author_idx on public.helpful_votes(author_id, created_at desc);
 create index if not exists help_requests_updated_idx on public.help_requests(updated_at desc);
 create index if not exists help_requests_author_idx on public.help_requests(author_id);
 create index if not exists help_requests_category_idx on public.help_requests(category, updated_at desc);
@@ -492,6 +551,30 @@ alter table public.edge_tips
   add constraint edge_tips_link_url_length_check check (char_length(link_url) <= 500),
   drop constraint if exists edge_tips_body_length_check,
   add constraint edge_tips_body_length_check check (char_length(body) between 1 and 2000);
+
+alter table public.economy_accounts
+  drop constraint if exists economy_accounts_point_balance_check,
+  add constraint economy_accounts_point_balance_check check (point_balance >= 0),
+  drop constraint if exists economy_accounts_contribution_score_check,
+  add constraint economy_accounts_contribution_score_check check (contribution_score >= 0),
+  drop constraint if exists economy_accounts_evaluation_credits_check,
+  add constraint economy_accounts_evaluation_credits_check check (evaluation_credits >= 0),
+  drop constraint if exists economy_accounts_reputation_title_length_check,
+  add constraint economy_accounts_reputation_title_length_check check (char_length(reputation_title) between 1 and 40);
+
+alter table public.point_transactions
+  drop constraint if exists point_transactions_direction_check,
+  add constraint point_transactions_direction_check check (direction in ('credit', 'debit')),
+  drop constraint if exists point_transactions_amount_check,
+  add constraint point_transactions_amount_check check (amount > 0),
+  drop constraint if exists point_transactions_kind_length_check,
+  add constraint point_transactions_kind_length_check check (char_length(kind) between 1 and 60);
+
+alter table public.helpful_votes
+  drop constraint if exists helpful_votes_target_type_check,
+  add constraint helpful_votes_target_type_check check (target_type in ('class_note', 'edge_tip')),
+  drop constraint if exists helpful_votes_points_awarded_check,
+  add constraint helpful_votes_points_awarded_check check (points_awarded > 0);
 
 alter table public.help_requests
   drop constraint if exists help_requests_title_length_check,
@@ -615,6 +698,238 @@ begin
 end;
 $$;
 
+create or replace function public.weekly_evaluation_allowance(p_user_id uuid)
+returns integer
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select case when coalesce((select keio_verified from public.profiles where id = p_user_id), false) then 15 else 10 end;
+$$;
+
+create or replace function public.initial_point_balance(p_user_id uuid)
+returns integer
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select case when coalesce((select keio_verified from public.profiles where id = p_user_id), false) then 30 else 10 end;
+$$;
+
+create or replace function public.derive_reputation_title(p_score integer)
+returns text
+language sql
+immutable
+as $$
+  select case
+    when p_score >= 400 then '守り手'
+    when p_score >= 250 then '連結者'
+    when p_score >= 120 then '支援者'
+    when p_score >= 60 then '案内人'
+    when p_score >= 20 then '記録者'
+    else '見習い'
+  end;
+$$;
+
+create or replace function public.refresh_economy_account(p_user_id uuid)
+returns table (
+  user_id uuid,
+  point_balance integer,
+  contribution_score integer,
+  reputation_title text,
+  evaluation_credits integer,
+  evaluation_cycle_started_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_allowance integer;
+  v_initial_balance integer;
+begin
+  if not exists (select 1 from public.profiles where id = p_user_id) then
+    raise exception 'profile not found';
+  end if;
+
+  v_allowance := public.weekly_evaluation_allowance(p_user_id);
+  v_initial_balance := public.initial_point_balance(p_user_id);
+
+  insert into public.economy_accounts (
+    user_id,
+    point_balance,
+    contribution_score,
+    reputation_title,
+    evaluation_credits,
+    evaluation_cycle_started_at
+  )
+  values (
+    p_user_id,
+    v_initial_balance,
+    0,
+    public.derive_reputation_title(0),
+    v_allowance,
+    timezone('utc'::text, now())
+  )
+  on conflict (user_id) do nothing;
+
+  update public.economy_accounts
+  set
+    evaluation_credits = v_allowance,
+    evaluation_cycle_started_at = timezone('utc'::text, now()),
+    reputation_title = public.derive_reputation_title(contribution_score)
+  where user_id = p_user_id
+    and (
+      evaluation_cycle_started_at is null
+      or evaluation_cycle_started_at <= timezone('utc'::text, now()) - interval '7 days'
+      or reputation_title is distinct from public.derive_reputation_title(contribution_score)
+    );
+
+  return query
+  select
+    account.user_id,
+    account.point_balance,
+    account.contribution_score,
+    account.reputation_title,
+    account.evaluation_credits,
+    account.evaluation_cycle_started_at
+  from public.economy_accounts as account
+  where account.user_id = p_user_id;
+end;
+$$;
+
+create or replace function public.cast_helpful_vote(
+  p_voter_id uuid,
+  p_target_type text,
+  p_target_id uuid
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_author_id uuid;
+  v_helpful_count integer;
+  v_reward integer := 2;
+  v_voter_account public.economy_accounts%rowtype;
+  v_author_account public.economy_accounts%rowtype;
+begin
+  if p_target_type not in ('class_note', 'edge_tip') then
+    raise exception 'invalid target type';
+  end if;
+
+  perform public.refresh_economy_account(p_voter_id);
+
+  if p_target_type = 'class_note' then
+    select author_id into v_author_id
+    from public.class_notes
+    where id = p_target_id;
+  else
+    select author_id into v_author_id
+    from public.edge_tips
+    where id = p_target_id;
+  end if;
+
+  if v_author_id is null then
+    raise exception 'target not found';
+  end if;
+
+  if v_author_id = p_voter_id then
+    raise exception 'cannot vote for own content';
+  end if;
+
+  perform public.refresh_economy_account(v_author_id);
+
+  select *
+  into v_voter_account
+  from public.economy_accounts
+  where user_id = p_voter_id
+  for update;
+
+  if coalesce(v_voter_account.evaluation_credits, 0) <= 0 then
+    raise exception 'no evaluation credits';
+  end if;
+
+  insert into public.helpful_votes (
+    voter_id,
+    author_id,
+    target_type,
+    target_id,
+    points_awarded
+  )
+  values (
+    p_voter_id,
+    v_author_id,
+    p_target_type,
+    p_target_id,
+    v_reward
+  );
+
+  update public.economy_accounts
+  set evaluation_credits = evaluation_credits - 1
+  where user_id = p_voter_id;
+
+  update public.economy_accounts
+  set
+    point_balance = point_balance + v_reward,
+    contribution_score = contribution_score + 1,
+    reputation_title = public.derive_reputation_title(contribution_score + 1)
+  where user_id = v_author_id
+  returning *
+  into v_author_account;
+
+  insert into public.point_transactions (
+    user_id,
+    counterparty_user_id,
+    direction,
+    amount,
+    kind,
+    meta
+  )
+  values (
+    v_author_id,
+    p_voter_id,
+    'credit',
+    v_reward,
+    'helpful_reward',
+    jsonb_build_object(
+      'target_type', p_target_type,
+      'target_id', p_target_id,
+      'voter_id', p_voter_id
+    )
+  );
+
+  select count(*)
+  into v_helpful_count
+  from public.helpful_votes
+  where target_type = p_target_type
+    and target_id = p_target_id;
+
+  select *
+  into v_voter_account
+  from public.economy_accounts
+  where user_id = p_voter_id;
+
+  return jsonb_build_object(
+    'helpful_count', v_helpful_count,
+    'points_awarded', v_reward,
+    'summary', jsonb_build_object(
+      'point_balance', v_voter_account.point_balance,
+      'contribution_score', v_voter_account.contribution_score,
+      'reputation_title', v_voter_account.reputation_title,
+      'evaluation_credits', v_voter_account.evaluation_credits,
+      'evaluation_cycle_started_at', v_voter_account.evaluation_cycle_started_at
+    )
+  );
+exception
+  when unique_violation then
+    raise exception 'already voted';
+end;
+$$;
+
 update public.profiles as p
 set
   username = left(
@@ -635,6 +950,24 @@ where u.id = p.id
     or p.email_verified is distinct from (u.email_confirmed_at is not null)
     or p.keio_verified is distinct from ((lower(split_part(u.email, '@', 2)) in ('keio.jp', 'keio.ac.jp')) and u.email_confirmed_at is not null)
   );
+
+insert into public.economy_accounts (
+  user_id,
+  point_balance,
+  contribution_score,
+  reputation_title,
+  evaluation_credits,
+  evaluation_cycle_started_at
+)
+select
+  p.id,
+  public.initial_point_balance(p.id),
+  0,
+  public.derive_reputation_title(0),
+  public.weekly_evaluation_allowance(p.id),
+  timezone('utc'::text, now())
+from public.profiles as p
+on conflict (user_id) do nothing;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -679,6 +1012,11 @@ for each row execute procedure public.handle_updated_at();
 drop trigger if exists edge_tips_set_updated_at on public.edge_tips;
 create trigger edge_tips_set_updated_at
 before update on public.edge_tips
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists economy_accounts_set_updated_at on public.economy_accounts;
+create trigger economy_accounts_set_updated_at
+before update on public.economy_accounts
 for each row execute procedure public.handle_updated_at();
 
 drop trigger if exists help_requests_set_updated_at on public.help_requests;
@@ -753,6 +1091,9 @@ alter table public.anonymous_questions enable row level security;
 alter table public.class_notes enable row level security;
 alter table public.special_articles enable row level security;
 alter table public.edge_tips enable row level security;
+alter table public.economy_accounts enable row level security;
+alter table public.point_transactions enable row level security;
+alter table public.helpful_votes enable row level security;
 alter table public.help_requests enable row level security;
 alter table public.grad_ritual_posts enable row level security;
 alter table public.walk_sessions enable row level security;
@@ -1077,6 +1418,52 @@ using (auth.uid() = author_id);
 drop policy if exists "admins can manage edge tips" on public.edge_tips;
 create policy "admins can manage edge tips"
 on public.edge_tips
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "users can read own economy account" on public.economy_accounts;
+create policy "users can read own economy account"
+on public.economy_accounts
+for select
+using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "admins can manage economy accounts" on public.economy_accounts;
+create policy "admins can manage economy accounts"
+on public.economy_accounts
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "users can read own point transactions" on public.point_transactions;
+create policy "users can read own point transactions"
+on public.point_transactions
+for select
+using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "admins can manage point transactions" on public.point_transactions;
+create policy "admins can manage point transactions"
+on public.point_transactions
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "users can read own helpful votes" on public.helpful_votes;
+create policy "users can read own helpful votes"
+on public.helpful_votes
+for select
+using (auth.uid() = voter_id or auth.uid() = author_id or public.is_admin());
+
+drop policy if exists "authenticated users can create helpful votes" on public.helpful_votes;
+create policy "authenticated users can create helpful votes"
+on public.helpful_votes
+for insert
+to authenticated
+with check (auth.uid() = voter_id);
+
+drop policy if exists "admins can manage helpful votes" on public.helpful_votes;
+create policy "admins can manage helpful votes"
+on public.helpful_votes
 for all
 using (public.is_admin())
 with check (public.is_admin());

@@ -89,5 +89,5 @@ export async function POST(request) {
     return NextResponse.json({ error: error.message || "エッジ情報の保存に失敗しました。" }, { status: 400 });
   }
 
-  return NextResponse.json({ item: data });
+  return NextResponse.json({ item: { ...data, helpful_count: 0 } });
 }

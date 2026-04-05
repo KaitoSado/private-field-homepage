@@ -37,6 +37,9 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
   const [editingDraft, setEditingDraft] = useState(emptyForm);
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [economy, setEconomy] = useState(null);
+  const [votedNoteIds, setVotedNoteIds] = useState([]);
+  const [votingTargetId, setVotingTargetId] = useState("");
   const [query, setQuery] = useState("");
   const [weekdayFilter, setWeekdayFilter] = useState("");
   const [campusFilter, setCampusFilter] = useState("");
@@ -68,6 +71,16 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
       subscription.unsubscribe();
     };
   }, [supabase]);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      setEconomy(null);
+      setVotedNoteIds([]);
+      return;
+    }
+
+    loadEconomySummary();
+  }, [session?.user?.id]);
 
   const campuses = useMemo(() => uniq([...initialCampuses, ...items.map((item) => item.campus).filter(Boolean)]), [initialCampuses, items]);
   const terms = useMemo(() => uniq([...initialTerms, ...items.map((item) => item.term_label).filter(Boolean)]), [initialTerms, items]);
@@ -180,6 +193,83 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
     }
   }
 
+  async function loadEconomySummary() {
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      if (!currentSession?.access_token) return;
+
+      const response = await fetch("/api/economy/summary", {
+        headers: {
+          Authorization: `Bearer ${currentSession.access_token}`
+        }
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "ポイント状況を読み込めませんでした。");
+      }
+
+      setEconomy(result.summary || null);
+      setVotedNoteIds(result.votedTargets?.class_note || []);
+    } catch (error) {
+      setStatus(error.message || "ポイント状況を読み込めませんでした。");
+    }
+  }
+
+  async function submitHelpfulVote(noteId) {
+    if (!session?.user) {
+      setStatus("役に立った投票にはログインが必要です。");
+      return;
+    }
+
+    setVotingTargetId(noteId);
+    setStatus("");
+
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      const response = await fetch("/api/helpful-votes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {})
+        },
+        body: JSON.stringify({
+          targetType: "class_note",
+          targetId: noteId
+        })
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "役に立った投票に失敗しました。");
+      }
+
+      setItems((current) =>
+        current.map((item) =>
+          item.id === noteId
+            ? {
+                ...item,
+                helpful_count: result.helpful_count ?? (item.helpful_count || 0) + 1
+              }
+            : item
+        )
+      );
+      setEconomy(result.summary || null);
+      setVotedNoteIds((current) => (current.includes(noteId) ? current : [...current, noteId]));
+      setStatus(`役に立った投票を送信しました。+${result.points_awarded || 0}pt が投稿者に加算されます。`);
+    } catch (error) {
+      setStatus(error.message || "役に立った投票に失敗しました。");
+    } finally {
+      setVotingTargetId("");
+    }
+  }
+
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
   }
@@ -264,7 +354,17 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
         throw new Error(result.error || "授業情報の更新に失敗しました。");
       }
 
-      setItems((current) => current.map((item) => (item.id === noteId ? result.item : item)));
+      setItems((current) =>
+        current.map((item) =>
+          item.id === noteId
+            ? {
+                ...item,
+                ...result.item,
+                helpful_count: item.helpful_count || 0
+              }
+            : item
+        )
+      );
       setEditingNoteId("");
       setEditingDraft(emptyForm);
       setStatus("反応を更新しました。");
@@ -304,6 +404,23 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
             <div className="section-copy">
               <h2>被告の授業を探す</h2>
             </div>
+
+            {economy ? (
+              <div className="economy-status-strip" aria-label="ポイント状況">
+                <div className="economy-chip">
+                  <strong>{economy.point_balance}</strong>
+                  <span>保有pt</span>
+                </div>
+                <div className="economy-chip">
+                  <strong>{economy.evaluation_credits}</strong>
+                  <span>今週の評価票</span>
+                </div>
+                <div className="economy-chip">
+                  <strong>{economy.reputation_title}</strong>
+                  <span>称号</span>
+                </div>
+              </div>
+            ) : null}
 
             <div className="class-form-grid">
               <label className="field">
@@ -533,13 +650,26 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
                                   {renderTextPill("判決", item.verdict_grade)}
                                 </div>
                                 <p className="class-note-body">{item.body}</p>
-                                {session?.user?.id === item.author_id ? (
+                                <div className="helpful-action-row">
+                                  <span className="helpful-count-pill">{item.helpful_count || 0} 役に立った</span>
                                   <div className="hero-actions">
-                                    <button type="button" className="button button-ghost button-small" onClick={() => startEditing(item)}>
-                                      編集
-                                    </button>
+                                    {session?.user?.id && session.user.id !== item.author_id ? (
+                                      <button
+                                        type="button"
+                                        className="button button-ghost button-small helpful-button"
+                                        disabled={votingTargetId === item.id || votedNoteIds.includes(item.id) || economy?.evaluation_credits === 0}
+                                        onClick={() => submitHelpfulVote(item.id)}
+                                      >
+                                        {votedNoteIds.includes(item.id) ? "投票済み" : votingTargetId === item.id ? "送信中..." : "役に立った"}
+                                      </button>
+                                    ) : null}
+                                    {session?.user?.id === item.author_id ? (
+                                      <button type="button" className="button button-ghost button-small" onClick={() => startEditing(item)}>
+                                        編集
+                                      </button>
+                                    ) : null}
                                   </div>
-                                ) : null}
+                                </div>
                               </>
                             )}
                           </div>

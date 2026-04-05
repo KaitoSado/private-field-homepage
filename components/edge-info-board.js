@@ -21,6 +21,9 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
   const [form, setForm] = useState(emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState("");
+  const [economy, setEconomy] = useState(null);
+  const [votedTipIds, setVotedTipIds] = useState([]);
+  const [votingTargetId, setVotingTargetId] = useState("");
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [campusFilter, setCampusFilter] = useState("");
@@ -50,6 +53,16 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
       subscription.unsubscribe();
     };
   }, [supabase]);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      setEconomy(null);
+      setVotedTipIds([]);
+      return;
+    }
+
+    loadEconomySummary();
+  }, [session?.user?.id]);
 
   const categories = useMemo(() => uniq([...CATEGORIES, ...initialCategories, ...items.map((item) => item.category).filter(Boolean)]), [initialCategories, items]);
   const campuses = useMemo(() => uniq([...initialCampuses, ...items.map((item) => item.campus).filter(Boolean)]), [initialCampuses, items]);
@@ -108,6 +121,83 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
     }
   }
 
+  async function loadEconomySummary() {
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      if (!currentSession?.access_token) return;
+
+      const response = await fetch("/api/economy/summary", {
+        headers: {
+          Authorization: `Bearer ${currentSession.access_token}`
+        }
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "ポイント状況を読み込めませんでした。");
+      }
+
+      setEconomy(result.summary || null);
+      setVotedTipIds(result.votedTargets?.edge_tip || []);
+    } catch (error) {
+      setStatus(error.message || "ポイント状況を読み込めませんでした。");
+    }
+  }
+
+  async function submitHelpfulVote(itemId) {
+    if (!session?.user) {
+      setStatus("役に立った投票にはログインが必要です。");
+      return;
+    }
+
+    setVotingTargetId(itemId);
+    setStatus("");
+
+    try {
+      const {
+        data: { session: currentSession }
+      } = await supabase.auth.getSession();
+
+      const response = await fetch("/api/helpful-votes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(currentSession?.access_token ? { Authorization: `Bearer ${currentSession.access_token}` } : {})
+        },
+        body: JSON.stringify({
+          targetType: "edge_tip",
+          targetId: itemId
+        })
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || "役に立った投票に失敗しました。");
+      }
+
+      setItems((current) =>
+        current.map((item) =>
+          item.id === itemId
+            ? {
+                ...item,
+                helpful_count: result.helpful_count ?? (item.helpful_count || 0) + 1
+              }
+            : item
+        )
+      );
+      setEconomy(result.summary || null);
+      setVotedTipIds((current) => (current.includes(itemId) ? current : [...current, itemId]));
+      setStatus(`役に立った投票を送信しました。+${result.points_awarded || 0}pt が投稿者に加算されます。`);
+    } catch (error) {
+      setStatus(error.message || "役に立った投票に失敗しました。");
+    } finally {
+      setVotingTargetId("");
+    }
+  }
+
   function updateField(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
   }
@@ -141,6 +231,23 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
             <div className="section-copy">
               <h2>エッジ情報を探す</h2>
             </div>
+
+            {economy ? (
+              <div className="economy-status-strip" aria-label="ポイント状況">
+                <div className="economy-chip">
+                  <strong>{economy.point_balance}</strong>
+                  <span>保有pt</span>
+                </div>
+                <div className="economy-chip">
+                  <strong>{economy.evaluation_credits}</strong>
+                  <span>今週の評価票</span>
+                </div>
+                <div className="economy-chip">
+                  <strong>{economy.reputation_title}</strong>
+                  <span>称号</span>
+                </div>
+              </div>
+            ) : null}
 
             <div className="class-form-grid">
               <label className="field">
@@ -195,6 +302,19 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
                   </div>
 
                   <p className="class-note-body">{item.body}</p>
+                  <div className="helpful-action-row">
+                    <span className="helpful-count-pill">{item.helpful_count || 0} 役に立った</span>
+                    {session?.user?.id && session.user.id !== item.author_id ? (
+                      <button
+                        type="button"
+                        className="button button-ghost button-small helpful-button"
+                        disabled={votingTargetId === item.id || votedTipIds.includes(item.id) || economy?.evaluation_credits === 0}
+                        onClick={() => submitHelpfulVote(item.id)}
+                      >
+                        {votedTipIds.includes(item.id) ? "投票済み" : votingTargetId === item.id ? "送信中..." : "役に立った"}
+                      </button>
+                    ) : null}
+                  </div>
                   <div className="class-reaction-head">
                     <strong>@{item.profiles?.username || item.profiles?.display_name || "guest"}</strong>
                     <span className="muted">{formatDate(item.updated_at || item.created_at)}</span>

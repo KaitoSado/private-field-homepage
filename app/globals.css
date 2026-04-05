@@ -1731,6 +1731,33 @@ textarea {
   padding: 20px 22px;
 }
 
+.economy-status-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.economy-chip {
+  display: inline-grid;
+  gap: 3px;
+  min-width: 96px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(31, 111, 120, 0.12);
+}
+
+.economy-chip strong {
+  font-size: 1rem;
+  color: #22313a;
+}
+
+.economy-chip span {
+  color: #6b7276;
+  font-size: 0.74rem;
+}
+
 .help-board-author {
   display: inline-flex;
   flex-wrap: wrap;
@@ -1843,6 +1870,30 @@ textarea {
   color: var(--text);
   line-height: 1.8;
   white-space: pre-wrap;
+}
+
+.helpful-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.helpful-count-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(31, 111, 120, 0.08);
+  border: 1px solid rgba(31, 111, 120, 0.12);
+  color: #35505a;
+  font-size: 0.79rem;
+}
+
+.helpful-button:disabled {
+  opacity: 0.55;
 }
 
 .social-card,
