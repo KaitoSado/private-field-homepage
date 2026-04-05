@@ -36,9 +36,9 @@ const APP_TABS = [
   { id: "derivative", label: "微分" },
   { id: "integral", label: "積分" },
   { id: "linear", label: "線形代数" },
-  { id: "probability", label: "偶然観測室" },
-  { id: "limit", label: "近づきラボ" },
-  { id: "newton", label: "根っこハンター" },
+  { id: "probability", label: "確率・基本分布" },
+  { id: "limit", label: "極限・連続性" },
+  { id: "newton", label: "ニュートン法" },
   { id: "geometry", label: "幾何" },
   { id: "space", label: "空間図形" },
   { id: "cas", label: "数式処理(CAS)" },
@@ -48,7 +48,7 @@ const APP_TABS = [
 const TAB_SECTIONS = [
   {
     id: "play-labs",
-    label: "あそべる新ラボ",
+    label: "観察して学ぶ",
     tabs: ["probability", "limit", "newton"]
   },
   {
@@ -1774,7 +1774,7 @@ function ProbabilityPlaygroundPanel() {
       caption="ボタンを押すたびに棒グラフが育ちます。偏りを変えると、期待される形と実際の揺れ方が一緒に見えてきます。"
       controls={
         <>
-          <MathPlaygroundHeader title="偶然観測室" starter="まずは 10 回押す" />
+          <MathPlaygroundHeader title="確率・基本分布" starter="まずは 10 回押す" />
           <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
 
           {mode === "play" ? (
@@ -1971,7 +1971,7 @@ function LimitPlaygroundPanel() {
       caption="左と右の点が問題の点へ近づきます。真ん中の値と、近づいた先が同じとは限らないところを見てください。"
       controls={
         <>
-          <MathPlaygroundHeader title="近づきラボ" starter="まずは近づける" />
+          <MathPlaygroundHeader title="極限・連続性" starter="まずは近づける" />
           <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
 
           {mode === "play" ? (
@@ -2177,7 +2177,7 @@ function NewtonPlaygroundPanel() {
       caption="白い出発点を左右に動かすと、接線の飛び方が変わります。接線で x 軸に飛び、そこからまた登るリズムを見てください。"
       controls={
         <>
-          <MathPlaygroundHeader title="根っこハンター" starter="まずは出発点を動かす" />
+          <MathPlaygroundHeader title="ニュートン法" starter="まずは出発点を動かす" />
           <MathModeTabs activeId={mode} onSelect={setMode} items={PLAYGROUND_MODES} />
 
           {mode === "play" ? (
@@ -3489,7 +3489,7 @@ function drawProbabilityScene(context, config) {
   context.save();
   context.fillStyle = "#16202a";
   context.font = "700 22px var(--font-sans, sans-serif)";
-  context.fillText(config.title || "偶然観測室", chart.left, 30);
+  context.fillText(config.title || "確率・基本分布", chart.left, 30);
   context.fillStyle = "rgba(31, 41, 55, 0.64)";
   context.font = "500 13px var(--font-sans, sans-serif)";
   context.fillText(total ? `${total}回観測` : "まだ観測していません", chart.right - 120, 30);
