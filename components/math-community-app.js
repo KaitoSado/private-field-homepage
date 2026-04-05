@@ -45,6 +45,26 @@ const APP_TABS = [
   { id: "calculator", label: "科学計算電卓" }
 ];
 
+const TAB_SECTIONS = [
+  {
+    id: "core-labs",
+    label: "変化を見る",
+    tabs: ["graph", "derivative", "integral", "linear"]
+  },
+  {
+    id: "play-labs",
+    label: "あそべる新ラボ",
+    tabs: ["probability", "limit", "newton"]
+  },
+  {
+    id: "math-tools",
+    label: "図形と計算",
+    tabs: ["geometry", "space", "cas", "calculator"]
+  }
+];
+
+const TAB_MAP = Object.fromEntries(APP_TABS.map((tab) => [tab.id, tab]));
+
 const PLAYGROUND_MODES = [
   { id: "play", label: "あそぶ" },
   { id: "edit", label: "いじる" },
@@ -529,16 +549,27 @@ export function MathCommunityApp() {
       </section>
 
       <section className="section-grid">
-        <div className="arcade-tab-row">
-          {APP_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`signature-filter-chip ${activeTab === tab.id ? "is-active" : ""}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
+        <div className="math-tab-sections">
+          {TAB_SECTIONS.map((section) => (
+            <div key={section.id} className="math-tab-section">
+              <span className="math-tab-section-label">{section.label}</span>
+              <div className="arcade-tab-row math-tab-row">
+                {section.tabs.map((tabId) => {
+                  const tab = TAB_MAP[tabId];
+                  if (!tab) return null;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      className={`signature-filter-chip ${activeTab === tab.id ? "is-active" : ""}`}
+                      onClick={() => setActiveTab(tab.id)}
+                    >
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           ))}
         </div>
 

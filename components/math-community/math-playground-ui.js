@@ -25,6 +25,10 @@ export function MathPlaygroundLayout({ workspace, controls, caption, footer }) {
   );
 }
 
+export function PlayLayout(props) {
+  return <MathPlaygroundLayout {...props} />;
+}
+
 export function MathPlaygroundHeader({ title, starter }) {
   return (
     <div className="math-card-head math-playground-head">
@@ -32,6 +36,10 @@ export function MathPlaygroundHeader({ title, starter }) {
       {starter ? <span className="math-starter-pill">{starter}</span> : null}
     </div>
   );
+}
+
+export function ControlPanel({ children, className = "" }) {
+  return <div className={`math-control-stack ${className}`.trim()}>{children}</div>;
 }
 
 export function MathModeTabs({ activeId, onSelect, items = DEFAULT_MODES }) {
@@ -105,6 +113,10 @@ export function MathPlayPauseResetBar({
   );
 }
 
+export function PlayPauseResetBar(props) {
+  return <MathPlayPauseResetBar {...props} />;
+}
+
 export function MathSliderField({ label, min, max, step = "1", value, onChange }) {
   return (
     <label className="field math-slider-field">
@@ -162,6 +174,10 @@ export function MathStatusMessage({ title, children, tone = "" }) {
   );
 }
 
+export function StatusMessage(props) {
+  return <MathStatusMessage {...props} />;
+}
+
 export function MathLegendRow({ items }) {
   return (
     <div className="math-legend-row">
@@ -211,4 +227,8 @@ export function MathMissionCard({ mission }) {
       <span className="math-mission-status">{mission.statusText}</span>
     </div>
   );
+}
+
+export function MissionCard(props) {
+  return <MathMissionCard {...props} />;
 }
