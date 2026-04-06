@@ -66,7 +66,9 @@ export function WaveLab() {
   const [statusText, setStatusText] = useState(buildWaveStatus("draw", null));
 
   function handleDrawFinish(rawPoints) {
-    const resampled = resamplePath(rawPoints, 256);
+    const resampled = rawPoints.some((point) => point.hiddenBefore)
+      ? resamplePathWithBreaks(rawPoints, 512)
+      : resamplePath(rawPoints, 256);
     setDrawnPoints(resampled);
     setMode("orbit");
   }
@@ -1217,21 +1219,12 @@ function extractPathFromLineArt(maskCanvas, targetN = 640) {
 
   const dilated = dilateMask(occupancy, width, height, 1);
   const skeleton = skeletonizeMask(dilated, width, height);
-  const components = extractAllRegions(skeleton, width, height);
-  if (!components.length) {
+  const skeletonPoints = collectSkeletonPoints(skeleton, width, height);
+  if (skeletonPoints.length < 12) {
     return [];
   }
 
-  const tracedSegments = components
-    .map((component) => traceSkeletonComponent(component, width, height))
-    .filter((segment) => segment.length >= 4);
-
-  if (!tracedSegments.length) {
-    return [];
-  }
-
-  const orderedSegments = orderTracedSegments(tracedSegments);
-  const path = mergeSegmentsWithBreaks(orderedSegments);
+  const path = traceSkeletonPoints(skeletonPoints, width);
   const smoothedPath = smoothSegmentedPoints(path, 2);
   const sampledPath = resamplePathWithBreaks(smoothedPath, targetN);
 
@@ -1249,9 +1242,11 @@ function extractPathFromLineArt(maskCanvas, targetN = 640) {
   const spanX = Math.max(1, maxX - minX);
   const spanY = Math.max(1, maxY - minY);
   const scale = Math.min((DRAW_CANVAS_WIDTH * 0.58) / spanX, (DRAW_CANVAS_HEIGHT * 0.72) / spanY);
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
   return sampledPath.map((point) => ({
-    x: point.x * scale,
-    y: point.y * scale,
+    x: (point.x - centerX) * scale,
+    y: (point.y - centerY) * scale,
     hiddenBefore: point.hiddenBefore
   }));
 }
@@ -1346,181 +1341,105 @@ function countBinaryTransitions(neighbors) {
   return transitions;
 }
 
-function extractAllRegions(source, width, height) {
-  const visited = new Uint8Array(width * height);
-  const queue = new Int32Array(width * height);
-  const regions = [];
-
-  for (let index = 0; index < source.length; index += 1) {
-    if (!source[index] || visited[index]) continue;
-    let head = 0;
-    let tail = 0;
-    const region = [];
-    queue[tail++] = index;
-    visited[index] = 1;
-
-    while (head < tail) {
-      const current = queue[head++];
-      region.push(current);
-      const x = current % width;
-      const y = Math.floor(current / width);
-      for (let dy = -1; dy <= 1; dy += 1) {
-        for (let dx = -1; dx <= 1; dx += 1) {
-          if (dx === 0 && dy === 0) continue;
-          const nx = x + dx;
-          const ny = y + dy;
-          if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-          const neighbor = ny * width + nx;
-          if (!source[neighbor] || visited[neighbor]) continue;
-          visited[neighbor] = 1;
-          queue[tail++] = neighbor;
-        }
-      }
-    }
-
-    if (region.length >= 6) {
-      regions.push(region);
+function collectSkeletonPoints(source, width, height) {
+  const points = [];
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (!source[y * width + x]) continue;
+      points.push({ x, y, index: y * width + x });
     }
   }
-
-  return regions.sort((left, right) => right.length - left.length);
+  return points;
 }
 
-function traceSkeletonComponent(indices, width, height) {
-  const indexSet = new Set(indices);
-  const adjacency = new Map();
-  indices.forEach((index) => {
-    const x = index % width;
-    const y = Math.floor(index / width);
+function traceSkeletonPoints(points, width) {
+  const keyToIndex = new Map(points.map((point, index) => [`${point.x},${point.y}`, index]));
+  const adjacency = points.map((point) => {
     const neighbors = [];
     for (let dy = -1; dy <= 1; dy += 1) {
       for (let dx = -1; dx <= 1; dx += 1) {
         if (dx === 0 && dy === 0) continue;
-        const nx = x + dx;
-        const ny = y + dy;
-        if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-        const neighbor = ny * width + nx;
-        if (indexSet.has(neighbor)) neighbors.push(neighbor);
+        const neighborIndex = keyToIndex.get(`${point.x + dx},${point.y + dy}`);
+        if (neighborIndex !== undefined) neighbors.push(neighborIndex);
       }
     }
-    adjacency.set(index, neighbors);
+    return neighbors;
   });
 
-  const endpoints = indices.filter((index) => (adjacency.get(index)?.length || 0) <= 1);
-  const start = (endpoints.length ? endpoints : indices).sort((left, right) => {
-    const ly = Math.floor(left / width);
-    const ry = Math.floor(right / width);
-    if (ly !== ry) return ly - ry;
-    return (left % width) - (right % width);
-  })[0];
-  const visitedEdges = new Set();
-  const points = [];
+  const visited = new Uint8Array(points.length);
+  const ordered = [];
+  let currentIndex = points
+    .map((point, index) => ({ point, index }))
+    .sort((left, right) => (left.point.y - right.point.y) || (left.point.x - right.point.x))[0]?.index ?? 0;
+  let previousVector = { x: 1, y: 0 };
+  ordered.push({ x: points[currentIndex].x, y: points[currentIndex].y, hiddenBefore: false });
+  visited[currentIndex] = 1;
 
-  function dfs(current, previousVector = { x: 1, y: 0 }) {
-    points.push(indexToPoint(current, width));
-    const currentNeighbors = adjacency.get(current) || [];
-    const available = currentNeighbors.filter((neighbor) => !visitedEdges.has(makeEdgeKey(current, neighbor)));
-    available.sort((left, right) => {
-      const leftScore = directionScore(current, left, width, previousVector, adjacency);
-      const rightScore = directionScore(current, right, width, previousVector, adjacency);
-      return leftScore - rightScore;
-    });
+  while (ordered.length < points.length) {
+    const currentPoint = points[currentIndex];
+    const availableNeighbors = adjacency[currentIndex].filter((index) => !visited[index]);
+    let nextIndex = -1;
+    let hiddenBefore = false;
 
-    available.forEach((neighbor) => {
-      const edgeKey = makeEdgeKey(current, neighbor);
-      visitedEdges.add(edgeKey);
-      const vector = {
-        x: (neighbor % width) - (current % width),
-        y: Math.floor(neighbor / width) - Math.floor(current / width)
-      };
-      dfs(neighbor, vector);
-      points.push(indexToPoint(current, width));
+    if (availableNeighbors.length) {
+      nextIndex = availableNeighbors.sort((left, right) => {
+        const leftScore = traceStepScore(currentPoint, points[left], previousVector);
+        const rightScore = traceStepScore(currentPoint, points[right], previousVector);
+        return leftScore - rightScore;
+      })[0];
+    } else {
+      let bestDistance = Infinity;
+      points.forEach((point, index) => {
+        if (visited[index]) return;
+        const distance = Math.hypot(point.x - currentPoint.x, point.y - currentPoint.y);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          nextIndex = index;
+        }
+      });
+      hiddenBefore = nextIndex !== -1;
+    }
+
+    if (nextIndex === -1) break;
+    const nextPoint = points[nextIndex];
+    ordered.push({
+      x: nextPoint.x,
+      y: nextPoint.y,
+      hiddenBefore
     });
+    visited[nextIndex] = 1;
+    previousVector = {
+      x: nextPoint.x - currentPoint.x,
+      y: nextPoint.y - currentPoint.y
+    };
+    currentIndex = nextIndex;
   }
 
-  dfs(start);
-  return simplifyPointSequence(points, 1.5);
+  return simplifyPointSequence(
+    ordered.filter((point, index, array) => index === 0 || point.x !== array[index - 1].x || point.y !== array[index - 1].y || point.hiddenBefore),
+    1.2
+  );
 }
 
-function makeEdgeKey(a, b) {
-  return a < b ? `${a}:${b}` : `${b}:${a}`;
-}
-
-function directionScore(from, to, width, previousVector, adjacency) {
-  const vector = {
-    x: (to % width) - (from % width),
-    y: Math.floor(to / width) - Math.floor(from / width)
-  };
-  const dot = vector.x * previousVector.x + vector.y * previousVector.y;
-  const magnitude = Math.hypot(vector.x, vector.y) * Math.hypot(previousVector.x, previousVector.y || 1);
+function traceStepScore(currentPoint, nextPoint, previousVector) {
+  const dx = nextPoint.x - currentPoint.x;
+  const dy = nextPoint.y - currentPoint.y;
+  const distance = Math.hypot(dx, dy);
+  const magnitude = Math.hypot(previousVector.x, previousVector.y) * Math.max(0.001, distance);
+  const dot = dx * previousVector.x + dy * previousVector.y;
   const turnPenalty = magnitude ? 1 - dot / magnitude : 1;
-  const degreePenalty = (adjacency.get(to)?.length || 0) > 2 ? 0.25 : 0;
-  return turnPenalty + degreePenalty;
-}
-
-function indexToPoint(index, width) {
-  return {
-    x: index % width,
-    y: Math.floor(index / width)
-  };
+  return distance + turnPenalty * 1.5;
 }
 
 function simplifyPointSequence(points, minimumDistance) {
   const compact = [];
   points.forEach((point) => {
     const last = compact[compact.length - 1];
-    if (!last || Math.hypot(point.x - last.x, point.y - last.y) >= minimumDistance) {
-      compact.push(point);
+    if (!last || point.hiddenBefore || Math.hypot(point.x - last.x, point.y - last.y) >= minimumDistance) {
+      compact.push({ ...point });
     }
   });
   return compact;
-}
-
-function orderTracedSegments(segments) {
-  if (segments.length <= 1) return segments;
-  const remaining = [...segments];
-  const ordered = [remaining.shift()];
-
-  while (remaining.length) {
-    const lastPoint = ordered[ordered.length - 1][ordered[ordered.length - 1].length - 1];
-    let bestIndex = 0;
-    let bestReverse = false;
-    let bestDistance = Infinity;
-
-    remaining.forEach((segment, index) => {
-      const startDistance = Math.hypot(lastPoint.x - segment[0].x, lastPoint.y - segment[0].y);
-      const endDistance = Math.hypot(lastPoint.x - segment[segment.length - 1].x, lastPoint.y - segment[segment.length - 1].y);
-      if (startDistance < bestDistance) {
-        bestDistance = startDistance;
-        bestIndex = index;
-        bestReverse = false;
-      }
-      if (endDistance < bestDistance) {
-        bestDistance = endDistance;
-        bestIndex = index;
-        bestReverse = true;
-      }
-    });
-
-    const [next] = remaining.splice(bestIndex, 1);
-    ordered.push(bestReverse ? [...next].reverse() : next);
-  }
-
-  return ordered;
-}
-
-function mergeSegmentsWithBreaks(segments) {
-  const merged = [];
-  segments.forEach((segment, segmentIndex) => {
-    segment.forEach((point, pointIndex) => {
-      merged.push({
-        x: point.x,
-        y: point.y,
-        hiddenBefore: segmentIndex > 0 && pointIndex === 0
-      });
-    });
-  });
-  return merged;
 }
 
 function smoothSegmentedPoints(points, radius) {
