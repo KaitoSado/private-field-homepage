@@ -1172,9 +1172,13 @@ function drawDrawCanvas(context, points, isDrawing) {
 }
 
 function buildLineArtMask(image) {
+  const maxDimension = 320;
+  const naturalWidth = image.naturalWidth || image.width;
+  const naturalHeight = image.naturalHeight || image.height;
+  const scale = Math.min(1, maxDimension / Math.max(naturalWidth, naturalHeight));
   const canvas = document.createElement("canvas");
-  canvas.width = image.naturalWidth || image.width;
-  canvas.height = image.naturalHeight || image.height;
+  canvas.width = Math.max(1, Math.round(naturalWidth * scale));
+  canvas.height = Math.max(1, Math.round(naturalHeight * scale));
   const context = canvas.getContext("2d", { willReadFrequently: true });
   context.drawImage(image, 0, 0, canvas.width, canvas.height);
   const frame = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -1202,108 +1206,165 @@ function extractLoopFromLineArt(maskCanvas, targetN = 256) {
   const frame = context.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
   const pixels = frame.data;
   const threshold = 18;
-  let minX = maskCanvas.width;
-  let maxX = 0;
-  let minY = maskCanvas.height;
-  let maxY = 0;
+  const width = maskCanvas.width;
+  const height = maskCanvas.height;
+  const occupancy = new Uint8Array(width * height);
 
-  for (let y = 0; y < maskCanvas.height; y += 1) {
-    for (let x = 0; x < maskCanvas.width; x += 1) {
-      const alpha = pixels[(y * maskCanvas.width + x) * 4 + 3];
-      if (alpha <= threshold) continue;
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    }
-  }
-
-  if (minX >= maxX || minY >= maxY) {
-    return [];
-  }
-
-  const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2;
-  const maxRadius = Math.hypot(Math.max(centerX - minX, maxX - centerX), Math.max(centerY - minY, maxY - centerY)) + 8;
-  const radialHits = Array.from({ length: targetN }, (_, index) => {
-    const angle = (index / targetN) * Math.PI * 2;
-    let farthestRadius = 0;
-    for (let radius = 2; radius <= maxRadius; radius += 1.5) {
-      const x = Math.round(centerX + Math.cos(angle) * radius);
-      const y = Math.round(centerY + Math.sin(angle) * radius);
-      if (x < 0 || x >= maskCanvas.width || y < 0 || y >= maskCanvas.height) break;
-      const alpha = pixels[(y * maskCanvas.width + x) * 4 + 3];
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const alpha = pixels[(y * width + x) * 4 + 3];
       if (alpha > threshold) {
-        farthestRadius = radius;
+        occupancy[y * width + x] = 1;
       }
     }
-    return farthestRadius || null;
-  });
+  }
 
-  const firstValid = radialHits.findIndex(Boolean);
-  if (firstValid === -1) {
+  const dilated = dilateMask(occupancy, width, height, 4);
+  const region = extractLargestRegion(dilated, width, height);
+  if (!region) {
     return [];
   }
 
-  const filledRadii = radialHits.map((radius, index) => {
-    if (radius) return radius;
-    let prevIndex = index;
-    let nextIndex = index;
+  const rightEdge = [];
+  const leftEdge = [];
+  let minX = width;
+  let maxX = 0;
+  let minY = height;
+  let maxY = 0;
 
-    while (!radialHits[prevIndex]) {
-      prevIndex = (prevIndex - 1 + radialHits.length) % radialHits.length;
-      if (prevIndex === index) break;
+  for (let y = 0; y < height; y += 1) {
+    let left = -1;
+    let right = -1;
+    for (let x = 0; x < width; x += 1) {
+      if (!region[y * width + x]) continue;
+      if (left === -1) left = x;
+      right = x;
     }
-    while (!radialHits[nextIndex]) {
-      nextIndex = (nextIndex + 1) % radialHits.length;
-      if (nextIndex === index) break;
-    }
+    if (left === -1) continue;
+    minX = Math.min(minX, left);
+    maxX = Math.max(maxX, right);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+    rightEdge.push({ x: right, y });
+    leftEdge.push({ x: left, y });
+  }
 
-    const prevRadius = radialHits[prevIndex] || radialHits[firstValid];
-    const nextRadius = radialHits[nextIndex] || radialHits[firstValid];
-    return (prevRadius + nextRadius) / 2;
-  });
+  if (rightEdge.length < 12) {
+    return [];
+  }
 
-  const smoothed = filledRadii.map((_, index) => {
-    let total = 0;
-    let count = 0;
-    for (let offset = -2; offset <= 2; offset += 1) {
-      const sample = filledRadii[(index + offset + filledRadii.length) % filledRadii.length];
-      total += sample;
-      count += 1;
-    }
-    return total / count;
-  });
+  const points = [...rightEdge, ...leftEdge.reverse()].map((point) => ({
+    x: point.x - (minX + maxX) / 2,
+    y: point.y - (minY + maxY) / 2
+  }));
+  const smoothedPoints = smoothLoopPoints(points, 4);
 
-  const points = smoothed.map((radius, index) => {
-    const angle = (index / targetN) * Math.PI * 2;
-    return {
-      x: Math.cos(angle) * radius,
-      y: Math.sin(angle) * radius
-    };
-  });
-
-  let pointMinX = Infinity;
-  let pointMaxX = -Infinity;
-  let pointMinY = Infinity;
-  let pointMaxY = -Infinity;
-  points.forEach((point) => {
-    pointMinX = Math.min(pointMinX, point.x);
-    pointMaxX = Math.max(pointMaxX, point.x);
-    pointMinY = Math.min(pointMinY, point.y);
-    pointMaxY = Math.max(pointMaxY, point.y);
-  });
-
-  const spanX = Math.max(1, pointMaxX - pointMinX);
-  const spanY = Math.max(1, pointMaxY - pointMinY);
+  const spanX = Math.max(1, maxX - minX);
+  const spanY = Math.max(1, maxY - minY);
   const scale = Math.min((DRAW_CANVAS_WIDTH * 0.58) / spanX, (DRAW_CANVAS_HEIGHT * 0.72) / spanY);
   return resamplePath(
-    points.map((point) => ({
+    smoothedPoints.map((point) => ({
       x: point.x * scale,
       y: point.y * scale
     })),
     targetN
   );
+}
+
+function dilateMask(source, width, height, iterations) {
+  let current = source;
+  for (let step = 0; step < iterations; step += 1) {
+    const next = new Uint8Array(width * height);
+    for (let y = 0; y < height; y += 1) {
+      for (let x = 0; x < width; x += 1) {
+        let occupied = 0;
+        for (let dy = -1; dy <= 1 && !occupied; dy += 1) {
+          for (let dx = -1; dx <= 1; dx += 1) {
+            const nx = x + dx;
+            const ny = y + dy;
+            if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+            if (current[ny * width + nx]) {
+              occupied = 1;
+              break;
+            }
+          }
+        }
+        next[y * width + x] = occupied;
+      }
+    }
+    current = next;
+  }
+  return current;
+}
+
+function extractLargestRegion(source, width, height) {
+  const visited = new Uint8Array(width * height);
+  const queue = new Int32Array(width * height);
+  let bestRegion = null;
+  let bestSize = 0;
+
+  for (let index = 0; index < source.length; index += 1) {
+    if (!source[index] || visited[index]) continue;
+    let head = 0;
+    let tail = 0;
+    const region = [];
+    queue[tail++] = index;
+    visited[index] = 1;
+
+    while (head < tail) {
+      const current = queue[head++];
+      region.push(current);
+      const x = current % width;
+      const y = Math.floor(current / width);
+      const neighbors = [
+        current - 1,
+        current + 1,
+        current - width,
+        current + width
+      ];
+
+      if (x === 0) neighbors[0] = -1;
+      if (x === width - 1) neighbors[1] = -1;
+      if (y === 0) neighbors[2] = -1;
+      if (y === height - 1) neighbors[3] = -1;
+
+      neighbors.forEach((neighbor) => {
+        if (neighbor < 0 || visited[neighbor] || !source[neighbor]) return;
+        visited[neighbor] = 1;
+        queue[tail++] = neighbor;
+      });
+    }
+
+    if (region.length > bestSize) {
+      bestSize = region.length;
+      bestRegion = region;
+    }
+  }
+
+  if (!bestRegion?.length) return null;
+  const mask = new Uint8Array(width * height);
+  bestRegion.forEach((index) => {
+    mask[index] = 1;
+  });
+  return mask;
+}
+
+function smoothLoopPoints(points, radius) {
+  return points.map((_, index) => {
+    let totalX = 0;
+    let totalY = 0;
+    let count = 0;
+    for (let offset = -radius; offset <= radius; offset += 1) {
+      const sample = points[(index + offset + points.length) % points.length];
+      totalX += sample.x;
+      totalY += sample.y;
+      count += 1;
+    }
+    return {
+      x: totalX / count,
+      y: totalY / count
+    };
+  });
 }
 
 function computeOrbitScale(points, width, height) {
