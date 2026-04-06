@@ -70,13 +70,15 @@ export function WaveLab() {
       ? resamplePathWithBreaks(rawPoints, 512)
       : resamplePath(rawPoints, 256);
     if (rawPoints.preserveDensity) {
-      resampled = densifyPath(rawPoints, rawPoints.densityStep || 2.4);
+      resampled = rawPoints.some((point) => point.hiddenBefore)
+        ? densifyPathWithBreaks(rawPoints, rawPoints.densityStep || 2.4)
+        : densifyPath(rawPoints, rawPoints.densityStep || 2.4);
     }
     if (rawPoints.sourceImage) {
       resampled.sourceImage = rawPoints.sourceImage;
     }
-    if (rawPoints.singleStrokeVerified) {
-      resampled.singleStrokeVerified = rawPoints.singleStrokeVerified;
+    if (rawPoints.strokeCount) {
+      resampled.strokeCount = rawPoints.strokeCount;
     }
     setDrawnPoints(resampled);
     setMode("orbit");
@@ -238,7 +240,6 @@ function DrawMode({ onFinish, onStatusChange }) {
     extracted.sourceImage = TRACE_GUIDE.src;
     extracted.preserveDensity = true;
     extracted.densityStep = 1.35;
-    extracted.singleStrokeVerified = verifySingleStrokePath(extracted);
     setSelectedPreset(TRACE_GUIDE.id);
     setRawPoints(extracted);
     setIsDrawing(false);
@@ -346,7 +347,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   const trailRef = useRef([]);
   const unfoldStartRef = useRef(0);
   const sourceOverlayRef = useRef(null);
-  const [coeffs, setCoeffs] = useState([]);
+  const [strokeSystems, setStrokeSystems] = useState([]);
   const [maxCoeffs, setMaxCoeffs] = useState(0);
   const [numCircles, setNumCircles] = useState(20);
   const [speed, setSpeed] = useState(1);
@@ -356,6 +357,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   const [animPhase, setAnimPhase] = useState("unfolding");
   const [playing, setPlaying] = useState(false);
   const sourcePoints = useMemo(() => (initialPoints?.length ? initialPoints : generatePresetPath("star")), [initialPoints]);
+  const sourceStrokes = useMemo(() => splitSegmentedPath(sourcePoints), [sourcePoints]);
   const isImageSource = Boolean(sourcePoints?.sourceImage);
   const orbitScale = useMemo(() => computeOrbitScale(sourcePoints, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT), [sourcePoints]);
   const missionHint = useMemo(() => {
@@ -366,20 +368,30 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   }, [maxCoeffs, numCircles]);
 
   useEffect(() => {
-    const calculated = computeDFT(sourcePoints, Math.min(sourcePoints.length, isImageSource ? 140 : 80));
-    setCoeffs(calculated);
-    setMaxCoeffs(calculated.length);
-    setNumCircles(Math.min(isImageSource ? 56 : 20, calculated.length));
+    let globalIndex = 0;
+    const systems = sourceStrokes.map((stroke) => {
+      const calculated = computeDFT(stroke, Math.min(stroke.length, isImageSource ? 72 : 80));
+      const entry = {
+        points: stroke,
+        coeffs: calculated,
+        startIndex: globalIndex
+      };
+      globalIndex += calculated.length;
+      return entry;
+    });
+    setStrokeSystems(systems);
+    setMaxCoeffs(globalIndex);
+    setNumCircles(Math.min(isImageSource ? Math.min(96, globalIndex) : 20, globalIndex));
     setCircleVisibility({});
     setShowOriginal(true);
     setShowCircles(true);
     setSpeed(1);
-    trailRef.current = [];
+    trailRef.current = systems.map(() => []);
     timeRef.current = 0;
     unfoldStartRef.current = Date.now();
     setAnimPhase("unfolding");
     setPlaying(false);
-  }, [isImageSource, sourcePoints]);
+  }, [isImageSource, sourceStrokes]);
 
   useEffect(() => {
     if (!isImageSource || !sourcePoints?.sourceImage) {
@@ -404,7 +416,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !coeffs.length) return;
+    if (!canvas || !strokeSystems.length) return;
     const context = canvas.getContext("2d");
 
     function frame() {
@@ -437,32 +449,42 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
           setAnimPhase("paused");
         } else {
           timeRef.current -= Math.PI * 2;
-          trailRef.current = [];
+          trailRef.current = strokeSystems.map(() => []);
         }
       }
 
-      const visibleCoeffs = [];
-      for (let index = 0; index < Math.min(visibleCount, coeffs.length); index += 1) {
-        if (circleVisibility[index] !== false) {
-          visibleCoeffs.push(coeffs[index]);
+      const positionGroups = strokeSystems.map((system, systemIndex) => {
+        const visibleCoeffs = [];
+        for (let localIndex = 0; localIndex < system.coeffs.length; localIndex += 1) {
+          const globalCoeffIndex = system.startIndex + localIndex;
+          if (globalCoeffIndex >= visibleCount) break;
+          if (circleVisibility[globalCoeffIndex] !== false) {
+            visibleCoeffs.push(system.coeffs[localIndex]);
+          }
         }
-      }
 
-      const positions = getEpicyclePositions(visibleCoeffs, visibleCoeffs.length, timeRef.current);
-      if (visibleCoeffs.length > 0) {
-        const sourceIndex = Math.floor((timeRef.current / (Math.PI * 2)) * sourcePoints.length) % Math.max(1, sourcePoints.length);
-        trailRef.current = [
-          ...trailRef.current,
-          { ...positions.tip, hiddenBefore: Boolean(sourcePoints[sourceIndex]?.hiddenBefore) }
-        ].slice(-1500);
-      }
+        const positions = getEpicyclePositions(visibleCoeffs, visibleCoeffs.length, timeRef.current);
+        if (!trailRef.current[systemIndex]) {
+          trailRef.current[systemIndex] = [];
+        }
+        if (visibleCoeffs.length > 0) {
+          trailRef.current[systemIndex] = [...trailRef.current[systemIndex], positions.tip].slice(-1500);
+        }
+        return {
+          strokeIndex: systemIndex,
+          positions,
+          startIndex: system.startIndex,
+          coeffCount: system.coeffs.length
+        };
+      });
+
       drawOrbitScene(context, {
         sourcePoints,
         sourceOverlay: sourceOverlayRef.current,
         showOriginal,
         showCircles,
-        positions,
-        trail: trailRef.current,
+        positionGroups,
+        trails: trailRef.current,
         scale: orbitScale,
         animPhase,
         unfoldElapsed: now - unfoldStartRef.current
@@ -473,7 +495,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
 
     rafRef.current = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [animPhase, circleVisibility, coeffs, isImageSource, numCircles, orbitScale, playing, showCircles, showOriginal, sourcePoints, speed]);
+  }, [animPhase, circleVisibility, isImageSource, numCircles, orbitScale, playing, showCircles, showOriginal, sourcePoints, speed, strokeSystems]);
 
   function toggleRun() {
     if (animPhase === "unfolding") return;
@@ -482,7 +504,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   }
 
   function resetOrbit() {
-    trailRef.current = [];
+    trailRef.current = strokeSystems.map(() => []);
     timeRef.current = 0;
     setPlaying(true);
     setAnimPhase("playing");
@@ -490,12 +512,12 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
 
   function handleCircleCountChange(nextValue) {
     setNumCircles(nextValue);
-    trailRef.current = [];
+    trailRef.current = strokeSystems.map(() => []);
     timeRef.current = 0;
   }
 
   function toggleCircle(index) {
-    trailRef.current = [];
+    trailRef.current = strokeSystems.map(() => []);
     timeRef.current = 0;
     setCircleVisibility((current) => ({
       ...current,
@@ -503,7 +525,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
     }));
   }
 
-  const displayedCircleCount = Math.min(15, numCircles, coeffs.length);
+  const displayedCircleCount = Math.min(15, numCircles, maxCoeffs);
 
   return (
     <PlayLayout
@@ -531,9 +553,9 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
             <NeonSlider
               label="くっきり"
               min={1}
-              max={Math.max(1, coeffs.length)}
+              max={Math.max(1, maxCoeffs)}
               step={1}
-              value={Math.min(numCircles, Math.max(1, coeffs.length))}
+              value={Math.min(numCircles, Math.max(1, maxCoeffs))}
               onChange={handleCircleCountChange}
               color={COLORS.neonPurple}
             />
@@ -566,8 +588,9 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
             </GlowButton>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
-            <ValueCard label="円の数" value={`${Math.min(numCircles, coeffs.length)}`} color={COLORS.neonPurple} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
+            <ValueCard label="円の数" value={`${Math.min(numCircles, maxCoeffs)}`} color={COLORS.neonPurple} />
+            <ValueCard label="線の数" value={`${sourceStrokes.length}`} color={COLORS.neonBlue} />
             <ValueCard label="速度" value={`${speed.toFixed(1)}x`} color={COLORS.neonPurple} />
             <ValueCard label="状態" value={animPhase === "unfolding" ? "変身中" : playing ? "再生中" : "停止中"} color={animPhase === "unfolding" ? COLORS.neonPink : playing ? COLORS.neonGreen : COLORS.textMuted} />
           </div>
@@ -1281,9 +1304,7 @@ function extractPathFromLineArt(maskCanvas, targetN = 640) {
   const path = traceSkeletonPoints(skeletonPoints, width);
   const smoothedPath = smoothSegmentedPoints(path, 2);
   const sampledPath = resamplePathWithBreaks(smoothedPath, targetN);
-  const singleStrokePath = connectSegmentedPath(sampledPath, 2.8);
-  const softenedPath = smoothContinuousPath(singleStrokePath, 2);
-  const densePath = resamplePath(softenedPath, targetN);
+  const densePath = densifyPathWithBreaks(sampledPath, 1.8);
 
   let minX = Infinity;
   let maxX = -Infinity;
@@ -1304,8 +1325,9 @@ function extractPathFromLineArt(maskCanvas, targetN = 640) {
   const result = densePath.map((point) => ({
     x: (point.x - centerX) * scale,
     y: (point.y - centerY) * scale,
+    hiddenBefore: Boolean(point.hiddenBefore)
   }));
-  result.singleStrokeVerified = verifySingleStrokePath(result);
+  result.strokeCount = splitSegmentedPath(result).length;
   return result;
 }
 
@@ -1556,46 +1578,6 @@ function resamplePathWithBreaks(rawPoints, targetN) {
   return merged;
 }
 
-function connectSegmentedPath(points, spacing) {
-  if (!points.length) return [];
-  const connected = [{ x: points[0].x, y: points[0].y }];
-  for (let index = 1; index < points.length; index += 1) {
-    const point = points[index];
-    const last = connected[connected.length - 1];
-    if (point.hiddenBefore) {
-      const distance = Math.hypot(point.x - last.x, point.y - last.y);
-      const steps = Math.max(1, Math.ceil(distance / spacing));
-      for (let step = 1; step < steps; step += 1) {
-        const ratio = step / steps;
-        connected.push({
-          x: last.x + (point.x - last.x) * ratio,
-          y: last.y + (point.y - last.y) * ratio
-        });
-      }
-    }
-    connected.push({ x: point.x, y: point.y });
-  }
-  return connected;
-}
-
-function smoothContinuousPath(points, radius) {
-  return points.map((point, index) => {
-    let totalX = 0;
-    let totalY = 0;
-    let count = 0;
-    for (let offset = -radius; offset <= radius; offset += 1) {
-      const sample = points[(index + offset + points.length) % points.length];
-      totalX += sample.x;
-      totalY += sample.y;
-      count += 1;
-    }
-    return {
-      x: totalX / count,
-      y: totalY / count
-    };
-  });
-}
-
 function densifyPath(points, step) {
   if (points.length < 2) return points;
   const dense = [points[0]];
@@ -1615,8 +1597,36 @@ function densifyPath(points, step) {
   return dense;
 }
 
-function verifySingleStrokePath(points) {
-  return !points.some((point) => point.hiddenBefore);
+function densifyPathWithBreaks(points, step) {
+  const segments = splitSegmentedPath(points);
+  const dense = [];
+  segments.forEach((segment, segmentIndex) => {
+    const densifiedSegment = densifyPath(segment, step);
+    densifiedSegment.forEach((point, pointIndex) => {
+      dense.push({
+        x: point.x,
+        y: point.y,
+        hiddenBefore: segmentIndex > 0 && pointIndex === 0
+      });
+    });
+  });
+  return dense;
+}
+
+function splitSegmentedPath(points) {
+  const segments = [];
+  let current = [];
+  points.forEach((point) => {
+    if (point.hiddenBefore && current.length) {
+      segments.push(current);
+      current = [];
+    }
+    current.push({ x: point.x, y: point.y });
+  });
+  if (current.length) {
+    segments.push(current);
+  }
+  return segments.filter((segment) => segment.length >= 2);
 }
 
 function segmentLength(points) {
@@ -1666,7 +1676,7 @@ function buildOrbitStatus(animPhase, numCircles, maxCoeffs) {
 
 function drawOrbitScene(
   context,
-  { sourcePoints, sourceOverlay, showOriginal, showCircles, positions, trail, scale, animPhase, unfoldElapsed }
+  { sourcePoints, sourceOverlay, showOriginal, showCircles, positionGroups, trails, scale, animPhase, unfoldElapsed }
 ) {
   context.clearRect(0, 0, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT);
   context.save();
@@ -1696,48 +1706,56 @@ function drawOrbitScene(
     context.restore();
   }
 
-  if (showCircles && positions?.circles?.length) {
-    positions.circles.forEach((circle, index) => {
-      const radius = circle.r * scale;
-      if (radius < 0.5) return;
-      const opacity = Math.max(0.08, 0.3 - index * 0.015);
+  if (showCircles && positionGroups?.length) {
+    positionGroups.forEach((group) => {
+      group.positions.circles.forEach((circle, index) => {
+        const radius = circle.r * scale;
+        if (radius < 0.5) return;
+        const opacity = Math.max(0.08, 0.3 - index * 0.015);
 
+        context.save();
+        context.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
+        context.lineWidth = 0.8;
+        context.beginPath();
+        context.arc(circle.cx * scale, circle.cy * scale, radius, 0, Math.PI * 2);
+        context.stroke();
+
+        context.strokeStyle = `rgba(168, 85, 247, ${Math.min(0.42, opacity + 0.08)})`;
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(circle.cx * scale, circle.cy * scale);
+        context.lineTo(circle.nx * scale, circle.ny * scale);
+        context.stroke();
+        context.restore();
+      });
+    });
+  }
+
+  if (trails?.length) {
+    trails.forEach((trail) => {
+      if (!trail || trail.length <= 1) return;
       context.save();
-      context.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
-      context.lineWidth = 0.8;
-      context.beginPath();
-      context.arc(circle.cx * scale, circle.cy * scale, radius, 0, Math.PI * 2);
-      context.stroke();
-
-      context.strokeStyle = `rgba(168, 85, 247, ${Math.min(0.42, opacity + 0.08)})`;
-      context.lineWidth = 1;
-      context.beginPath();
-      context.moveTo(circle.cx * scale, circle.cy * scale);
-      context.lineTo(circle.nx * scale, circle.ny * scale);
-      context.stroke();
+      context.strokeStyle = COLORS.neonPink;
+      context.lineWidth = 1.5;
+      context.shadowColor = COLORS.neonPink;
+      context.shadowBlur = 6;
+      strokeSegmentedPath(context, trail.map((point) => ({ ...point, x: point.x * scale, y: point.y * scale })), false);
       context.restore();
     });
   }
 
-  if (trail?.length > 1) {
-    context.save();
-    context.strokeStyle = COLORS.neonPink;
-    context.lineWidth = 1.5;
-    context.shadowColor = COLORS.neonPink;
-    context.shadowBlur = 6;
-    strokeSegmentedPath(context, trail.map((point) => ({ ...point, x: point.x * scale, y: point.y * scale })), false);
-    context.restore();
-  }
-
-  if (positions?.tip) {
-    context.save();
-    context.fillStyle = COLORS.neonPink;
-    context.shadowColor = COLORS.neonPink;
-    context.shadowBlur = 10;
-    context.beginPath();
-    context.arc(positions.tip.x * scale, positions.tip.y * scale, 3, 0, Math.PI * 2);
-    context.fill();
-    context.restore();
+  if (positionGroups?.length) {
+    positionGroups.forEach((group) => {
+      if (!group.positions?.tip) return;
+      context.save();
+      context.fillStyle = COLORS.neonPink;
+      context.shadowColor = COLORS.neonPink;
+      context.shadowBlur = 10;
+      context.beginPath();
+      context.arc(group.positions.tip.x * scale, group.positions.tip.y * scale, 3, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+    });
   }
 
   context.restore();
