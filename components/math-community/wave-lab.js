@@ -69,6 +69,9 @@ export function WaveLab() {
     const resampled = rawPoints.some((point) => point.hiddenBefore)
       ? resamplePathWithBreaks(rawPoints, 512)
       : resamplePath(rawPoints, 256);
+    if (rawPoints.sourceImage) {
+      resampled.sourceImage = rawPoints.sourceImage;
+    }
     setDrawnPoints(resampled);
     setMode("orbit");
   }
@@ -226,6 +229,7 @@ function DrawMode({ onFinish, onStatusChange }) {
     if (!lineArtReady || !lineArtRef.current) return;
     const extracted = extractPathFromLineArt(lineArtRef.current, 640);
     if (!extracted.length) return;
+    extracted.sourceImage = TRACE_GUIDE.src;
     setSelectedPreset(TRACE_GUIDE.id);
     setRawPoints(extracted);
     setIsDrawing(false);
@@ -332,6 +336,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   const timeRef = useRef(0);
   const trailRef = useRef([]);
   const unfoldStartRef = useRef(0);
+  const sourceOverlayRef = useRef(null);
   const [coeffs, setCoeffs] = useState([]);
   const [maxCoeffs, setMaxCoeffs] = useState(0);
   const [numCircles, setNumCircles] = useState(20);
@@ -342,6 +347,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   const [animPhase, setAnimPhase] = useState("unfolding");
   const [playing, setPlaying] = useState(false);
   const sourcePoints = useMemo(() => (initialPoints?.length ? initialPoints : generatePresetPath("star")), [initialPoints]);
+  const isImageSource = Boolean(sourcePoints?.sourceImage);
   const orbitScale = useMemo(() => computeOrbitScale(sourcePoints, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT), [sourcePoints]);
   const missionHint = useMemo(() => {
     if (numCircles <= 2) return ORBIT_MISSIONS[3];
@@ -351,10 +357,10 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   }, [maxCoeffs, numCircles]);
 
   useEffect(() => {
-    const calculated = computeDFT(sourcePoints, Math.min(sourcePoints.length, 80));
+    const calculated = computeDFT(sourcePoints, Math.min(sourcePoints.length, isImageSource ? 140 : 80));
     setCoeffs(calculated);
     setMaxCoeffs(calculated.length);
-    setNumCircles(Math.min(20, calculated.length));
+    setNumCircles(Math.min(isImageSource ? 56 : 20, calculated.length));
     setCircleVisibility({});
     setShowOriginal(true);
     setShowCircles(true);
@@ -364,7 +370,24 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
     unfoldStartRef.current = Date.now();
     setAnimPhase("unfolding");
     setPlaying(false);
-  }, [sourcePoints]);
+  }, [isImageSource, sourcePoints]);
+
+  useEffect(() => {
+    if (!isImageSource || !sourcePoints?.sourceImage) {
+      sourceOverlayRef.current = null;
+      return undefined;
+    }
+    let cancelled = false;
+    const image = new window.Image();
+    image.onload = () => {
+      if (cancelled) return;
+      sourceOverlayRef.current = buildLineArtMask(image);
+    };
+    image.src = sourcePoints.sourceImage;
+    return () => {
+      cancelled = true;
+    };
+  }, [isImageSource, sourcePoints]);
 
   useEffect(() => {
     onStatusChange?.(buildOrbitStatus(animPhase, numCircles, maxCoeffs));
@@ -399,8 +422,14 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
       }
 
       if (timeRef.current >= Math.PI * 2) {
-        timeRef.current -= Math.PI * 2;
-        trailRef.current = [];
+        if (isImageSource) {
+          timeRef.current = Math.PI * 2;
+          setPlaying(false);
+          setAnimPhase("paused");
+        } else {
+          timeRef.current -= Math.PI * 2;
+          trailRef.current = [];
+        }
       }
 
       const visibleCoeffs = [];
@@ -420,6 +449,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
       }
       drawOrbitScene(context, {
         sourcePoints,
+        sourceOverlay: sourceOverlayRef.current,
         showOriginal,
         showCircles,
         positions,
@@ -434,7 +464,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
 
     rafRef.current = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [animPhase, circleVisibility, coeffs, numCircles, orbitScale, playing, showCircles, showOriginal, sourcePoints, speed]);
+  }, [animPhase, circleVisibility, coeffs, isImageSource, numCircles, orbitScale, playing, showCircles, showOriginal, sourcePoints, speed]);
 
   function toggleRun() {
     if (animPhase === "unfolding") return;
@@ -1196,6 +1226,21 @@ function buildLineArtMask(image) {
   }
 
   context.putImageData(frame, 0, 0);
+  let minX = canvas.width;
+  let maxX = 0;
+  let minY = canvas.height;
+  let maxY = 0;
+  for (let y = 0; y < canvas.height; y += 1) {
+    for (let x = 0; x < canvas.width; x += 1) {
+      const alpha = pixels[(y * canvas.width + x) * 4 + 3];
+      if (alpha <= 18) continue;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  canvas.contentBounds = minX < maxX && minY < maxY ? { minX, maxX, minY, maxY } : null;
   return canvas;
 }
 
@@ -1545,7 +1590,7 @@ function buildOrbitStatus(animPhase, numCircles, maxCoeffs) {
 
 function drawOrbitScene(
   context,
-  { sourcePoints, showOriginal, showCircles, positions, trail, scale, animPhase, unfoldElapsed }
+  { sourcePoints, sourceOverlay, showOriginal, showCircles, positions, trail, scale, animPhase, unfoldElapsed }
 ) {
   context.clearRect(0, 0, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT);
   context.save();
@@ -1563,11 +1608,15 @@ function drawOrbitScene(
   if (showOriginal && sourcePoints?.length) {
     const glowBoost = animPhase === "unfolding" && unfoldElapsed < 500;
     context.save();
-    context.strokeStyle = glowBoost ? "rgba(0, 229, 255, 0.3)" : "rgba(0, 229, 255, 0.15)";
-    context.lineWidth = 1;
-    context.shadowColor = COLORS.neonCyan;
-    context.shadowBlur = glowBoost ? 20 : 6;
-    strokeSegmentedPath(context, sourcePoints.map((point) => ({ ...point, x: point.x * scale, y: point.y * scale })), false);
+    if (sourceOverlay?.contentBounds) {
+      drawLineArtOverlay(context, sourceOverlay, glowBoost);
+    } else {
+      context.strokeStyle = glowBoost ? "rgba(0, 229, 255, 0.3)" : "rgba(0, 229, 255, 0.15)";
+      context.lineWidth = 1;
+      context.shadowColor = COLORS.neonCyan;
+      context.shadowBlur = glowBoost ? 20 : 6;
+      strokeSegmentedPath(context, sourcePoints.map((point) => ({ ...point, x: point.x * scale, y: point.y * scale })), false);
+    }
     context.restore();
   }
 
@@ -1616,6 +1665,23 @@ function drawOrbitScene(
   }
 
   context.restore();
+}
+
+function drawLineArtOverlay(context, overlayCanvas, glowBoost) {
+  const bounds = overlayCanvas.contentBounds;
+  const spanX = Math.max(1, bounds.maxX - bounds.minX);
+  const spanY = Math.max(1, bounds.maxY - bounds.minY);
+  const scale = Math.min((DRAW_CANVAS_WIDTH * 0.58) / spanX, (DRAW_CANVAS_HEIGHT * 0.72) / spanY);
+  const width = overlayCanvas.width * scale;
+  const height = overlayCanvas.height * scale;
+  const centerX = (bounds.minX + bounds.maxX) / 2;
+  const centerY = (bounds.minY + bounds.maxY) / 2;
+  const offsetX = -centerX * scale;
+  const offsetY = -centerY * scale;
+  context.globalAlpha = glowBoost ? 0.85 : 0.55;
+  context.shadowColor = COLORS.neonCyan;
+  context.shadowBlur = glowBoost ? 20 : 10;
+  context.drawImage(overlayCanvas, offsetX, offsetY, width, height);
 }
 
 function strokeSegmentedPath(context, points, closeLoop) {
