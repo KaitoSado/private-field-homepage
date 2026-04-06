@@ -66,11 +66,17 @@ export function WaveLab() {
   const [statusText, setStatusText] = useState(buildWaveStatus("draw", null));
 
   function handleDrawFinish(rawPoints) {
-    const resampled = rawPoints.some((point) => point.hiddenBefore)
+    let resampled = rawPoints.some((point) => point.hiddenBefore)
       ? resamplePathWithBreaks(rawPoints, 512)
       : resamplePath(rawPoints, 256);
+    if (rawPoints.preserveDensity) {
+      resampled = densifyPath(rawPoints, rawPoints.densityStep || 2.4);
+    }
     if (rawPoints.sourceImage) {
       resampled.sourceImage = rawPoints.sourceImage;
+    }
+    if (rawPoints.singleStrokeVerified) {
+      resampled.singleStrokeVerified = rawPoints.singleStrokeVerified;
     }
     setDrawnPoints(resampled);
     setMode("orbit");
@@ -227,9 +233,12 @@ function DrawMode({ onFinish, onStatusChange }) {
 
   function castLineArt() {
     if (!lineArtReady || !lineArtRef.current) return;
-    const extracted = extractPathFromLineArt(lineArtRef.current, 640);
+    const extracted = extractPathFromLineArt(lineArtRef.current, 960);
     if (!extracted.length) return;
     extracted.sourceImage = TRACE_GUIDE.src;
+    extracted.preserveDensity = true;
+    extracted.densityStep = 1.35;
+    extracted.singleStrokeVerified = verifySingleStrokePath(extracted);
     setSelectedPreset(TRACE_GUIDE.id);
     setRawPoints(extracted);
     setIsDrawing(false);
@@ -1272,12 +1281,15 @@ function extractPathFromLineArt(maskCanvas, targetN = 640) {
   const path = traceSkeletonPoints(skeletonPoints, width);
   const smoothedPath = smoothSegmentedPoints(path, 2);
   const sampledPath = resamplePathWithBreaks(smoothedPath, targetN);
+  const singleStrokePath = connectSegmentedPath(sampledPath, 2.8);
+  const softenedPath = smoothContinuousPath(singleStrokePath, 2);
+  const densePath = resamplePath(softenedPath, targetN);
 
   let minX = Infinity;
   let maxX = -Infinity;
   let minY = Infinity;
   let maxY = -Infinity;
-  sampledPath.forEach((point) => {
+  densePath.forEach((point) => {
     minX = Math.min(minX, point.x);
     maxX = Math.max(maxX, point.x);
     minY = Math.min(minY, point.y);
@@ -1289,11 +1301,12 @@ function extractPathFromLineArt(maskCanvas, targetN = 640) {
   const scale = Math.min((DRAW_CANVAS_WIDTH * 0.58) / spanX, (DRAW_CANVAS_HEIGHT * 0.72) / spanY);
   const centerX = (minX + maxX) / 2;
   const centerY = (minY + maxY) / 2;
-  return sampledPath.map((point) => ({
+  const result = densePath.map((point) => ({
     x: (point.x - centerX) * scale,
     y: (point.y - centerY) * scale,
-    hiddenBefore: point.hiddenBefore
   }));
+  result.singleStrokeVerified = verifySingleStrokePath(result);
+  return result;
 }
 
 function dilateMask(source, width, height, iterations) {
@@ -1541,6 +1554,69 @@ function resamplePathWithBreaks(rawPoints, targetN) {
   });
 
   return merged;
+}
+
+function connectSegmentedPath(points, spacing) {
+  if (!points.length) return [];
+  const connected = [{ x: points[0].x, y: points[0].y }];
+  for (let index = 1; index < points.length; index += 1) {
+    const point = points[index];
+    const last = connected[connected.length - 1];
+    if (point.hiddenBefore) {
+      const distance = Math.hypot(point.x - last.x, point.y - last.y);
+      const steps = Math.max(1, Math.ceil(distance / spacing));
+      for (let step = 1; step < steps; step += 1) {
+        const ratio = step / steps;
+        connected.push({
+          x: last.x + (point.x - last.x) * ratio,
+          y: last.y + (point.y - last.y) * ratio
+        });
+      }
+    }
+    connected.push({ x: point.x, y: point.y });
+  }
+  return connected;
+}
+
+function smoothContinuousPath(points, radius) {
+  return points.map((point, index) => {
+    let totalX = 0;
+    let totalY = 0;
+    let count = 0;
+    for (let offset = -radius; offset <= radius; offset += 1) {
+      const sample = points[(index + offset + points.length) % points.length];
+      totalX += sample.x;
+      totalY += sample.y;
+      count += 1;
+    }
+    return {
+      x: totalX / count,
+      y: totalY / count
+    };
+  });
+}
+
+function densifyPath(points, step) {
+  if (points.length < 2) return points;
+  const dense = [points[0]];
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = dense[dense.length - 1];
+    const current = points[index];
+    const distance = Math.hypot(current.x - previous.x, current.y - previous.y);
+    const pieces = Math.max(1, Math.ceil(distance / step));
+    for (let piece = 1; piece <= pieces; piece += 1) {
+      const ratio = piece / pieces;
+      dense.push({
+        x: previous.x + (current.x - previous.x) * ratio,
+        y: previous.y + (current.y - previous.y) * ratio
+      });
+    }
+  }
+  return dense;
+}
+
+function verifySingleStrokePath(points) {
+  return !points.some((point) => point.hiddenBefore);
 }
 
 function segmentLength(points) {
