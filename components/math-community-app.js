@@ -31,8 +31,10 @@ import {
   worldToScreenX,
   worldToScreenY
 } from "@/lib/math-community/math-canvas";
+import { WaveLab } from "@/components/math-community/wave-lab";
 
 const APP_TABS = [
+  { id: "wave", label: "Wave Lab" },
   { id: "graph", label: "関数グラフ" },
   { id: "derivative", label: "微分" },
   { id: "integral", label: "積分" },
@@ -50,6 +52,11 @@ const APP_TABS = [
 ];
 
 const TAB_SECTIONS = [
+  {
+    id: "waves",
+    label: "波と分解",
+    tabs: ["wave"]
+  },
   {
     id: "hidden-order",
     label: "見えにくい秩序を見抜く",
@@ -806,6 +813,7 @@ export function MathCommunityApp() {
           ))}
         </div>
 
+        {activeTab === "wave" ? <WaveLab /> : null}
         {activeTab === "graph" ? <FunctionGraphPanel /> : null}
         {activeTab === "derivative" ? <DerivativePlaygroundPanel /> : null}
         {activeTab === "integral" ? <IntegralPlaygroundPanel /> : null}
