@@ -30,11 +30,6 @@ const DRAW_PRESETS = [
   { id: "face", icon: "☺", label: "顔" },
   { id: "infinity", icon: "∞", label: "無限" }
 ];
-const TRACE_GUIDE = {
-  id: "grok-line-art",
-  label: "線画から始める",
-  src: "/wave-lab-assets/grok-line-art.png"
-};
 const SILHOUETTE_GUIDE = {
   id: "img-4878-silhouette",
   label: "シルエットをフーリエに送る",
@@ -184,26 +179,10 @@ function DrawMode({ onFinish, onStatusChange }) {
   const [rawPoints, setRawPoints] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
-  const [lineArtReady, setLineArtReady] = useState(false);
   const [silhouetteReady, setSilhouetteReady] = useState(false);
-  const [status, setStatus] = useState("好きなループを描いてみましょう。プリセットか線画からも始められます。");
+  const [status, setStatus] = useState("好きなループを描いてみましょう。プリセットかシルエットからも始められます。");
   const drawCanvasRef = useRef(null);
-  const lineArtRef = useRef(null);
   const silhouetteRef = useRef(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const image = new window.Image();
-    image.onload = () => {
-      if (cancelled) return;
-      lineArtRef.current = buildLineArtMask(image);
-      setLineArtReady(true);
-    };
-    image.src = TRACE_GUIDE.src;
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -235,7 +214,7 @@ function DrawMode({ onFinish, onStatusChange }) {
       setStatus("この線に魔法をかけると、中身が見えてきます");
       return;
     }
-    setStatus("好きなループを描いてみましょう。プリセットか線画からも始められます。");
+    setStatus("好きなループを描いてみましょう。プリセットかシルエットからも始められます。");
   }, [isDrawing, rawPoints.length]);
 
   useEffect(() => {
@@ -255,19 +234,6 @@ function DrawMode({ onFinish, onStatusChange }) {
     setRawPoints(generated);
     setSelectedPreset(presetId);
     setIsDrawing(false);
-  }
-
-  function castLineArt() {
-    if (!lineArtReady || !lineArtRef.current) return;
-    const extracted = extractPathFromLineArt(lineArtRef.current, 1400);
-    if (!extracted.length) return;
-    extracted.sourceImage = TRACE_GUIDE.src;
-    extracted.preserveDensity = true;
-    extracted.densityStep = 1.35;
-    setSelectedPreset(TRACE_GUIDE.id);
-    setRawPoints(extracted);
-    setIsDrawing(false);
-    onFinish(extracted);
   }
 
   function castSilhouette() {
@@ -336,7 +302,7 @@ function DrawMode({ onFinish, onStatusChange }) {
             onPointerCancel={finishStroke}
           />
           <MissionHint
-            text="描いた線や線画がフーリエ変換の素材になります"
+            text="描いた線やシルエットがフーリエ変換の素材になります"
             color={COLORS.neonCyan}
           />
         </div>
@@ -346,9 +312,6 @@ function DrawMode({ onFinish, onStatusChange }) {
           <PresetSelector presets={DRAW_PRESETS} selected={selectedPreset} onSelect={loadPreset} color={COLORS.neonCyan} />
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            <GlowButton color={COLORS.neonPurple} onClick={castLineArt} disabled={!lineArtReady} small>
-              線画をフーリエに送る
-            </GlowButton>
             <GlowButton color={COLORS.neonPink} onClick={castSilhouette} disabled={!silhouetteReady} small>
               シルエットをフーリエに送る
             </GlowButton>
@@ -367,7 +330,7 @@ function DrawMode({ onFinish, onStatusChange }) {
 
           <StatusMessage color={COLORS.neonCyan}>{status}</StatusMessage>
           <div style={{ color: COLORS.textMuted, fontSize: 11, lineHeight: 1.6 }}>
-            線画は内部線ごと、シルエットは外周を優先してそのまま Orbit に送ります。
+            シルエットは外周を優先してそのまま Orbit に送ります。
           </div>
 
           <PlayPauseResetBar
@@ -472,7 +435,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
     const image = new window.Image();
     image.onload = () => {
       if (cancelled) return;
-      sourceOverlayRef.current = sourcePoints?.sourceType === "silhouette" ? buildSilhouetteMask(image) : buildLineArtMask(image);
+      sourceOverlayRef.current = buildSilhouetteMask(image);
     };
     image.src = sourcePoints.sourceImage;
     return () => {
@@ -1301,51 +1264,6 @@ function drawDrawCanvas(context, points, isDrawing) {
   context.restore();
 }
 
-function buildLineArtMask(image) {
-  const maxDimension = 480;
-  const naturalWidth = image.naturalWidth || image.width;
-  const naturalHeight = image.naturalHeight || image.height;
-  const scale = Math.min(1, maxDimension / Math.max(naturalWidth, naturalHeight));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(naturalWidth * scale));
-  canvas.height = Math.max(1, Math.round(naturalHeight * scale));
-  const context = canvas.getContext("2d", { willReadFrequently: true });
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-  const frame = context.getImageData(0, 0, canvas.width, canvas.height);
-  const pixels = frame.data;
-
-  for (let index = 0; index < pixels.length; index += 4) {
-    const red = pixels[index];
-    const green = pixels[index + 1];
-    const blue = pixels[index + 2];
-    const luminance = (red + green + blue) / 3;
-    const darkness = 255 - luminance;
-    const alpha = darkness > 18 ? Math.min(170, darkness * 1.4) : 0;
-    pixels[index] = 130;
-    pixels[index + 1] = 205;
-    pixels[index + 2] = 230;
-    pixels[index + 3] = alpha;
-  }
-
-  context.putImageData(frame, 0, 0);
-  let minX = canvas.width;
-  let maxX = 0;
-  let minY = canvas.height;
-  let maxY = 0;
-  for (let y = 0; y < canvas.height; y += 1) {
-    for (let x = 0; x < canvas.width; x += 1) {
-      const alpha = pixels[(y * canvas.width + x) * 4 + 3];
-      if (alpha <= 18) continue;
-      minX = Math.min(minX, x);
-      maxX = Math.max(maxX, x);
-      minY = Math.min(minY, y);
-      maxY = Math.max(maxY, y);
-    }
-  }
-  canvas.contentBounds = minX < maxX && minY < maxY ? { minX, maxX, minY, maxY } : null;
-  return canvas;
-}
-
 function buildSilhouetteMask(image) {
   const maxDimension = 640;
   const naturalWidth = image.naturalWidth || image.width;
@@ -1372,62 +1290,22 @@ function buildSilhouetteMask(image) {
   }
 
   context.putImageData(frame, 0, 0);
-  return canvas;
-}
-
-function extractPathFromLineArt(maskCanvas, targetN = 640) {
-  const context = maskCanvas.getContext("2d", { willReadFrequently: true });
-  const frame = context.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
-  const pixels = frame.data;
-  const threshold = 18;
-  const width = maskCanvas.width;
-  const height = maskCanvas.height;
-  const occupancy = new Uint8Array(width * height);
-
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const alpha = pixels[(y * width + x) * 4 + 3];
-      if (alpha > threshold) {
-        occupancy[y * width + x] = 1;
-      }
+  let minX = canvas.width;
+  let maxX = 0;
+  let minY = canvas.height;
+  let maxY = 0;
+  for (let y = 0; y < canvas.height; y += 1) {
+    for (let x = 0; x < canvas.width; x += 1) {
+      const alpha = pixels[(y * canvas.width + x) * 4 + 3];
+      if (alpha <= 18) continue;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
     }
   }
-
-  const dilated = dilateMask(occupancy, width, height, 1);
-  const skeleton = skeletonizeMask(dilated, width, height);
-  const skeletonPoints = collectSkeletonPoints(skeleton, width, height);
-  if (skeletonPoints.length < 12) {
-    return [];
-  }
-
-  const path = traceSkeletonPoints(skeletonPoints, width);
-  const smoothedPath = smoothSegmentedPoints(path, 2);
-  const sampledPath = resamplePathWithBreaks(smoothedPath, targetN);
-  const densePath = densifyPathWithBreaks(sampledPath, 1.8);
-
-  let minX = Infinity;
-  let maxX = -Infinity;
-  let minY = Infinity;
-  let maxY = -Infinity;
-  densePath.forEach((point) => {
-    minX = Math.min(minX, point.x);
-    maxX = Math.max(maxX, point.x);
-    minY = Math.min(minY, point.y);
-    maxY = Math.max(maxY, point.y);
-  });
-
-  const spanX = Math.max(1, maxX - minX);
-  const spanY = Math.max(1, maxY - minY);
-  const scale = Math.min((DRAW_CANVAS_WIDTH * 0.58) / spanX, (DRAW_CANVAS_HEIGHT * 0.72) / spanY);
-  const centerX = (minX + maxX) / 2;
-  const centerY = (minY + maxY) / 2;
-  const result = densePath.map((point) => ({
-    x: (point.x - centerX) * scale,
-    y: (point.y - centerY) * scale,
-    hiddenBefore: Boolean(point.hiddenBefore)
-  }));
-  result.strokeCount = splitSegmentedPath(result).length;
-  return result;
+  canvas.contentBounds = minX < maxX && minY < maxY ? { minX, maxX, minY, maxY } : null;
+  return canvas;
 }
 
 function extractContourFromSilhouette(maskCanvas, targetN = 1200) {
