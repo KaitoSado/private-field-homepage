@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const COLORS = {
   bg: "#070b1a",
@@ -36,12 +36,6 @@ const WAVE_MODES = [
   { id: "analyze", icon: "≋", label: "Analyze", sub: "分解する", color: COLORS.neonBlue }
 ];
 const PLACEHOLDER_META = {
-  orbit: {
-    icon: "◎",
-    title: "Coming Soon",
-    subtitle: "Phase 2 で実装予定",
-    color: COLORS.neonPurple
-  },
   analyze: {
     icon: "≋",
     title: "Coming Soon",
@@ -49,16 +43,27 @@ const PLACEHOLDER_META = {
     color: COLORS.neonBlue
   }
 };
+const ORBIT_MISSIONS = [
+  "少ない円だけで元の絵っぽくしてみよう",
+  "一番影響の大きい円を見つけてみよう",
+  "ぼんやり側にして抽象アートを作ろう",
+  "円 1 つだけにするとどうなる？"
+];
 
 export function WaveLab() {
   const [mode, setMode] = useState("draw");
   const [drawnPoints, setDrawnPoints] = useState(null);
+  const [statusText, setStatusText] = useState(buildWaveStatus("draw", null));
 
   function handleDrawFinish(rawPoints) {
     const resampled = resamplePath(rawPoints, 256);
     setDrawnPoints(resampled);
     setMode("orbit");
   }
+
+  useEffect(() => {
+    setStatusText(buildWaveStatus(mode, drawnPoints));
+  }, [mode, drawnPoints]);
 
   return (
     <div
@@ -80,13 +85,13 @@ export function WaveLab() {
       <div style={{ position: "relative", zIndex: 10, display: "flex", minHeight: "calc(100vh - 220px)", flexDirection: "column" }}>
         <Header mode={mode} onModeChange={setMode} />
         <StatusMessage color={mode === "draw" ? COLORS.neonCyan : WAVE_MODES.find((item) => item.id === mode)?.color}>
-          {buildWaveStatus(mode, drawnPoints)}
+          {statusText}
         </StatusMessage>
 
         <main style={{ flex: 1, padding: 16, display: "flex" }}>
-          {mode === "draw" ? <DrawMode onFinish={handleDrawFinish} /> : null}
-          {mode === "orbit" ? <ModePlaceholder mode="orbit" points={drawnPoints} /> : null}
-          {mode === "analyze" ? <ModePlaceholder mode="analyze" points={drawnPoints} /> : null}
+          {mode === "draw" ? <DrawMode onFinish={handleDrawFinish} onStatusChange={setStatusText} /> : null}
+          {mode === "orbit" ? <OrbitMode initialPoints={drawnPoints} onModeChange={setMode} onStatusChange={setStatusText} /> : null}
+          {mode === "analyze" ? <ModePlaceholder mode="analyze" points={drawnPoints} onStatusChange={setStatusText} /> : null}
         </main>
 
         <Footer mode={mode} />
@@ -144,7 +149,7 @@ function Header({ mode, onModeChange }) {
   );
 }
 
-function DrawMode({ onFinish }) {
+function DrawMode({ onFinish, onStatusChange }) {
   const [rawPoints, setRawPoints] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
@@ -169,6 +174,10 @@ function DrawMode({ onFinish }) {
     }
     setStatus("好きなループを描いてみましょう。プリセットも試せます。");
   }, [isDrawing, rawPoints.length]);
+
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [onStatusChange, status]);
 
   const canCastMagic = rawPoints.length >= 10;
 
@@ -270,8 +279,251 @@ function DrawMode({ onFinish }) {
   );
 }
 
-function ModePlaceholder({ mode, points }) {
+function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
+  const canvasRef = useRef(null);
+  const rafRef = useRef(0);
+  const timeRef = useRef(0);
+  const trailRef = useRef([]);
+  const unfoldStartRef = useRef(0);
+  const [coeffs, setCoeffs] = useState([]);
+  const [maxCoeffs, setMaxCoeffs] = useState(0);
+  const [numCircles, setNumCircles] = useState(20);
+  const [speed, setSpeed] = useState(1);
+  const [showOriginal, setShowOriginal] = useState(true);
+  const [showCircles, setShowCircles] = useState(true);
+  const [circleVisibility, setCircleVisibility] = useState({});
+  const [animPhase, setAnimPhase] = useState("unfolding");
+  const [playing, setPlaying] = useState(false);
+  const sourcePoints = useMemo(() => (initialPoints?.length ? initialPoints : generatePresetPath("star")), [initialPoints]);
+  const orbitScale = useMemo(() => computeOrbitScale(sourcePoints, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT), [sourcePoints]);
+  const missionHint = useMemo(() => {
+    if (numCircles <= 2) return ORBIT_MISSIONS[3];
+    if (numCircles <= 5) return ORBIT_MISSIONS[0];
+    if (numCircles >= Math.max(6, maxCoeffs - 2)) return ORBIT_MISSIONS[1];
+    return ORBIT_MISSIONS[2];
+  }, [maxCoeffs, numCircles]);
+
+  useEffect(() => {
+    const calculated = computeDFT(sourcePoints, Math.min(sourcePoints.length, 80));
+    setCoeffs(calculated);
+    setMaxCoeffs(calculated.length);
+    setNumCircles(Math.min(20, calculated.length));
+    setCircleVisibility({});
+    setShowOriginal(true);
+    setShowCircles(true);
+    setSpeed(1);
+    trailRef.current = [];
+    timeRef.current = 0;
+    unfoldStartRef.current = Date.now();
+    setAnimPhase("unfolding");
+    setPlaying(false);
+  }, [sourcePoints]);
+
+  useEffect(() => {
+    onStatusChange?.(buildOrbitStatus(animPhase, numCircles, maxCoeffs));
+  }, [animPhase, maxCoeffs, numCircles, onStatusChange]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !coeffs.length) return;
+    const context = canvas.getContext("2d");
+
+    function frame() {
+      const now = Date.now();
+      let visibleCount = numCircles;
+
+      if (animPhase === "unfolding") {
+        const elapsed = now - unfoldStartRef.current;
+        if (elapsed < 500) {
+          visibleCount = 0;
+        } else {
+          const ratio = Math.min(1, (elapsed - 500) / 2000);
+          visibleCount = Math.max(1, Math.min(numCircles, Math.ceil(ratio * numCircles)));
+        }
+
+        timeRef.current += (Math.PI * 2 * speed) / 520;
+        if (elapsed >= 2500) {
+          setAnimPhase("playing");
+          setPlaying(true);
+          visibleCount = numCircles;
+        }
+      } else if (animPhase === "playing" && playing) {
+        timeRef.current += (Math.PI * 2 * speed) / 400;
+      }
+
+      if (timeRef.current >= Math.PI * 2) {
+        timeRef.current -= Math.PI * 2;
+        trailRef.current = [];
+      }
+
+      const visibleCoeffs = [];
+      for (let index = 0; index < Math.min(visibleCount, coeffs.length); index += 1) {
+        if (circleVisibility[index] !== false) {
+          visibleCoeffs.push(coeffs[index]);
+        }
+      }
+
+      const positions = getEpicyclePositions(visibleCoeffs, visibleCoeffs.length, timeRef.current);
+      if (visibleCoeffs.length > 0) {
+        trailRef.current = [...trailRef.current, positions.tip].slice(-1500);
+      }
+      drawOrbitScene(context, {
+        sourcePoints,
+        showOriginal,
+        showCircles,
+        positions,
+        trail: trailRef.current,
+        scale: orbitScale,
+        animPhase,
+        unfoldElapsed: now - unfoldStartRef.current
+      });
+
+      rafRef.current = requestAnimationFrame(frame);
+    }
+
+    rafRef.current = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [animPhase, circleVisibility, coeffs, numCircles, orbitScale, playing, showCircles, showOriginal, sourcePoints, speed]);
+
+  function toggleRun() {
+    if (animPhase === "unfolding") return;
+    setPlaying((current) => !current);
+    setAnimPhase((current) => (current === "paused" ? "playing" : current === "playing" ? "paused" : current));
+  }
+
+  function resetOrbit() {
+    trailRef.current = [];
+    timeRef.current = 0;
+    setPlaying(true);
+    setAnimPhase("playing");
+  }
+
+  function handleCircleCountChange(nextValue) {
+    setNumCircles(nextValue);
+    trailRef.current = [];
+    timeRef.current = 0;
+  }
+
+  function toggleCircle(index) {
+    trailRef.current = [];
+    timeRef.current = 0;
+    setCircleVisibility((current) => ({
+      ...current,
+      [index]: current[index] === false ? true : false
+    }));
+  }
+
+  const displayedCircleCount = Math.min(15, numCircles, coeffs.length);
+
+  return (
+    <PlayLayout
+      canvasArea={
+        <div style={{ position: "relative", width: "100%", height: "100%" }}>
+          <canvas
+            ref={canvasRef}
+            width={DRAW_CANVAS_WIDTH}
+            height={DRAW_CANVAS_HEIGHT}
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "block",
+              borderRadius: 12,
+              background: COLORS.bgAlt,
+              border: `1px solid ${COLORS.border}`
+            }}
+          />
+          <MissionHint text={missionHint} color={COLORS.neonPurple} />
+        </div>
+      }
+      controlPanel={
+        <ControlPanel title="Orbital Sketcher" subtitle="描いた線が、回転する部品の連鎖へほどけます">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 12 }}>
+            <NeonSlider
+              label="くっきり"
+              min={1}
+              max={Math.max(1, coeffs.length)}
+              step={1}
+              value={Math.min(numCircles, Math.max(1, coeffs.length))}
+              onChange={handleCircleCountChange}
+              color={COLORS.neonPurple}
+            />
+            <NeonSlider
+              label="速度"
+              min={0.1}
+              max={3}
+              step={0.1}
+              value={speed}
+              onChange={setSpeed}
+              color={COLORS.neonPurple}
+            />
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            <GlowButton color={COLORS.neonPurple} onClick={toggleRun} disabled={animPhase === "unfolding"}>
+              {animPhase === "unfolding" ? "展開中" : playing ? "⏸ 停止" : "▶ 再生"}
+            </GlowButton>
+            <GlowButton color={COLORS.neonPurple} onClick={resetOrbit}>
+              ↺ リセット
+            </GlowButton>
+            <GlowButton color={COLORS.neonPurple} active={showOriginal} onClick={() => setShowOriginal((current) => !current)}>
+              元の線
+            </GlowButton>
+            <GlowButton color={COLORS.neonPurple} active={showCircles} onClick={() => setShowCircles((current) => !current)}>
+              円を表示
+            </GlowButton>
+            <GlowButton color={COLORS.neonBlue} onClick={() => onModeChange("analyze")}>
+              成分として見る →
+            </GlowButton>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
+            <ValueCard label="円の数" value={`${Math.min(numCircles, coeffs.length)}`} color={COLORS.neonPurple} />
+            <ValueCard label="速度" value={`${speed.toFixed(1)}x`} color={COLORS.neonPurple} />
+            <ValueCard label="状態" value={animPhase === "unfolding" ? "変身中" : playing ? "再生中" : "停止中"} color={animPhase === "unfolding" ? COLORS.neonPink : playing ? COLORS.neonGreen : COLORS.textMuted} />
+          </div>
+
+          <StatusMessage color={COLORS.neonPurple}>
+            {buildOrbitStatus(animPhase, numCircles, maxCoeffs)}
+          </StatusMessage>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              overflowX: "auto",
+              paddingBottom: 4
+            }}
+          >
+            {Array.from({ length: displayedCircleCount }, (_, index) => (
+              <GlowButton
+                key={index}
+                small
+                color={COLORS.neonPurple}
+                active={circleVisibility[index] !== false}
+                onClick={() => toggleCircle(index)}
+              >
+                {index + 1}
+              </GlowButton>
+            ))}
+          </div>
+        </ControlPanel>
+      }
+      footer="複雑な形は、回転する部品の組み合わせで再現できます"
+    />
+  );
+}
+
+function ModePlaceholder({ mode, points, onStatusChange }) {
   const meta = PLACEHOLDER_META[mode];
+
+  useEffect(() => {
+    onStatusChange?.(
+      mode === "analyze"
+        ? (points?.length ? "この形を、次の段階で成分ごとに分解します。" : "まずは Draw で形を作ると、分解モードの準備ができます。")
+        : buildWaveStatus(mode, points)
+    );
+  }, [mode, onStatusChange, points]);
+
   return (
     <PlayLayout
       canvasArea={
@@ -587,7 +839,7 @@ function buildWaveStatus(mode, drawnPoints) {
     return drawnPoints?.length ? "別の形を描くと、別の中身が現れます。" : "好きなループを描いてみましょう。プリセットも試せます。";
   }
   if (mode === "orbit") {
-    return drawnPoints?.length ? "この線に魔法をかけた先を、次の段階で見せます。" : "まずは Draw で形を作ると、ここで中身が見える予定です。";
+    return drawnPoints?.length ? "複雑な形は、回転する部品の組み合わせへほどけます。" : "まずは Draw で形を作ると、ここで中身が見えてきます。";
   }
   return drawnPoints?.length ? "同じ形でも、成分に分けると違う見え方になります。" : "Draw で素材を用意すると、分解モードの準備ができます。";
 }
@@ -641,6 +893,125 @@ function drawDrawCanvas(context, points, isDrawing) {
     context.beginPath();
     context.arc(tail.x, tail.y, 4, 0, Math.PI * 2);
     context.fill();
+  }
+
+  context.restore();
+}
+
+function computeOrbitScale(points, width, height) {
+  if (!points?.length) return 1;
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  points.forEach((point) => {
+    minX = Math.min(minX, point.x);
+    maxX = Math.max(maxX, point.x);
+    minY = Math.min(minY, point.y);
+    maxY = Math.max(maxY, point.y);
+  });
+
+  const spanX = Math.max(1, maxX - minX);
+  const spanY = Math.max(1, maxY - minY);
+  const availableWidth = width * 0.68;
+  const availableHeight = height * 0.68;
+  return Math.min(availableWidth / spanX, availableHeight / spanY);
+}
+
+function buildOrbitStatus(animPhase, numCircles, maxCoeffs) {
+  if (animPhase === "unfolding") {
+    return "複雑な形が、回転する部品へほどけています…";
+  }
+  if (numCircles <= 3) {
+    return "大きな円が全体の形を作っています";
+  }
+  if (numCircles <= 8) {
+    return "形が見えてきました。もっと増やしてみましょう";
+  }
+  if (maxCoeffs > 0 && numCircles >= maxCoeffs - 2) {
+    return "ほぼ完全再現！複雑な形が回転する部品で再現されています";
+  }
+  return "円を減らすと、形が抽象化されます";
+}
+
+function drawOrbitScene(
+  context,
+  { sourcePoints, showOriginal, showCircles, positions, trail, scale, animPhase, unfoldElapsed }
+) {
+  context.clearRect(0, 0, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT);
+  context.save();
+  context.translate(DRAW_CANVAS_WIDTH / 2, DRAW_CANVAS_HEIGHT / 2);
+
+  context.strokeStyle = COLORS.border;
+  context.lineWidth = 0.5;
+  context.beginPath();
+  context.moveTo(-DRAW_CANVAS_WIDTH / 2, 0);
+  context.lineTo(DRAW_CANVAS_WIDTH / 2, 0);
+  context.moveTo(0, -DRAW_CANVAS_HEIGHT / 2);
+  context.lineTo(0, DRAW_CANVAS_HEIGHT / 2);
+  context.stroke();
+
+  if (showOriginal && sourcePoints?.length) {
+    const glowBoost = animPhase === "unfolding" && unfoldElapsed < 500;
+    context.save();
+    context.beginPath();
+    context.moveTo(sourcePoints[0].x * scale, sourcePoints[0].y * scale);
+    sourcePoints.slice(1).forEach((point) => context.lineTo(point.x * scale, point.y * scale));
+    context.closePath();
+    context.strokeStyle = glowBoost ? "rgba(0, 229, 255, 0.3)" : "rgba(0, 229, 255, 0.15)";
+    context.lineWidth = 1;
+    context.shadowColor = COLORS.neonCyan;
+    context.shadowBlur = glowBoost ? 20 : 6;
+    context.stroke();
+    context.restore();
+  }
+
+  if (showCircles && positions?.circles?.length) {
+    positions.circles.forEach((circle, index) => {
+      const radius = circle.r * scale;
+      if (radius < 0.5) return;
+      const opacity = Math.max(0.08, 0.3 - index * 0.015);
+
+      context.save();
+      context.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
+      context.lineWidth = 0.8;
+      context.beginPath();
+      context.arc(circle.cx * scale, circle.cy * scale, radius, 0, Math.PI * 2);
+      context.stroke();
+
+      context.strokeStyle = `rgba(168, 85, 247, ${Math.min(0.42, opacity + 0.08)})`;
+      context.lineWidth = 1;
+      context.beginPath();
+      context.moveTo(circle.cx * scale, circle.cy * scale);
+      context.lineTo(circle.nx * scale, circle.ny * scale);
+      context.stroke();
+      context.restore();
+    });
+  }
+
+  if (trail?.length > 1) {
+    context.save();
+    context.beginPath();
+    context.moveTo(trail[0].x * scale, trail[0].y * scale);
+    trail.slice(1).forEach((point) => context.lineTo(point.x * scale, point.y * scale));
+    context.strokeStyle = COLORS.neonPink;
+    context.lineWidth = 1.5;
+    context.shadowColor = COLORS.neonPink;
+    context.shadowBlur = 6;
+    context.stroke();
+    context.restore();
+  }
+
+  if (positions?.tip) {
+    context.save();
+    context.fillStyle = COLORS.neonPink;
+    context.shadowColor = COLORS.neonPink;
+    context.shadowBlur = 10;
+    context.beginPath();
+    context.arc(positions.tip.x * scale, positions.tip.y * scale, 3, 0, Math.PI * 2);
+    context.fill();
+    context.restore();
   }
 
   context.restore();
