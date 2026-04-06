@@ -650,7 +650,7 @@ alter table public.edge_tips
   drop constraint if exists edge_tips_link_url_length_check,
   add constraint edge_tips_link_url_length_check check (char_length(link_url) <= 500),
   drop constraint if exists edge_tips_body_length_check,
-  add constraint edge_tips_body_length_check check (char_length(body) between 1 and 2000);
+  add constraint edge_tips_body_length_check check (char_length(body) between 1 and 12000);
 
 alter table public.economy_accounts
   drop constraint if exists economy_accounts_point_balance_check,
