@@ -30,6 +30,11 @@ const DRAW_PRESETS = [
   { id: "face", icon: "☺", label: "顔" },
   { id: "infinity", icon: "∞", label: "無限" }
 ];
+const TRACE_GUIDE = {
+  id: "grok-line-art",
+  label: "線画お手本",
+  src: "/wave-lab-assets/grok-line-art.png"
+};
 const WAVE_MODES = [
   { id: "draw", icon: "✎", label: "Draw", sub: "描く", color: COLORS.neonCyan },
   { id: "orbit", icon: "◎", label: "Orbit", sub: "回す", color: COLORS.neonPurple },
@@ -158,19 +163,40 @@ function DrawMode({ onFinish, onStatusChange }) {
   const [rawPoints, setRawPoints] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
+  const [showTraceGuide, setShowTraceGuide] = useState(false);
+  const [guideReady, setGuideReady] = useState(false);
   const [status, setStatus] = useState("好きなループを描いてみましょう。プリセットも試せます。");
   const drawCanvasRef = useRef(null);
+  const traceGuideRef = useRef(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const image = new window.Image();
+    image.onload = () => {
+      if (cancelled) return;
+      traceGuideRef.current = buildTraceGuideOverlay(image);
+      setGuideReady(true);
+    };
+    image.src = TRACE_GUIDE.src;
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = drawCanvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
-    drawDrawCanvas(context, rawPoints, isDrawing);
-  }, [isDrawing, rawPoints]);
+    drawDrawCanvas(context, rawPoints, isDrawing, showTraceGuide && guideReady ? traceGuideRef.current : null);
+  }, [guideReady, isDrawing, rawPoints, showTraceGuide]);
 
   useEffect(() => {
     if (isDrawing) {
       setStatus("そのまま…いい形ですね");
+      return;
+    }
+    if (showTraceGuide && rawPoints.length < 10) {
+      setStatus("独立した線は気にせず、大まかな外形を 1 本でつなぐ感じでなぞってみましょう。");
       return;
     }
     if (rawPoints.length >= 10) {
@@ -250,7 +276,14 @@ function DrawMode({ onFinish, onStatusChange }) {
             onPointerLeave={finishStroke}
             onPointerCancel={finishStroke}
           />
-          <MissionHint text="描いた線がフーリエ変換の素材になります" color={COLORS.neonCyan} />
+          <MissionHint
+            text={
+              showTraceGuide
+                ? "細かい内部線は気にせず、外形を気持ちよく 1 本でなぞってみよう"
+                : "描いた線がフーリエ変換の素材になります"
+            }
+            color={COLORS.neonCyan}
+          />
         </div>
       }
       controlPanel={
@@ -258,6 +291,9 @@ function DrawMode({ onFinish, onStatusChange }) {
           <PresetSelector presets={DRAW_PRESETS} selected={selectedPreset} onSelect={loadPreset} color={COLORS.neonCyan} />
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+            <GlowButton color={COLORS.neonCyan} active={showTraceGuide} onClick={() => setShowTraceGuide((current) => !current)} small>
+              線画お手本
+            </GlowButton>
             <GlowButton color={COLORS.borderLight} onClick={resetDrawing} small>
               描き直す
             </GlowButton>
@@ -272,6 +308,12 @@ function DrawMode({ onFinish, onStatusChange }) {
           </div>
 
           <StatusMessage color={COLORS.neonCyan}>{status}</StatusMessage>
+
+          {showTraceGuide ? (
+            <div style={{ color: COLORS.textMuted, fontSize: 11, lineHeight: 1.6 }}>
+              {TRACE_GUIDE.label} を薄く表示しています。細い内部線は無視して、外形や目立つ流れだけを気持ちよく 1 本でつないで大丈夫です。
+            </div>
+          ) : null}
 
           <PlayPauseResetBar
             onReset={resetDrawing}
@@ -1085,10 +1127,14 @@ function eventToCenteredCanvasPoint(event, canvas) {
   return { x, y };
 }
 
-function drawDrawCanvas(context, points, isDrawing) {
+function drawDrawCanvas(context, points, isDrawing, traceGuide) {
   context.clearRect(0, 0, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT);
   context.save();
   context.translate(DRAW_CANVAS_WIDTH / 2, DRAW_CANVAS_HEIGHT / 2);
+
+  if (traceGuide) {
+    drawTraceGuide(context, traceGuide);
+  }
 
   context.strokeStyle = COLORS.border;
   context.lineWidth = 0.5;
@@ -1128,6 +1174,44 @@ function drawDrawCanvas(context, points, isDrawing) {
     context.fill();
   }
 
+  context.restore();
+}
+
+function buildTraceGuideOverlay(image) {
+  const canvas = document.createElement("canvas");
+  canvas.width = image.naturalWidth || image.width;
+  canvas.height = image.naturalHeight || image.height;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+  const frame = context.getImageData(0, 0, canvas.width, canvas.height);
+  const pixels = frame.data;
+
+  for (let index = 0; index < pixels.length; index += 4) {
+    const red = pixels[index];
+    const green = pixels[index + 1];
+    const blue = pixels[index + 2];
+    const luminance = (red + green + blue) / 3;
+    const darkness = 255 - luminance;
+    const alpha = darkness > 18 ? Math.min(170, darkness * 1.4) : 0;
+    pixels[index] = 130;
+    pixels[index + 1] = 205;
+    pixels[index + 2] = 230;
+    pixels[index + 3] = alpha;
+  }
+
+  context.putImageData(frame, 0, 0);
+  return canvas;
+}
+
+function drawTraceGuide(context, overlayCanvas) {
+  const scale = Math.min((DRAW_CANVAS_WIDTH * 0.72) / overlayCanvas.width, (DRAW_CANVAS_HEIGHT * 0.78) / overlayCanvas.height);
+  const width = overlayCanvas.width * scale;
+  const height = overlayCanvas.height * scale;
+  context.save();
+  context.globalAlpha = 0.55;
+  context.shadowColor = COLORS.neonCyan;
+  context.shadowBlur = 12;
+  context.drawImage(overlayCanvas, -width / 2, -height / 2, width, height);
   context.restore();
 }
 
