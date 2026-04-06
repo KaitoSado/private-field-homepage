@@ -32,7 +32,7 @@ const DRAW_PRESETS = [
 ];
 const TRACE_GUIDE = {
   id: "grok-line-art",
-  label: "線画お手本",
+  label: "線画から始める",
   src: "/wave-lab-assets/grok-line-art.png"
 };
 const WAVE_MODES = [
@@ -163,19 +163,18 @@ function DrawMode({ onFinish, onStatusChange }) {
   const [rawPoints, setRawPoints] = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [selectedPreset, setSelectedPreset] = useState(null);
-  const [showTraceGuide, setShowTraceGuide] = useState(false);
-  const [guideReady, setGuideReady] = useState(false);
-  const [status, setStatus] = useState("好きなループを描いてみましょう。プリセットも試せます。");
+  const [lineArtReady, setLineArtReady] = useState(false);
+  const [status, setStatus] = useState("好きなループを描いてみましょう。プリセットか線画からも始められます。");
   const drawCanvasRef = useRef(null);
-  const traceGuideRef = useRef(null);
+  const lineArtRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
     const image = new window.Image();
     image.onload = () => {
       if (cancelled) return;
-      traceGuideRef.current = buildTraceGuideOverlay(image);
-      setGuideReady(true);
+      lineArtRef.current = buildLineArtMask(image);
+      setLineArtReady(true);
     };
     image.src = TRACE_GUIDE.src;
     return () => {
@@ -187,23 +186,19 @@ function DrawMode({ onFinish, onStatusChange }) {
     const canvas = drawCanvasRef.current;
     if (!canvas) return;
     const context = canvas.getContext("2d");
-    drawDrawCanvas(context, rawPoints, isDrawing, showTraceGuide && guideReady ? traceGuideRef.current : null);
-  }, [guideReady, isDrawing, rawPoints, showTraceGuide]);
+    drawDrawCanvas(context, rawPoints, isDrawing);
+  }, [isDrawing, rawPoints]);
 
   useEffect(() => {
     if (isDrawing) {
       setStatus("そのまま…いい形ですね");
       return;
     }
-    if (showTraceGuide && rawPoints.length < 10) {
-      setStatus("独立した線は気にせず、大まかな外形を 1 本でつなぐ感じでなぞってみましょう。");
-      return;
-    }
     if (rawPoints.length >= 10) {
       setStatus("この線に魔法をかけると、中身が見えてきます");
       return;
     }
-    setStatus("好きなループを描いてみましょう。プリセットも試せます。");
+    setStatus("好きなループを描いてみましょう。プリセットか線画からも始められます。");
   }, [isDrawing, rawPoints.length]);
 
   useEffect(() => {
@@ -223,6 +218,16 @@ function DrawMode({ onFinish, onStatusChange }) {
     setRawPoints(generated);
     setSelectedPreset(presetId);
     setIsDrawing(false);
+  }
+
+  function castLineArt() {
+    if (!lineArtReady || !lineArtRef.current) return;
+    const extracted = extractLoopFromLineArt(lineArtRef.current, 256);
+    if (!extracted.length) return;
+    setSelectedPreset(TRACE_GUIDE.id);
+    setRawPoints(extracted);
+    setIsDrawing(false);
+    onFinish(extracted);
   }
 
   function beginStroke(event) {
@@ -277,11 +282,7 @@ function DrawMode({ onFinish, onStatusChange }) {
             onPointerCancel={finishStroke}
           />
           <MissionHint
-            text={
-              showTraceGuide
-                ? "細かい内部線は気にせず、外形を気持ちよく 1 本でなぞってみよう"
-                : "描いた線がフーリエ変換の素材になります"
-            }
+            text="描いた線や線画がフーリエ変換の素材になります"
             color={COLORS.neonCyan}
           />
         </div>
@@ -291,8 +292,8 @@ function DrawMode({ onFinish, onStatusChange }) {
           <PresetSelector presets={DRAW_PRESETS} selected={selectedPreset} onSelect={loadPreset} color={COLORS.neonCyan} />
 
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-            <GlowButton color={COLORS.neonCyan} active={showTraceGuide} onClick={() => setShowTraceGuide((current) => !current)} small>
-              線画お手本
+            <GlowButton color={COLORS.neonPurple} onClick={castLineArt} disabled={!lineArtReady} small>
+              線画をフーリエに送る
             </GlowButton>
             <GlowButton color={COLORS.borderLight} onClick={resetDrawing} small>
               描き直す
@@ -308,12 +309,9 @@ function DrawMode({ onFinish, onStatusChange }) {
           </div>
 
           <StatusMessage color={COLORS.neonCyan}>{status}</StatusMessage>
-
-          {showTraceGuide ? (
-            <div style={{ color: COLORS.textMuted, fontSize: 11, lineHeight: 1.6 }}>
-              {TRACE_GUIDE.label} を薄く表示しています。細い内部線は無視して、外形や目立つ流れだけを気持ちよく 1 本でつないで大丈夫です。
-            </div>
-          ) : null}
+          <div style={{ color: COLORS.textMuted, fontSize: 11, lineHeight: 1.6 }}>
+            {TRACE_GUIDE.label} を押すと、細い独立線は無視して外形だけをそのまま Orbit に送ります。
+          </div>
 
           <PlayPauseResetBar
             onReset={resetDrawing}
@@ -1127,14 +1125,10 @@ function eventToCenteredCanvasPoint(event, canvas) {
   return { x, y };
 }
 
-function drawDrawCanvas(context, points, isDrawing, traceGuide) {
+function drawDrawCanvas(context, points, isDrawing) {
   context.clearRect(0, 0, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT);
   context.save();
   context.translate(DRAW_CANVAS_WIDTH / 2, DRAW_CANVAS_HEIGHT / 2);
-
-  if (traceGuide) {
-    drawTraceGuide(context, traceGuide);
-  }
 
   context.strokeStyle = COLORS.border;
   context.lineWidth = 0.5;
@@ -1177,7 +1171,7 @@ function drawDrawCanvas(context, points, isDrawing, traceGuide) {
   context.restore();
 }
 
-function buildTraceGuideOverlay(image) {
+function buildLineArtMask(image) {
   const canvas = document.createElement("canvas");
   canvas.width = image.naturalWidth || image.width;
   canvas.height = image.naturalHeight || image.height;
@@ -1203,16 +1197,113 @@ function buildTraceGuideOverlay(image) {
   return canvas;
 }
 
-function drawTraceGuide(context, overlayCanvas) {
-  const scale = Math.min((DRAW_CANVAS_WIDTH * 0.72) / overlayCanvas.width, (DRAW_CANVAS_HEIGHT * 0.78) / overlayCanvas.height);
-  const width = overlayCanvas.width * scale;
-  const height = overlayCanvas.height * scale;
-  context.save();
-  context.globalAlpha = 0.55;
-  context.shadowColor = COLORS.neonCyan;
-  context.shadowBlur = 12;
-  context.drawImage(overlayCanvas, -width / 2, -height / 2, width, height);
-  context.restore();
+function extractLoopFromLineArt(maskCanvas, targetN = 256) {
+  const context = maskCanvas.getContext("2d", { willReadFrequently: true });
+  const frame = context.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+  const pixels = frame.data;
+  const threshold = 18;
+  let minX = maskCanvas.width;
+  let maxX = 0;
+  let minY = maskCanvas.height;
+  let maxY = 0;
+
+  for (let y = 0; y < maskCanvas.height; y += 1) {
+    for (let x = 0; x < maskCanvas.width; x += 1) {
+      const alpha = pixels[(y * maskCanvas.width + x) * 4 + 3];
+      if (alpha <= threshold) continue;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+  }
+
+  if (minX >= maxX || minY >= maxY) {
+    return [];
+  }
+
+  const centerX = (minX + maxX) / 2;
+  const centerY = (minY + maxY) / 2;
+  const maxRadius = Math.hypot(Math.max(centerX - minX, maxX - centerX), Math.max(centerY - minY, maxY - centerY)) + 8;
+  const radialHits = Array.from({ length: targetN }, (_, index) => {
+    const angle = (index / targetN) * Math.PI * 2;
+    let farthestRadius = 0;
+    for (let radius = 2; radius <= maxRadius; radius += 1.5) {
+      const x = Math.round(centerX + Math.cos(angle) * radius);
+      const y = Math.round(centerY + Math.sin(angle) * radius);
+      if (x < 0 || x >= maskCanvas.width || y < 0 || y >= maskCanvas.height) break;
+      const alpha = pixels[(y * maskCanvas.width + x) * 4 + 3];
+      if (alpha > threshold) {
+        farthestRadius = radius;
+      }
+    }
+    return farthestRadius || null;
+  });
+
+  const firstValid = radialHits.findIndex(Boolean);
+  if (firstValid === -1) {
+    return [];
+  }
+
+  const filledRadii = radialHits.map((radius, index) => {
+    if (radius) return radius;
+    let prevIndex = index;
+    let nextIndex = index;
+
+    while (!radialHits[prevIndex]) {
+      prevIndex = (prevIndex - 1 + radialHits.length) % radialHits.length;
+      if (prevIndex === index) break;
+    }
+    while (!radialHits[nextIndex]) {
+      nextIndex = (nextIndex + 1) % radialHits.length;
+      if (nextIndex === index) break;
+    }
+
+    const prevRadius = radialHits[prevIndex] || radialHits[firstValid];
+    const nextRadius = radialHits[nextIndex] || radialHits[firstValid];
+    return (prevRadius + nextRadius) / 2;
+  });
+
+  const smoothed = filledRadii.map((_, index) => {
+    let total = 0;
+    let count = 0;
+    for (let offset = -2; offset <= 2; offset += 1) {
+      const sample = filledRadii[(index + offset + filledRadii.length) % filledRadii.length];
+      total += sample;
+      count += 1;
+    }
+    return total / count;
+  });
+
+  const points = smoothed.map((radius, index) => {
+    const angle = (index / targetN) * Math.PI * 2;
+    return {
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius
+    };
+  });
+
+  let pointMinX = Infinity;
+  let pointMaxX = -Infinity;
+  let pointMinY = Infinity;
+  let pointMaxY = -Infinity;
+  points.forEach((point) => {
+    pointMinX = Math.min(pointMinX, point.x);
+    pointMaxX = Math.max(pointMaxX, point.x);
+    pointMinY = Math.min(pointMinY, point.y);
+    pointMaxY = Math.max(pointMaxY, point.y);
+  });
+
+  const spanX = Math.max(1, pointMaxX - pointMinX);
+  const spanY = Math.max(1, pointMaxY - pointMinY);
+  const scale = Math.min((DRAW_CANVAS_WIDTH * 0.58) / spanX, (DRAW_CANVAS_HEIGHT * 0.72) / spanY);
+  return resamplePath(
+    points.map((point) => ({
+      x: point.x * scale,
+      y: point.y * scale
+    })),
+    targetN
+  );
 }
 
 function computeOrbitScale(points, width, height) {
