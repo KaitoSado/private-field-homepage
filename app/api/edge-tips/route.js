@@ -4,7 +4,7 @@ import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 const TITLE_LIMIT = 120;
 const CATEGORY_LIMIT = 40;
 const CAMPUS_LIMIT = 80;
-const BODY_LIMIT = 2000;
+const BODY_LIMIT = 12000;
 const ALLOWED_CATEGORIES = new Set(["学割", "無料", "助成", "食費", "交通", "ソフト", "住まい", "学内", "バイト", "その他"]);
 
 function normalizeUrl(value) {
