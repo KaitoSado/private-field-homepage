@@ -222,7 +222,7 @@ function DrawMode({ onFinish, onStatusChange }) {
 
   function castLineArt() {
     if (!lineArtReady || !lineArtRef.current) return;
-    const extracted = extractLoopFromLineArt(lineArtRef.current, 256);
+    const extracted = extractPathFromLineArt(lineArtRef.current, 640);
     if (!extracted.length) return;
     setSelectedPreset(TRACE_GUIDE.id);
     setRawPoints(extracted);
@@ -310,7 +310,7 @@ function DrawMode({ onFinish, onStatusChange }) {
 
           <StatusMessage color={COLORS.neonCyan}>{status}</StatusMessage>
           <div style={{ color: COLORS.textMuted, fontSize: 11, lineHeight: 1.6 }}>
-            {TRACE_GUIDE.label} を押すと、細い独立線は無視して外形だけをそのまま Orbit に送ります。
+            {TRACE_GUIDE.label} を押すと、線画を自動トレースしてそのまま Orbit に送ります。
           </div>
 
           <PlayPauseResetBar
@@ -410,7 +410,11 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
 
       const positions = getEpicyclePositions(visibleCoeffs, visibleCoeffs.length, timeRef.current);
       if (visibleCoeffs.length > 0) {
-        trailRef.current = [...trailRef.current, positions.tip].slice(-1500);
+        const sourceIndex = Math.floor((timeRef.current / (Math.PI * 2)) * sourcePoints.length) % Math.max(1, sourcePoints.length);
+        trailRef.current = [
+          ...trailRef.current,
+          { ...positions.tip, hiddenBefore: Boolean(sourcePoints[sourceIndex]?.hiddenBefore) }
+        ].slice(-1500);
       }
       drawOrbitScene(context, {
         sourcePoints,
@@ -1144,20 +1148,12 @@ function drawDrawCanvas(context, points, isDrawing) {
     context.strokeStyle = "rgba(0,229,255,0.18)";
     context.shadowColor = COLORS.neonCyan;
     context.shadowBlur = 12;
-    context.beginPath();
-    context.moveTo(points[0].x, points[0].y);
-    points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
-    if (!isDrawing) context.closePath();
-    context.stroke();
+    strokeSegmentedPath(context, points, !isDrawing);
 
     context.shadowBlur = 0;
     context.lineWidth = 2;
     context.strokeStyle = COLORS.neonCyan;
-    context.beginPath();
-    context.moveTo(points[0].x, points[0].y);
-    points.slice(1).forEach((point) => context.lineTo(point.x, point.y));
-    if (!isDrawing) context.closePath();
-    context.stroke();
+    strokeSegmentedPath(context, points, !isDrawing);
 
     const tail = points[points.length - 1];
     context.fillStyle = COLORS.neonPink;
@@ -1201,7 +1197,7 @@ function buildLineArtMask(image) {
   return canvas;
 }
 
-function extractLoopFromLineArt(maskCanvas, targetN = 256) {
+function extractPathFromLineArt(maskCanvas, targetN = 640) {
   const context = maskCanvas.getContext("2d", { willReadFrequently: true });
   const frame = context.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
   const pixels = frame.data;
@@ -1219,56 +1215,45 @@ function extractLoopFromLineArt(maskCanvas, targetN = 256) {
     }
   }
 
-  const dilated = dilateMask(occupancy, width, height, 4);
-  const region = extractLargestRegion(dilated, width, height);
-  if (!region) {
+  const dilated = dilateMask(occupancy, width, height, 1);
+  const skeleton = skeletonizeMask(dilated, width, height);
+  const components = extractAllRegions(skeleton, width, height);
+  if (!components.length) {
     return [];
   }
 
-  const rightEdge = [];
-  const leftEdge = [];
-  let minX = width;
-  let maxX = 0;
-  let minY = height;
-  let maxY = 0;
+  const tracedSegments = components
+    .map((component) => traceSkeletonComponent(component, width, height))
+    .filter((segment) => segment.length >= 4);
 
-  for (let y = 0; y < height; y += 1) {
-    let left = -1;
-    let right = -1;
-    for (let x = 0; x < width; x += 1) {
-      if (!region[y * width + x]) continue;
-      if (left === -1) left = x;
-      right = x;
-    }
-    if (left === -1) continue;
-    minX = Math.min(minX, left);
-    maxX = Math.max(maxX, right);
-    minY = Math.min(minY, y);
-    maxY = Math.max(maxY, y);
-    rightEdge.push({ x: right, y });
-    leftEdge.push({ x: left, y });
-  }
-
-  if (rightEdge.length < 12) {
+  if (!tracedSegments.length) {
     return [];
   }
 
-  const points = [...rightEdge, ...leftEdge.reverse()].map((point) => ({
-    x: point.x - (minX + maxX) / 2,
-    y: point.y - (minY + maxY) / 2
-  }));
-  const smoothedPoints = smoothLoopPoints(points, 4);
+  const orderedSegments = orderTracedSegments(tracedSegments);
+  const path = mergeSegmentsWithBreaks(orderedSegments);
+  const smoothedPath = smoothSegmentedPoints(path, 2);
+  const sampledPath = resamplePathWithBreaks(smoothedPath, targetN);
+
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  sampledPath.forEach((point) => {
+    minX = Math.min(minX, point.x);
+    maxX = Math.max(maxX, point.x);
+    minY = Math.min(minY, point.y);
+    maxY = Math.max(maxY, point.y);
+  });
 
   const spanX = Math.max(1, maxX - minX);
   const spanY = Math.max(1, maxY - minY);
   const scale = Math.min((DRAW_CANVAS_WIDTH * 0.58) / spanX, (DRAW_CANVAS_HEIGHT * 0.72) / spanY);
-  return resamplePath(
-    smoothedPoints.map((point) => ({
-      x: point.x * scale,
-      y: point.y * scale
-    })),
-    targetN
-  );
+  return sampledPath.map((point) => ({
+    x: point.x * scale,
+    y: point.y * scale,
+    hiddenBefore: point.hiddenBefore
+  }));
 }
 
 function dilateMask(source, width, height, iterations) {
@@ -1297,11 +1282,74 @@ function dilateMask(source, width, height, iterations) {
   return current;
 }
 
-function extractLargestRegion(source, width, height) {
+function skeletonizeMask(source, width, height) {
+  const data = new Uint8Array(source);
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    const toDelete = [];
+    for (let pass = 0; pass < 2; pass += 1) {
+      toDelete.length = 0;
+      for (let y = 1; y < height - 1; y += 1) {
+        for (let x = 1; x < width - 1; x += 1) {
+          const index = y * width + x;
+          if (!data[index]) continue;
+          const neighbors = getEightNeighbors(data, width, index);
+          const count = neighbors.reduce((sum, value) => sum + value, 0);
+          if (count < 2 || count > 6) continue;
+          const transitions = countBinaryTransitions(neighbors);
+          if (transitions !== 1) continue;
+          const [p2, p3, p4, p5, p6, p7, p8, p9] = neighbors;
+          if (pass === 0) {
+            if (p2 * p4 * p6 !== 0) continue;
+            if (p4 * p6 * p8 !== 0) continue;
+          } else {
+            if (p2 * p4 * p8 !== 0) continue;
+            if (p2 * p6 * p8 !== 0) continue;
+          }
+          toDelete.push(index);
+        }
+      }
+      if (toDelete.length) {
+        changed = true;
+        toDelete.forEach((index) => {
+          data[index] = 0;
+        });
+      }
+    }
+  }
+
+  return data;
+}
+
+function getEightNeighbors(data, width, index) {
+  return [
+    data[index - width],
+    data[index - width + 1],
+    data[index + 1],
+    data[index + width + 1],
+    data[index + width],
+    data[index + width - 1],
+    data[index - 1],
+    data[index - width - 1]
+  ];
+}
+
+function countBinaryTransitions(neighbors) {
+  let transitions = 0;
+  for (let index = 0; index < neighbors.length; index += 1) {
+    const current = neighbors[index];
+    const next = neighbors[(index + 1) % neighbors.length];
+    if (current === 0 && next === 1) transitions += 1;
+  }
+  return transitions;
+}
+
+function extractAllRegions(source, width, height) {
   const visited = new Uint8Array(width * height);
   const queue = new Int32Array(width * height);
-  let bestRegion = null;
-  let bestSize = 0;
+  const regions = [];
 
   for (let index = 0; index < source.length; index += 1) {
     if (!source[index] || visited[index]) continue;
@@ -1316,55 +1364,227 @@ function extractLargestRegion(source, width, height) {
       region.push(current);
       const x = current % width;
       const y = Math.floor(current / width);
-      const neighbors = [
-        current - 1,
-        current + 1,
-        current - width,
-        current + width
-      ];
-
-      if (x === 0) neighbors[0] = -1;
-      if (x === width - 1) neighbors[1] = -1;
-      if (y === 0) neighbors[2] = -1;
-      if (y === height - 1) neighbors[3] = -1;
-
-      neighbors.forEach((neighbor) => {
-        if (neighbor < 0 || visited[neighbor] || !source[neighbor]) return;
-        visited[neighbor] = 1;
-        queue[tail++] = neighbor;
-      });
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+          const neighbor = ny * width + nx;
+          if (!source[neighbor] || visited[neighbor]) continue;
+          visited[neighbor] = 1;
+          queue[tail++] = neighbor;
+        }
+      }
     }
 
-    if (region.length > bestSize) {
-      bestSize = region.length;
-      bestRegion = region;
+    if (region.length >= 6) {
+      regions.push(region);
     }
   }
 
-  if (!bestRegion?.length) return null;
-  const mask = new Uint8Array(width * height);
-  bestRegion.forEach((index) => {
-    mask[index] = 1;
-  });
-  return mask;
+  return regions.sort((left, right) => right.length - left.length);
 }
 
-function smoothLoopPoints(points, radius) {
-  return points.map((_, index) => {
+function traceSkeletonComponent(indices, width, height) {
+  const indexSet = new Set(indices);
+  const adjacency = new Map();
+  indices.forEach((index) => {
+    const x = index % width;
+    const y = Math.floor(index / width);
+    const neighbors = [];
+    for (let dy = -1; dy <= 1; dy += 1) {
+      for (let dx = -1; dx <= 1; dx += 1) {
+        if (dx === 0 && dy === 0) continue;
+        const nx = x + dx;
+        const ny = y + dy;
+        if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+        const neighbor = ny * width + nx;
+        if (indexSet.has(neighbor)) neighbors.push(neighbor);
+      }
+    }
+    adjacency.set(index, neighbors);
+  });
+
+  const endpoints = indices.filter((index) => (adjacency.get(index)?.length || 0) <= 1);
+  const start = (endpoints.length ? endpoints : indices).sort((left, right) => {
+    const ly = Math.floor(left / width);
+    const ry = Math.floor(right / width);
+    if (ly !== ry) return ly - ry;
+    return (left % width) - (right % width);
+  })[0];
+  const visitedEdges = new Set();
+  const points = [];
+
+  function dfs(current, previousVector = { x: 1, y: 0 }) {
+    points.push(indexToPoint(current, width));
+    const currentNeighbors = adjacency.get(current) || [];
+    const available = currentNeighbors.filter((neighbor) => !visitedEdges.has(makeEdgeKey(current, neighbor)));
+    available.sort((left, right) => {
+      const leftScore = directionScore(current, left, width, previousVector, adjacency);
+      const rightScore = directionScore(current, right, width, previousVector, adjacency);
+      return leftScore - rightScore;
+    });
+
+    available.forEach((neighbor) => {
+      const edgeKey = makeEdgeKey(current, neighbor);
+      visitedEdges.add(edgeKey);
+      const vector = {
+        x: (neighbor % width) - (current % width),
+        y: Math.floor(neighbor / width) - Math.floor(current / width)
+      };
+      dfs(neighbor, vector);
+      points.push(indexToPoint(current, width));
+    });
+  }
+
+  dfs(start);
+  return simplifyPointSequence(points, 1.5);
+}
+
+function makeEdgeKey(a, b) {
+  return a < b ? `${a}:${b}` : `${b}:${a}`;
+}
+
+function directionScore(from, to, width, previousVector, adjacency) {
+  const vector = {
+    x: (to % width) - (from % width),
+    y: Math.floor(to / width) - Math.floor(from / width)
+  };
+  const dot = vector.x * previousVector.x + vector.y * previousVector.y;
+  const magnitude = Math.hypot(vector.x, vector.y) * Math.hypot(previousVector.x, previousVector.y || 1);
+  const turnPenalty = magnitude ? 1 - dot / magnitude : 1;
+  const degreePenalty = (adjacency.get(to)?.length || 0) > 2 ? 0.25 : 0;
+  return turnPenalty + degreePenalty;
+}
+
+function indexToPoint(index, width) {
+  return {
+    x: index % width,
+    y: Math.floor(index / width)
+  };
+}
+
+function simplifyPointSequence(points, minimumDistance) {
+  const compact = [];
+  points.forEach((point) => {
+    const last = compact[compact.length - 1];
+    if (!last || Math.hypot(point.x - last.x, point.y - last.y) >= minimumDistance) {
+      compact.push(point);
+    }
+  });
+  return compact;
+}
+
+function orderTracedSegments(segments) {
+  if (segments.length <= 1) return segments;
+  const remaining = [...segments];
+  const ordered = [remaining.shift()];
+
+  while (remaining.length) {
+    const lastPoint = ordered[ordered.length - 1][ordered[ordered.length - 1].length - 1];
+    let bestIndex = 0;
+    let bestReverse = false;
+    let bestDistance = Infinity;
+
+    remaining.forEach((segment, index) => {
+      const startDistance = Math.hypot(lastPoint.x - segment[0].x, lastPoint.y - segment[0].y);
+      const endDistance = Math.hypot(lastPoint.x - segment[segment.length - 1].x, lastPoint.y - segment[segment.length - 1].y);
+      if (startDistance < bestDistance) {
+        bestDistance = startDistance;
+        bestIndex = index;
+        bestReverse = false;
+      }
+      if (endDistance < bestDistance) {
+        bestDistance = endDistance;
+        bestIndex = index;
+        bestReverse = true;
+      }
+    });
+
+    const [next] = remaining.splice(bestIndex, 1);
+    ordered.push(bestReverse ? [...next].reverse() : next);
+  }
+
+  return ordered;
+}
+
+function mergeSegmentsWithBreaks(segments) {
+  const merged = [];
+  segments.forEach((segment, segmentIndex) => {
+    segment.forEach((point, pointIndex) => {
+      merged.push({
+        x: point.x,
+        y: point.y,
+        hiddenBefore: segmentIndex > 0 && pointIndex === 0
+      });
+    });
+  });
+  return merged;
+}
+
+function smoothSegmentedPoints(points, radius) {
+  return points.map((point, index) => {
+    if (point.hiddenBefore) {
+      return { ...point };
+    }
     let totalX = 0;
     let totalY = 0;
     let count = 0;
     for (let offset = -radius; offset <= radius; offset += 1) {
-      const sample = points[(index + offset + points.length) % points.length];
+      const sample = points[index + offset];
+      if (!sample || sample.hiddenBefore) continue;
       totalX += sample.x;
       totalY += sample.y;
       count += 1;
     }
-    return {
-      x: totalX / count,
-      y: totalY / count
-    };
+    return count
+      ? {
+          x: totalX / count,
+          y: totalY / count,
+          hiddenBefore: point.hiddenBefore
+        }
+      : { ...point };
   });
+}
+
+function resamplePathWithBreaks(rawPoints, targetN) {
+  const segments = [];
+  let current = [];
+  rawPoints.forEach((point) => {
+    if (point.hiddenBefore && current.length) {
+      segments.push(current);
+      current = [];
+    }
+    current.push({ x: point.x, y: point.y });
+  });
+  if (current.length) segments.push(current);
+
+  const lengths = segments.map((segment) => segmentLength(segment));
+  const totalLength = lengths.reduce((sum, value) => sum + value, 0) || 1;
+  const merged = [];
+
+  segments.forEach((segment, index) => {
+    const quota = Math.max(12, Math.round((lengths[index] / totalLength) * targetN));
+    const sampled = resamplePath(segment, quota);
+    sampled.forEach((point, pointIndex) => {
+      merged.push({
+        x: point.x,
+        y: point.y,
+        hiddenBefore: index > 0 && pointIndex === 0
+      });
+    });
+  });
+
+  return merged;
+}
+
+function segmentLength(points) {
+  let length = 0;
+  for (let index = 1; index < points.length; index += 1) {
+    length += Math.hypot(points[index].x - points[index - 1].x, points[index].y - points[index - 1].y);
+  }
+  return length;
 }
 
 function computeOrbitScale(points, width, height) {
@@ -1424,15 +1644,11 @@ function drawOrbitScene(
   if (showOriginal && sourcePoints?.length) {
     const glowBoost = animPhase === "unfolding" && unfoldElapsed < 500;
     context.save();
-    context.beginPath();
-    context.moveTo(sourcePoints[0].x * scale, sourcePoints[0].y * scale);
-    sourcePoints.slice(1).forEach((point) => context.lineTo(point.x * scale, point.y * scale));
-    context.closePath();
     context.strokeStyle = glowBoost ? "rgba(0, 229, 255, 0.3)" : "rgba(0, 229, 255, 0.15)";
     context.lineWidth = 1;
     context.shadowColor = COLORS.neonCyan;
     context.shadowBlur = glowBoost ? 20 : 6;
-    context.stroke();
+    strokeSegmentedPath(context, sourcePoints.map((point) => ({ ...point, x: point.x * scale, y: point.y * scale })), false);
     context.restore();
   }
 
@@ -1461,14 +1677,11 @@ function drawOrbitScene(
 
   if (trail?.length > 1) {
     context.save();
-    context.beginPath();
-    context.moveTo(trail[0].x * scale, trail[0].y * scale);
-    trail.slice(1).forEach((point) => context.lineTo(point.x * scale, point.y * scale));
     context.strokeStyle = COLORS.neonPink;
     context.lineWidth = 1.5;
     context.shadowColor = COLORS.neonPink;
     context.shadowBlur = 6;
-    context.stroke();
+    strokeSegmentedPath(context, trail.map((point) => ({ ...point, x: point.x * scale, y: point.y * scale })), false);
     context.restore();
   }
 
@@ -1484,6 +1697,28 @@ function drawOrbitScene(
   }
 
   context.restore();
+}
+
+function strokeSegmentedPath(context, points, closeLoop) {
+  if (!points?.length) return;
+  context.beginPath();
+  let segmentStartIndex = 0;
+  context.moveTo(points[0].x, points[0].y);
+  for (let index = 1; index < points.length; index += 1) {
+    if (points[index].hiddenBefore) {
+      if (closeLoop && index - segmentStartIndex > 2 && !points[segmentStartIndex].hiddenBefore) {
+        context.closePath();
+      }
+      segmentStartIndex = index;
+      context.moveTo(points[index].x, points[index].y);
+      continue;
+    }
+    context.lineTo(points[index].x, points[index].y);
+  }
+  if (closeLoop && points.length - segmentStartIndex > 2 && !points[segmentStartIndex].hiddenBefore) {
+    context.closePath();
+  }
+  context.stroke();
 }
 
 function buildAnalyzeStatus(filterMode, activeCount, totalCount) {
