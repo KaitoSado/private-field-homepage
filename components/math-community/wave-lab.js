@@ -344,7 +344,6 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   const canvasRef = useRef(null);
   const rafRef = useRef(0);
   const timeRef = useRef(0);
-  const trailRef = useRef([]);
   const unfoldStartRef = useRef(0);
   const sourceOverlayRef = useRef(null);
   const [strokeSystems, setStrokeSystems] = useState([]);
@@ -360,6 +359,29 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   const sourceStrokes = useMemo(() => splitSegmentedPath(sourcePoints), [sourcePoints]);
   const isImageSource = Boolean(sourcePoints?.sourceImage);
   const orbitScale = useMemo(() => computeOrbitScale(sourcePoints, DRAW_CANVAS_WIDTH, DRAW_CANVAS_HEIGHT), [sourcePoints]);
+  const precomputedTrails = useMemo(() => {
+    if (!strokeSystems.length) return [];
+    const totalCoeffs = strokeSystems.reduce((sum, system) => sum + system.coeffs.length, 0);
+    const coeffRatio = totalCoeffs > 0 ? Math.min(1, numCircles / totalCoeffs) : 0;
+    return strokeSystems.map((system) => {
+      const quota = Math.max(1, Math.round(system.coeffs.length * coeffRatio));
+      const visibleCoeffs = [];
+      for (let i = 0; i < Math.min(quota, system.coeffs.length); i += 1) {
+        if (circleVisibility[system.startIndex + i] !== false) {
+          visibleCoeffs.push(system.coeffs[i]);
+        }
+      }
+      if (!visibleCoeffs.length) return [];
+      const numSamples = Math.max(80, Math.min(500, visibleCoeffs.length * 5));
+      const trail = [];
+      for (let i = 0; i <= numSamples; i += 1) {
+        const t = (i / numSamples) * Math.PI * 2;
+        trail.push(getEpicyclePositions(visibleCoeffs, visibleCoeffs.length, t).tip);
+      }
+      return trail;
+    });
+  }, [circleVisibility, numCircles, strokeSystems]);
+
   const missionHint = useMemo(() => {
     if (numCircles <= 2) return ORBIT_MISSIONS[3];
     if (numCircles <= 5) return ORBIT_MISSIONS[0];
@@ -389,7 +411,6 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
     setShowOriginal(true);
     setShowCircles(true);
     setSpeed(1);
-    trailRef.current = systems.map(() => []);
     timeRef.current = 0;
     unfoldStartRef.current = Date.now();
     setAnimPhase("unfolding");
@@ -452,7 +473,6 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
           setAnimPhase("paused");
         } else {
           timeRef.current -= Math.PI * 2;
-          trailRef.current = strokeSystems.map(() => []);
         }
       }
 
@@ -470,12 +490,6 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
         }
 
         const positions = getEpicyclePositions(visibleCoeffs, visibleCoeffs.length, timeRef.current);
-        if (!trailRef.current[systemIndex]) {
-          trailRef.current[systemIndex] = [];
-        }
-        if (visibleCoeffs.length > 0) {
-          trailRef.current[systemIndex] = [...trailRef.current[systemIndex], positions.tip].slice(-1500);
-        }
         return {
           strokeIndex: systemIndex,
           positions,
@@ -484,13 +498,20 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
         };
       });
 
+      const progress = Math.min(1, timeRef.current / (Math.PI * 2));
+      const visibleTrails = precomputedTrails.map((trail) => {
+        if (!trail.length) return [];
+        const end = Math.ceil(progress * trail.length);
+        return trail.slice(0, end);
+      });
+
       drawOrbitScene(context, {
         sourcePoints,
         sourceOverlay: sourceOverlayRef.current,
         showOriginal,
         showCircles,
         positionGroups,
-        trails: trailRef.current,
+        trails: visibleTrails,
         scale: orbitScale,
         animPhase,
         unfoldElapsed: now - unfoldStartRef.current
@@ -501,7 +522,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
 
     rafRef.current = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [animPhase, circleVisibility, isImageSource, numCircles, orbitScale, playing, showCircles, showOriginal, sourcePoints, speed, strokeSystems]);
+  }, [animPhase, circleVisibility, isImageSource, numCircles, orbitScale, playing, precomputedTrails, showCircles, showOriginal, sourcePoints, speed, strokeSystems]);
 
   function toggleRun() {
     if (animPhase === "unfolding") return;
@@ -510,7 +531,6 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   }
 
   function resetOrbit() {
-    trailRef.current = strokeSystems.map(() => []);
     timeRef.current = 0;
     setPlaying(true);
     setAnimPhase("playing");
@@ -518,12 +538,10 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
 
   function handleCircleCountChange(nextValue) {
     setNumCircles(nextValue);
-    trailRef.current = strokeSystems.map(() => []);
     timeRef.current = 0;
   }
 
   function toggleCircle(index) {
-    trailRef.current = strokeSystems.map(() => []);
     timeRef.current = 0;
     setCircleVisibility((current) => ({
       ...current,
