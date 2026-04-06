@@ -382,9 +382,10 @@ export function EdgeInfoBoard({ initialItems, initialCategories, initialCampuses
             <label className="field">
               <span>内容</span>
               <textarea
-                rows="6"
+                rows="10"
                 value={form.body}
                 onChange={(event) => updateField("body", event.target.value)}
+                maxLength={12000}
                 placeholder="どういう条件で使えるか、どこから申し込むか、注意点があれば短く。"
                 required
               />
