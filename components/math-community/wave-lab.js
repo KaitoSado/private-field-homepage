@@ -35,20 +35,25 @@ const WAVE_MODES = [
   { id: "orbit", icon: "◎", label: "Orbit", sub: "回す", color: COLORS.neonPurple },
   { id: "analyze", icon: "≋", label: "Analyze", sub: "分解する", color: COLORS.neonBlue }
 ];
-const PLACEHOLDER_META = {
-  analyze: {
-    icon: "≋",
-    title: "Coming Soon",
-    subtitle: "Phase 3 で実装予定",
-    color: COLORS.neonBlue
-  }
-};
 const ORBIT_MISSIONS = [
   "少ない円だけで元の絵っぽくしてみよう",
   "一番影響の大きい円を見つけてみよう",
   "ぼんやり側にして抽象アートを作ろう",
   "円 1 つだけにするとどうなる？"
 ];
+const ANALYZE_PRESETS = [
+  { id: "Simple wave", label: "単純波" },
+  { id: "Chord", label: "和音" },
+  { id: "Square wave", label: "矩形波" },
+  { id: "Sawtooth", label: "鋸歯波" },
+  { id: "Noisy wave", label: "ノイズ入り" },
+  { id: "Pulse", label: "パルス" }
+];
+const ANALYZE_MISSIONS = {
+  "Noisy wave": "ノイズ入り波形からノイズを除去してみよう",
+  "Square wave": "矩形波の一番大事な成分だけ残してみよう",
+  default: "どのピークが形を決めているか見抜こう"
+};
 
 export function WaveLab() {
   const [mode, setMode] = useState("draw");
@@ -91,7 +96,7 @@ export function WaveLab() {
         <main style={{ flex: 1, padding: 16, display: "flex" }}>
           {mode === "draw" ? <DrawMode onFinish={handleDrawFinish} onStatusChange={setStatusText} /> : null}
           {mode === "orbit" ? <OrbitMode initialPoints={drawnPoints} onModeChange={setMode} onStatusChange={setStatusText} /> : null}
-          {mode === "analyze" ? <ModePlaceholder mode="analyze" points={drawnPoints} onStatusChange={setStatusText} /> : null}
+          {mode === "analyze" ? <AnalyzeMode onStatusChange={setStatusText} /> : null}
         </main>
 
         <Footer mode={mode} />
@@ -513,55 +518,283 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   );
 }
 
-function ModePlaceholder({ mode, points, onStatusChange }) {
-  const meta = PLACEHOLDER_META[mode];
+function AnalyzeMode({ onStatusChange }) {
+  const inputCanvasRef = useRef(null);
+  const spectrumCanvasRef = useRef(null);
+  const outputCanvasRef = useRef(null);
+  const [preset, setPreset] = useState("Chord");
+  const [signal, setSignal] = useState([]);
+  const [spectrum, setSpectrum] = useState([]);
+  const [mask, setMask] = useState({});
+  const [filterMode, setFilterMode] = useState(null);
+  const [cutoff, setCutoff] = useState(20);
+
+  const reconSignal = useMemo(() => reconstructSignal(spectrum, signal.length || 256, mask), [mask, signal.length, spectrum]);
+  const activeCount = useMemo(
+    () => spectrum.reduce((count, _, index) => count + (mask[index] !== false ? 1 : 0), 0),
+    [mask, spectrum]
+  );
+  const status = useMemo(() => buildAnalyzeStatus(filterMode, activeCount, spectrum.length), [activeCount, filterMode, spectrum.length]);
+  const mission = ANALYZE_MISSIONS[preset] || ANALYZE_MISSIONS.default;
 
   useEffect(() => {
-    onStatusChange?.(
-      mode === "analyze"
-        ? (points?.length ? "この形を、次の段階で成分ごとに分解します。" : "まずは Draw で形を作ると、分解モードの準備ができます。")
-        : buildWaveStatus(mode, points)
-    );
-  }, [mode, onStatusChange, points]);
+    loadPresetSignal("Chord");
+  }, []);
+
+  useEffect(() => {
+    onStatusChange?.(status);
+  }, [onStatusChange, status]);
+
+  useEffect(() => {
+    if (!filterMode || spectrum.length === 0) return;
+    const nextMask = {};
+    const half = Math.floor(spectrum.length / 2);
+    spectrum.forEach((_, index) => {
+      const distance = spectralDistance(index, spectrum.length);
+      if (filterMode === "lowpass") {
+        nextMask[index] = distance <= cutoff;
+      } else if (filterMode === "highpass") {
+        nextMask[index] = distance >= cutoff && distance <= half;
+      } else if (filterMode === "bandpass") {
+        nextMask[index] = distance >= cutoff - 5 && distance <= cutoff + 5;
+      }
+    });
+    setMask(nextMask);
+  }, [cutoff, filterMode, spectrum]);
+
+  useEffect(() => {
+    const canvas = inputCanvasRef.current;
+    if (!canvas || signal.length === 0) return;
+    const context = canvas.getContext("2d");
+    drawSignalPanel(context, {
+      signal,
+      color: COLORS.neonBlue
+    });
+  }, [signal]);
+
+  useEffect(() => {
+    const canvas = spectrumCanvasRef.current;
+    if (!canvas || spectrum.length === 0) return;
+    const context = canvas.getContext("2d");
+    drawSpectrumPanel(context, {
+      spectrum,
+      mask,
+      filterMode,
+      cutoff
+    });
+  }, [cutoff, filterMode, mask, spectrum]);
+
+  useEffect(() => {
+    const canvas = outputCanvasRef.current;
+    if (!canvas || signal.length === 0 || reconSignal.length === 0) return;
+    const context = canvas.getContext("2d");
+    drawReconstructedSignalPanel(context, {
+      original: signal,
+      reconstructed: reconSignal
+    });
+  }, [reconSignal, signal]);
+
+  function loadPresetSignal(nextPreset) {
+    const sampleCount = 256;
+    const nextSignal = Array.from({ length: sampleCount }, (_, index) => SIGNAL_PRESETS[nextPreset](index, sampleCount));
+    setPreset(nextPreset);
+    setSignal(nextSignal);
+    setSpectrum(computeSignalDFT(nextSignal));
+    setMask({});
+    setFilterMode(null);
+    setCutoff(20);
+  }
+
+  function handleSpectrumClick(event) {
+    if (!spectrum.length) return;
+    const rect = spectrumCanvasRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const relativeX = (event.clientX - rect.left) / rect.width;
+    const index = Math.max(0, Math.min(spectrum.length - 1, Math.floor(relativeX * spectrum.length)));
+    setFilterMode(null);
+    setMask((current) => ({
+      ...current,
+      [index]: current[index] === false ? true : false
+    }));
+  }
+
+  function toggleFilter(nextMode) {
+    setFilterMode((current) => {
+      const updated = current === nextMode ? null : nextMode;
+      if (updated === null) {
+        setMask({});
+      }
+      return updated;
+    });
+  }
+
+  function resetMask() {
+    setFilterMode(null);
+    setMask({});
+  }
 
   return (
     <PlayLayout
       canvasArea={
-        <div
-          style={{
-            width: "100%",
-            height: "100%",
-            borderRadius: 12,
-            border: `1px solid ${COLORS.border}`,
-            background: COLORS.bgAlt,
-            display: "grid",
-            placeItems: "center",
-            textAlign: "center",
-            gap: 10
-          }}
-        >
-          <div style={{ display: "grid", gap: 8 }}>
-            <span style={{ fontSize: 64, lineHeight: 1, color: meta.color, textShadow: `0 0 24px ${meta.color}55` }}>{meta.icon}</span>
-            <strong style={{ fontSize: 16, color: COLORS.textMuted }}>{meta.title}</strong>
-            <span style={{ fontSize: 12, color: COLORS.textDim }}>{meta.subtitle}</span>
+        <div style={{ display: "grid", gap: 12, height: "100%", position: "relative" }}>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 8,
+              justifyContent: "center",
+              padding: "4px 0"
+            }}
+          >
+            {ANALYZE_PRESETS.map((item) => (
+              <GlowButton
+                key={item.id}
+                small
+                color={COLORS.neonBlue}
+                active={preset === item.id}
+                onClick={() => loadPresetSignal(item.id)}
+              >
+                {item.label}
+              </GlowButton>
+            ))}
           </div>
+
+          <AnalyzePanelFrame label="時間領域（入力)">
+            <canvas
+              ref={inputCanvasRef}
+              width={600}
+              height={100}
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "block"
+              }}
+            />
+          </AnalyzePanelFrame>
+
+          <AnalyzePanelFrame label="周波数領域（成分)">
+            <canvas
+              ref={spectrumCanvasRef}
+              width={600}
+              height={100}
+              onClick={handleSpectrumClick}
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "block",
+                cursor: "crosshair"
+              }}
+            />
+          </AnalyzePanelFrame>
+
+          <AnalyzePanelFrame label="再構成（出力)">
+            <canvas
+              ref={outputCanvasRef}
+              width={600}
+              height={100}
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "block"
+              }}
+            />
+          </AnalyzePanelFrame>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 10,
+              borderRadius: 8,
+              border: `1px solid ${COLORS.border}`,
+              background: COLORS.surface,
+              padding: "8px 12px"
+            }}
+          >
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              <GlowButton color={COLORS.neonAmber} active={filterMode === "lowpass"} onClick={() => toggleFilter("lowpass")} small>
+                低域通過
+              </GlowButton>
+              <GlowButton color={COLORS.neonAmber} active={filterMode === "highpass"} onClick={() => toggleFilter("highpass")} small>
+                高域通過
+              </GlowButton>
+              <GlowButton color={COLORS.neonAmber} active={filterMode === "bandpass"} onClick={() => toggleFilter("bandpass")} small>
+                帯域通過
+              </GlowButton>
+              <GlowButton color={COLORS.borderLight} onClick={resetMask} small>
+                全復元
+              </GlowButton>
+            </div>
+
+            {filterMode ? (
+              <NeonSlider
+                label="カットオフ"
+                min={1}
+                max={Math.max(2, Math.floor(spectrum.length / 2))}
+                step={1}
+                value={Math.min(cutoff, Math.max(2, Math.floor(spectrum.length / 2)))}
+                onChange={setCutoff}
+                color={COLORS.neonAmber}
+              />
+            ) : null}
+          </div>
+
+          <MissionHint text={mission} color={COLORS.neonBlue} />
         </div>
       }
       controlPanel={
-        <ControlPanel title={mode === "orbit" ? "Orbit" : "Analyze"} subtitle={points?.length ? `${points.length} 点の素材を受け取りました` : "まだ素材がありません"}>
-          <StatusMessage color={meta.color}>
-            {mode === "orbit"
-              ? "Phase 2 では、描いた線が回転する円の列に変身します。"
-              : "Phase 3 では、波形を成分ごとに分解してフィルタできます。"}
+        <ControlPanel title="Analyze" subtitle="波形を成分へほどいて、残す・消すを試します">
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10 }}>
+            <ValueCard label="プリセット" value={ANALYZE_PRESETS.find((item) => item.id === preset)?.label || preset} color={COLORS.neonBlue} />
+            <ValueCard label="有効成分" value={`${activeCount}/${spectrum.length || 0}`} color={COLORS.neonGreen} />
+            <ValueCard label="フィルタ" value={filterMode === "lowpass" ? "低域" : filterMode === "highpass" ? "高域" : filterMode === "bandpass" ? "帯域" : "なし"} color={filterMode ? COLORS.neonAmber : COLORS.textMuted} />
+          </div>
+
+          <StatusMessage color={COLORS.neonBlue}>
+            {status}
           </StatusMessage>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-            <ValueCard label="素材点" value={points?.length || 0} color={meta.color} />
-            <ValueCard label="状態" value="Coming Soon" color={COLORS.textMuted} />
+
+          <div style={{ display: "grid", gap: 8 }}>
+            <span style={{ color: COLORS.textDim, fontSize: 10, letterSpacing: "0.08em" }}>観察のコツ</span>
+            <div style={{ display: "grid", gap: 6, color: COLORS.textMuted, fontSize: 11, lineHeight: 1.5 }}>
+              <span>・棒をクリックすると、その成分だけ消したり戻したりできます</span>
+              <span>・フィルタを使うと、波形のなめらかさが一気に変わります</span>
+              <span>・緑の線と青いゴーストの差が、削った情報です</span>
+            </div>
           </div>
         </ControlPanel>
       }
-      footer={mode === "orbit" ? "描いた形が、回転する部品へ変わる予定です" : "波をほどいて、中の成分を見る予定です"}
+      footer="さっきの円の連鎖も、ここでは成分として見えます"
     />
+  );
+}
+
+function AnalyzePanelFrame({ label, children }) {
+  return (
+    <div
+      style={{
+        position: "relative",
+        borderRadius: 12,
+        border: `1px solid ${COLORS.border}`,
+        background: COLORS.bgAlt,
+        overflow: "hidden",
+        minHeight: 120
+      }}
+    >
+      <span
+        style={{
+          position: "absolute",
+          top: 8,
+          left: 12,
+          color: COLORS.textDim,
+          fontSize: 10,
+          letterSpacing: "0.08em",
+          zIndex: 2
+        }}
+      >
+        {label}
+      </span>
+      <div style={{ width: "100%", height: "100%" }}>{children}</div>
+    </div>
   );
 }
 
@@ -812,7 +1045,7 @@ function Footer({ mode }) {
       ? "描いた線がフーリエ変換の素材になります"
       : mode === "orbit"
         ? "回転する部品たちが、描いた形を作ります"
-        : "波を成分ごとに分けると、隠れた秩序が見えてきます";
+        : "さっきの円の連鎖も、ここでは成分として見えます";
 
   return (
     <div
@@ -841,7 +1074,7 @@ function buildWaveStatus(mode, drawnPoints) {
   if (mode === "orbit") {
     return drawnPoints?.length ? "複雑な形は、回転する部品の組み合わせへほどけます。" : "まずは Draw で形を作ると、ここで中身が見えてきます。";
   }
-  return drawnPoints?.length ? "同じ形でも、成分に分けると違う見え方になります。" : "Draw で素材を用意すると、分解モードの準備ができます。";
+  return "この波形は、いくつかの成分の混ざり物です";
 }
 
 function eventToCenteredCanvasPoint(event, canvas) {
@@ -1016,6 +1249,152 @@ function drawOrbitScene(
 
   context.restore();
 }
+
+function buildAnalyzeStatus(filterMode, activeCount, totalCount) {
+  if (filterMode === "lowpass") {
+    return "高い成分を消すと、波形がなめらかになります";
+  }
+  if (filterMode === "highpass") {
+    return "低い成分を消すと、大きなうねりが消えます";
+  }
+  if (filterMode === "bandpass") {
+    return "特定の帯域だけを取り出しています";
+  }
+  if (totalCount > 0 && activeCount < totalCount / 2) {
+    return "成分を減らすと、波形が簡素化されます";
+  }
+  return "この波形は、いくつかの成分の混ざり物です";
+}
+
+function spectralDistance(index, length) {
+  return Math.min(index, length - index);
+}
+
+function drawSignalPanel(context, { signal, color }) {
+  context.clearRect(0, 0, 600, 100);
+  drawWaveAxis(context);
+  drawSignalLine(context, signal, color, { shadowBlur: 4, lineWidth: 1.5 });
+}
+
+function drawSpectrumPanel(context, { spectrum, mask, filterMode, cutoff }) {
+  context.clearRect(0, 0, 600, 100);
+  drawSpectrumBars(context, spectrum, mask);
+  if (filterMode) {
+    drawSpectrumCutoff(context, spectrum.length, filterMode, cutoff);
+  }
+}
+
+function drawReconstructedSignalPanel(context, { original, reconstructed }) {
+  context.clearRect(0, 0, 600, 100);
+  drawWaveAxis(context);
+  drawSignalLine(context, original, "rgba(74, 158, 255, 0.15)", { shadowBlur: 0, lineWidth: 1 });
+  drawSignalLine(context, reconstructed, COLORS.neonGreen, { shadowBlur: 5, lineWidth: 1.5 });
+}
+
+function drawWaveAxis(context) {
+  context.save();
+  context.strokeStyle = COLORS.border;
+  context.lineWidth = 0.5;
+  context.beginPath();
+  context.moveTo(0, 50);
+  context.lineTo(600, 50);
+  context.stroke();
+  context.restore();
+}
+
+function drawSignalLine(context, signal, color, { shadowBlur, lineWidth }) {
+  if (!signal?.length) return;
+  const maxAbs = Math.max(...signal.map((value) => Math.abs(value))) || 1;
+  context.save();
+  context.beginPath();
+  signal.forEach((value, index) => {
+    const x = (index / Math.max(1, signal.length - 1)) * 600;
+    const y = 50 - (value / maxAbs) * 38;
+    if (index === 0) context.moveTo(x, y);
+    else context.lineTo(x, y);
+  });
+  context.strokeStyle = color;
+  context.lineWidth = lineWidth;
+  context.shadowColor = color;
+  context.shadowBlur = shadowBlur;
+  context.stroke();
+  context.restore();
+}
+
+function drawSpectrumBars(context, spectrum, mask) {
+  if (!spectrum?.length) return;
+  const maxAmp = Math.max(...spectrum.map((component) => component.amp)) || 1;
+  const barWidth = Math.max(1, 600 / spectrum.length - 1);
+
+  context.save();
+  spectrum.forEach((component, index) => {
+    const active = mask[index] !== false;
+    const normalized = component.amp / maxAmp;
+    const height = normalized * 74;
+    const x = (index / spectrum.length) * 600;
+    const y = 90 - height;
+    context.globalAlpha = active ? 0.8 : 0.2;
+    context.fillStyle = active ? COLORS.neonBlue : COLORS.textDim;
+    if (active && height >= 10) {
+      context.shadowColor = COLORS.neonBlue;
+      context.shadowBlur = 6;
+    } else {
+      context.shadowBlur = 0;
+    }
+    context.fillRect(x, y, barWidth, height);
+  });
+  context.restore();
+}
+
+function drawSpectrumCutoff(context, length, filterMode, cutoff) {
+  const positions = [];
+  if (filterMode === "lowpass" || filterMode === "highpass") {
+    positions.push(cutoff, length - cutoff);
+  } else if (filterMode === "bandpass") {
+    positions.push(cutoff - 5, cutoff + 5, length - cutoff - 5, length - cutoff + 5);
+  }
+
+  context.save();
+  context.setLineDash([4, 4]);
+  context.strokeStyle = COLORS.neonAmber;
+  context.lineWidth = 1;
+  positions
+    .filter((position) => position > 0 && position < length)
+    .forEach((position) => {
+      const x = (position / length) * 600;
+      context.beginPath();
+      context.moveTo(x, 8);
+      context.lineTo(x, 92);
+      context.stroke();
+    });
+  context.restore();
+}
+
+// === 将来拡張 ===
+// [基礎原理ラボ] 直交性・収束・ギブス現象・離散化の可視化モード
+// → 新しいモードとして追加。computeDFT の係数を使って
+//   ギブス現象（項数による矩形波近似の振動）等を可視化
+// [変換本体] フーリエ級数・フーリエ変換・DFT/FFT の比較ページ
+// → computeDFT を FFT 実装に差し替え可能（インターフェース同一）
+// → signalDft.js に連続フーリエ変換の近似計算を追加可能
+// [音ラボ] Web Audio API で実際に音を生成・分析
+// → signalDft の入力を AudioContext.analyser から取得
+// → reconSignal の出力を AudioBuffer として再生
+// → SIGNAL_PRESETS に実音声プリセットを追加
+// [画像ラボ] 2D フーリエ変換で画像のフィルタリング
+// → computeDFT の 2D 版を実装
+// → Canvas の ImageData を入力として受け取り
+// → 周波数空間でのマスク操作 → 逆変換で画像再構成
+// [スペクトログラム] STFT でリアルタイム時間周波数解析
+// → signalDft を窓関数付きで短区間に適用
+// → 結果を 2D ヒートマップとして Canvas に描画
+// [ウェーブレット] 時間周波数解析の拡張
+// → 計算コアに wavelet 変換関数を追加
+// [PDE ラボ] 熱方程式・波動方程式の直感可視化
+// → フーリエ級数の各モードに減衰/伝播を適用
+// → 時間発展をアニメーション
+// [EEG 隠しモード] 脳波データの読み込みと周波数解析
+// → File API で CSV/EDF 読み込み → signalDft で解析
 
 function buildParticles(width, height, count) {
   return Array.from({ length: count }, () => ({
@@ -1214,22 +1593,31 @@ export function generatePresetPath(name) {
 }
 
 export const SIGNAL_PRESETS = {
-  "Simple wave": (n, total) => Math.sin((2 * Math.PI * n) / total),
+  "Simple wave": (n, total) => Math.sin((2 * Math.PI * 3 * n) / total),
   Chord: (n, total) =>
-    0.7 * Math.sin((2 * Math.PI * n) / total) +
-    0.35 * Math.sin((4 * Math.PI * n) / total) +
-    0.18 * Math.sin((7 * Math.PI * n) / total),
-  "Square wave": (n, total) =>
-    Math.sin((2 * Math.PI * n) / total) +
-    Math.sin((6 * Math.PI * n) / total) / 3 +
-    Math.sin((10 * Math.PI * n) / total) / 5,
-  Sawtooth: (n, total) =>
-    Math.sin((2 * Math.PI * n) / total) +
-    Math.sin((4 * Math.PI * n) / total) / 2 +
-    Math.sin((6 * Math.PI * n) / total) / 3,
+    0.5 * Math.sin((2 * Math.PI * 3 * n) / total) +
+    0.3 * Math.sin((2 * Math.PI * 7 * n) / total) +
+    0.2 * Math.sin((2 * Math.PI * 13 * n) / total),
+  "Square wave": (n, total) => {
+    let value = 0;
+    for (let harmonic = 1; harmonic <= 15; harmonic += 2) {
+      value += Math.sin((2 * Math.PI * harmonic * n) / total) / harmonic;
+    }
+    return value;
+  },
+  Sawtooth: (n, total) => {
+    let value = 0;
+    for (let harmonic = 1; harmonic <= 20; harmonic += 1) {
+      value += Math.sin((2 * Math.PI * harmonic * n) / total) / harmonic;
+    }
+    return value;
+  },
   "Noisy wave": (n, total) =>
-    Math.sin((2 * Math.PI * n) / total) * 0.85 + (Math.random() - 0.5) * 0.35,
-  Pulse: (n, total) => (n % total < total * 0.1 ? 1 : 0)
+    Math.sin((2 * Math.PI * 5 * n) / total) + (Math.random() - 0.5) * 0.4,
+  Pulse: (n, total) => {
+    const phase = (n % total) / total;
+    return phase < 0.12 || (phase > 0.48 && phase < 0.6) ? 1 : -0.15;
+  }
 };
 
 export function resamplePath(rawPoints, targetN = 256) {
