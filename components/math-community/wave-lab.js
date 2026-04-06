@@ -368,9 +368,12 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
   }, [maxCoeffs, numCircles]);
 
   useEffect(() => {
+    const totalStrokePoints = sourceStrokes.reduce((sum, stroke) => sum + stroke.length, 0);
+    const coeffBudget = isImageSource ? 600 : 80;
     let globalIndex = 0;
     const systems = sourceStrokes.map((stroke) => {
-      const calculated = computeDFT(stroke, Math.min(stroke.length, isImageSource ? 72 : 80));
+      const share = Math.max(8, Math.round((stroke.length / Math.max(1, totalStrokePoints)) * coeffBudget));
+      const calculated = computeDFT(stroke, Math.min(stroke.length, share));
       const entry = {
         points: stroke,
         coeffs: calculated,
@@ -381,7 +384,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
     });
     setStrokeSystems(systems);
     setMaxCoeffs(globalIndex);
-    setNumCircles(Math.min(isImageSource ? Math.min(96, globalIndex) : 20, globalIndex));
+    setNumCircles(Math.min(isImageSource ? globalIndex : 20, globalIndex));
     setCircleVisibility({});
     setShowOriginal(true);
     setShowCircles(true);
@@ -453,11 +456,14 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
         }
       }
 
+      const totalCoeffs = strokeSystems.reduce((sum, system) => sum + system.coeffs.length, 0);
+      const ratio = totalCoeffs > 0 ? Math.min(1, visibleCount / totalCoeffs) : 0;
+
       const positionGroups = strokeSystems.map((system, systemIndex) => {
+        const quota = Math.max(1, Math.round(system.coeffs.length * ratio));
         const visibleCoeffs = [];
-        for (let localIndex = 0; localIndex < system.coeffs.length; localIndex += 1) {
+        for (let localIndex = 0; localIndex < Math.min(quota, system.coeffs.length); localIndex += 1) {
           const globalCoeffIndex = system.startIndex + localIndex;
-          if (globalCoeffIndex >= visibleCount) break;
           if (circleVisibility[globalCoeffIndex] !== false) {
             visibleCoeffs.push(system.coeffs[localIndex]);
           }
@@ -1232,7 +1238,7 @@ function drawDrawCanvas(context, points, isDrawing) {
 }
 
 function buildLineArtMask(image) {
-  const maxDimension = 320;
+  const maxDimension = 480;
   const naturalWidth = image.naturalWidth || image.width;
   const naturalHeight = image.naturalHeight || image.height;
   const scale = Math.min(1, maxDimension / Math.max(naturalWidth, naturalHeight));
@@ -1732,13 +1738,15 @@ function drawOrbitScene(
   }
 
   if (trails?.length) {
-    trails.forEach((trail) => {
+    const strokeHueStep = trails.length > 1 ? 40 / trails.length : 0;
+    trails.forEach((trail, trailIndex) => {
       if (!trail || trail.length <= 1) return;
       context.save();
-      context.strokeStyle = COLORS.neonPink;
-      context.lineWidth = 1.5;
-      context.shadowColor = COLORS.neonPink;
-      context.shadowBlur = 6;
+      const hue = 330 + trailIndex * strokeHueStep;
+      context.strokeStyle = `hsl(${hue}, 85%, 72%)`;
+      context.lineWidth = 1.8;
+      context.shadowColor = `hsl(${hue}, 85%, 72%)`;
+      context.shadowBlur = 7;
       strokeSegmentedPath(context, trail.map((point) => ({ ...point, x: point.x * scale, y: point.y * scale })), false);
       context.restore();
     });
