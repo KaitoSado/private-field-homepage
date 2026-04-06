@@ -372,7 +372,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
         }
       }
       if (!visibleCoeffs.length) return [];
-      const numSamples = Math.max(80, Math.min(500, visibleCoeffs.length * 5));
+      const numSamples = Math.max(40, Math.min(200, visibleCoeffs.length * 4));
       const trail = [];
       for (let i = 0; i <= numSamples; i += 1) {
         const t = (i / numSamples) * Math.PI * 2;
@@ -391,7 +391,7 @@ function OrbitMode({ initialPoints, onModeChange, onStatusChange }) {
 
   useEffect(() => {
     const totalStrokePoints = sourceStrokes.reduce((sum, stroke) => sum + stroke.length, 0);
-    const coeffBudget = isImageSource ? 600 : 80;
+    const coeffBudget = isImageSource ? Math.min(400, sourceStrokes.length * 12) : 80;
     let globalIndex = 0;
     const systems = sourceStrokes.map((stroke) => {
       const share = Math.max(8, Math.round((stroke.length / Math.max(1, totalStrokePoints)) * coeffBudget));
@@ -1650,7 +1650,11 @@ function splitSegmentedPath(points) {
   if (current.length) {
     segments.push(current);
   }
-  return segments.filter((segment) => segment.length >= 2);
+  const valid = segments.filter((segment) => segment.length >= 2);
+  if (valid.length <= 60) return valid;
+  const withLength = valid.map((segment) => ({ segment, length: segmentLength(segment) }));
+  withLength.sort((a, b) => b.length - a.length);
+  return withLength.slice(0, 60).map((entry) => entry.segment);
 }
 
 function segmentLength(points) {
@@ -1731,8 +1735,9 @@ function drawOrbitScene(
   }
 
   if (showCircles && positionGroups?.length) {
-    positionGroups.forEach((group) => {
-      group.positions.circles.forEach((circle, index) => {
+    const maxCircleGroups = Math.min(positionGroups.length, 12);
+    positionGroups.slice(0, maxCircleGroups).forEach((group) => {
+      group.positions.circles.slice(0, 8).forEach((circle, index) => {
         const radius = circle.r * scale;
         if (radius < 0.5) return;
         const opacity = Math.max(0.08, 0.3 - index * 0.015);
