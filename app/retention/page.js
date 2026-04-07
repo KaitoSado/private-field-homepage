@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "データ保持ポリシー | FieldCard Social"
+  title: "データ保持ポリシー | New Commune"
 };
 
 export default function RetentionPage() {

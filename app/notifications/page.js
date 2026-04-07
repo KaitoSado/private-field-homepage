@@ -1,7 +1,7 @@
 import { NotificationsPanel } from "@/components/notifications-panel";
 
 export const metadata = {
-  title: "通知 | FieldCard Social"
+  title: "通知 | New Commune"
 };
 
 export default function NotificationsPage() {

@@ -1,7 +1,7 @@
 import { AdminPanel } from "@/components/admin-panel";
 
 export const metadata = {
-  title: "管理画面 | FieldCard Social"
+  title: "管理画面 | New Commune"
 };
 
 export default function AdminPage() {

@@ -1,7 +1,7 @@
 import { AccountSettingsPanel } from "@/components/account-settings-panel";
 
 export const metadata = {
-  title: "アカウント設定 | FieldCard Social"
+  title: "アカウント設定 | New Commune"
 };
 
 export default function SettingsPage() {

@@ -1,7 +1,7 @@
 import { AuthPanel } from "@/components/auth-panel";
 
 export const metadata = {
-  title: "ログイン | FieldCard Social"
+  title: "ログイン | New Commune"
 };
 
 export default function AuthPage() {

@@ -2,7 +2,7 @@ import { HelpBoardPanel } from "@/components/help-board-panel";
 import { getHelpBoardData } from "@/lib/data";
 
 export const metadata = {
-  title: "助け合いボード | Apps | FieldCard Social",
+  title: "助け合いボード | Apps | New Commune",
   description: "ノート共有、過去問交換、空きコマ同行、機材貸し借り、引っ越し手伝いなどを募集・提供できる助け合い掲示板。"
 };
 

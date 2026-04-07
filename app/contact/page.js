@@ -1,7 +1,7 @@
 const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "";
 
 export const metadata = {
-  title: "お問い合わせ | FieldCard Social"
+  title: "お問い合わせ | New Commune"
 };
 
 export default function ContactPage() {
