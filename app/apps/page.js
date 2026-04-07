@@ -1,8 +1,8 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Apps | FieldCard Social",
-  description: "FieldCard Social から使えるアプリや追加サービスの入口。"
+  title: "アプリ一覧 | FieldCard Social",
+  description: "アプリ一覧"
 };
 
 const plannedApps = [
@@ -58,8 +58,7 @@ export default function AppsPage() {
     <main className="shell">
       <section className="section-grid section-head">
         <div className="section-copy">
-          <p className="eyebrow">Apps</p>
-          <h1 className="page-title">FieldCard にぶら下がるアプリの入口</h1>
+          <h1 className="page-title">アプリ一覧</h1>
         </div>
       </section>
 
