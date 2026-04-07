@@ -172,7 +172,7 @@ export default function HomePage() {
 
       <section id="apps" className="home-section">
         <div className="home-section-copy">
-          <h2>Apps</h2>
+          <h2>アプリ一覧</h2>
         </div>
         <div className="home-app-grid">
           {appCards.map((app) => (
