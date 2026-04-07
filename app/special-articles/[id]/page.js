@@ -16,12 +16,12 @@ export async function generateMetadata({ params }) {
 
   if (!article) {
     return {
-      title: "特別記事が見つかりません | FieldCard Social"
+      title: "特別記事が見つかりません | New Commune"
     };
   }
 
   return {
-    title: `${article.title} | 特別記事 | FieldCard Social`,
+    title: `${article.title} | 特別記事 | New Commune`,
     description: article.excerpt || article.body.slice(0, 140)
   };
 }

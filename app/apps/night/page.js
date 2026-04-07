@@ -2,7 +2,7 @@ import { NightWalkBoard } from "@/components/night-walk-board";
 import { getNightWalkData } from "@/lib/data";
 
 export const metadata = {
-  title: "深夜徘徊界隈 | FieldCard Social",
+  title: "深夜徘徊界隈 | New Commune",
   description: "深夜の移動セッションをそのままコンテンツ化する、リアルタイム徘徊ログ。"
 };
 

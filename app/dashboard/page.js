@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "My Page | FieldCard Social"
+  title: "My Page | New Commune"
 };
 
 export default function DashboardPage() {

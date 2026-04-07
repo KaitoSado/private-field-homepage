@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "更新履歴 | FieldCard Social"
+  title: "更新履歴 | New Commune"
 };
 
 export default function ChangelogPage() {

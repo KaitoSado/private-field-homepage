@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "アプリ一覧 | FieldCard Social",
+  title: "アプリ一覧 | New Commune",
   description: "アプリ一覧"
 };
 

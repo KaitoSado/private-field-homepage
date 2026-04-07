@@ -2,7 +2,7 @@ import { RitualBoardPanel } from "@/components/ritual-board-panel";
 import { getRitualBoardData } from "@/lib/data";
 
 export const metadata = {
-  title: "祈祷と呪詛 | FieldCard Social",
+  title: "祈祷と呪詛 | New Commune",
   description: "慶應大学院生向けの、愚痴・祈り・雑談・募集をゆるく流せる共同待合室。"
 };
 

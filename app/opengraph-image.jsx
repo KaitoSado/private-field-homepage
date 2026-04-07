@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/brand";
+import { BRAND_DESCRIPTION, BRAND_MARK, BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 
 export const runtime = "edge";
 export const size = {
@@ -44,9 +44,9 @@ export default function OpenGraphImage() {
               fontWeight: 700
             }}
           >
-            FC
+            {BRAND_MARK}
           </div>
-          <div style={{ fontSize: 26, letterSpacing: 2 }}>PROFILE + BLOG + SOCIAL CARD</div>
+          <div style={{ fontSize: 26, letterSpacing: 2 }}>{BRAND_TAGLINE.toUpperCase()}</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: "18px", maxWidth: "860px" }}>
           <div style={{ fontSize: 72, fontWeight: 700 }}>{BRAND_NAME}</div>
