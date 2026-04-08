@@ -53,6 +53,24 @@ const plannedApps = [
   }
 ];
 
+const privateApps = [
+  {
+    name: "管理画面",
+    body: "通報確認、投稿対応、権限まわりの処理を行う管理者専用の内部画面です。",
+    status: "管理者専用"
+  },
+  {
+    name: "運用状況",
+    body: "環境変数、telemetry、エラー件数など、最低限の運用状態を確認するための内部ツールです。",
+    status: "運営用"
+  },
+  {
+    name: "共同ワールド管理室",
+    body: "招待制の VR プロジェクトを立ち上げて、少人数で空間制作や内部テストを進めるための入口です。",
+    status: "招待制"
+  }
+];
+
 export default function AppsPage() {
   return (
     <main className="shell">
@@ -73,6 +91,24 @@ export default function AppsPage() {
                 </Link>
               </div>
             ) : null}
+          </article>
+        ))}
+      </section>
+
+      <section className="section-grid">
+        <div className="section-copy">
+          <p className="eyebrow">Internal / Invite Only</p>
+          <h2>非公開アプリ一覧</h2>
+          <p>一般公開していない、招待制または運営用のアプリです。</p>
+        </div>
+      </section>
+
+      <section className="card-grid">
+        {privateApps.map((app) => (
+          <article key={app.name} className="surface feature-card">
+            <p className="eyebrow">{app.status}</p>
+            <h2>{app.name}</h2>
+            <p>{app.body}</p>
           </article>
         ))}
       </section>
