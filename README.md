@@ -1,6 +1,6 @@
-# FieldCard Social
+# New Commune
 
-FieldCard Social is a small social platform where each user can create a public profile page and publish short blog posts that work as a digital business card.
+New Commune is a small social platform for public profiles, posts, and shared campus apps.
 
 ## Stack
 
@@ -44,6 +44,7 @@ The schema also creates public storage buckets for avatars and post media, plus 
 
 ## Production Runbook
 
+- Status guide: [`docs/status.md`](./docs/status.md)
 - Launch checklist: [`docs/launch-checklist.md`](./docs/launch-checklist.md)
 - Smoke test: [`docs/smoke-test.md`](./docs/smoke-test.md)
 - First admin SQL: [`supabase/first-admin.sql`](./supabase/first-admin.sql)

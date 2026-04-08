@@ -28,7 +28,7 @@ const appCards = [
     body: "授業レビュー、各種評価、判決メモ。",
     href: "/apps/classes",
     emoji: "⚖️",
-    accent: "is-red",
+    accent: "is-rose",
     tags: ["授業", "評価", "判決"],
     featured: true
   },
@@ -37,7 +37,7 @@ const appCards = [
     body: "ノート共有、過去問交換、同行、貸し借り。",
     href: "/apps/help",
     emoji: "🤝",
-    accent: "is-green",
+    accent: "is-mint",
     tags: ["ノート", "同行", "貸し借り"]
   },
   {
@@ -45,7 +45,7 @@ const appCards = [
     body: "お得情報、生活情報、制度メモ。",
     href: "/apps/edge",
     emoji: "💡",
-    accent: "is-blue",
+    accent: "is-sky",
     tags: ["お得情報", "生活", "制度"]
   },
   {
@@ -53,7 +53,7 @@ const appCards = [
     body: "院生向けの軽い吐き出し、雑談、募集。",
     href: "/apps/ritual",
     emoji: "🕯️",
-    accent: "is-ink",
+    accent: "is-lavender",
     tags: ["院生", "雑談", "募集"]
   },
   {
@@ -61,7 +61,7 @@ const appCards = [
     body: "テトリス、ブロック崩し、ミニゲーム。",
     href: "/apps/games",
     emoji: "🎮",
-    accent: "is-gold",
+    accent: "is-lemon",
     tags: ["テトリス", "ブロック崩し", "暇つぶし"]
   }
 ];
@@ -172,7 +172,7 @@ export default function HomePage() {
 
       <section id="apps" className="home-section">
         <div className="home-section-copy">
-          <h2>Apps</h2>
+          <h2>アプリ一覧</h2>
         </div>
         <div className="home-app-grid">
           {appCards.map((app) => (

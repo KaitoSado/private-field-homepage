@@ -5,7 +5,7 @@
 
 ## 1. プロダクトの要約
 
-- サービス名: `FieldCard Social`
+- サービス名: `New Commune`
 - 性質: 公開プロフィール + 記事 + 学生向け Apps を持つ Next.js アプリ
 - 想定ユーザー: 慶應 / SFC 周辺の学生・院生
 - 中心導線:
@@ -43,6 +43,9 @@
   - アバターや静的アセット
 - `docs/`
   - プロジェクト文書
+- `skills/`
+  - Codex / 他エージェント向けの project-local skill
+  - 実運用する skill の正本は repo 内 `skills/` に置き、`scripts/sync-skill-to-codex.sh` で `~/.codex/skills/` に同期する
 - `.claude/worktrees/`
   - Claude 側の試作・分岐用
 
@@ -106,4 +109,3 @@
 - `/dashboard` は旧導線が残るだけで主導線ではない
 - `@keio.jp / @keio.ac.jp` の扱いは信頼軸に関わるため慎重に変更する
 - Apps は学内向けの実用面として拡張中
-

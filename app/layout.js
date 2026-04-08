@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { FeedVisibilityHydrator } from "@/components/feed-visibility-hydrator";
 import { HeaderNav } from "@/components/header-nav";
 import { TelemetryClient } from "@/components/telemetry-client";
-import { BRAND_DESCRIPTION, BRAND_NAME, BRAND_TAGLINE, buildAbsoluteUrl } from "@/lib/brand";
+import { BRAND_DESCRIPTION, BRAND_MARK, BRAND_NAME, BRAND_TAGLINE, buildAbsoluteUrl } from "@/lib/brand";
 
 export const metadata = {
   metadataBase: new URL(buildAbsoluteUrl("/")),
@@ -51,7 +51,7 @@ export default function RootLayout({ children }) {
         <header className="site-header">
           <div className="site-header-inner">
             <Link href="/" className="brand-lockup">
-              <span className="brand-cube">FC</span>
+              <span className="brand-cube">{BRAND_MARK}</span>
               <span>
                 <strong>{BRAND_NAME}</strong>
                 <small>{BRAND_TAGLINE}</small>

@@ -1,7 +1,7 @@
 import { GameArcade } from "@/components/game-arcade";
 
 export const metadata = {
-  title: "Games | Apps | FieldCard Social",
+  title: "Games | Apps | New Commune",
   description: "Apps の中でそのまま遊べるミニゲーム集。"
 };
 

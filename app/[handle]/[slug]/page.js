@@ -1,9 +1,9 @@
-import { Fragment } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PostEngagementPanel } from "@/components/post-engagement-panel";
 import { PostMediaGallery } from "@/components/post-media-gallery";
 import { ReportAction } from "@/components/report-action";
+import { ExpandableArticleBody } from "@/components/expandable-article-body";
 import { BRAND_NAME } from "@/lib/brand";
 import { getCommentsByPostId, getPostByUsernameAndSlug } from "@/lib/data";
 
@@ -75,9 +75,7 @@ export default async function PostPage({ params }) {
           </div>
         ) : null}
         <PostMediaGallery mediaItems={post.media_items} coverImageUrl={post.cover_image_url} title={post.title} />
-        <div className="article-body">
-          {renderParagraphs(post.body)}
-        </div>
+        <ExpandableArticleBody body={post.body} className="article-body" />
       </article>
 
       <PostEngagementPanel
@@ -90,23 +88,6 @@ export default async function PostPage({ params }) {
       <ReportAction targetPostId={post.id} label="投稿を通報" />
     </main>
   );
-}
-
-function renderParagraphs(body) {
-  if (!body) {
-    return <p>本文はまだありません。</p>;
-  }
-
-  return body.split(/\n{2,}/).map((paragraph, index) => (
-    <p key={index}>
-      {paragraph.split("\n").map((line, lineIndex) => (
-        <Fragment key={`${index}-${lineIndex}`}>
-          {lineIndex ? <br /> : null}
-          {line}
-        </Fragment>
-      ))}
-    </p>
-  ));
 }
 
 function formatDate(value) {

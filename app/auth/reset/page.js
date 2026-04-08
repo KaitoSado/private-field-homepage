@@ -1,7 +1,7 @@
 import { ResetPasswordPanel } from "@/components/reset-password-panel";
 
 export const metadata = {
-  title: "パスワード再設定 | FieldCard Social"
+  title: "パスワード再設定 | New Commune"
 };
 
 export default function ResetPasswordPage() {
@@ -11,4 +11,3 @@ export default function ResetPasswordPage() {
     </main>
   );
 }
-
