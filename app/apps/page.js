@@ -5,8 +5,6 @@ export const metadata = {
   description: "アプリ一覧"
 };
 
-const COLORS = ["lavender", "sky", "mint", "lemon", "rose"];
-
 const plannedApps = [
   {
     name: "深夜徘徊界隈",
@@ -64,6 +62,27 @@ const plannedApps = [
   }
 ];
 
+const privateApps = [
+  {
+    name: "管理画面",
+    body: "通報確認、投稿対応、権限まわりの処理を行う管理者専用の内部画面です。",
+    status: "管理者専用",
+    color: "rose"
+  },
+  {
+    name: "運用状況",
+    body: "環境変数、telemetry、エラー件数など、最低限の運用状態を確認するための内部ツールです。",
+    status: "運営用",
+    color: "sky"
+  },
+  {
+    name: "共同ワールド管理室",
+    body: "招待制の VR プロジェクトを立ち上げて、少人数で空間制作や内部テストを進めるための入口です。",
+    status: "招待制",
+    color: "lavender"
+  }
+];
+
 export default function AppsPage() {
   return (
     <main className="shell">
@@ -80,6 +99,26 @@ export default function AppsPage() {
             <p>{app.body}</p>
           </Link>
         ))}
+      </section>
+
+      <section className="apps-subsection">
+        <div className="apps-subsection-copy">
+          <p className="eyebrow">Internal / Invite Only</p>
+          <h2>非公開アプリ一覧</h2>
+          <p>一般公開していない、招待制または運営用のアプリです。</p>
+        </div>
+
+        <div className="apps-color-grid">
+          {privateApps.map((app) => (
+            <article key={app.name} className={`apps-color-card apps-private-card candy-${app.color}`}>
+              <div className="apps-private-meta">
+                <span className="apps-private-status">{app.status}</span>
+              </div>
+              <h2>{app.name}</h2>
+              <p>{app.body}</p>
+            </article>
+          ))}
+        </div>
       </section>
     </main>
   );
