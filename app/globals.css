@@ -15,6 +15,12 @@
   --shadow: 0 24px 60px rgba(20, 29, 40, 0.08);
   --radius: 28px;
   --container: min(1180px, calc(100vw - 32px));
+
+  --candy-lavender: #d1bada;
+  --candy-sky: #a0d8ea;
+  --candy-mint: #bedfc2;
+  --candy-lemon: #fef263;
+  --candy-rose: #e49ec4;
 }
 
 * {
@@ -30,8 +36,10 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(31, 111, 120, 0.1), transparent 28%),
-    radial-gradient(circle at top right, rgba(178, 107, 42, 0.1), transparent 24%),
+    radial-gradient(circle at 8% 18%, rgba(209, 186, 218, 0.14), transparent 26%),
+    radial-gradient(circle at 92% 12%, rgba(160, 216, 234, 0.13), transparent 24%),
+    radial-gradient(circle at 75% 65%, rgba(228, 158, 196, 0.07), transparent 22%),
+    radial-gradient(circle at 25% 80%, rgba(190, 223, 194, 0.08), transparent 20%),
     linear-gradient(180deg, #faf7f2 0%, #f0ebe2 100%);
   font-family: "Plus Jakarta Sans", "Hiragino Sans", "Yu Gothic", sans-serif;
 }
@@ -735,28 +743,28 @@ textarea {
   content: "";
   position: absolute;
   inset: 0 0 auto 0;
-  height: 4px;
+  height: 5px;
   background: rgba(23, 29, 36, 0.08);
 }
 
-.home-app-card.is-red::before {
-  background: linear-gradient(90deg, #d06f52, #b74434);
+.home-app-card.is-rose::before {
+  background: linear-gradient(90deg, var(--candy-rose), #d07aa8);
 }
 
-.home-app-card.is-green::before {
-  background: linear-gradient(90deg, #3f9274, #2d7a62);
+.home-app-card.is-mint::before {
+  background: linear-gradient(90deg, var(--candy-mint), #8ec99a);
 }
 
-.home-app-card.is-blue::before {
-  background: linear-gradient(90deg, #518cb9, #2f6f9e);
+.home-app-card.is-sky::before {
+  background: linear-gradient(90deg, var(--candy-sky), #6bbdd6);
 }
 
-.home-app-card.is-ink::before {
-  background: linear-gradient(90deg, #4d5460, #1f2630);
+.home-app-card.is-lavender::before {
+  background: linear-gradient(90deg, var(--candy-lavender), #b598c4);
 }
 
-.home-app-card.is-gold::before {
-  background: linear-gradient(90deg, #b88d2e, #d2b067);
+.home-app-card.is-lemon::before {
+  background: linear-gradient(90deg, var(--candy-lemon), #e6d84a);
 }
 
 .home-app-emoji {
@@ -987,6 +995,54 @@ textarea {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
 }
+
+/* ── Apps color grid ── */
+
+.apps-color-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.apps-color-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  min-height: 190px;
+  padding: 28px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+}
+
+.apps-color-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.10);
+  filter: brightness(1.04);
+}
+
+.apps-color-card h2 {
+  margin: 0;
+  font-size: 1.18rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.apps-color-card p {
+  margin: 0;
+  color: rgba(23, 29, 36, 0.62);
+  line-height: 1.65;
+  font-size: 0.9rem;
+}
+
+.candy-lavender { background: var(--candy-lavender); }
+.candy-sky      { background: var(--candy-sky); }
+.candy-mint     { background: var(--candy-mint); }
+.candy-lemon    { background: var(--candy-lemon); }
+.candy-rose     { background: var(--candy-rose); }
 
 .profile-card,
 .post-card {
@@ -1244,6 +1300,31 @@ textarea {
   gap: 18px;
   margin-top: 28px;
   line-height: 1.9;
+}
+
+.expandable-article-shell {
+  position: relative;
+  display: grid;
+  gap: 12px;
+}
+
+.expandable-article-content {
+  overflow: hidden;
+  transition: max-height 280ms ease;
+}
+
+.expandable-article-fade {
+  pointer-events: none;
+  position: absolute;
+  inset: auto 0 34px 0;
+  height: 110px;
+  border-radius: 0 0 18px 18px;
+  background: linear-gradient(180deg, rgba(246, 244, 238, 0) 0%, rgba(246, 244, 238, 0.95) 65%, rgba(246, 244, 238, 1) 100%);
+}
+
+.expandable-article-toggle {
+  position: relative;
+  z-index: 1;
 }
 
 .inline-meta,
@@ -3472,7 +3553,6 @@ textarea {
 }
 
 .special-article-body {
-  white-space: pre-wrap;
   line-height: 1.9;
 }
 
@@ -4337,7 +4417,8 @@ textarea {
     padding: 16px 0;
   }
 
-  .card-grid {
+  .card-grid,
+  .apps-color-grid {
     grid-template-columns: 1fr;
   }
 

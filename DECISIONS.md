@@ -30,3 +30,14 @@
 - 衝突回避を最優先する
 - 並行作業はブランチと担当ファイルを分ける
 
+### 6. project-local skill は初版を lean に作る
+
+- `skills/` 配下の skill は、まず workflow と判断基準を中心に置く
+- 初版は「監査 + 安全修正」に寄せ、過剰な自動修正や重い依存前提は避ける
+- 長い検出ルールや framework 別の注意点は `references/` に分離する
+
+### 7. skill の正本は repo 側に置く
+
+- project-local skill は repo 内 `skills/` を正本にする
+- `~/.codex/skills/` 側は実行用の同期先として扱う
+- Codex が広く誤発火しないよう、明示呼び出し中心の skill は `allow_implicit_invocation: false` を基本にする

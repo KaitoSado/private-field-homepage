@@ -1,0 +1,7 @@
+interface:
+  display_name: "Frontend Structure Optimizer"
+  short_description: "Audit and safely clean UI structure"
+  default_prompt: "Use $frontend-structure-optimizer to audit this frontend codebase for structural debt and apply only safe cleanup changes."
+
+policy:
+  allow_implicit_invocation: false

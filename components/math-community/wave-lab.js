@@ -1360,32 +1360,6 @@ function extractContourFromSilhouette(maskCanvas, targetN = 1200) {
   return result;
 }
 
-function dilateMask(source, width, height, iterations) {
-  let current = source;
-  for (let step = 0; step < iterations; step += 1) {
-    const next = new Uint8Array(width * height);
-    for (let y = 0; y < height; y += 1) {
-      for (let x = 0; x < width; x += 1) {
-        let occupied = 0;
-        for (let dy = -1; dy <= 1 && !occupied; dy += 1) {
-          for (let dx = -1; dx <= 1; dx += 1) {
-            const nx = x + dx;
-            const ny = y + dy;
-            if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-            if (current[ny * width + nx]) {
-              occupied = 1;
-              break;
-            }
-          }
-        }
-        next[y * width + x] = occupied;
-      }
-    }
-    current = next;
-  }
-  return current;
-}
-
 function extractLargestComponentMask(source, width, height) {
   const visited = new Uint8Array(width * height);
   let bestMembers = [];
@@ -1431,257 +1405,69 @@ function extractLargestComponentMask(source, width, height) {
 }
 
 function traceContourFromMask(mask, width, height) {
+  /* use numeric keys (y*(width+2)+x) instead of string keys for ~5× faster lookup */
+  const stride = width + 2;
+  const key = (x, y) => y * stride + x;
   const adjacency = new Map();
+
+  function addEdge(x1, y1, x2, y2) {
+    const from = key(x1, y1);
+    const to = key(x2, y2);
+    if (!adjacency.has(from)) adjacency.set(from, []);
+    adjacency.get(from).push(to);
+  }
 
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       if (!mask[y * width + x]) continue;
-      const topEmpty = y === 0 || !mask[(y - 1) * width + x];
-      const rightEmpty = x === width - 1 || !mask[y * width + x + 1];
-      const bottomEmpty = y === height - 1 || !mask[(y + 1) * width + x];
-      const leftEmpty = x === 0 || !mask[y * width + x - 1];
-
-      if (topEmpty) addContourEdge(adjacency, x, y, x + 1, y);
-      if (rightEmpty) addContourEdge(adjacency, x + 1, y, x + 1, y + 1);
-      if (bottomEmpty) addContourEdge(adjacency, x + 1, y + 1, x, y + 1);
-      if (leftEmpty) addContourEdge(adjacency, x, y + 1, x, y);
+      if (y === 0 || !mask[(y - 1) * width + x]) addEdge(x, y, x + 1, y);
+      if (x === width - 1 || !mask[y * width + x + 1]) addEdge(x + 1, y, x + 1, y + 1);
+      if (y === height - 1 || !mask[(y + 1) * width + x]) addEdge(x + 1, y + 1, x, y + 1);
+      if (x === 0 || !mask[y * width + x - 1]) addEdge(x, y + 1, x, y);
     }
   }
 
-  const startKey = [...adjacency.keys()].sort((left, right) => {
-    const [lx, ly] = left.split(",").map(Number);
-    const [rx, ry] = right.split(",").map(Number);
-    return ly - ry || lx - rx;
-  })[0];
-  if (!startKey) return [];
+  let startKey = -1;
+  let startY = Infinity;
+  let startX = Infinity;
+  for (const k of adjacency.keys()) {
+    const ky = Math.floor(k / stride);
+    const kx = k % stride;
+    if (ky < startY || (ky === startY && kx < startX)) {
+      startY = ky;
+      startX = kx;
+      startKey = k;
+    }
+  }
+  if (startKey === -1) return [];
 
   const contour = [];
-  let currentKey = startKey;
-  let previousKey = null;
+  let current = startKey;
+  let previous = -1;
   const edgeVisited = new Set();
 
-  while (currentKey) {
-    const [x, y] = currentKey.split(",").map(Number);
-    contour.push({ x, y });
-    const neighbors = adjacency.get(currentKey) || [];
-    let nextKey = null;
+  while (current !== -1) {
+    const cx = current % stride;
+    const cy = Math.floor(current / stride);
+    contour.push({ x: cx, y: cy });
+    const neighbors = adjacency.get(current) || [];
+    let next = -1;
 
     for (const candidate of neighbors) {
-      const edgeKey = `${currentKey}->${candidate}`;
-      if (edgeVisited.has(edgeKey)) continue;
-      if (candidate === previousKey && neighbors.length > 1) continue;
-      nextKey = candidate;
-      edgeVisited.add(edgeKey);
+      const ek = current < candidate ? current * 1e7 + candidate : candidate * 1e7 + current;
+      if (edgeVisited.has(ek)) continue;
+      if (candidate === previous && neighbors.length > 1) continue;
+      next = candidate;
+      edgeVisited.add(ek);
       break;
     }
 
-    if (!nextKey) break;
-    previousKey = currentKey;
-    currentKey = nextKey === startKey ? null : nextKey;
+    if (next === -1) break;
+    previous = current;
+    current = next === startKey ? -1 : next;
   }
 
   return contour;
-}
-
-function addContourEdge(adjacency, x1, y1, x2, y2) {
-  const from = `${x1},${y1}`;
-  const to = `${x2},${y2}`;
-  if (!adjacency.has(from)) adjacency.set(from, []);
-  adjacency.get(from).push(to);
-}
-
-function skeletonizeMask(source, width, height) {
-  const data = new Uint8Array(source);
-  let changed = true;
-
-  while (changed) {
-    changed = false;
-    const toDelete = [];
-    for (let pass = 0; pass < 2; pass += 1) {
-      toDelete.length = 0;
-      for (let y = 1; y < height - 1; y += 1) {
-        for (let x = 1; x < width - 1; x += 1) {
-          const index = y * width + x;
-          if (!data[index]) continue;
-          const neighbors = getEightNeighbors(data, width, index);
-          const count = neighbors.reduce((sum, value) => sum + value, 0);
-          if (count < 2 || count > 6) continue;
-          const transitions = countBinaryTransitions(neighbors);
-          if (transitions !== 1) continue;
-          const [p2, p3, p4, p5, p6, p7, p8, p9] = neighbors;
-          if (pass === 0) {
-            if (p2 * p4 * p6 !== 0) continue;
-            if (p4 * p6 * p8 !== 0) continue;
-          } else {
-            if (p2 * p4 * p8 !== 0) continue;
-            if (p2 * p6 * p8 !== 0) continue;
-          }
-          toDelete.push(index);
-        }
-      }
-      if (toDelete.length) {
-        changed = true;
-        toDelete.forEach((index) => {
-          data[index] = 0;
-        });
-      }
-    }
-  }
-
-  return data;
-}
-
-function getEightNeighbors(data, width, index) {
-  return [
-    data[index - width],
-    data[index - width + 1],
-    data[index + 1],
-    data[index + width + 1],
-    data[index + width],
-    data[index + width - 1],
-    data[index - 1],
-    data[index - width - 1]
-  ];
-}
-
-function countBinaryTransitions(neighbors) {
-  let transitions = 0;
-  for (let index = 0; index < neighbors.length; index += 1) {
-    const current = neighbors[index];
-    const next = neighbors[(index + 1) % neighbors.length];
-    if (current === 0 && next === 1) transitions += 1;
-  }
-  return transitions;
-}
-
-function collectSkeletonPoints(source, width, height) {
-  const points = [];
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      if (!source[y * width + x]) continue;
-      points.push({ x, y, index: y * width + x });
-    }
-  }
-  return points;
-}
-
-function traceSkeletonPoints(points, width) {
-  if (!points.length) return [];
-
-  const keyToIndex = new Map(points.map((point, index) => [`${point.x},${point.y}`, index]));
-  const adjacency = points.map((point) => {
-    const neighbors = [];
-    for (let dy = -1; dy <= 1; dy += 1) {
-      for (let dx = -1; dx <= 1; dx += 1) {
-        if (dx === 0 && dy === 0) continue;
-        const neighborIndex = keyToIndex.get(`${point.x + dx},${point.y + dy}`);
-        if (neighborIndex !== undefined) neighbors.push(neighborIndex);
-      }
-    }
-    return neighbors;
-  });
-
-  /* ── find connected components via BFS ── */
-  const componentOf = new Int32Array(points.length).fill(-1);
-  const components = [];
-  for (let i = 0; i < points.length; i += 1) {
-    if (componentOf[i] !== -1) continue;
-    const compId = components.length;
-    const members = [];
-    const queue = [i];
-    componentOf[i] = compId;
-    let head = 0;
-    while (head < queue.length) {
-      const node = queue[head++];
-      members.push(node);
-      for (const neighbor of adjacency[node]) {
-        if (componentOf[neighbor] === -1) {
-          componentOf[neighbor] = compId;
-          queue.push(neighbor);
-        }
-      }
-    }
-    components.push(members);
-  }
-
-  /* sort largest-first, drop tiny noise (<8 points) */
-  components.sort((a, b) => b.length - a.length);
-
-  const ordered = [];
-  const makeEdgeKey = (a, b) => (a < b ? `${a},${b}` : `${b},${a}`);
-
-  for (let ci = 0; ci < components.length; ci += 1) {
-    const comp = components[ci];
-    if (comp.length < 8) continue;
-
-    /* pick a leaf node (degree 1) as start for a cleaner sweep */
-    let startNode = comp[0];
-    for (const nodeIdx of comp) {
-      if (adjacency[nodeIdx].length === 1) { startNode = nodeIdx; break; }
-    }
-
-    /* ── DFS walk: traverse every EDGE once, backtrack through visited nodes ──
-       This keeps the pen down at all times.  Each edge is walked forward once
-       and retraced once during backtracking, so the path is ~2× edge count
-       but fully continuous (no jumps). */
-    const visitedEdges = new Set();
-    const stack = [{ node: startNode, ei: 0 }];
-    const trail = [startNode];
-
-    while (stack.length > 0) {
-      const top = stack[stack.length - 1];
-      const neighbors = adjacency[top.node];
-      let advanced = false;
-
-      while (top.ei < neighbors.length) {
-        const neighbor = neighbors[top.ei];
-        const ek = makeEdgeKey(top.node, neighbor);
-        top.ei += 1;
-        if (!visitedEdges.has(ek)) {
-          visitedEdges.add(ek);
-          trail.push(neighbor);
-          stack.push({ node: neighbor, ei: 0 });
-          advanced = true;
-          break;
-        }
-      }
-
-      if (!advanced) {
-        stack.pop();
-        if (stack.length > 0) {
-          trail.push(stack[stack.length - 1].node); /* backtrack step */
-        }
-      }
-    }
-
-    const isFirstComponent = ordered.length === 0;
-    trail.forEach((nodeIndex, i) => {
-      ordered.push({
-        x: points[nodeIndex].x,
-        y: points[nodeIndex].y,
-        hiddenBefore: !isFirstComponent && i === 0
-      });
-    });
-  }
-
-  if (!ordered.length) return [];
-
-  return simplifyPointSequence(
-    ordered.filter((point, index, array) =>
-      index === 0 || point.x !== array[index - 1].x || point.y !== array[index - 1].y || point.hiddenBefore
-    ),
-    1.2
-  );
-}
-
-function traceStepScore(currentPoint, nextPoint, previousVector) {
-  const dx = nextPoint.x - currentPoint.x;
-  const dy = nextPoint.y - currentPoint.y;
-  const distance = Math.hypot(dx, dy);
-  const magnitude = Math.hypot(previousVector.x, previousVector.y) * Math.max(0.001, distance);
-  const dot = dx * previousVector.x + dy * previousVector.y;
-  const turnPenalty = magnitude ? 1 - dot / magnitude : 1;
-  return distance + turnPenalty * 1.5;
 }
 
 function simplifyPointSequence(points, minimumDistance) {
@@ -1693,31 +1479,6 @@ function simplifyPointSequence(points, minimumDistance) {
     }
   });
   return compact;
-}
-
-function smoothSegmentedPoints(points, radius) {
-  return points.map((point, index) => {
-    if (point.hiddenBefore) {
-      return { ...point };
-    }
-    let totalX = 0;
-    let totalY = 0;
-    let count = 0;
-    for (let offset = -radius; offset <= radius; offset += 1) {
-      const sample = points[index + offset];
-      if (!sample || sample.hiddenBefore) continue;
-      totalX += sample.x;
-      totalY += sample.y;
-      count += 1;
-    }
-    return count
-      ? {
-          x: totalX / count,
-          y: totalY / count,
-          hiddenBefore: point.hiddenBefore
-        }
-      : { ...point };
-  });
 }
 
 function smoothClosedPoints(points, radius) {
@@ -1780,17 +1541,23 @@ function resampleClosedPath(points, targetN) {
   if (!totalLength) return points;
 
   const result = [];
+  let hint = 1;
   for (let index = 0; index < targetN; index += 1) {
     const targetDistance = (index / targetN) * totalLength;
-    let segmentIndex = 1;
-    while (segmentIndex < lengths.length && lengths[segmentIndex] < targetDistance) {
-      segmentIndex += 1;
+    /* binary search for the segment containing targetDistance */
+    let lo = hint;
+    let hi = lengths.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi) >>> 1;
+      if (lengths[mid] < targetDistance) lo = mid + 1;
+      else hi = mid;
     }
-    const start = closed[segmentIndex - 1];
-    const end = closed[segmentIndex];
-    const startDistance = lengths[segmentIndex - 1];
-    const segmentLength = Math.max(1e-6, lengths[segmentIndex] - startDistance);
-    const ratio = (targetDistance - startDistance) / segmentLength;
+    hint = lo;
+    const start = closed[lo - 1];
+    const end = closed[lo];
+    const startDistance = lengths[lo - 1];
+    const seg = Math.max(1e-6, lengths[lo] - startDistance);
+    const ratio = (targetDistance - startDistance) / seg;
     result.push({
       x: start.x + (end.x - start.x) * ratio,
       y: start.y + (end.y - start.y) * ratio
@@ -2244,53 +2011,52 @@ export function computeDFT(points, maxN) {
   const samples = points.length;
   if (!samples) return [];
   const half = Math.floor(maxN / 2);
+
+  /* pre-extract x/y into flat arrays — avoids repeated property lookup */
+  const px = new Float64Array(samples);
+  const py = new Float64Array(samples);
+  for (let n = 0; n < samples; n += 1) {
+    px[n] = points[n].x;
+    py[n] = points[n].y;
+  }
+
   const coeffs = [];
+  const twoPiOverN = (-2 * Math.PI) / samples;
 
   for (let freq = -half; freq <= half; freq += 1) {
     let re = 0;
     let im = 0;
+    const baseAngle = twoPiOverN * freq;
     for (let n = 0; n < samples; n += 1) {
-      const angle = (-2 * Math.PI * freq * n) / samples;
-      const x = points[n].x;
-      const y = points[n].y;
-      re += x * Math.cos(angle) - y * Math.sin(angle);
-      im += x * Math.sin(angle) + y * Math.cos(angle);
+      const angle = baseAngle * n;
+      const cosA = Math.cos(angle);
+      const sinA = Math.sin(angle);
+      re += px[n] * cosA - py[n] * sinA;
+      im += px[n] * sinA + py[n] * cosA;
     }
     re /= samples;
     im /= samples;
-    coeffs.push({
-      freq,
-      re,
-      im,
-      amp: Math.hypot(re, im),
-      phase: Math.atan2(im, re)
-    });
+    coeffs.push({ freq, re, im, amp: Math.hypot(re, im), phase: Math.atan2(im, re) });
   }
 
   return coeffs.sort((left, right) => right.amp - left.amp);
 }
 
 export function getEpicyclePositions(coeffs, numCoeffs, t) {
+  const limit = Math.min(numCoeffs, coeffs.length);
   const circles = [];
   let x = 0;
   let y = 0;
-  coeffs.slice(0, numCoeffs).forEach((coeff) => {
+  for (let i = 0; i < limit; i += 1) {
+    const coeff = coeffs[i];
     const angle = coeff.freq * t + coeff.phase;
     const radius = coeff.amp;
     const nx = x + radius * Math.cos(angle);
     const ny = y + radius * Math.sin(angle);
-    circles.push({
-      cx: x,
-      cy: y,
-      r: radius,
-      nx,
-      ny,
-      freq: coeff.freq,
-      angle
-    });
+    circles.push({ cx: x, cy: y, r: radius, nx, ny, freq: coeff.freq, angle });
     x = nx;
     y = ny;
-  });
+  }
   return { circles, tip: { x, y } };
 }
 

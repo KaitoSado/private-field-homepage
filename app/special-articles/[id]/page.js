@@ -2,6 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { SpecialArticleGate } from "@/components/special-article-gate";
+import { ExpandableArticleBody } from "@/components/expandable-article-body";
 import { getSpecialArticleById } from "@/lib/data";
 import {
   getSpecialArticleAccessCookieName,
@@ -50,7 +51,11 @@ export default async function SpecialArticleDetailPage({ params }) {
         <div className="inline-meta">
           <span>@{article.profiles?.username || article.profiles?.display_name || "author"}</span>
         </div>
-        {needsPassword && !unlocked ? <SpecialArticleGate articleId={article.id} /> : <div className="special-article-body">{article.body}</div>}
+        {needsPassword && !unlocked ? (
+          <SpecialArticleGate articleId={article.id} />
+        ) : (
+          <ExpandableArticleBody body={article.body} className="article-body special-article-body" />
+        )}
         <div className="hero-actions">
           <Link href="/special-articles" className="button button-secondary">
             特別記事一覧へ戻る
