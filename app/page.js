@@ -66,11 +66,11 @@ const appCards = [
   },
   {
     title: "物理コンテンツ",
-    body: "剛体、流れ、波、相転移、時空、カオス、量子化までを、秩序の立ち上がりとして触る Physics Playground。",
+    body: "放物、衝突、単振動、理想気体、波、相対論、量子までを、現象 -> 式 -> 理論で往復する Physics Playground。",
     href: "/apps/physics",
     emoji: "🪐",
     accent: "is-sky",
-    tags: ["波", "カオス", "量子"]
+    tags: ["放物", "相対論", "量子"]
   }
 ];
 

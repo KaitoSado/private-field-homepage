@@ -66,9 +66,9 @@
   - 祈祷と呪詛 `/apps/ritual`
   - Games `/apps/games`
   - 物理コンテンツ `/apps/physics`
-    - `Physics Playground: Emergence Lab` として、秩序、波、時空、量子化を共通 runner で読む client-side 物理 app
-    - `Playground / Law View / Emergence` を入口に、`回る / 流れる / 伝わる / 乱れる / 切り替わる / 歪む / 量子になる` のカテゴリから scene を選ぶ
-    - 現在は `剛体`, `流体`, `電磁波`, `熱力学第二・第三法則`, `相転移`, `ローレンツ変換`, `前期量子論`, `1D量子`, `量子調和振動子`, `非線形・カオス` の簡易 scene を実装
+    - `Physics Playground` として、操作・可視化・数式・理論マップを往復する client-side 物理 app
+    - `Sandbox / Guided Lab / Math Link / Theory Map` を上位モードに持つ
+    - 現在は `放物運動`, `衝突と運動量保存`, `単振動`, `理想気体`, `波の反射・屈折`, `ローレンツ変換`, `1D量子井戸` の 7 scene を実装
   - リサーチプログレス `/apps/research-progress`
     - 招待制の研究会 / ゼミ / 小規模PJ向け研究ライン + 週次チェックイン面
     - グループ一覧 `/apps/research-progress`

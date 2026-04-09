@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-09 | codex | physics app | `/apps/physics` を `Sandbox / Guided Lab / Math Link / Theory Map` 中心の Physics Playground に再構成し、放物運動・衝突・単振動・理想気体・波の反射 / 屈折・ローレンツ変換・1D量子井戸の 7 scene を共通 runner に実装 | `npm run build` |
 | 2026-04-09 | codex | physics app | `/apps/physics` を `Emergence Lab` 方向へ拡張し、剛体・流体・電磁波・不可逆性・相転移・ローレンツ変換・前期量子論・1D量子・量子調和振動子・カオスの 10 scene を共通 runner 上に実装 | `npm run build` |
 | 2026-04-09 | codex | physics app | `/apps/physics` を overlay 中心の Physics Playground へ組み替え、`Playground / Law View / World Shift` と `Motion / Collision / Rotation / Gas / Relativity / Quantum` の章構成に刷新 | `npm run build` |
 | 2026-04-09 | codex | physics app | `/apps/physics` に `Physics Playground` を追加し、放物運動・バネ振動・電場・幾何光学の MVP と Sandbox / Guided Lab / Theory Map を実装 | `npm run build` |
