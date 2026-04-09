@@ -26,7 +26,7 @@ const plannedApps = [
   },
   {
     name: "物理コンテンツ",
-    body: "剛体、流体、電磁波、相転移、ローレンツ変換、カオス、量子化までを、秩序と波の変化として触れる Physics Playground です。",
+    body: "放物運動、衝突、単振動、理想気体、波の反射・屈折、ローレンツ変換、1D量子井戸を、触る・見る・式とつなぐ・理論で見る Physics Playground です。",
     href: "/apps/physics",
     color: "lemon"
   },
