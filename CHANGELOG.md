@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-09 | codex | physics app | `/apps/physics` を overlay 中心の Physics Playground へ組み替え、`Playground / Law View / World Shift` と `Motion / Collision / Rotation / Gas / Relativity / Quantum` の章構成に刷新 | `npm run build` |
 | 2026-04-09 | codex | physics app | `/apps/physics` に `Physics Playground` を追加し、放物運動・バネ振動・電場・幾何光学の MVP と Sandbox / Guided Lab / Theory Map を実装 | `npm run build` |
 | 2026-04-09 | codex | apps copy | `/apps/math` とアプリ一覧での名称を `数学コミュニティ` から `数学コンテンツ` に変更 | `npm run build` |
 | 2026-04-09 | codex | research progress ui | 研究室パイプラインの各 project に全体進捗シークバーを追加し、段階ラベルと全体％を同時に見えるようにした | `npm run build` |
