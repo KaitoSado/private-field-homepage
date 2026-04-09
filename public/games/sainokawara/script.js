@@ -81,7 +81,10 @@
     previewStone: null,
     nextStone: null,
     previewX: PEDESTAL_CENTER_X,
+    previewY: 160,
     previewAngle: 0,
+    dragging: false,
+    activePointerId: null,
     screen: "title",
     mode: "idle",
     settle: null,
@@ -119,12 +122,11 @@
   titleButton.addEventListener("click", returnToTitle);
   resultTitleButton.addEventListener("click", returnToTitle);
 
+  canvas.addEventListener("pointerdown", handlePointerDown);
   canvas.addEventListener("pointermove", handlePointerMove);
-  canvas.addEventListener("click", () => {
-    if (state.screen === "game" && state.mode === "placing") {
-      dropPreviewStone();
-    }
-  });
+  canvas.addEventListener("pointerup", handlePointerUp);
+  canvas.addEventListener("pointerleave", handlePointerUp);
+  canvas.addEventListener("pointercancel", handlePointerUp);
   canvas.addEventListener(
     "wheel",
     (event) => {
@@ -201,7 +203,10 @@
     state.previewStone = null;
     state.nextStone = createStoneSeed();
     state.previewX = PEDESTAL_CENTER_X;
+    state.previewY = 160;
     state.previewAngle = 0;
+    state.dragging = false;
+    state.activePointerId = null;
     state.screen = "game";
     state.mode = "placing";
     state.settle = null;
@@ -230,6 +235,8 @@
   function returnToTitle() {
     state.screen = "title";
     state.mode = "idle";
+    state.dragging = false;
+    state.activePointerId = null;
     state.statusMessage = "石を置く前に、ほんの少しだけ深呼吸。";
     updateOverlayVisibility();
     updateHud();
@@ -240,6 +247,8 @@
     const delta = Math.min(34, timestamp - state.lastFrameAt || 16.67);
     state.lastFrameAt = timestamp;
     state.now = timestamp;
+    canvas.style.cursor =
+      state.screen === "game" && state.mode === "placing" ? (state.dragging ? "grabbing" : "grab") : "default";
 
     if (state.screen === "game") {
       updateWindModel();
@@ -274,7 +283,10 @@
     state.previewStone = state.nextStone || createStoneSeed();
     state.nextStone = createStoneSeed();
     state.previewX = clamp(getTowerCenter() + randomRange(-32, 32), PREVIEW_LIMIT_LEFT, PREVIEW_LIMIT_RIGHT);
+    state.previewY = getSuggestedPreviewY(state.previewStone);
     state.previewAngle = randomRange(-0.18, 0.18);
+    state.dragging = false;
+    state.activePointerId = null;
     state.lastRiskBonus = computeRiskBonus();
     state.currentMultiplier = computePlacementMultiplier();
     renderNextPreview();
@@ -284,7 +296,7 @@
   function dropPreviewStone() {
     if (state.screen !== "game" || state.mode !== "placing" || !state.previewStone) return;
 
-    const body = createStoneBody(state.previewStone, state.previewX, getSpawnY(), state.previewAngle);
+    const body = createStoneBody(state.previewStone, state.previewX, state.previewY, state.previewAngle);
     body.stoneData = {
       id: ++state.stoneSequence,
       riskBonus: state.lastRiskBonus
@@ -309,22 +321,12 @@
 
   function evaluateSettlement() {
     const fallenTotal = countFallenBodies();
-    const fallenDelta = fallenTotal - state.settle.fallenBefore;
-    const currentHeight = getTowerHeight();
-    const heightDrop = Math.max(0, state.settle.heightBefore - currentHeight);
-    const heightRatio =
-      state.settle.heightBefore > 70 ? heightDrop / state.settle.heightBefore : 0;
     const motion = measureMotion();
     const lastBody = getStoneById(state.settle.lastBodyId);
     const lastBodyFallen = !lastBody || isFallen(lastBody);
 
-    const severeCollapse =
-      fallenDelta >= 3 ||
-      (fallenDelta >= 2 && heightDrop > 150) ||
-      (fallenDelta >= 1 && heightRatio > 0.72 && state.placedCount >= 5);
-
-    if (severeCollapse && state.now >= state.settle.minAt + 260) {
-      endRun("石塔が大きく崩れました。");
+    if (fallenTotal > 0 || lastBodyFallen) {
+      endRun("石が台から落ちました。");
       return;
     }
 
@@ -333,19 +335,8 @@
     const quiet = motion.maxSpeed < 0.54 && motion.maxAngular < 0.05;
     state.settle.stableFrames = quiet ? state.settle.stableFrames + 1 : 0;
 
-    if (lastBodyFallen && state.settle.stableFrames > 24) {
-      state.fallenCount = fallenTotal;
-      state.streak = 0;
-      state.lastRiskBonus = 0;
-      state.statusMessage = "ひとつ流れた。塔はまだ残っている。";
-      state.mode = "placing";
-      state.settle = null;
-      preparePreviewStone();
-      return;
-    }
-
     if (state.settle.stableFrames > 34 || state.now >= state.settle.maxAt) {
-      finalizeStablePlacement(lastBodyFallen);
+      finalizeStablePlacement(false);
     }
   }
 
@@ -392,6 +383,11 @@
   }
 
   function evaluateGlobalCollapse() {
+    if (countFallenBodies() > 0) {
+      endRun("石が台から落ちました。");
+      return;
+    }
+
     if (state.placedCount < 4) {
       state.collapseTimerStartedAt = null;
       return;
@@ -437,14 +433,47 @@
   }
 
   // Input
+  function handlePointerDown(event) {
+    if (state.screen !== "game" || state.mode !== "placing") return;
+    state.dragging = true;
+    state.activePointerId = event.pointerId;
+    if (canvas.setPointerCapture) {
+      canvas.setPointerCapture(event.pointerId);
+    }
+    applyPointerPosition(event);
+  }
+
   function handlePointerMove(event) {
     if (state.screen !== "game" || state.mode !== "placing") return;
-    const rect = canvas.getBoundingClientRect();
-    const ratio = clamp((event.clientX - rect.left) / rect.width, 0, 1);
-    state.previewX = clamp(ratio * WORLD_WIDTH, PREVIEW_LIMIT_LEFT, PREVIEW_LIMIT_RIGHT);
+    if (state.dragging && state.activePointerId === event.pointerId) {
+      applyPointerPosition(event);
+      updateHud();
+      return;
+    }
+
+    const point = getPointerWorldPosition(event);
+    state.previewX = clamp(point.x, PREVIEW_LIMIT_LEFT, PREVIEW_LIMIT_RIGHT);
+    state.previewY = getSuggestedPreviewY(state.previewStone);
     state.lastRiskBonus = computeRiskBonus();
     state.currentMultiplier = computePlacementMultiplier();
     updateHud();
+  }
+
+  function handlePointerUp(event) {
+    if (!state.dragging) return;
+    if (state.activePointerId !== null && event.pointerId !== state.activePointerId) return;
+    state.dragging = false;
+    state.activePointerId = null;
+    if (canvas.releasePointerCapture && event.pointerId != null) {
+      try {
+        canvas.releasePointerCapture(event.pointerId);
+      } catch (_error) {
+        // ignore
+      }
+    }
+    if (state.screen === "game" && state.mode === "placing") {
+      dropPreviewStone();
+    }
   }
 
   function handleKeyDown(event) {
@@ -482,6 +511,9 @@
     if (input.rotateRight) state.previewAngle += ROTATE_SPEED * delta * 8;
 
     state.previewX = clamp(state.previewX, PREVIEW_LIMIT_LEFT, PREVIEW_LIMIT_RIGHT);
+    if (!state.dragging) {
+      state.previewY = getSuggestedPreviewY(state.previewStone);
+    }
     state.previewAngle = clamp(state.previewAngle, -1.28, 1.28);
     state.lastRiskBonus = computeRiskBonus();
     state.currentMultiplier = computePlacementMultiplier();
@@ -490,6 +522,9 @@
   function nudgePreview(amount) {
     if (state.screen !== "game" || state.mode !== "placing") return;
     state.previewX = clamp(state.previewX + amount, PREVIEW_LIMIT_LEFT, PREVIEW_LIMIT_RIGHT);
+    if (!state.dragging) {
+      state.previewY = getSuggestedPreviewY(state.previewStone);
+    }
     state.lastRiskBonus = computeRiskBonus();
     state.currentMultiplier = computePlacementMultiplier();
     updateHud();
@@ -501,6 +536,22 @@
     state.lastRiskBonus = computeRiskBonus();
     state.currentMultiplier = computePlacementMultiplier();
     updateHud();
+  }
+
+  function getPointerWorldPosition(event) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: clamp(((event.clientX - rect.left) / rect.width) * WORLD_WIDTH, 0, WORLD_WIDTH),
+      y: clamp(((event.clientY - rect.top) / rect.height) * WORLD_HEIGHT, 0, WORLD_HEIGHT)
+    };
+  }
+
+  function applyPointerPosition(event) {
+    const point = getPointerWorldPosition(event);
+    state.previewX = clamp(point.x, PREVIEW_LIMIT_LEFT, PREVIEW_LIMIT_RIGHT);
+    state.previewY = clampPreviewY(point.y, state.previewStone);
+    state.lastRiskBonus = computeRiskBonus();
+    state.currentMultiplier = computePlacementMultiplier();
   }
 
   // Scoring, danger, wind
@@ -593,8 +644,19 @@
     return weightedX / Math.max(1, totalArea);
   }
 
-  function getSpawnY() {
-    return clamp(PEDESTAL_TOP_Y - getTowerHeight() - 300, 82, 180);
+  function getSuggestedPreviewY(stone) {
+    const bounds = measureVertices(stone.vertices);
+    const halfHeight = (bounds.maxY - bounds.minY) * 0.5;
+    return clamp(PEDESTAL_TOP_Y - getTowerHeight() - halfHeight - 18, 90, 208);
+  }
+
+  function clampPreviewY(targetY, stone) {
+    const bounds = measureVertices(stone.vertices);
+    const halfHeight = (bounds.maxY - bounds.minY) * 0.5;
+    const baseY = getSuggestedPreviewY(stone);
+    const minY = Math.max(86, baseY - 88);
+    const maxY = Math.min(PEDESTAL_TOP_Y - halfHeight + 6, baseY + 14);
+    return clamp(targetY, minY, maxY);
   }
 
   function measureMotion() {
@@ -1037,7 +1099,7 @@
 
   function drawPreviewStone() {
     context.save();
-    context.translate(state.previewX, getSpawnY());
+    context.translate(state.previewX, state.previewY);
     context.rotate(state.previewAngle);
     context.globalAlpha = 0.58;
     drawStoneShape(context, state.previewStone, true);
@@ -1047,7 +1109,7 @@
     context.strokeStyle = "rgba(233, 238, 243, 0.14)";
     context.setLineDash([6, 8]);
     context.beginPath();
-    context.moveTo(state.previewX, getSpawnY() + 18);
+    context.moveTo(state.previewX, state.previewY + 18);
     context.lineTo(state.previewX, PEDESTAL_TOP_Y - getTowerHeight() - 18);
     context.stroke();
     context.restore();
