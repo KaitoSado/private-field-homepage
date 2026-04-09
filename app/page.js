@@ -66,11 +66,11 @@ const appCards = [
   },
   {
     title: "物理コンテンツ",
-    body: "エネルギー、衝突、剛体、相対論、量子までを、同じ世界を異なる法則で見る Physics Playground。",
+    body: "剛体、流れ、波、相転移、時空、カオス、量子化までを、秩序の立ち上がりとして触る Physics Playground。",
     href: "/apps/physics",
     emoji: "🪐",
     accent: "is-sky",
-    tags: ["エネルギー", "衝突", "相対論"]
+    tags: ["波", "カオス", "量子"]
   }
 ];
 

@@ -2040,6 +2040,20 @@ textarea {
   padding: 20px;
 }
 
+.physics-category-grid,
+.physics-scene-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.physics-category-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.physics-scene-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .physics-entry-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2047,7 +2061,9 @@ textarea {
 }
 
 .physics-entry-card,
-.physics-module-tab {
+.physics-module-tab,
+.physics-category-card,
+.physics-scene-card {
   border: 1px solid rgba(23, 29, 36, 0.08);
   background: rgba(255, 255, 255, 0.74);
   border-radius: 24px;
@@ -2060,14 +2076,17 @@ textarea {
 }
 
 .physics-entry-card:hover,
-.physics-module-tab:hover {
+.physics-module-tab:hover,
+.physics-category-card:hover,
+.physics-scene-card:hover {
   transform: translateY(-1px);
   border-color: rgba(83, 168, 188, 0.32);
   box-shadow: 0 14px 32px rgba(24, 38, 56, 0.08);
 }
 
 .physics-entry-card span,
-.physics-module-tab small {
+.physics-module-tab small,
+.physics-category-card span {
   display: block;
   color: #4e7683;
   font-family: "IBM Plex Mono", monospace;
@@ -2077,14 +2096,18 @@ textarea {
 }
 
 .physics-entry-card strong,
-.physics-module-tab strong {
+.physics-module-tab strong,
+.physics-category-card strong,
+.physics-scene-card strong {
   display: block;
   margin-top: 8px;
   font-size: 1rem;
 }
 
 .physics-entry-card small,
-.physics-module-tab span {
+.physics-module-tab span,
+.physics-category-card small,
+.physics-scene-card small {
   display: block;
   margin-top: 8px;
   color: var(--muted);
@@ -2093,9 +2116,36 @@ textarea {
 }
 
 .physics-entry-card.is-active,
-.physics-module-tab.is-active {
+.physics-module-tab.is-active,
+.physics-category-card.is-active,
+.physics-scene-card.is-active {
   border-color: rgba(83, 168, 188, 0.42);
   background: linear-gradient(135deg, rgba(160, 216, 234, 0.22), rgba(255, 214, 130, 0.16));
+}
+
+.physics-scene-card {
+  display: grid;
+  gap: 8px;
+}
+
+.physics-scene-card p {
+  margin: 0;
+  color: #45505d;
+  line-height: 1.55;
+}
+
+.physics-scene-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.physics-badge {
+  border-radius: 999px;
+  background: rgba(23, 29, 36, 0.06);
+  color: #45505d;
+  font-size: 0.76rem;
+  padding: 6px 10px;
 }
 
 .physics-module-rail {
@@ -2147,6 +2197,41 @@ textarea {
 
 .physics-checkbox-row.is-disabled {
   cursor: not-allowed;
+}
+
+.physics-playback-row {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.physics-playback-group,
+.physics-speed-strip,
+.physics-connection-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.physics-speed-chip {
+  border: 1px solid rgba(23, 29, 36, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font: inherit;
+  color: #1b2430;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.physics-speed-chip:hover {
+  transform: translateY(-1px);
+  border-color: rgba(83, 168, 188, 0.35);
+}
+
+.physics-speed-chip.is-active {
+  background: rgba(160, 216, 234, 0.28);
+  border-color: rgba(83, 168, 188, 0.45);
 }
 
 .physics-status-pill {
@@ -2263,6 +2348,32 @@ textarea {
 .physics-histogram-bar span {
   color: var(--muted);
   font-size: 0.74rem;
+}
+
+.physics-spectrum-strip {
+  position: relative;
+  height: 132px;
+  margin-top: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(23, 29, 36, 0.08);
+  background: linear-gradient(90deg, rgba(122, 190, 255, 0.08), rgba(255, 213, 108, 0.12), rgba(255, 128, 96, 0.12));
+  overflow: hidden;
+}
+
+.physics-spectrum-line {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: rgba(23, 29, 36, 0.72);
+}
+
+.physics-spectrum-line span {
+  position: absolute;
+  bottom: 100%;
+  left: -10px;
+  color: #45505d;
+  font-size: 0.72rem;
 }
 
 .physics-mini-graph {
@@ -2398,6 +2509,8 @@ textarea {
 
 @media (max-width: 1040px) {
   .physics-entry-grid,
+  .physics-category-grid,
+  .physics-scene-grid,
   .physics-overlay-grid,
   .physics-compare-bars {
     grid-template-columns: 1fr;
