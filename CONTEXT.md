@@ -65,6 +65,10 @@
   - 助け合いボード `/apps/help`
   - 祈祷と呪詛 `/apps/ritual`
   - Games `/apps/games`
+  - リサーチプログレス `/apps/research-progress`
+    - 招待制の研究会 / ゼミ / 小規模PJ向け週次チェックイン面
+    - グループ一覧 `/apps/research-progress`
+    - グループ別ダッシュボード `/apps/research-progress/[slug]`
   - アプリ一覧 `/apps` は公開中アプリと非公開アプリを分けて表示する
 
 ## 6. データベース運用ルール
@@ -75,6 +79,7 @@
   2. 必要なら `supabase/README.md` と `CHANGELOG.md` を更新
   3. live 環境に再適用が必要な場合は明記
 - `if exists` / `drop policy if exists` 前提で、再実行可能な schema を維持する
+- `research_*` 系テーブルはリサーチプログレス用の正本で、live 反映には Supabase への schema 再適用が必要
 
 ## 7. デザインと CSS の現状
 

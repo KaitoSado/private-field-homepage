@@ -64,22 +64,32 @@ const plannedApps = [
 
 const privateApps = [
   {
+    name: "リサーチプログレス",
+    body: "研究会・ゼミ・小規模PJの週次進捗を確認し、未提出と停滞を早めに拾うための招待制ダッシュボードです。",
+    status: "招待制",
+    color: "mint",
+    href: "/apps/research-progress"
+  },
+  {
     name: "管理画面",
     body: "通報確認、投稿対応、権限まわりの処理を行う管理者専用の内部画面です。",
     status: "管理者専用",
-    color: "rose"
+    color: "rose",
+    href: "/admin"
   },
   {
     name: "運用状況",
     body: "環境変数、telemetry、エラー件数など、最低限の運用状態を確認するための内部ツールです。",
     status: "運営用",
-    color: "sky"
+    color: "sky",
+    href: "/ops"
   },
   {
     name: "共同ワールド管理室",
     body: "招待制の VR プロジェクトを立ち上げて、少人数で空間制作や内部テストを進めるための入口です。",
     status: "招待制",
-    color: "lavender"
+    color: "lavender",
+    href: "/apps/vr"
   }
 ];
 
@@ -110,13 +120,23 @@ export default function AppsPage() {
 
         <div className="apps-color-grid">
           {privateApps.map((app) => (
-            <article key={app.name} className={`apps-color-card apps-private-card candy-${app.color}`}>
-              <div className="apps-private-meta">
-                <span className="apps-private-status">{app.status}</span>
-              </div>
-              <h2>{app.name}</h2>
-              <p>{app.body}</p>
-            </article>
+            app.href ? (
+              <Link key={app.name} href={app.href} className={`apps-color-card apps-private-card apps-private-link candy-${app.color}`}>
+                <div className="apps-private-meta">
+                  <span className="apps-private-status">{app.status}</span>
+                </div>
+                <h2>{app.name}</h2>
+                <p>{app.body}</p>
+              </Link>
+            ) : (
+              <article key={app.name} className={`apps-color-card apps-private-card candy-${app.color}`}>
+                <div className="apps-private-meta">
+                  <span className="apps-private-status">{app.status}</span>
+                </div>
+                <h2>{app.name}</h2>
+                <p>{app.body}</p>
+              </article>
+            )
           ))}
         </div>
       </section>

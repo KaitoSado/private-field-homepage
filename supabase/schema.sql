@@ -293,6 +293,50 @@ create table if not exists public.project_members (
   primary key (project_id, user_id)
 );
 
+create table if not exists public.research_groups (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  slug text not null unique,
+  description text not null default '',
+  is_active boolean not null default true,
+  created_by uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.research_group_members (
+  group_id uuid not null references public.research_groups(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  role text not null default 'member',
+  joined_at timestamptz not null default timezone('utc'::text, now()),
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  primary key (group_id, user_id)
+);
+
+create table if not exists public.research_updates (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid not null references public.research_groups(id) on delete cascade,
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  week_start date not null,
+  topic_title text not null default '',
+  status text not null default 'review_needed',
+  summary_text text not null default '',
+  done_text text not null default '',
+  next_text text not null default '',
+  blockers_text text not null default '',
+  help_needed_text text not null default '',
+  needs_help boolean not null default false,
+  wants_review_in_meeting boolean not null default false,
+  blocker_type text not null default 'none',
+  reviewer_note text not null default '',
+  reviewed_by uuid references public.profiles(id) on delete set null,
+  reviewed_at timestamptz,
+  submitted_late boolean not null default false,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  unique (group_id, author_id, week_start)
+);
+
 create table if not exists public.scene_objects (
   id text primary key,
   project_id uuid not null references public.projects(id) on delete cascade,
@@ -422,6 +466,35 @@ alter table public.projects add column if not exists updated_at timestamptz not 
 alter table public.project_members add column if not exists role text not null default 'viewer';
 alter table public.project_members add column if not exists invited_at timestamptz not null default timezone('utc'::text, now());
 alter table public.project_members add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.research_groups add column if not exists name text;
+alter table public.research_groups add column if not exists slug text;
+alter table public.research_groups add column if not exists description text not null default '';
+alter table public.research_groups add column if not exists is_active boolean not null default true;
+alter table public.research_groups add column if not exists created_by uuid references public.profiles(id) on delete cascade;
+alter table public.research_groups add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.research_groups add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+alter table public.research_group_members add column if not exists role text not null default 'member';
+alter table public.research_group_members add column if not exists joined_at timestamptz not null default timezone('utc'::text, now());
+alter table public.research_group_members add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.research_updates add column if not exists group_id uuid references public.research_groups(id) on delete cascade;
+alter table public.research_updates add column if not exists author_id uuid references public.profiles(id) on delete cascade;
+alter table public.research_updates add column if not exists week_start date;
+alter table public.research_updates add column if not exists topic_title text not null default '';
+alter table public.research_updates add column if not exists status text not null default 'review_needed';
+alter table public.research_updates add column if not exists summary_text text not null default '';
+alter table public.research_updates add column if not exists done_text text not null default '';
+alter table public.research_updates add column if not exists next_text text not null default '';
+alter table public.research_updates add column if not exists blockers_text text not null default '';
+alter table public.research_updates add column if not exists help_needed_text text not null default '';
+alter table public.research_updates add column if not exists needs_help boolean not null default false;
+alter table public.research_updates add column if not exists wants_review_in_meeting boolean not null default false;
+alter table public.research_updates add column if not exists blocker_type text not null default 'none';
+alter table public.research_updates add column if not exists reviewer_note text not null default '';
+alter table public.research_updates add column if not exists reviewed_by uuid references public.profiles(id) on delete set null;
+alter table public.research_updates add column if not exists reviewed_at timestamptz;
+alter table public.research_updates add column if not exists submitted_late boolean not null default false;
+alter table public.research_updates add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.research_updates add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
 alter table public.scene_objects add column if not exists name text;
 alter table public.scene_objects add column if not exists model_url text not null default '';
 alter table public.scene_objects add column if not exists mime_type text not null default 'model/gltf-binary';
@@ -542,6 +615,13 @@ create index if not exists walk_sessions_user_idx on public.walk_sessions(user_i
 create index if not exists location_points_session_created_idx on public.location_points(session_id, created_at asc);
 create index if not exists projects_owner_idx on public.projects(owner_id, updated_at desc);
 create index if not exists project_members_user_idx on public.project_members(user_id, created_at desc);
+create unique index if not exists research_groups_slug_idx on public.research_groups(slug);
+create unique index if not exists research_group_members_group_user_idx on public.research_group_members(group_id, user_id);
+create index if not exists research_group_members_user_idx on public.research_group_members(user_id, group_id);
+create unique index if not exists research_updates_group_author_week_idx on public.research_updates(group_id, author_id, week_start);
+create index if not exists research_updates_group_week_idx on public.research_updates(group_id, week_start desc, updated_at desc);
+create index if not exists research_updates_author_week_idx on public.research_updates(author_id, week_start desc, updated_at desc);
+create index if not exists research_updates_status_idx on public.research_updates(group_id, status, week_start desc);
 create index if not exists scene_objects_project_updated_idx on public.scene_objects(project_id, updated_at desc);
 create index if not exists chat_messages_project_created_idx on public.chat_messages(project_id, created_at asc);
 create index if not exists notifications_recipient_idx on public.notifications(recipient_id, created_at desc);
@@ -736,6 +816,38 @@ alter table public.project_members
   drop constraint if exists project_members_role_check,
   add constraint project_members_role_check check (role in ('owner', 'editor', 'viewer'));
 
+alter table public.research_groups
+  drop constraint if exists research_groups_name_length_check,
+  add constraint research_groups_name_length_check check (char_length(name) between 1 and 120),
+  drop constraint if exists research_groups_slug_length_check,
+  add constraint research_groups_slug_length_check check (char_length(slug) between 1 and 80),
+  drop constraint if exists research_groups_description_length_check,
+  add constraint research_groups_description_length_check check (char_length(description) <= 400);
+
+alter table public.research_group_members
+  drop constraint if exists research_group_members_role_check,
+  add constraint research_group_members_role_check check (role in ('owner', 'member', 'viewer'));
+
+alter table public.research_updates
+  drop constraint if exists research_updates_status_check,
+  add constraint research_updates_status_check check (status in ('on_track', 'at_risk', 'blocked', 'review_needed')),
+  drop constraint if exists research_updates_blocker_type_check,
+  add constraint research_updates_blocker_type_check check (blocker_type in ('none', 'direction', 'method', 'analysis', 'writing', 'schedule', 'motivation', 'dependency', 'other')),
+  drop constraint if exists research_updates_topic_title_length_check,
+  add constraint research_updates_topic_title_length_check check (char_length(topic_title) <= 120),
+  drop constraint if exists research_updates_summary_length_check,
+  add constraint research_updates_summary_length_check check (char_length(summary_text) between 1 and 180),
+  drop constraint if exists research_updates_done_length_check,
+  add constraint research_updates_done_length_check check (char_length(done_text) <= 2000),
+  drop constraint if exists research_updates_next_length_check,
+  add constraint research_updates_next_length_check check (char_length(next_text) between 1 and 2000),
+  drop constraint if exists research_updates_blockers_length_check,
+  add constraint research_updates_blockers_length_check check (char_length(blockers_text) <= 2000),
+  drop constraint if exists research_updates_help_needed_length_check,
+  add constraint research_updates_help_needed_length_check check (char_length(help_needed_text) <= 2000),
+  drop constraint if exists research_updates_reviewer_note_length_check,
+  add constraint research_updates_reviewer_note_length_check check (char_length(reviewer_note) <= 2000);
+
 alter table public.scene_objects
   drop constraint if exists scene_objects_name_length_check,
   add constraint scene_objects_name_length_check check (char_length(name) between 1 and 140),
@@ -836,6 +948,50 @@ security definer
 set search_path = public
 as $$
   select public.project_role(p_project_id) in ('owner', 'editor');
+$$;
+
+create or replace function public.is_research_group_member(p_group_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.research_group_members
+    where group_id = p_group_id
+      and user_id = auth.uid()
+  );
+$$;
+
+create or replace function public.research_group_role(p_group_id uuid)
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce(
+    (
+      select role
+      from public.research_group_members
+      where group_id = p_group_id
+        and user_id = auth.uid()
+      limit 1
+    ),
+    ''
+  );
+$$;
+
+create or replace function public.can_review_research_group(p_group_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.research_group_role(p_group_id) = 'owner';
 $$;
 
 drop function if exists public.create_vr_project(text);
@@ -1384,6 +1540,16 @@ create trigger projects_set_updated_at
 before update on public.projects
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists research_groups_set_updated_at on public.research_groups;
+create trigger research_groups_set_updated_at
+before update on public.research_groups
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists research_updates_set_updated_at on public.research_updates;
+create trigger research_updates_set_updated_at
+before update on public.research_updates
+for each row execute procedure public.handle_updated_at();
+
 drop trigger if exists projects_guard_updates on public.projects;
 create trigger projects_guard_updates
 before update on public.projects
@@ -1461,6 +1627,9 @@ alter table public.walk_sessions enable row level security;
 alter table public.location_points enable row level security;
 alter table public.projects enable row level security;
 alter table public.project_members enable row level security;
+alter table public.research_groups enable row level security;
+alter table public.research_group_members enable row level security;
+alter table public.research_updates enable row level security;
 alter table public.scene_objects enable row level security;
 alter table public.chat_messages enable row level security;
 alter table public.notifications enable row level security;
@@ -1840,6 +2009,9 @@ grant select, insert on public.helpful_votes to authenticated;
 grant select on public.help_request_feedback to authenticated;
 grant select, insert, update, delete on public.projects to authenticated;
 grant select, insert, update, delete on public.project_members to authenticated;
+grant select, insert, update, delete on public.research_groups to authenticated;
+grant select, insert, update, delete on public.research_group_members to authenticated;
+grant select, insert, update, delete on public.research_updates to authenticated;
 grant select, insert, update, delete on public.scene_objects to authenticated;
 grant select, insert, delete on public.chat_messages to authenticated;
 grant execute on function public.refresh_economy_account(uuid) to authenticated;
@@ -1847,6 +2019,9 @@ grant execute on function public.cast_helpful_vote(uuid, text, uuid) to authenti
 grant execute on function public.create_vr_project(text, text) to authenticated;
 grant execute on function public.accept_vr_project_invite(uuid, text) to authenticated;
 grant execute on function public.join_open_vr_project(uuid) to authenticated;
+grant execute on function public.is_research_group_member(uuid) to authenticated;
+grant execute on function public.research_group_role(uuid) to authenticated;
+grant execute on function public.can_review_research_group(uuid) to authenticated;
 
 drop policy if exists "help requests are public readable" on public.help_requests;
 create policy "help requests are public readable"
@@ -2280,6 +2455,147 @@ using (
     where projects.id = project_members.project_id
       and projects.owner_id = auth.uid()
   )
+  or public.is_admin()
+);
+
+drop policy if exists "members can read research groups" on public.research_groups;
+create policy "members can read research groups"
+on public.research_groups
+for select
+using (created_by = auth.uid() or public.is_research_group_member(id) or public.is_admin());
+
+drop policy if exists "authenticated users can create research groups" on public.research_groups;
+create policy "authenticated users can create research groups"
+on public.research_groups
+for insert
+to authenticated
+with check (created_by = auth.uid());
+
+drop policy if exists "owners can update research groups" on public.research_groups;
+create policy "owners can update research groups"
+on public.research_groups
+for update
+using (created_by = auth.uid() or public.can_review_research_group(id) or public.is_admin())
+with check (created_by = auth.uid() or public.can_review_research_group(id) or public.is_admin());
+
+drop policy if exists "owners can delete research groups" on public.research_groups;
+create policy "owners can delete research groups"
+on public.research_groups
+for delete
+using (created_by = auth.uid() or public.can_review_research_group(id) or public.is_admin());
+
+drop policy if exists "members can read research memberships" on public.research_group_members;
+create policy "members can read research memberships"
+on public.research_group_members
+for select
+using (public.is_research_group_member(group_id) or public.is_admin());
+
+drop policy if exists "owners can create research memberships" on public.research_group_members;
+create policy "owners can create research memberships"
+on public.research_group_members
+for insert
+to authenticated
+with check (
+  (
+    auth.uid() = user_id
+    and role = 'owner'
+    and exists (
+      select 1
+      from public.research_groups
+      where research_groups.id = research_group_members.group_id
+        and research_groups.created_by = auth.uid()
+    )
+  )
+  or exists (
+    select 1
+    from public.research_group_members as memberships
+    where memberships.group_id = research_group_members.group_id
+      and memberships.user_id = auth.uid()
+      and memberships.role = 'owner'
+  )
+  or public.is_admin()
+);
+
+drop policy if exists "owners can update research memberships" on public.research_group_members;
+create policy "owners can update research memberships"
+on public.research_group_members
+for update
+using (
+  exists (
+    select 1
+    from public.research_group_members as memberships
+    where memberships.group_id = research_group_members.group_id
+      and memberships.user_id = auth.uid()
+      and memberships.role = 'owner'
+  )
+  or public.is_admin()
+)
+with check (
+  exists (
+    select 1
+    from public.research_group_members as memberships
+    where memberships.group_id = research_group_members.group_id
+      and memberships.user_id = auth.uid()
+      and memberships.role = 'owner'
+  )
+  or public.is_admin()
+);
+
+drop policy if exists "owners can delete research memberships" on public.research_group_members;
+create policy "owners can delete research memberships"
+on public.research_group_members
+for delete
+using (
+  research_group_members.user_id = auth.uid()
+  or exists (
+    select 1
+    from public.research_group_members as memberships
+    where memberships.group_id = research_group_members.group_id
+      and memberships.user_id = auth.uid()
+      and memberships.role = 'owner'
+  )
+  or public.is_admin()
+);
+
+drop policy if exists "members can read research updates" on public.research_updates;
+create policy "members can read research updates"
+on public.research_updates
+for select
+using (public.is_research_group_member(group_id) or public.is_admin());
+
+drop policy if exists "members can create own research updates" on public.research_updates;
+create policy "members can create own research updates"
+on public.research_updates
+for insert
+to authenticated
+with check (
+  auth.uid() = author_id
+  and public.is_research_group_member(group_id)
+  and public.research_group_role(group_id) in ('owner', 'member')
+);
+
+drop policy if exists "authors or owners can update research updates" on public.research_updates;
+create policy "authors or owners can update research updates"
+on public.research_updates
+for update
+using (
+  auth.uid() = author_id
+  or public.can_review_research_group(group_id)
+  or public.is_admin()
+)
+with check (
+  auth.uid() = author_id
+  or public.can_review_research_group(group_id)
+  or public.is_admin()
+);
+
+drop policy if exists "authors or owners can delete research updates" on public.research_updates;
+create policy "authors or owners can delete research updates"
+on public.research_updates
+for delete
+using (
+  auth.uid() = author_id
+  or public.can_review_research_group(group_id)
   or public.is_admin()
 );
 

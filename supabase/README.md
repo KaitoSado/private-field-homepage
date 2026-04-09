@@ -25,8 +25,15 @@ schema を変える時は:
 - カラム追加 / 制約変更
 - policy / trigger / function 変更
 
+今回の `Research Progress` 追加では以下が live 適用対象:
+
+- `research_groups`
+- `research_group_members`
+- `research_updates`
+- 関連 helper function / trigger / RLS policy
+
 ## 注意点
 
 - DB だけ更新してコードを更新しない、またはその逆は避ける
 - `Could not find column in schema cache` が出たら、まず schema 適用漏れを疑う
-
+- `/apps/research-progress` が 403 / 500 になる時は、schema の live 適用漏れか profile 未作成を先に疑う
