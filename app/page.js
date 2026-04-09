@@ -66,11 +66,11 @@ const appCards = [
   },
   {
     title: "物理コンテンツ",
-    body: "放物運動、電場、レンズ、振動を触って理解する Physics Playground。",
+    body: "エネルギー、衝突、剛体、相対論、量子までを、同じ世界を異なる法則で見る Physics Playground。",
     href: "/apps/physics",
     emoji: "🪐",
     accent: "is-sky",
-    tags: ["放物運動", "電場", "レンズ"]
+    tags: ["エネルギー", "衝突", "相対論"]
   }
 ];
 

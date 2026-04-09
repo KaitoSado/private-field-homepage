@@ -26,7 +26,7 @@ const plannedApps = [
   },
   {
     name: "物理コンテンツ",
-    body: "放物運動、振動、電場、レンズを触りながら、現象から式へつなぐ Physics Playground です。",
+    body: "仕事とエネルギー、衝突、剛体、理想気体、相対論、1D量子を、同じ scene の上で見方を切り替えながら理解する Physics Playground です。",
     href: "/apps/physics",
     color: "lemon"
   },
