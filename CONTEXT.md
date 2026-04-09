@@ -65,6 +65,9 @@
   - 助け合いボード `/apps/help`
   - 祈祷と呪詛 `/apps/ritual`
   - Games `/apps/games`
+  - 物理コンテンツ `/apps/physics`
+    - `Physics Playground` として、Sandbox / Guided Lab / Theory Map を持つ client-side 物理 app
+    - 初版は放物運動、バネ振動、電場、幾何光学の 4 ラボを実装
   - リサーチプログレス `/apps/research-progress`
     - 招待制の研究会 / ゼミ / 小規模PJ向け研究ライン + 週次チェックイン面
     - グループ一覧 `/apps/research-progress`

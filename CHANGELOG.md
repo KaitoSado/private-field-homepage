@@ -4,6 +4,8 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-09 | codex | physics app | `/apps/physics` に `Physics Playground` を追加し、放物運動・バネ振動・電場・幾何光学の MVP と Sandbox / Guided Lab / Theory Map を実装 | `npm run build` |
+| 2026-04-09 | codex | apps copy | `/apps/math` とアプリ一覧での名称を `数学コミュニティ` から `数学コンテンツ` に変更 | `npm run build` |
 | 2026-04-09 | codex | research progress ui | 研究室パイプラインの各 project に全体進捗シークバーを追加し、段階ラベルと全体％を同時に見えるようにした | `npm run build` |
 | 2026-04-09 | codex | research progress | `/apps/research-progress` を研究ライン中心の研究室ポートフォリオに拡張し、`research_projects` / `research_project_members` / project 管理 API・UI を追加 | `npm run build` |
 | 2026-04-09 | codex | research progress | 招待制の研究進捗 app `/apps/research-progress` を追加し、group / membership / weekly update / owner review 用 API・UI・Supabase schema を実装 | `npm run build` |
