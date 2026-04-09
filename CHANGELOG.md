@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-10 | codex | games | `賽の河原` の配置操作をドラッグ主体に変え、石が 1 個でも台から落ちたら即終了するルールへ調整 | `node --check public/games/sainokawara/script.js`, `npm run build` |
 | 2026-04-10 | codex | games | `賽の河原` の static asset 参照を相対パスから `/games/sainokawara/...` の絶対パスへ切り替え、trailing slash の有無で CSS/JS が落ちる不具合を修正 | `npm run build` |
 | 2026-04-10 | codex | games | `賽の河原` の Matter.js 読み込みを CDN から `public/games/sainokawara/vendor/matter.min.js` のローカル同梱へ切り替え、開始ボタンが外部 script 失敗で止まらないようにした | `node --check public/games/sainokawara/script.js`, `npm run build` |
 | 2026-04-10 | codex | games | `賽の河原` の石形状を増やし、game over 判定を緩和しつつ、月夜と霧の背景・危険度メーター・高さ連動の微風・危険成功時の倍率を追加した | `node --check public/games/sainokawara/script.js`, `npm run build` |
