@@ -1,11 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { BreakoutGame } from "@/components/breakout-game";
 import { DuckPlatformerGame } from "@/components/duck-platformer-game";
 import { TowerDefenseGame } from "@/components/tower-defense-game";
 
 const tabs = [
+  { id: "sainokawara", label: "賽の河原" },
   { id: "defense", label: "Tower Defense" },
   { id: "duck", label: "Duck Run" },
   { id: "breakout", label: "Breakout" },
@@ -85,7 +87,7 @@ const TETRIS_SHAPES = {
 };
 
 export function GameArcade() {
-  const [activeTab, setActiveTab] = useState("defense");
+  const [activeTab, setActiveTab] = useState("sainokawara");
 
   return (
     <div className="dashboard-layout">
@@ -109,6 +111,7 @@ export function GameArcade() {
           ))}
         </div>
 
+        {activeTab === "sainokawara" ? <SaikawaraGame /> : null}
         {activeTab === "defense" ? <TowerDefenseGame /> : null}
         {activeTab === "duck" ? <DuckPlatformerGame /> : null}
         {activeTab === "breakout" ? <BreakoutGame /> : null}
@@ -117,6 +120,57 @@ export function GameArcade() {
         {activeTab === "reaction" ? <ReactionTapGame /> : null}
         {activeTab === "memory" ? <MemoryFlipGame /> : null}
       </section>
+    </div>
+  );
+}
+
+function SaikawaraGame() {
+  return (
+    <div className="arcade-panel-grid arcade-panel-grid-wide">
+      <div className="surface arcade-game-card arcade-feature-game">
+        <div className="section-copy">
+          <p className="eyebrow">Quiet stacking game</p>
+          <h2>賽の河原</h2>
+          <p>
+            石をひとつずつ積み、少し揺れ、崩れずに持ちこたえるのを待つ静かなゲームです。大きく崩れたら終わり。高く積むほど、次の一石がこわくなります。
+          </p>
+        </div>
+
+        <div className="arcade-feature-layout">
+          <div className="arcade-feature-frame-wrap">
+            <iframe
+              src="/games/sainokawara/"
+              title="賽の河原"
+              className="arcade-feature-frame"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="surface arcade-side-card arcade-feature-side">
+            <div className="stats-grid">
+              <div className="stat-tile">
+                <strong>静かな緊張</strong>
+                <span>一石ごとに待つゲーム</span>
+              </div>
+              <div className="stat-tile">
+                <strong>石塔の不安定さ</strong>
+                <span>崩れ方に納得感を寄せる</span>
+              </div>
+            </div>
+
+            <div className="arcade-feature-copy">
+              <p className="eyebrow">Controls</p>
+              <p>マウス / A D で移動、Q E やホイールで回転、クリックか Space で置きます。</p>
+            </div>
+
+            <div className="hero-actions">
+              <Link href="/games/sainokawara/" className="button button-secondary" target="_blank">
+                単独で開く
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

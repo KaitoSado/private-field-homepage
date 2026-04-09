@@ -5266,6 +5266,42 @@ textarea {
   background: rgba(79, 162, 212, 0.72);
 }
 
+.arcade-feature-game {
+  gap: 18px;
+}
+
+.arcade-feature-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 18px;
+  align-items: start;
+}
+
+.arcade-feature-frame-wrap {
+  min-height: 760px;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(12, 17, 24, 0.96), rgba(5, 8, 12, 0.98));
+}
+
+.arcade-feature-frame {
+  display: block;
+  width: 100%;
+  min-height: 760px;
+  border: 0;
+  background: transparent;
+}
+
+.arcade-feature-side {
+  align-content: start;
+}
+
+.arcade-feature-copy {
+  display: grid;
+  gap: 8px;
+}
+
 .night-walk-main {
   align-items: start;
 }
@@ -5904,6 +5940,10 @@ textarea {
   }
 
   .arcade-tetris-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .arcade-feature-layout {
     grid-template-columns: 1fr;
   }
 

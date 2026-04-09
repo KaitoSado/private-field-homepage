@@ -58,11 +58,11 @@ const appCards = [
   },
   {
     title: "Games",
-    body: "テトリス、ブロック崩し、ミニゲーム。",
+    body: "賽の河原、テトリス、ブロック崩し、静かな緊張のミニゲーム。",
     href: "/apps/games",
     emoji: "🎮",
-    accent: "is-gold",
-    tags: ["テトリス", "ブロック崩し", "暇つぶし"]
+    accent: "is-lemon",
+    tags: ["賽の河原", "テトリス", "ブロック崩し"]
   },
   {
     title: "物理コンテンツ",
