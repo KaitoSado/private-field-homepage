@@ -65,7 +65,7 @@ const plannedApps = [
 const privateApps = [
   {
     name: "リサーチプログレス",
-    body: "研究会・ゼミ・小規模PJの週次進捗を確認し、未提出と停滞を早めに拾うための招待制ダッシュボードです。",
+    body: "研究計画、研究費申請、ポスター、論文投稿までの研究ラインを一覧化し、研究室全体の現在地と停滞を把握する招待制ダッシュボードです。",
     status: "招待制",
     color: "mint",
     href: "/apps/research-progress"

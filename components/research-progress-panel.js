@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { ResearchProjectPortfolio } from "@/components/research-project-portfolio";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import {
   RESEARCH_BLOCKER_TYPE_OPTIONS,
@@ -384,6 +385,7 @@ export function ResearchProgressPanel({ slug }) {
 
   const canEdit = dashboard?.group?.my_role && dashboard.group.my_role !== "viewer";
   const canReview = dashboard?.group?.my_role === "owner";
+  const canManageProjects = dashboard?.group?.my_role === "owner";
   const currentWeekStart = dashboard?.current_week_start || getResearchWeekStart();
   const canGoNextWeek = compareResearchWeek(weekStart, currentWeekStart) < 0;
 
@@ -442,7 +444,7 @@ export function ResearchProgressPanel({ slug }) {
         <div className="research-progress-hero-copy">
           <p className="eyebrow">Research Progress</p>
           <h1>{dashboard.group.name}</h1>
-          <p>{dashboard.group.description || "週次チェックインとレビューのための招待制グループです。"}</p>
+          <p>{dashboard.group.description || "研究ラインと週次チェックインをまとめて見える化する招待制グループです。"}</p>
           <div className="research-progress-hero-meta">
             <span className="research-progress-chip">{getResearchRoleLabel(dashboard.group.my_role)}</span>
             <span className="research-progress-meta-line">週: {formatResearchWeekLabel(weekStart)}</span>
@@ -460,6 +462,14 @@ export function ResearchProgressPanel({ slug }) {
           </button>
         </div>
       </section>
+
+      <ResearchProjectPortfolio
+        dashboard={dashboard}
+        slug={slug}
+        session={session}
+        canManageProjects={canManageProjects}
+        onReload={() => loadDashboard(session.access_token, weekStart)}
+      />
 
       <section className="research-progress-summary-grid">
         <article className="surface research-progress-summary-card">

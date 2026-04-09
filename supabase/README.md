@@ -30,6 +30,8 @@ schema を変える時は:
 - `research_groups`
 - `research_group_members`
 - `research_updates`
+- `research_projects`
+- `research_project_members`
 - 関連 helper function / trigger / RLS policy
 
 ## 注意点
@@ -37,3 +39,4 @@ schema を変える時は:
 - DB だけ更新してコードを更新しない、またはその逆は避ける
 - `Could not find column in schema cache` が出たら、まず schema 適用漏れを疑う
 - `/apps/research-progress` が 403 / 500 になる時は、schema の live 適用漏れか profile 未作成を先に疑う
+- 研究ラインの create / update が失敗する時は、`research_projects` と `research_project_members` の live 適用漏れを先に疑う
