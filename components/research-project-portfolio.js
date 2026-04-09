@@ -5,6 +5,7 @@ import {
   RESEARCH_PROJECT_PROGRESS_OPTIONS,
   RESEARCH_PROJECT_RISK_OPTIONS,
   RESEARCH_PROJECT_TYPE_OPTIONS,
+  getResearchProjectGoalStage,
   getResearchProjectOverallProgress,
   getResearchProjectRiskClass,
   getResearchProjectRiskLabel,
@@ -277,6 +278,14 @@ export function ResearchProjectPortfolio({ dashboard, slug, session, canManagePr
                   const track = getResearchProjectStageTrack(project.project_type, project.current_stage);
                   const dueSoon = isResearchDueSoon(project.next_milestone_due_on);
                   const overdue = isResearchOverdue(project.next_milestone_due_on);
+                  const overallProgress = project.overall_progress || getResearchProjectOverallProgress(
+                    project.project_type,
+                    project.current_stage,
+                    project.stage_progress
+                  );
+                  const projectStages = getResearchProjectStages(project.project_type);
+                  const startStageLabel = getResearchProjectStageShortLabel(projectStages[0]);
+                  const goalStageLabel = getResearchProjectStageShortLabel(getResearchProjectGoalStage(project.project_type));
 
                   return (
                     <tr key={project.id}>
@@ -295,22 +304,42 @@ export function ResearchProjectPortfolio({ dashboard, slug, session, canManagePr
                         </div>
                       </td>
                       <td>
-                        <div className="research-project-track" aria-label={`${project.title} の研究ライン`}>
-                          {track.map((stage) => (
-                            <div
-                              key={stage.key}
-                              className={`research-project-track-step is-${stage.state}`}
-                              title={stage.label}
-                            >
-                              {stage.shortLabel}
+                        <div className="research-project-track-stack">
+                          <div className="research-project-track" aria-label={`${project.title} の研究ライン`}>
+                            {track.map((stage) => (
+                              <div
+                                key={stage.key}
+                                className={`research-project-track-step is-${stage.state}`}
+                                title={stage.label}
+                              >
+                                {stage.shortLabel}
+                              </div>
+                            ))}
+                          </div>
+                          <div
+                            className="research-project-progress-meter"
+                            role="progressbar"
+                            aria-label={`${project.title} の全体進捗`}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={overallProgress}
+                          >
+                            <div className="research-project-progress-rail">
+                              <div className="research-project-progress-fill" style={{ width: `${overallProgress}%` }} />
+                              <div className="research-project-progress-knob" style={{ left: `${overallProgress}%` }} />
                             </div>
-                          ))}
+                            <div className="research-project-progress-meta">
+                              <span>{startStageLabel}</span>
+                              <strong>{overallProgress}%</strong>
+                              <span>{goalStageLabel}</span>
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td>
                         <div className="research-progress-cell-stack">
                           <strong>{getResearchProjectStageLabel(project.current_stage)}</strong>
-                          <span>{project.stage_progress}% / 全体 {project.overall_progress || getResearchProjectOverallProgress(project.project_type, project.current_stage, project.stage_progress)}%</span>
+                          <span>この段階 {project.stage_progress}% / 全体 {overallProgress}%</span>
                         </div>
                       </td>
                       <td>
