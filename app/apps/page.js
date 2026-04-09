@@ -26,7 +26,7 @@ const plannedApps = [
   },
   {
     name: "物理コンテンツ",
-    body: "仕事とエネルギー、衝突、剛体、理想気体、相対論、1D量子を、同じ scene の上で見方を切り替えながら理解する Physics Playground です。",
+    body: "剛体、流体、電磁波、相転移、ローレンツ変換、カオス、量子化までを、秩序と波の変化として触れる Physics Playground です。",
     href: "/apps/physics",
     color: "lemon"
   },

@@ -63,5 +63,7 @@
 ### 11. 物理コンテンツは「見方の切替 UI」を主役にする
 
 - `/apps/physics` は物理単元を並べる辞書ではなく、同じ scene の上に law を重ねる app として育てる
-- 初版は高精度 solver よりも、`Playground / Law View / World Shift` と overlay 切替の一貫性を優先する
+- 初版は高精度 solver よりも、`Playground / Law View / Emergence` と overlay 切替の一貫性を優先する
 - 範囲は広げすぎず、古典力学から相対論・量子への導線が見える章立てを採用する
+- scene は専門分類よりも `回る / 流れる / 伝わる / 乱れる / 切り替わる / 歪む / 量子になる` の現象分類から入る
+- 各 scene は別 app に分けず、再生制御・表示切替・下部グラフを共通 runner にそろえる
