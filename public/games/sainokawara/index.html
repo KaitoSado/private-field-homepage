@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>賽の河原</title>
+    <meta
+      name="description"
+      content="石をひとつずつ積み上げ、崩壊の気配と静かな緊張を味わうブラウザゲーム。"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="saikawara-app">
+      <header class="saikawara-hud" id="hud" hidden>
+        <div class="hud-cluster">
+          <div class="hud-tile">
+            <span class="hud-label">積んだ石</span>
+            <strong id="stonesValue">0</strong>
+          </div>
+          <div class="hud-tile">
+            <span class="hud-label">高さ</span>
+            <strong id="heightValue">0</strong>
+          </div>
+          <div class="hud-tile">
+            <span class="hud-label">スコア</span>
+            <strong id="scoreValue">0</strong>
+          </div>
+          <div class="hud-tile">
+            <span class="hud-label">最良</span>
+            <strong id="bestValue">0</strong>
+          </div>
+        </div>
+
+        <div class="hud-cluster hud-cluster-right">
+          <div class="danger-meter" aria-label="危険度">
+            <div class="danger-meter-head">
+              <span>危険度</span>
+              <strong id="multiplierValue">x1.00</strong>
+            </div>
+            <div class="danger-meter-bar">
+              <i id="dangerFill"></i>
+            </div>
+          </div>
+          <button type="button" class="hud-button" id="restartButton">やり直す</button>
+          <button type="button" class="hud-button hud-button-ghost" id="titleButton">題字へ</button>
+        </div>
+      </header>
+
+      <main class="saikawara-stage">
+        <section class="playfield-shell">
+          <canvas id="gameCanvas" width="960" height="600" aria-label="賽の河原のゲーム画面"></canvas>
+
+          <div class="screen-overlay" id="titleScreen">
+            <div class="overlay-panel title-panel">
+              <p class="eyebrow">Quiet stacking game</p>
+              <h1>賽の河原</h1>
+              <p class="lead">
+                石をひとつずつ積み、少し揺れて、持ちこたえるのを待つ。
+                崩れるまでは静かです。高く積むほど、風と重さがじわじわ効いてきます。
+              </p>
+
+              <div class="title-rules">
+                <p>左右に寄せ、角度を整え、落とします。</p>
+                <p>大きく崩れたときだけ終わるので、少しの失敗ならまだ続けられます。</p>
+                <p>危うい置き方に成功するほど、倍率が上がります。</p>
+              </div>
+
+              <div class="overlay-actions">
+                <button type="button" class="primary-button" id="startButton">はじめる</button>
+              </div>
+
+              <div class="controls-grid">
+                <div><strong>移動</strong><span>マウス / A / D</span></div>
+                <div><strong>回転</strong><span>Q / E / ホイール</span></div>
+                <div><strong>置く</strong><span>クリック / Space</span></div>
+                <div><strong>再開</strong><span>R</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="screen-overlay result-screen" id="resultScreen" hidden>
+            <div class="overlay-panel result-panel">
+              <p class="eyebrow">The cairn has fallen</p>
+              <h2>崩れました</h2>
+
+              <div class="result-grid">
+                <div class="result-tile">
+                  <span>最終スコア</span>
+                  <strong id="resultScore">0</strong>
+                </div>
+                <div class="result-tile">
+                  <span>積んだ石</span>
+                  <strong id="resultStones">0</strong>
+                </div>
+                <div class="result-tile">
+                  <span>到達高さ</span>
+                  <strong id="resultHeight">0</strong>
+                </div>
+              </div>
+
+              <p class="result-note" id="resultNote">次の一石が、いちばんこわい。</p>
+
+              <div class="overlay-actions">
+                <button type="button" class="primary-button" id="retryButton">もう一度</button>
+                <button type="button" class="secondary-button" id="resultTitleButton">タイトルに戻る</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-panel" id="sidePanel" hidden>
+          <section class="side-card next-card">
+            <div class="side-head">
+              <p class="side-label">次の石</p>
+              <span class="side-small" id="windValue">風 0.00</span>
+            </div>
+            <canvas id="nextCanvas" width="180" height="120" aria-label="次の石プレビュー"></canvas>
+            <p class="side-note" id="statusText">石を置く前に、ほんの少しだけ深呼吸。</p>
+          </section>
+
+          <section class="side-card">
+            <p class="side-label">いまの気配</p>
+            <div class="telemetry-list">
+              <div><span>連続成功</span><strong id="streakValue">0</strong></div>
+              <div><span>危険ボーナス</span><strong id="riskValue">0</strong></div>
+              <div><span>流された石</span><strong id="fallenValue">0</strong></div>
+            </div>
+          </section>
+
+          <section class="side-card controls-card">
+            <p class="side-label">補助操作</p>
+            <div class="mobile-controls">
+              <button type="button" class="control-button" data-action="left">左</button>
+              <button type="button" class="control-button" data-action="rotate-left">↺</button>
+              <button type="button" class="control-button control-button-place" data-action="place">置く</button>
+              <button type="button" class="control-button" data-action="rotate-right">↻</button>
+              <button type="button" class="control-button" data-action="right">右</button>
+            </div>
+            <p class="controls-footnote">PC ではマウス / A D / Q E / Space が使えます。</p>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>

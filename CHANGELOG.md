@@ -4,6 +4,8 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-10 | codex | games | `賽の河原` の石形状を増やし、game over 判定を緩和しつつ、月夜と霧の背景・危険度メーター・高さ連動の微風・危険成功時の倍率を追加した | `node --check public/games/sainokawara/script.js`, `npm run build` |
+| 2026-04-10 | codex | games | `/games/sainokawara/` に standalone な静的ゲーム `賽の河原` を追加し、`/apps/games` から埋め込み・単独起動できるようにした | `node --check public/games/sainokawara/script.js`, `npm run build` |
 | 2026-04-09 | codex | physics app | `/apps/physics` を `Sandbox / Guided Lab / Math Link / Theory Map` 中心の Physics Playground に再構成し、放物運動・衝突・単振動・理想気体・波の反射 / 屈折・ローレンツ変換・1D量子井戸の 7 scene を共通 runner に実装 | `npm run build` |
 | 2026-04-09 | codex | physics app | `/apps/physics` を `Emergence Lab` 方向へ拡張し、剛体・流体・電磁波・不可逆性・相転移・ローレンツ変換・前期量子論・1D量子・量子調和振動子・カオスの 10 scene を共通 runner 上に実装 | `npm run build` |
 | 2026-04-09 | codex | physics app | `/apps/physics` を overlay 中心の Physics Playground へ組み替え、`Playground / Law View / World Shift` と `Motion / Collision / Rotation / Gas / Relativity / Quantum` の章構成に刷新 | `npm run build` |

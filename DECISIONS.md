@@ -66,3 +66,9 @@
 - 初版は高精度 solver よりも、`Sandbox / Guided Lab / Math Link / Theory Map` の学習導線を優先する
 - scene はバラバラの教材集にせず、再生制御・表示切替・グラフ・数式接続を共通 runner にそろえる
 - 最初の核は `放物運動`, `衝突`, `単振動`, `理想気体`, `波の反射・屈折`, `ローレンツ変換`, `1D量子井戸` の 7 scene とする
+
+### 12. build 不要の standalone game は `public/` に切り出す
+
+- `賽の河原` のように HTML / CSS / JS だけで即動くゲームは `public/` 配下に置く
+- site 側の React は導線と埋め込みにとどめ、ゲーム本体の複雑さを Next の route から切り離す
+- これにより local でも単体で確認しやすく、Games ハブからも一貫した見せ方を保てる
