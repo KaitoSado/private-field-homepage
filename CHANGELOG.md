@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-10 | codex | games | `賽の河原` の Matter.js 読み込みを CDN から `public/games/sainokawara/vendor/matter.min.js` のローカル同梱へ切り替え、開始ボタンが外部 script 失敗で止まらないようにした | `node --check public/games/sainokawara/script.js`, `npm run build` |
 | 2026-04-10 | codex | games | `賽の河原` の石形状を増やし、game over 判定を緩和しつつ、月夜と霧の背景・危険度メーター・高さ連動の微風・危険成功時の倍率を追加した | `node --check public/games/sainokawara/script.js`, `npm run build` |
 | 2026-04-10 | codex | games | `/games/sainokawara/` に standalone な静的ゲーム `賽の河原` を追加し、`/apps/games` から埋め込み・単独起動できるようにした | `node --check public/games/sainokawara/script.js`, `npm run build` |
 | 2026-04-09 | codex | physics app | `/apps/physics` を `Sandbox / Guided Lab / Math Link / Theory Map` 中心の Physics Playground に再構成し、放物運動・衝突・単振動・理想気体・波の反射 / 屈折・ローレンツ変換・1D量子井戸の 7 scene を共通 runner に実装 | `npm run build` |
