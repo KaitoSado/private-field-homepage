@@ -19,10 +19,16 @@ const plannedApps = [
     color: "lemon"
   },
   {
-    name: "数学コミュニティ",
+    name: "数学コンテンツ",
     body: "関数グラフ、幾何、空間図形、数式処理、科学計算をまとめたオールインワン数学ワークスペースです。",
     href: "/apps/math",
     color: "sky"
+  },
+  {
+    name: "物理コンテンツ",
+    body: "放物運動、振動、電場、レンズを触りながら、現象から式へつなぐ Physics Playground です。",
+    href: "/apps/physics",
+    color: "lemon"
   },
   {
     name: "3Dモデル3Dグラフィック",

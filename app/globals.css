@@ -1585,6 +1585,456 @@ textarea {
   flex-wrap: wrap;
   gap: 10px;
 }
+
+.physics-app-shell {
+  display: grid;
+  gap: 22px;
+}
+
+.physics-hero {
+  display: grid;
+  gap: 18px;
+}
+
+.physics-hero-lead {
+  max-width: 760px;
+}
+
+.physics-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.physics-summary-card {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+}
+
+.physics-summary-card span {
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.physics-summary-card strong {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.physics-summary-card small {
+  color: var(--muted);
+}
+
+.physics-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.physics-mode-chip,
+.physics-chip {
+  border: 1px solid rgba(23, 29, 36, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+  color: #1b2430;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.physics-mode-chip:hover,
+.physics-chip:hover,
+.physics-lab-tab:hover {
+  transform: translateY(-1px);
+  border-color: rgba(83, 168, 188, 0.35);
+}
+
+.physics-mode-chip.is-active,
+.physics-chip.is-active {
+  background: rgba(160, 216, 234, 0.28);
+  border-color: rgba(83, 168, 188, 0.45);
+}
+
+.physics-workbench {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.physics-side-panel,
+.physics-visual-card,
+.physics-controls-card,
+.physics-insight-card,
+.physics-mode-card {
+  padding: 20px;
+}
+
+.physics-main-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.physics-panel-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.physics-panel-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.physics-panel-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.physics-lab-tabs {
+  display: grid;
+  gap: 10px;
+}
+
+.physics-lab-tab {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  border: 1px solid rgba(23, 29, 36, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 22px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.physics-lab-tab small {
+  color: #4e7683;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.physics-lab-tab strong {
+  font-size: 1rem;
+}
+
+.physics-lab-tab span {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.physics-lab-tab.is-active {
+  border-color: rgba(83, 168, 188, 0.4);
+  background: linear-gradient(135deg, rgba(160, 216, 234, 0.22), rgba(255, 214, 130, 0.18));
+}
+
+.physics-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.physics-scene-wrap {
+  margin-top: 16px;
+}
+
+.physics-scene-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.physics-scene-panel {
+  fill: rgba(255, 250, 244, 0.96);
+  stroke: rgba(23, 29, 36, 0.08);
+  stroke-width: 1;
+}
+
+.physics-grid-line {
+  stroke: rgba(23, 29, 36, 0.08);
+  stroke-width: 1;
+}
+
+.physics-axis-line {
+  stroke: rgba(23, 29, 36, 0.34);
+  stroke-width: 1.6;
+}
+
+.physics-vector-line {
+  stroke: #4e7683;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.physics-field-vector {
+  stroke: rgba(78, 118, 131, 0.68);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.physics-scene-accent {
+  fill: #ffd56c;
+}
+
+.physics-scene-highlight {
+  fill: #53a8bc;
+}
+
+.physics-scene-highlight-fill {
+  fill: rgba(83, 168, 188, 0.18);
+  stroke: rgba(83, 168, 188, 0.45);
+  stroke-width: 2;
+}
+
+.physics-scene-orb {
+  fill: #ffffff;
+  stroke: #53a8bc;
+  stroke-width: 3;
+}
+
+.physics-scene-label {
+  fill: #5a6471;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.physics-scene-text,
+.physics-charge-text {
+  fill: #1b2430;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.physics-energy-rail {
+  fill: rgba(255, 255, 255, 0.72);
+  stroke: rgba(23, 29, 36, 0.08);
+}
+
+.physics-energy-potential {
+  fill: #ffd56c;
+}
+
+.physics-energy-kinetic {
+  fill: #53a8bc;
+}
+
+.physics-charge-positive {
+  fill: rgba(255, 128, 96, 0.22);
+  stroke: rgba(204, 87, 67, 0.5);
+  stroke-width: 2;
+}
+
+.physics-charge-negative {
+  fill: rgba(103, 153, 242, 0.18);
+  stroke: rgba(59, 108, 204, 0.5);
+  stroke-width: 2;
+}
+
+.physics-lens-line,
+.physics-focus-line,
+.physics-object-line,
+.physics-image-line {
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.physics-lens-line,
+.physics-focus-line {
+  stroke: rgba(78, 118, 131, 0.7);
+}
+
+.physics-lens-fill {
+  fill: rgba(160, 216, 234, 0.22);
+  stroke: rgba(78, 118, 131, 0.45);
+  stroke-width: 2;
+}
+
+.physics-object-line,
+.physics-object-fill {
+  stroke: #58a36b;
+  fill: #58a36b;
+}
+
+.physics-image-line,
+.physics-image-fill {
+  stroke: #d68a33;
+  fill: #d68a33;
+}
+
+.physics-ray-line {
+  stroke: rgba(214, 138, 51, 0.72);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.physics-ray-line-faint {
+  stroke: rgba(83, 168, 188, 0.6);
+}
+
+.physics-ray-dashed {
+  stroke: rgba(214, 138, 51, 0.52);
+  stroke-width: 2;
+  stroke-dasharray: 7 6;
+}
+
+.physics-detail-grid,
+.physics-mode-grid,
+.physics-note-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.physics-control-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.physics-control-field {
+  display: grid;
+  gap: 8px;
+}
+
+.physics-control-field span {
+  color: #4a5664;
+  font-size: 0.88rem;
+}
+
+.physics-control-field strong {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
+}
+
+.physics-control-field input[type="range"] {
+  width: 100%;
+  accent-color: #53a8bc;
+}
+
+.physics-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.physics-metric-card {
+  display: grid;
+  gap: 5px;
+  border: 1px solid rgba(23, 29, 36, 0.08);
+  background: rgba(255, 255, 255, 0.68);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.physics-metric-card span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.physics-metric-card strong {
+  font-size: 1.15rem;
+}
+
+.physics-mode-head {
+  margin-bottom: 14px;
+}
+
+.physics-note-panel,
+.physics-atlas-card {
+  border: 1px solid rgba(23, 29, 36, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 22px;
+  padding: 16px;
+}
+
+.physics-note-panel h3,
+.physics-atlas-card h3 {
+  margin: 0 0 10px;
+  font-size: 0.96rem;
+}
+
+.physics-note-panel p,
+.physics-atlas-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.physics-note-panel ul,
+.physics-equation-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #33404f;
+  line-height: 1.7;
+}
+
+.physics-atlas-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.physics-atlas-card.is-active {
+  border-color: rgba(83, 168, 188, 0.42);
+  background: linear-gradient(135deg, rgba(160, 216, 234, 0.2), rgba(255, 214, 130, 0.12));
+}
+
+.physics-atlas-next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.physics-atlas-next span {
+  border-radius: 999px;
+  background: rgba(23, 29, 36, 0.05);
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  color: #45505d;
+}
+
+@media (max-width: 1040px) {
+  .physics-summary-grid,
+  .physics-detail-grid,
+  .physics-mode-grid,
+  .physics-note-grid,
+  .physics-atlas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .physics-workbench {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .physics-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .physics-side-panel,
+  .physics-visual-card,
+  .physics-controls-card,
+  .physics-insight-card,
+  .physics-mode-card {
+    padding: 16px;
+  }
+
+  .physics-chip,
+  .physics-mode-chip {
+    padding: 9px 13px;
+  }
+}
 .candy-lavender { background: var(--candy-lavender); }
 .candy-sky      { background: var(--candy-sky); }
 .candy-mint     { background: var(--candy-mint); }

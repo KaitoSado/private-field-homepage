@@ -784,7 +784,7 @@ export function MathCommunityApp() {
     <div className="dashboard-layout math-app-shell">
       <section className="section-grid section-head">
         <div className="section-copy">
-          <h1 className="page-title">数学コミュニティ</h1>
+          <h1 className="page-title">数学コンテンツ</h1>
         </div>
       </section>
 

@@ -63,6 +63,14 @@ const appCards = [
     emoji: "🎮",
     accent: "is-gold",
     tags: ["テトリス", "ブロック崩し", "暇つぶし"]
+  },
+  {
+    title: "物理コンテンツ",
+    body: "放物運動、電場、レンズ、振動を触って理解する Physics Playground。",
+    href: "/apps/physics",
+    emoji: "🪐",
+    accent: "is-sky",
+    tags: ["放物運動", "電場", "レンズ"]
   }
 ];
 
