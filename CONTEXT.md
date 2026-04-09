@@ -66,9 +66,10 @@
   - 祈祷と呪詛 `/apps/ritual`
   - Games `/apps/games`
   - リサーチプログレス `/apps/research-progress`
-    - 招待制の研究会 / ゼミ / 小規模PJ向け週次チェックイン面
+    - 招待制の研究会 / ゼミ / 小規模PJ向け研究ライン + 週次チェックイン面
     - グループ一覧 `/apps/research-progress`
     - グループ別ダッシュボード `/apps/research-progress/[slug]`
+    - group owner が研究計画、研究費申請、ポスター、論文投稿までの案件パイプラインを管理できる
   - アプリ一覧 `/apps` は公開中アプリと非公開アプリを分けて表示する
 
 ## 6. データベース運用ルール
@@ -79,7 +80,8 @@
   2. 必要なら `supabase/README.md` と `CHANGELOG.md` を更新
   3. live 環境に再適用が必要な場合は明記
 - `if exists` / `drop policy if exists` 前提で、再実行可能な schema を維持する
-- `research_*` 系テーブルはリサーチプログレス用の正本で、live 反映には Supabase への schema 再適用が必要
+- `research_*` 系テーブルはリサーチプログレス用の正本で、`research_groups`, `research_group_members`, `research_updates`, `research_projects`, `research_project_members` を含む
+- `research_*` 系の変更は live 反映に Supabase への schema 再適用が必要
 
 ## 7. デザインと CSS の現状
 

@@ -90,6 +90,7 @@ repo 内では、次の情報を確認できます。
 - DB の単一ソースは [`supabase/schema.sql`](/Users/sadokaito/Downloads/homepage/supabase/schema.sql)
 - schema 変更は live 適用漏れが起きやすい
 - `research_*` テーブルを使う app は、Vercel 反映だけでなく Supabase schema 反映も必要
+- `Research Progress` は週次テーブルに加えて `research_projects` / `research_project_members` にも依存する
 - CSS は [`app/globals.css`](/Users/sadokaito/Downloads/homepage/app/globals.css) への依存がまだ大きい
 - Apps は拡張頻度が高く、衝突しやすい
 - 2つの AI が同じファイルを同時に触らない

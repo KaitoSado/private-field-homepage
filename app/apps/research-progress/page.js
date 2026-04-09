@@ -2,7 +2,7 @@ import { ResearchProgressGroupsPanel } from "@/components/research-progress-grou
 
 export const metadata = {
   title: "Research Progress | Apps | New Commune",
-  description: "招待制の研究会・ゼミ・小規模PJ向けの週次進捗チェックインアプリ。"
+  description: "研究室の案件ポートフォリオと週次チェックインをまとめて管理する招待制アプリ。"
 };
 
 export default function ResearchProgressGroupsPage() {

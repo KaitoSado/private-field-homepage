@@ -170,7 +170,7 @@ export function ResearchProgressGroupsPanel() {
           <p className="eyebrow">Research Progress</p>
           <h1>研究会の危険箇所を 30 秒で把握する</h1>
           <p>
-            今週の停滞、help 要請、未提出を招待制グループの中だけで見える化します。週報の提出と主催のフォローを同じ場所に寄せた MVP です。
+            研究計画からポスター、論文投稿までのラインと、週次チェックインを同じ場所で見ます。研究室のポートフォリオ管理と日々のフォローを一体化した MVP です。
           </p>
           {weekStart ? <p className="research-progress-meta-line">対象週: {formatResearchWeekLabel(weekStart)} 週</p> : null}
         </div>
@@ -196,20 +196,20 @@ export function ResearchProgressGroupsPanel() {
                   <p>{group.description || "週次チェックインと介入支援のためのグループです。"}</p>
                   <dl className="research-progress-mini-stats">
                     <div>
-                      <dt>提出</dt>
-                      <dd>{group.summary?.submitted_count || 0}</dd>
+                      <dt>案件</dt>
+                      <dd>{group.pipeline_summary?.active_count || 0}</dd>
+                    </div>
+                    <div>
+                      <dt>直近締切</dt>
+                      <dd>{group.pipeline_summary?.due_soon_count || 0}</dd>
+                    </div>
+                    <div>
+                      <dt>停滞</dt>
+                      <dd>{group.pipeline_summary?.blocked_count || 0}</dd>
                     </div>
                     <div>
                       <dt>未提出</dt>
                       <dd>{group.summary?.missing_count || 0}</dd>
-                    </div>
-                    <div>
-                      <dt>停滞</dt>
-                      <dd>{group.summary?.blocked_count || 0}</dd>
-                    </div>
-                    <div>
-                      <dt>help</dt>
-                      <dd>{group.summary?.needs_help_count || 0}</dd>
                     </div>
                   </dl>
                 </Link>

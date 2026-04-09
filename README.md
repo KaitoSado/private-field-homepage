@@ -24,7 +24,7 @@ New Commune is a small social platform for public profiles, posts, and shared ca
 - Changelog, retention policy, and ops status pages
 - Static terms/privacy/contact pages
 - Row Level Security policies for self-service editing
-- Invite-only Research Progress dashboard for weekly research check-ins
+- Invite-only Research Progress dashboard for lab portfolio pipelines and weekly research check-ins
 
 ## Local setup
 
@@ -57,7 +57,7 @@ The schema also creates public storage buckets for avatars and post media, plus 
 - `avatars` bucket: public profile images
 - `post-media` bucket: public images and videos attached to posts
 - `telemetry_page_views`, `telemetry_errors`, `abuse_events`, `admin_alerts`: operational logs
-- `research_groups`, `research_group_members`, `research_updates`: invite-only weekly research progress tracking
+- `research_groups`, `research_group_members`, `research_updates`, `research_projects`, `research_project_members`: invite-only research progress tracking and lab portfolio pipelines
 
 ## Notes
 
