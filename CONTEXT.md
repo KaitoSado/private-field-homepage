@@ -74,6 +74,14 @@
     - `Physics Playground` として、操作・可視化・数式・理論マップを往復する client-side 物理 app
     - `Sandbox / Guided Lab / Math Link / Theory Map` を上位モードに持つ
     - 現在は `放物運動`, `衝突と運動量保存`, `単振動`, `理想気体`, `波の反射・屈折`, `ローレンツ変換`, `1D量子井戸` の 7 scene を実装
+  - 英語コンテンツ `/apps/english`
+    - `English Chunks Lab` として、単語暗記カードを主役にしつつ、チャンク中心、高制約文脈、シャドーイング、多文脈レビューを持つ client-side 英語学習 app
+    - 進捗は初版では Supabase を使わず `localStorage` に保存する
+    - 現在は `単語` と `見直しリスト` を主導線にし、`英単語表示 -> 次へ -> 日本語の答え表示 -> ○×判定 -> 次単語` の暗記導線を持つ
+    - 語彙データの正本は `英単語/target1900_normalized.tsv` で、`scripts/build-english-vocabulary.mjs` により `lib/english-target1900.js` を生成して読み込む
+    - 現在の英単語データは 3441 カードで、進捗保存は全件ではなく学習済み差分だけ `localStorage` に保持する
+    - 正誤ログは各単語ごとに日時つきで `localStorage` に保持し、復習は `学習直後 -> 1日後 -> 3日後 -> 8日後 -> 30日後` の固定 5 段階で回す
+    - UI 上の `見直しリスト` は日時を見せず、間違えた単語一覧を中心に見直せる
   - リサーチプログレス `/apps/research-progress`
     - 招待制の研究会 / ゼミ / 小規模PJ向け研究ライン + 週次チェックイン面
     - グループ一覧 `/apps/research-progress`

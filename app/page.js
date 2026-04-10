@@ -71,6 +71,14 @@ const appCards = [
     emoji: "🪐",
     accent: "is-sky",
     tags: ["放物", "相対論", "量子"]
+  },
+  {
+    title: "英語コンテンツ",
+    body: "チャンク中心、高制約文脈、シャドーイング、多文脈レビューで回す English Chunks Lab。",
+    href: "/apps/english",
+    emoji: "🧠",
+    accent: "is-mint",
+    tags: ["チャンク", "シャドー", "多文脈"]
   }
 ];
 

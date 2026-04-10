@@ -1,0 +1,5 @@
+tractional: family/pos/代表訳は要確認
+all: family/pos/代表訳は要確認
+in: family/pos/代表訳は要確認
+skip: n, "re, Ious は断片と判断して除外
+merge: law-abiding, misunderstanding, straightforward, toll-free, epoch-making を結合

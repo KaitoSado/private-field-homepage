@@ -4,6 +4,17 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-11 | codex | english app | `英単語/target1900_normalized.tsv` から 3441 語の `lib/english-target1900.js` を生成する script を追加し、`/apps/english` が大語彙データを優先して読むようにした。進捗保存も全件保存から学習済み差分保存へ軽量化 | `node scripts/build-english-vocabulary.mjs`, `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の学習フローを `英単語表示 -> 次へ -> 1対1の日本語答え表示 -> ○×判定 -> 次単語` へ組み替え、例文表示ではなく答え表示中心のカードに変更 | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の右側に再度出ていた重複 `見直しリスト` を削除し、見直し対象の一覧は `見直しリスト` タブ本体だけに集約 | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の右側 `見直しリスト` を戻しつつ、切替先の `見直しリスト` 本体は 2 列寄りの密な羅列レイアウトにして大量語でも縦に伸びすぎないよう調整 | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の右側に重複していた `見直しリスト` カードを削除し、上部切替を 1 行の羅列ナビへ圧縮して空間効率を上げた | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の上部切替を `単語` と `見直しリスト` に絞り、`日本語` / `シャドー` を主導線から外して古い保存状態でも hidden モードに戻らないよう調整 | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の記録面を正解表示なしの `間違えた単語一覧` 専用に絞り、件数増加時はコンパクトな行表示と折りたたみで見やすさを保つ形へ調整 | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の正誤ログを日時つきで内部保存したまま、UI では日時非表示の `間違えた単語一覧` を見せる形に切り替え、復習を `学習直後 -> 1日 -> 3日 -> 8日 -> 30日` の固定 5 段階へ変更 | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の UI を単語カード主役のノート風レイアウトへ整理し、上部説明帯を削って右レール中心のミニマル構成にした | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の主導線を単語暗記カードへ寄せ、○×判定で例文を開き、再押下で次単語へ進む UI と正誤履歴一覧を追加 | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` に `English Chunks Lab` を追加し、チャンク中心・高制約文脈・シャドーイング・多文脈レビュー・軽量 SRS を持つ client-side MVP を実装 | `npm run build` |
 | 2026-04-10 | codex | games | `賽の河原` の配置操作をドラッグ主体に変え、石が 1 個でも台から落ちたら即終了するルールへ調整 | `node --check public/games/sainokawara/script.js`, `npm run build` |
 | 2026-04-10 | codex | games | `賽の河原` の static asset 参照を相対パスから `/games/sainokawara/...` の絶対パスへ切り替え、trailing slash の有無で CSS/JS が落ちる不具合を修正 | `npm run build` |
 | 2026-04-10 | codex | games | `賽の河原` の Matter.js 読み込みを CDN から `public/games/sainokawara/vendor/matter.min.js` のローカル同梱へ切り替え、開始ボタンが外部 script 失敗で止まらないようにした | `node --check public/games/sainokawara/script.js`, `npm run build` |
