@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-11 | codex | english app | `/apps/english` に `当日 -> 3日後 -> 7日後 -> 14日後 -> 30日後` の固定SRS、間違い時ステージ維持、復習優先シャッフルキュー、品詞フィルタ、派生語チップのシャッフル表示を追加 | `npm run build` |
 | 2026-04-11 | codex | english app | `/apps/english` の `n / 3441` 表示を累積学習済み数ではなく、現在セッションで進んだカード番号に変更 | `npm run build` |
 | 2026-04-11 | codex | english app | `/apps/english` の上部カウントを並び順 index ではなく学習済み単語数に変更し、説明文・`DECK`・`切替 view` などの不要テキストを削除 | `npm run build` |
 | 2026-04-11 | codex | english app | `/apps/english` の単語カードに同一 `family` の派生語チップを追加し、現データの `family` 畳み込み数が 2686 グループであることを文書化 | `awk` 集計, `npm run build` |
