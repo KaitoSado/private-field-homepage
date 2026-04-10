@@ -1764,14 +1764,31 @@ textarea {
 }
 
 .physics-scene-panel {
-  fill: rgba(255, 250, 244, 0.96);
+  fill: rgba(255, 252, 247, 0.98);
   stroke: rgba(23, 29, 36, 0.08);
   stroke-width: 1;
 }
 
 .physics-grid-line {
-  stroke: rgba(23, 29, 36, 0.08);
+  stroke: rgba(23, 29, 36, 0.07);
+  stroke-width: 0.8;
+}
+
+.physics-tick-mark {
+  stroke: rgba(23, 29, 36, 0.25);
   stroke-width: 1;
+}
+
+.physics-tick-label {
+  fill: #5a6471;
+  font-size: 9px;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.physics-axis-title {
+  fill: #4a5664;
+  font-size: 11px;
+  font-style: italic;
 }
 
 .physics-axis-line {
@@ -1984,6 +2001,14 @@ textarea {
   padding-left: 18px;
   color: #33404f;
   line-height: 1.7;
+}
+
+.physics-hint-list {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.65;
 }
 
 .physics-atlas-grid {

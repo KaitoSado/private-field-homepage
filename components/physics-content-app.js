@@ -77,6 +77,58 @@ function areaFromSeries(points, width, height, bounds, pad = 24) {
   return `${line} L ${last.x.toFixed(1)} ${baseline.toFixed(1)} L ${first.x.toFixed(1)} ${baseline.toFixed(1)} Z`;
 }
 
+function niceStep(range, targetTicks = 5) {
+  const rough = range / targetTicks;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough / mag;
+  const nice = norm < 1.5 ? 1 : norm < 3.5 ? 2 : norm < 7.5 ? 5 : 10;
+  return nice * mag;
+}
+
+function renderGrid(width, height, bounds, pad, opts = {}) {
+  const { xLabel, yLabel, xUnit, yUnit } = opts;
+  const elements = [];
+  const xRange = bounds.xMax - bounds.xMin;
+  const yRange = bounds.yMax - bounds.yMin;
+  const xStep = niceStep(xRange);
+  const yStep = niceStep(yRange);
+  const xStart = Math.ceil(bounds.xMin / xStep) * xStep;
+  const yStart = Math.ceil(bounds.yMin / yStep) * yStep;
+  const innerW = width - pad * 2;
+  const innerH = height - pad * 2;
+  const toX = (v) => pad + ((v - bounds.xMin) / xRange) * innerW;
+  const toY = (v) => height - pad - ((v - bounds.yMin) / yRange) * innerH;
+
+  for (let v = xStart; v <= bounds.xMax + xStep * 0.01; v += xStep) {
+    const x = toX(v);
+    if (x < pad - 1 || x > width - pad + 1) continue;
+    elements.push(<line key={`gx${v}`} x1={x} y1={pad} x2={x} y2={height - pad} className="physics-grid-line" />);
+    elements.push(<line key={`tx${v}`} x1={x} y1={height - pad} x2={x} y2={height - pad + 5} className="physics-tick-mark" />);
+    elements.push(<text key={`lx${v}`} x={x} y={height - pad + 16} textAnchor="middle" className="physics-tick-label">{Number(v.toFixed(6))}</text>);
+  }
+  for (let v = yStart; v <= bounds.yMax + yStep * 0.01; v += yStep) {
+    const y = toY(v);
+    if (y < pad - 1 || y > height - pad + 1) continue;
+    elements.push(<line key={`gy${v}`} x1={pad} y1={y} x2={width - pad} y2={y} className="physics-grid-line" />);
+    elements.push(<line key={`ty${v}`} x1={pad - 5} y1={y} x2={pad} y2={y} className="physics-tick-mark" />);
+    elements.push(<text key={`ly${v}`} x={pad - 8} y={y + 3.5} textAnchor="end" className="physics-tick-label">{Number(v.toFixed(6))}</text>);
+  }
+
+  elements.push(<line key="ax" x1={pad} y1={height - pad} x2={width - pad} y2={height - pad} className="physics-axis-line" />);
+  elements.push(<line key="ay" x1={pad} y1={height - pad} x2={pad} y2={pad} className="physics-axis-line" />);
+
+  if (xLabel) {
+    const label = xUnit ? `${xLabel} [${xUnit}]` : xLabel;
+    elements.push(<text key="xlbl" x={width - pad} y={height - pad + 28} textAnchor="end" className="physics-axis-title">{label}</text>);
+  }
+  if (yLabel) {
+    const label = yUnit ? `${yLabel} [${yUnit}]` : yLabel;
+    elements.push(<text key="ylbl" x={pad} y={pad - 10} textAnchor="start" className="physics-axis-title">{label}</text>);
+  }
+
+  return <g className="physics-grid-group">{elements}</g>;
+}
+
 function renderProjectileScene(model, overlays) {
   const width = 640;
   const height = 320;
@@ -92,8 +144,7 @@ function renderProjectileScene(model, overlays) {
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="physics-scene-svg" role="img" aria-label="放物運動">
       <rect x="0" y="0" width={width} height={height} rx="28" className="physics-scene-panel" />
-      <line x1="34" y1={height - 34} x2={width - 30} y2={height - 34} className="physics-axis-line" />
-      <line x1="34" y1={height - 34} x2="34" y2="34" className="physics-axis-line" />
+      {renderGrid(width, height, bounds, 34, { xLabel: "x", yLabel: "y", xUnit: "m", yUnit: "m" })}
       {overlays.trajectory ? (
         <path
           d={pathFromSeries(model.trajectory, width, height, bounds, 34)}
@@ -132,8 +183,6 @@ function renderProjectileScene(model, overlays) {
           <text x="0" y="-10" className="physics-scene-label">K / U</text>
         </g>
       ) : null}
-      <text x="42" y="54" className="physics-scene-label">height</text>
-      <text x="560" y="300" className="physics-scene-label">range</text>
     </svg>
   );
 }
@@ -151,10 +200,12 @@ function renderCollisionScene(model, params, overlays) {
       <rect x="0" y="0" width={width} height={height} rx="28" className="physics-scene-panel" />
       <line x1="38" y1="228" x2={width - 38} y2="228" className="physics-axis-line" />
       <line x1="320" y1="48" x2="320" y2="258" style={{ stroke: "rgba(23, 29, 36, 0.14)", strokeWidth: 2, strokeDasharray: "9 8" }} />
-      <text x="96" y="60" className="physics-scene-label">before</text>
-      <text x="400" y="60" className="physics-scene-label">after</text>
+      <text x="96" y="60" className="physics-scene-label">衝突前</text>
+      <text x="400" y="60" className="physics-scene-label">衝突後</text>
       <rect x={beforeLeftX} y="174" width="58" height="54" rx="16" style={{ fill: "rgba(255, 128, 96, 0.2)", stroke: "rgba(204, 87, 67, 0.52)", strokeWidth: 2 }} />
+      <text x={beforeLeftX + 29} y="206" textAnchor="middle" className="physics-tick-label">{formatPhysicsNumber(params.massA, 1)} kg</text>
       <rect x={beforeRightX} y="170" width="84" height="58" rx="18" style={{ fill: "rgba(103, 153, 242, 0.18)", stroke: "rgba(59, 108, 204, 0.52)", strokeWidth: 2 }} />
+      <text x={beforeRightX + 42} y="204" textAnchor="middle" className="physics-tick-label">{formatPhysicsNumber(params.massB, 1)} kg</text>
       <rect x={afterLeftX} y="174" width="58" height="54" rx="16" style={{ fill: "rgba(255, 128, 96, 0.2)", stroke: "rgba(204, 87, 67, 0.52)", strokeWidth: 2 }} />
       <rect x={afterRightX} y="170" width="84" height="58" rx="18" style={{ fill: "rgba(103, 153, 242, 0.18)", stroke: "rgba(59, 108, 204, 0.52)", strokeWidth: 2 }} />
       {overlays.vectors ? (
@@ -200,6 +251,8 @@ function renderOscillatorScene(model, overlays) {
     <svg viewBox={`0 0 ${width} ${height}`} className="physics-scene-svg" role="img" aria-label="単振動">
       <rect x="0" y="0" width={width} height={height} rx="28" className="physics-scene-panel" />
       <line x1="82" y1={centerY} x2={width - 82} y2={centerY} className="physics-axis-line" />
+      <line x1={centerX} y1={centerY - 60} x2={centerX} y2={centerY + 60} style={{ stroke: "rgba(23, 29, 36, 0.12)", strokeWidth: 1.5, strokeDasharray: "6 5" }} />
+      <text x={centerX} y={centerY + 76} textAnchor="middle" className="physics-tick-label">x = 0</text>
       <rect x="92" y={centerY - 44} width="24" height="88" rx="8" style={{ fill: "rgba(23, 29, 36, 0.14)" }} />
       {(() => {
         const sx = 116;
@@ -283,9 +336,6 @@ function renderGasScene(model, overlays) {
           ) : null}
         </g>
       ))}
-      <text x="464" y="300" className="physics-scene-label">
-        pressure {formatPhysicsNumber(model.metrics.pressure, 2)}
-      </text>
     </svg>
   );
 }
@@ -322,8 +372,8 @@ function renderWaveScene(model, overlays) {
           <text x="0" y="-10" className="physics-scene-label">T {formatPhysicsNumber(model.metrics.transmission, 1)}%</text>
         </g>
       ) : null}
-      <text x="64" y="42" className="physics-scene-label">medium A</text>
-      <text x="392" y="42" className="physics-scene-label">medium B</text>
+      <text x="64" y="42" className="physics-scene-label">媒質 A</text>
+      <text x="392" y="42" className="physics-scene-label">媒質 B (n={formatPhysicsNumber(model.metrics.refractiveIndex || 1.42, 2)})</text>
     </svg>
   );
 }
@@ -342,6 +392,14 @@ function renderRelativityScene(model, params, overlays) {
       <rect x="56" y="40" width="528" height="236" rx="26" className="physics-diagram-panel" />
       <line x1={originX} y1={originY} x2="564" y2={originY} className="physics-axis-line" />
       <line x1={originX} y1={originY} x2={originX} y2="60" className="physics-axis-line" />
+      {[2, 4, 6, 8].map((v) => {
+        const x = originX + v * 56;
+        return x < 560 ? <g key={`xt${v}`}><line x1={x} y1={originY} x2={x} y2={originY + 5} className="physics-tick-mark" /><text x={x} y={originY + 16} textAnchor="middle" className="physics-tick-label">{v}</text></g> : null;
+      })}
+      {[1, 2, 3, 4].map((v) => {
+        const y = originY - v * 42;
+        return y > 55 ? <g key={`yt${v}`}><line x1={originX - 5} y1={y} x2={originX} y2={y} className="physics-tick-mark" /><text x={originX - 8} y={y + 3.5} textAnchor="end" className="physics-tick-label">{v}</text></g> : null;
+      })}
       {overlays.spacetime ? (
         <>
           <line x1={originX} y1={originY} x2={originX + 176} y2="60" style={{ stroke: "rgba(214, 138, 51, 0.76)", strokeWidth: 2.5, strokeDasharray: "8 6" }} />
@@ -381,18 +439,22 @@ function renderQuantumScene(model, params, overlays) {
       <rect x="0" y="0" width={width} height={height} rx="28" className="physics-scene-panel" />
       <line x1="28" y1="252" x2={width - 28} y2="252" className="physics-axis-line" />
       <rect x={barrierX} y={252 - barrierHeight} width={barrierWidth} height={barrierHeight} rx="18" style={{ fill: "rgba(103, 153, 242, 0.18)", stroke: "rgba(59, 108, 204, 0.55)", strokeWidth: 2 }} />
+      <text x={barrierX + barrierWidth / 2} y={252 - barrierHeight - 8} textAnchor="middle" className="physics-axis-title">V₀</text>
       <rect x="84" y="252" width="112" height="74" rx="18" style={{ fill: "rgba(83, 168, 188, 0.08)", stroke: "rgba(83, 168, 188, 0.26)", strokeWidth: 2 }} />
       {overlays.probability ? (
         <path d={areaFromSeries(model.density, width, height, bounds, 28)} style={{ fill: "rgba(83, 168, 188, 0.16)", stroke: "rgba(83, 168, 188, 0.82)", strokeWidth: 3 }} />
       ) : null}
       {overlays.energy ? (
-        <line x1="36" y1={252 - params.energy * 22} x2="600" y2={252 - params.energy * 22} style={{ stroke: "rgba(214, 138, 51, 0.82)", strokeWidth: 3, strokeDasharray: "8 6" }} />
+        <>
+          <line x1="36" y1={252 - params.energy * 22} x2="600" y2={252 - params.energy * 22} style={{ stroke: "rgba(214, 138, 51, 0.82)", strokeWidth: 3, strokeDasharray: "8 6" }} />
+          <text x="608" y={252 - params.energy * 22 + 4} className="physics-axis-title">E</text>
+        </>
       ) : null}
       <text x="48" y="60" className="physics-scene-label">
         T {formatPhysicsNumber(model.metrics.transmission, 1)}%
       </text>
       <text x="48" y="84" className="physics-scene-label">
-        bound {model.metrics.boundLevels}
+        束縛準位 {model.metrics.boundLevels}
       </text>
     </svg>
   );
@@ -753,28 +815,14 @@ function SandboxPanel({ scene }) {
       <div className="physics-panel-head">
         <div>
           <p className="eyebrow">Sandbox</p>
-          <h2>まず scene を崩してみる</h2>
-          <p>PhET の導入の分かりやすさを保ちながら、Algodoo 的にまず触るところから始めます。</p>
+          <h2>{scene.title}</h2>
         </div>
       </div>
-      <div className="physics-note-grid">
-        <article className="physics-note-panel">
-          <h3>自由に変える軸</h3>
-          <ul>
-            <li>scene ごとに 4 - 5 個のパラメータを自由に変更できます</li>
-            <li>再生速度を変えて、速い変化も slow に読み直せます</li>
-            <li>overlay を足すまで、なるべく素の現象を見られます</li>
-          </ul>
-        </article>
-        <article className="physics-note-panel">
-          <h3>この scene の狙い</h3>
-          <ul>
-            {scene.observationPoints.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
-      </div>
+      <ul className="physics-hint-list">
+        {scene.observationPoints.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
     </article>
   );
 }
@@ -785,28 +833,14 @@ function GuidedLabPanel({ scene }) {
       <div className="physics-panel-head">
         <div>
           <p className="eyebrow">Guided Lab</p>
-          <h2>観察ポイントを絞って読む</h2>
-          <p>PhET のように、いま注目してほしい変化だけを順番に追えるようにしています。</p>
+          <h2>{scene.title}</h2>
         </div>
       </div>
-      <div className="physics-note-grid">
-        <article className="physics-note-panel">
-          <h3>観察する順番</h3>
-          <ul>
-            {scene.observationPoints.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
-        </article>
-        <article className="physics-note-panel">
-          <h3>単元の位置づけ</h3>
-          <ul>
-            <li>difficulty: {scene.difficulty}</li>
-            <li>scope: {scene.status}</li>
-            <li>academic title: {scene.academicTitle}</li>
-          </ul>
-        </article>
-      </div>
+      <ol className="physics-hint-list">
+        {scene.observationPoints.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ol>
     </article>
   );
 }
@@ -819,8 +853,7 @@ function MathLinkPanel({ scene, formula, model, params, onSelectFormula }) {
       <div className="physics-panel-head">
         <div>
           <p className="eyebrow">Math Link</p>
-          <h2>式と現象を同じ画面でつなぐ</h2>
-          <p>GeoGebra 的に、式を別世界へ追いやらず、いまの scene に結びつけます。</p>
+          <h2>{scene.title}</h2>
         </div>
       </div>
       <div className="physics-chip-row">
@@ -863,20 +896,12 @@ function TheoryMapPanel({ scene, onJump }) {
       <div className="physics-panel-head">
         <div>
           <p className="eyebrow">Theory Map</p>
-          <h2>この scene が伸びる先</h2>
-          <p>単元をバラバラのミニ app にせず、物理全体の中でどこにつながるかを示します。</p>
+          <h2>{scene.title}</h2>
         </div>
       </div>
       <div className="physics-atlas-grid">
         <article className="physics-atlas-card is-active">
-          <h3>Current</h3>
-          <p>{scene.title}</p>
-          <div className="physics-atlas-next">
-            <span>{scene.academicTitle}</span>
-          </div>
-        </article>
-        <article className="physics-atlas-card">
-          <h3>Bridge</h3>
+          <h3>{scene.academicTitle}</h3>
           <p>{scene.theoryMap.bridge}</p>
         </article>
       </div>
@@ -1067,49 +1092,26 @@ export function PhysicsContentApp() {
 
   return (
     <div className="dashboard-layout physics-app-shell">
-      <section className="section-grid section-head physics-hero">
+      <section className="section-grid section-head">
         <div className="section-copy">
           <p className="eyebrow">Physics Playground</p>
-          <h1 className="page-title">現象 {"->"} 見方 {"->"} 式 {"->"} 理論を、ひとつの画面で往復する</h1>
-          <p className="hero-lead physics-hero-lead">
-            PhET の学習導線、Algodoo / Physion の砂場感、GeoGebra の数式連動をまとめて、
-            まず触ってから law と式へ接続する物理 app に寄せました。
-          </p>
-        </div>
-        <div className="physics-entry-grid">
-          {PHYSICS_VIEW_MODES.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`surface physics-entry-card ${viewMode === item.id ? "is-active" : ""}`}
-              onClick={() => setViewMode(item.id)}
-            >
-              <span>{item.label}</span>
-              <strong>{item.title}</strong>
-              <small>{item.body}</small>
-            </button>
-          ))}
+          <h1 className="page-title">物理コンテンツ</h1>
         </div>
       </section>
 
       <section className="section-grid">
-        <div className="physics-category-grid">
+        <div className="physics-chip-row">
           {PHYSICS_HOME_CATEGORIES.map((item) => (
             <button
               key={item.id}
               type="button"
-              className={`surface physics-category-card ${categoryId === item.id ? "is-active" : ""}`}
+              className={`physics-chip ${categoryId === item.id ? "is-active" : ""}`}
               onClick={() => selectCategory(item.id)}
             >
-              <span>{item.label}</span>
-              <strong>{item.title}</strong>
-              <small>{item.body}</small>
+              {item.label}
             </button>
           ))}
         </div>
-      </section>
-
-      <section className="section-grid">
         <div className="physics-scene-grid">
           {scenes.map((item) => (
             <button
@@ -1118,14 +1120,8 @@ export function PhysicsContentApp() {
               className={`physics-scene-card ${sceneId === item.id ? "is-active" : ""}`}
               onClick={() => selectScene(item.id)}
             >
-              <div className="physics-scene-meta">
-                <span className="physics-badge">{item.difficulty}</span>
-                <span className="physics-badge">{item.status}</span>
-                <span className="physics-badge">{item.parameterCount} params</span>
-              </div>
               <strong>{item.title}</strong>
               <small>{item.academicTitle}</small>
-              <p>{item.summary}</p>
             </button>
           ))}
         </div>
@@ -1150,19 +1146,6 @@ export function PhysicsContentApp() {
             onSpeed={setSpeed}
           />
 
-          <div className="physics-summary-grid">
-            <article className="surface physics-summary-card">
-              <span>View</span>
-              <strong>{PHYSICS_VIEW_MODES.find((mode) => mode.id === viewMode)?.title || "Sandbox"}</strong>
-              <small>scene は固定、読み方だけ切り替える</small>
-            </article>
-            <article className="surface physics-summary-card">
-              <span>Scene</span>
-              <strong>{scene.difficulty}</strong>
-              <small>{scene.academicTitle}</small>
-            </article>
-          </div>
-
           <div className="physics-chip-row">
             {(PHYSICS_PRESETS[sceneId] || []).map((preset) => (
               <button key={preset.id} type="button" className="physics-chip" onClick={() => applyPreset(preset.values)}>
@@ -1177,12 +1160,24 @@ export function PhysicsContentApp() {
         </aside>
 
         <div className="physics-main-stack">
+          <div className="physics-chip-row">
+            {PHYSICS_VIEW_MODES.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`physics-chip ${viewMode === item.id ? "is-active" : ""}`}
+                onClick={() => setViewMode(item.id)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+
           <section className="surface physics-visual-card">
             <div className="physics-panel-head">
               <div>
                 <p className="eyebrow">{scene.academicTitle}</p>
                 <h2>{scene.title}</h2>
-                <p>{scene.summary}</p>
               </div>
             </div>
             <div className="physics-scene-wrap">
