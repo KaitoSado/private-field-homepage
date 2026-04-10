@@ -7283,6 +7283,62 @@ textarea {
   letter-spacing: -0.06em;
 }
 
+.english-family-strip {
+  display: grid;
+  gap: 10px;
+  max-width: 42rem;
+}
+
+.english-family-strip > span {
+  color: rgba(87, 101, 107, 0.76);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.english-family-strip > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.english-family-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(35, 58, 65, 0.11);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: rgba(24, 38, 42, 0.9);
+  padding: 8px 11px;
+  font: inherit;
+  box-shadow: 0 10px 22px rgba(39, 54, 56, 0.05);
+  cursor: pointer;
+}
+
+.english-family-chip:hover {
+  border-color: rgba(22, 111, 110, 0.26);
+  background: rgba(247, 254, 252, 0.86);
+}
+
+.english-family-chip strong {
+  font-size: 0.98rem;
+  line-height: 1;
+}
+
+.english-family-chip small {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.45rem;
+  min-height: 1.45rem;
+  border-radius: 999px;
+  background: rgba(33, 110, 111, 0.1);
+  color: rgba(28, 93, 94, 0.88);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
 .english-study-placeholder {
   margin: 0;
   max-width: 28ch;

@@ -4,6 +4,8 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-11 | codex | english app | `/apps/english` の上部カウントを並び順 index ではなく学習済み単語数に変更し、説明文・`DECK`・`切替 view` などの不要テキストを削除 | `npm run build` |
+| 2026-04-11 | codex | english app | `/apps/english` の単語カードに同一 `family` の派生語チップを追加し、現データの `family` 畳み込み数が 2686 グループであることを文書化 | `awk` 集計, `npm run build` |
 | 2026-04-11 | codex | english app | `英単語/target1900_normalized.tsv` から 3441 語の `lib/english-target1900.js` を生成する script を追加し、`/apps/english` が大語彙データを優先して読むようにした。進捗保存も全件保存から学習済み差分保存へ軽量化 | `node scripts/build-english-vocabulary.mjs`, `npm run build` |
 | 2026-04-11 | codex | english app | `/apps/english` の学習フローを `英単語表示 -> 次へ -> 1対1の日本語答え表示 -> ○×判定 -> 次単語` へ組み替え、例文表示ではなく答え表示中心のカードに変更 | `npm run build` |
 | 2026-04-11 | codex | english app | `/apps/english` の右側に再度出ていた重複 `見直しリスト` を削除し、見直し対象の一覧は `見直しリスト` タブ本体だけに集約 | `npm run build` |

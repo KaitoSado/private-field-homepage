@@ -8,6 +8,7 @@ import {
   compactEnglishProgressMap,
   createEmptyEnglishProgress,
   getEnglishProgressForId,
+  getEnglishFamilyMembers,
   getEnglishRecommendedChunkIds,
   getExamplesForFocus,
   getEnglishReviewStepLabel,
@@ -120,12 +121,20 @@ export function EnglishChunksApp() {
 
   const selectedChunk = chunkMap[selectedChunkId] || ENGLISH_CHUNK_LIBRARY[0];
   const selectedProgress = getEnglishProgressForId(progressMap, selectedChunk.id);
+  const selectedFamilyMembers = useMemo(
+    () => getEnglishFamilyMembers(selectedChunk.id),
+    [selectedChunk.id]
+  );
   const diverseExamples = getExamplesForFocus(selectedChunk, focusTopic);
   const allExamples = [...selectedChunk.starterExamples, ...diverseExamples];
   const studyExample = allExamples[(selectedProgress.seenCount + selectedProgress.incorrectCount) % allExamples.length];
   const shadowPrompt = selectedChunk.shadowPrompts[shadowPromptIndex % selectedChunk.shadowPrompts.length];
   const studyPosition = Math.max(0, recommendedIds.indexOf(selectedChunk.id));
-  const progressRatio = recommendedIds.length ? (studyPosition + 1) / recommendedIds.length : 0;
+  const studiedWordCount = useMemo(
+    () => Object.values(progressMap || {}).filter((progress) => progress.seenCount > 0 || progress.reviewCount > 0).length,
+    [progressMap]
+  );
+  const progressRatio = ENGLISH_CHUNK_LIBRARY.length ? studiedWordCount / ENGLISH_CHUNK_LIBRARY.length : 0;
   const historyForChunk = attemptHistory.filter((entry) => entry.chunkId === selectedChunk.id);
   const wrongWordList = useMemo(() => {
     const latestWrongMap = new Map();
@@ -284,22 +293,38 @@ export function EnglishChunksApp() {
           {mode === "study" ? (
             <div className="english-pane-stack">
               <div className="english-study-topline">
-                <span>{studyPosition + 1} / {recommendedIds.length}</span>
-                <strong>deck</strong>
+                <span>{studiedWordCount} / {ENGLISH_CHUNK_LIBRARY.length}</span>
               </div>
 
               <section className={`english-study-card ${studyPhase === "revealed" ? "is-revealed" : ""}`}>
                 <div className="english-study-sheet">
                   <p className="english-study-word">{selectedChunk.headword}</p>
 
+                  {selectedFamilyMembers.length ? (
+                    <div className="english-family-strip" aria-label="派生語">
+                      <span>派生語</span>
+                      <div>
+                        {selectedFamilyMembers.map((member) => (
+                          <button
+                            key={member.id}
+                            type="button"
+                            className="english-family-chip"
+                            onClick={() => handleSelectChunk(member.id)}
+                          >
+                            <strong>{member.headword}</strong>
+                            <small>{getPosLabel(member.pos)}</small>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
                   {studyPhase === "revealed" ? (
                     <div className="english-study-answer">
                       <span>答え</span>
                       <strong>{selectedChunk.meaning}</strong>
                     </div>
-                  ) : (
-                    <p className="english-study-placeholder">まず英単語だけ見ます。思い出したら、次へで答えを出します。</p>
-                  )}
+                  ) : null}
                 </div>
 
                 {studyPhase === "revealed" ? (
@@ -336,7 +361,7 @@ export function EnglishChunksApp() {
 
               <div className="english-progress-rail">
                 <div className="english-progress-rail-line">
-                  <i style={{ width: `${Math.max(6, progressRatio * 100)}%` }} />
+                  <i style={{ width: `${studiedWordCount ? Math.max(6, progressRatio * 100) : 0}%` }} />
                 </div>
                 <div className="english-progress-rail-copy">
                   <span>start</span>
@@ -495,10 +520,6 @@ export function EnglishChunksApp() {
 
         <aside className="english-side-stack">
           <section className="surface english-side-card">
-            <div className="english-section-head">
-              <h3>切替</h3>
-              <span>view</span>
-            </div>
             <div className="english-mode-row" role="tablist" aria-label="English content modes">
               {ENGLISH_MODE_TABS.map((tab) => (
                 <button
@@ -645,6 +666,25 @@ function getStageLabel(stage) {
       return "定着";
     default:
       return "新規";
+  }
+}
+
+function getPosLabel(pos) {
+  switch (pos) {
+    case "noun":
+      return "名";
+    case "verb":
+      return "動";
+    case "adjective":
+      return "形";
+    case "adverb":
+      return "副";
+    case "preposition":
+      return "前";
+    case "phrase":
+      return "句";
+    default:
+      return "他";
   }
 }
 
