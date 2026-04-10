@@ -1610,14 +1610,15 @@ textarea {
 
 .physics-summary-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
 
 .physics-summary-card {
   display: grid;
-  gap: 6px;
-  padding: 18px;
+  gap: 4px;
+  padding: 12px 14px;
+  overflow: hidden;
 }
 
 .physics-summary-card span {
@@ -1629,7 +1630,7 @@ textarea {
 }
 
 .physics-summary-card strong {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   line-height: 1.2;
 }
 

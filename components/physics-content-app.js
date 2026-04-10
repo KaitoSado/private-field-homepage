@@ -201,13 +201,25 @@ function renderOscillatorScene(model, overlays) {
       <rect x="0" y="0" width={width} height={height} rx="28" className="physics-scene-panel" />
       <line x1="82" y1={centerY} x2={width - 82} y2={centerY} className="physics-axis-line" />
       <rect x="92" y={centerY - 44} width="24" height="88" rx="8" style={{ fill: "rgba(23, 29, 36, 0.14)" }} />
-      <path
-        d={`M 116 ${centerY} C 146 ${centerY - 24} 168 ${centerY + 24} 198 ${centerY} C 226 ${centerY - 24} 248 ${centerY + 24} 278 ${centerY} C 304 ${centerY - 24} 332 ${centerY + 24} ${massX - 36} ${centerY}`}
-        fill="none"
-        stroke="rgba(78, 118, 131, 0.88)"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
+      {(() => {
+        const sx = 116;
+        const ex = massX - 36;
+        const coils = 6;
+        const segLen = (ex - sx) / coils;
+        const amp = Math.min(24, Math.max(8, segLen * 0.6));
+        let d = `M ${sx} ${centerY}`;
+        for (let i = 0; i < coils; i++) {
+          const x0 = sx + segLen * i;
+          const x1 = sx + segLen * (i + 1);
+          const cx1 = x0 + segLen * 0.33;
+          const cx2 = x0 + segLen * 0.67;
+          const sign = i % 2 === 0 ? -1 : 1;
+          d += ` C ${cx1} ${centerY + sign * amp} ${cx2} ${centerY - sign * amp} ${x1} ${centerY}`;
+        }
+        return (
+          <path d={d} fill="none" stroke="rgba(78, 118, 131, 0.88)" strokeWidth="4" strokeLinecap="round" />
+        );
+      })()}
       <rect x={massX - 28} y={centerY - 28} width="56" height="56" rx="18" className="physics-scene-orb" />
       {overlays.vectors ? (
         <line x1={massX} y1={centerY - 46} x2={massX + model.velocity * 24} y2={centerY - 46} className="physics-vector-line" />
