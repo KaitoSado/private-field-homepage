@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import {
   ENGLISH_CHUNK_LIBRARY,
   ENGLISH_MODE_TABS,
@@ -9,19 +10,27 @@ import {
   compactEnglishProgressMap,
   createEmptyEnglishProgress,
   getEnglishProgressForId,
+  getEnglishDisplayVariant,
   getEnglishFamilyMembers,
   getEnglishRecommendedChunkIds,
   getExamplesForFocus,
   getEnglishReviewStepLabel,
+  isEnglishLongTermProgress,
   recordStudyAttempt,
   markShadowComplete
 } from "@/lib/english-content";
 
-const STORAGE_KEY = "new-commune:english-chunks:v2";
+const STORAGE_BASE_KEY = "new-commune:english-chunks:v3";
+const LEGACY_STORAGE_KEY = "new-commune:english-chunks:v2";
 const ACTIVE_MODE_IDS = new Set(ENGLISH_MODE_TABS.map((tab) => tab.id));
+const ACTIVE_POS_IDS = new Set(ENGLISH_POS_OPTIONS.map((option) => option.id));
+const DEFAULT_QUESTION_SECONDS = 4;
+const DEFAULT_ANSWER_SECONDS = 5;
 
 export function EnglishChunksApp() {
+  const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [hydrated, setHydrated] = useState(false);
+  const [storageOwnerId, setStorageOwnerId] = useState("");
   const [progressMap, setProgressMap] = useState(() => createEmptyEnglishProgress());
   const [attemptHistory, setAttemptHistory] = useState([]);
   const [mode, setMode] = useState("study");
@@ -29,8 +38,10 @@ export function EnglishChunksApp() {
   const [posFilter, setPosFilter] = useState("all");
   const [detailMode, setDetailMode] = useState("gentle");
   const [supportMode, setSupportMode] = useState(true);
+  const [questionSeconds, setQuestionSeconds] = useState(DEFAULT_QUESTION_SECONDS);
+  const [answerSeconds, setAnswerSeconds] = useState(DEFAULT_ANSWER_SECONDS);
+  const [studyTimerPhase, setStudyTimerPhase] = useState("question");
   const [selectedChunkId, setSelectedChunkId] = useState(ENGLISH_CHUNK_LIBRARY[0].id);
-  const [studyPhase, setStudyPhase] = useState("front");
   const [sessionStep, setSessionStep] = useState(1);
   const [queueSeed, setQueueSeed] = useState(0);
   const [shadowPromptIndex, setShadowPromptIndex] = useState(0);
@@ -52,12 +63,41 @@ export function EnglishChunksApp() {
     () => Object.fromEntries(ENGLISH_CHUNK_LIBRARY.map((chunk) => [chunk.id, chunk])),
     []
   );
+  const storageKey = storageOwnerId ? `${STORAGE_BASE_KEY}:${storageOwnerId}` : "";
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    let mounted = true;
+
+    async function loadSessionOwner() {
+      const {
+        data: { session }
+      } = await supabase.auth.getSession();
+
+      if (!mounted) return;
+      setStorageOwnerId(session?.user?.id || "guest");
+    }
+
+    loadSessionOwner();
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setStorageOwnerId(nextSession?.user?.id || "guest");
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !storageKey) return;
+
+    setHydrated(false);
 
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const raw = window.localStorage.getItem(storageKey) || window.localStorage.getItem(LEGACY_STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed.progressMap) {
@@ -68,19 +108,36 @@ export function EnglishChunksApp() {
         }
         if (parsed.mode && ACTIVE_MODE_IDS.has(parsed.mode)) setMode(parsed.mode);
         if (parsed.focusTopic) setFocusTopic(parsed.focusTopic);
-        if (parsed.posFilter) setPosFilter(parsed.posFilter);
+        if (parsed.posFilter && ACTIVE_POS_IDS.has(parsed.posFilter)) {
+          setPosFilter(parsed.posFilter);
+        } else {
+          setPosFilter("all");
+        }
         if (parsed.detailMode) setDetailMode(parsed.detailMode);
         if (typeof parsed.supportMode === "boolean") setSupportMode(parsed.supportMode);
+        if (Number.isFinite(parsed.questionSeconds)) setQuestionSeconds(clampStudySeconds(parsed.questionSeconds));
+        if (Number.isFinite(parsed.answerSeconds)) setAnswerSeconds(clampStudySeconds(parsed.answerSeconds));
         if (parsed.selectedChunkId && chunkMap[parsed.selectedChunkId]) {
           setSelectedChunkId(parsed.selectedChunkId);
         }
+      } else {
+        setProgressMap(createEmptyEnglishProgress());
+        setAttemptHistory([]);
+        setMode("study");
+        setFocusTopic("all");
+        setPosFilter("all");
+        setDetailMode("gentle");
+        setSupportMode(true);
+        setQuestionSeconds(DEFAULT_QUESTION_SECONDS);
+        setAnswerSeconds(DEFAULT_ANSWER_SECONDS);
+        setSelectedChunkId(ENGLISH_CHUNK_LIBRARY[0].id);
       }
     } catch (_error) {
       // ignore broken local data
     }
 
     setHydrated(true);
-  }, [chunkMap]);
+  }, [chunkMap, storageKey]);
 
   useEffect(() => {
     if (hydrated && queueSeed === 0) {
@@ -92,9 +149,9 @@ export function EnglishChunksApp() {
   }, [focusTopic, hydrated, posFilter, progressMap, queueSeed]);
 
   useEffect(() => {
-    if (!hydrated || typeof window === "undefined") return;
+    if (!hydrated || typeof window === "undefined" || !storageKey) return;
     window.localStorage.setItem(
-      STORAGE_KEY,
+      storageKey,
       JSON.stringify({
         progressMap: compactEnglishProgressMap(progressMap),
         attemptHistory,
@@ -103,10 +160,12 @@ export function EnglishChunksApp() {
         posFilter,
         detailMode,
         supportMode,
+        questionSeconds,
+        answerSeconds,
         selectedChunkId
       })
     );
-  }, [attemptHistory, detailMode, focusTopic, hydrated, mode, posFilter, progressMap, selectedChunkId, supportMode]);
+  }, [answerSeconds, attemptHistory, detailMode, focusTopic, hydrated, mode, posFilter, progressMap, questionSeconds, selectedChunkId, storageKey, supportMode]);
 
   useEffect(() => {
     return () => {
@@ -123,34 +182,79 @@ export function EnglishChunksApp() {
   );
 
   useEffect(() => {
-    if (recommendedIds.length && !recommendedIds.includes(selectedChunkId)) {
+    if (mode === "study" && recommendedIds.length && !recommendedIds.includes(selectedChunkId)) {
       setSelectedChunkId(recommendedIds[0]);
     }
-  }, [recommendedIds, selectedChunkId]);
+  }, [mode, recommendedIds, selectedChunkId]);
 
   useEffect(() => {
-    setStudyPhase("front");
+    setStudyTimerPhase("question");
     setShadowPromptIndex(0);
     setRecordingState((current) => ({ ...current, error: "" }));
   }, [mode, selectedChunkId]);
 
+  useEffect(() => {
+    if (!hydrated || mode !== "study" || !recommendedIds.length) return;
+
+    const duration = studyTimerPhase === "question" ? questionSeconds : answerSeconds;
+    if (studyTimerPhase === "ready") return;
+
+    const timer = window.setTimeout(() => {
+      setStudyTimerPhase((current) => {
+        if (current === "question") return "answer";
+        if (current === "answer") return "ready";
+        return current;
+      });
+    }, duration * 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [answerSeconds, hydrated, mode, questionSeconds, recommendedIds.length, studyTimerPhase]);
+
   const selectedChunk = chunkMap[selectedChunkId] || ENGLISH_CHUNK_LIBRARY[0];
   const selectedProgress = getEnglishProgressForId(progressMap, selectedChunk.id);
+  const isSelectedLongTerm = isEnglishLongTermProgress(selectedProgress);
+  const displayedStudyChunk = useMemo(
+    () => getEnglishDisplayVariant(selectedChunk, {
+      posFilter,
+      seed: `${queueSeed}:${sessionStep}:${selectedChunk.id}:${selectedProgress.seenCount}:${selectedProgress.reviewCount}`
+    }),
+    [posFilter, queueSeed, selectedChunk, selectedProgress.reviewCount, selectedProgress.seenCount, sessionStep]
+  );
   const selectedFamilyMembers = useMemo(
     () => shuffleItemsBySeed(
-      getEnglishFamilyMembers(selectedChunk.id),
+      getEnglishFamilyMembers(selectedChunk.id, {
+        includeSelf: true,
+        currentVariantId: displayedStudyChunk.variantId
+      }).filter((member) => member.id !== displayedStudyChunk.variantId),
       `${queueSeed}:${sessionStep}:${selectedChunk.id}`
     ),
-    [queueSeed, selectedChunk.id, sessionStep]
+    [displayedStudyChunk.variantId, queueSeed, selectedChunk.id, sessionStep]
   );
-  const diverseExamples = getExamplesForFocus(selectedChunk, focusTopic);
-  const allExamples = [...selectedChunk.starterExamples, ...diverseExamples];
+  const diverseExamples = getExamplesForFocus(displayedStudyChunk, focusTopic);
+  const allExamples = [...displayedStudyChunk.starterExamples, ...diverseExamples];
   const studyExample = allExamples[(selectedProgress.seenCount + selectedProgress.incorrectCount) % allExamples.length];
-  const shadowPrompt = selectedChunk.shadowPrompts[shadowPromptIndex % selectedChunk.shadowPrompts.length];
+  const shadowPrompt = displayedStudyChunk.shadowPrompts[shadowPromptIndex % displayedStudyChunk.shadowPrompts.length];
   const studyPosition = recommendedIds.indexOf(selectedChunk.id);
   const safeStudyPosition = Math.max(0, studyPosition);
-  const sessionTotal = recommendedIds.length || ENGLISH_CHUNK_LIBRARY.length;
-  const progressRatio = sessionTotal ? sessionStep / sessionTotal : 0;
+  const sessionTotal = recommendedIds.length;
+  const longTermWordList = useMemo(() => {
+    return ENGLISH_CHUNK_LIBRARY
+      .map((chunk) => {
+        const progress = getEnglishProgressForId(progressMap, chunk.id);
+        return {
+          chunkId: chunk.id,
+          headword: chunk.headword,
+          meaning: chunk.meaning,
+          isLongTerm: isEnglishLongTermProgress(progress),
+          longTermAt: progress.longTermAt || progress.memorizedAt || progress.lastSeenAt || 0,
+          correctCount: progress.correctCount
+        };
+      })
+      .filter((entry) => entry.isLongTerm)
+      .sort((left, right) => right.longTermAt - left.longTermAt);
+  }, [progressMap]);
+  const longTermCount = longTermWordList.length;
+  const progressRatio = ENGLISH_CHUNK_LIBRARY.length ? longTermCount / ENGLISH_CHUNK_LIBRARY.length : 0;
   const historyForChunk = attemptHistory.filter((entry) => entry.chunkId === selectedChunk.id);
   const wrongWordList = useMemo(() => {
     const now = Date.now();
@@ -169,7 +273,7 @@ export function EnglishChunksApp() {
           isDue: progress.nextReviewAt > 0 && progress.nextReviewAt <= now
         };
       })
-      .filter((entry) => entry.wrongCount > 0)
+      .filter((entry) => entry.wrongCount > 0 && !isEnglishLongTermProgress(getEnglishProgressForId(progressMap, entry.chunkId)))
       .sort((left, right) => {
         if (left.isDue !== right.isDue) return left.isDue ? -1 : 1;
         if (left.reviewStep !== right.reviewStep) return left.reviewStep - right.reviewStep;
@@ -178,10 +282,19 @@ export function EnglishChunksApp() {
   }, [progressMap]);
   const mainVisibleWrongWords = wrongWordList.slice(0, 24);
   const mainHiddenWrongWords = wrongWordList.slice(24);
+  const mainVisibleLongTermWords = longTermWordList.slice(0, 36);
+  const mainHiddenLongTermWords = longTermWordList.slice(36);
+  const isAnswerVisible = studyTimerPhase !== "question";
+  const activeTimerSeconds = studyTimerPhase === "question" ? questionSeconds : answerSeconds;
 
   const handleSelectChunk = (chunkId) => {
     setSelectedChunkId(chunkId);
     setMode("study");
+  };
+
+  const handleSelectMemoryChunk = (chunkId) => {
+    setSelectedChunkId(chunkId);
+    setMode("memory");
   };
 
   const handlePosFilterChange = (nextPosFilter) => {
@@ -194,12 +307,27 @@ export function EnglishChunksApp() {
     if (nextIds.length) setSelectedChunkId(nextIds[0]);
   };
 
+  const handleQuestionSecondsChange = (event) => {
+    setQuestionSeconds(clampStudySeconds(Number(event.target.value)));
+    setStudyTimerPhase("question");
+  };
+
+  const handleAnswerSecondsChange = (event) => {
+    setAnswerSeconds(clampStudySeconds(Number(event.target.value)));
+    setStudyTimerPhase("question");
+  };
+
+  const applyTimingPreset = (nextQuestionSeconds, nextAnswerSeconds) => {
+    setQuestionSeconds(clampStudySeconds(nextQuestionSeconds));
+    setAnswerSeconds(clampStudySeconds(nextAnswerSeconds));
+    setStudyTimerPhase("question");
+  };
+
   const handleAdvanceChunk = () => {
     if (!recommendedIds.length) return;
     const nextIndex = (safeStudyPosition + 1) % recommendedIds.length;
     const nextId = recommendedIds[nextIndex];
     setSelectedChunkId(nextId);
-    setStudyPhase("front");
 
     if (nextIndex === 0) {
       const nextSeed = Date.now();
@@ -212,20 +340,16 @@ export function EnglishChunksApp() {
     }
   };
 
-  const handleRevealAnswer = () => {
-    if (mode !== "study" || studyPhase === "revealed") return;
-    setStudyPhase("revealed");
-  };
-
   const handleStudyAction = (wasCorrect) => {
-    if (mode !== "study" || studyPhase !== "revealed") return;
+    if (mode !== "study" || !recommendedIds.length) return;
 
     setProgressMap((current) => recordStudyAttempt(current, selectedChunk, wasCorrect, studyExample.topic));
     setAttemptHistory((current) => [
       {
-        id: `${selectedChunk.id}-${Date.now()}`,
+        id: `${selectedChunk.id}-${displayedStudyChunk.variantId}-${Date.now()}`,
         chunkId: selectedChunk.id,
-        headword: selectedChunk.headword,
+        variantId: displayedStudyChunk.variantId,
+        headword: displayedStudyChunk.headword,
         result: wasCorrect ? "correct" : "wrong",
         topic: studyExample.topic,
         answeredAt: Date.now()
@@ -235,7 +359,32 @@ export function EnglishChunksApp() {
     handleAdvanceChunk();
   };
 
-  const handleSpeak = (text) => {
+  useEffect(() => {
+    if (!hydrated || mode !== "study" || !recommendedIds.length) return;
+    const timer = window.setTimeout(() => handleSpeak(displayedStudyChunk.headword), 180);
+    return () => window.clearTimeout(timer);
+  }, [displayedStudyChunk.headword, displayedStudyChunk.variantId, hydrated, mode, recommendedIds.length, selectedChunk.id]);
+
+  useEffect(() => {
+    if (mode !== "study" || !recommendedIds.length) return;
+
+    const onKeyDown = (event) => {
+      if (event.repeat) return;
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        handleStudyAction(false);
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        handleStudyAction(true);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
+  function handleSpeak(text) {
     if (typeof window === "undefined" || !window.speechSynthesis) return;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
@@ -243,7 +392,7 @@ export function EnglishChunksApp() {
     utterance.pitch = 1;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
-  };
+  }
 
   const handleStartRecording = async () => {
     if (typeof window === "undefined" || !navigator.mediaDevices || !window.MediaRecorder) {
@@ -317,7 +466,7 @@ export function EnglishChunksApp() {
 
   const handleSaveShadow = () => {
     if (!recordingState.durationMs) return;
-    setProgressMap((current) => markShadowComplete(current, selectedChunk, getPromptTopic(selectedChunk, shadowPrompt), recordingState.durationMs));
+    setProgressMap((current) => markShadowComplete(current, selectedChunk, getPromptTopic(displayedStudyChunk, shadowPrompt), recordingState.durationMs));
     setShadowPromptIndex((current) => current + 1);
   };
 
@@ -328,84 +477,99 @@ export function EnglishChunksApp() {
           {mode === "study" ? (
             <div className="english-pane-stack">
               <div className="english-study-topline">
-                <span>{sessionStep} / {sessionTotal}</span>
+                <span>残り {sessionTotal}</span>
               </div>
 
-              <section className={`english-study-card ${studyPhase === "revealed" ? "is-revealed" : ""}`}>
-                <div className="english-study-sheet">
-                  <p className="english-study-word">{selectedChunk.headword}</p>
+              {recommendedIds.length ? (
+                <section className="english-study-card is-fast-review">
+                  <button
+                    type="button"
+                    className="english-judge-button is-wrong"
+                    onClick={() => handleStudyAction(false)}
+                    aria-label="間違えた"
+                  >
+                    <small>←</small>
+                    <span>×</span>
+                    <small>まだ</small>
+                  </button>
 
-                  {selectedFamilyMembers.length ? (
-                    <div className="english-family-strip" aria-label="派生語">
-                      <span>派生語</span>
-                      <div>
-                        {selectedFamilyMembers.map((member) => (
-                          <button
-                            key={member.id}
-                            type="button"
-                            className="english-family-chip"
-                            onClick={() => handleSelectChunk(member.id)}
-                          >
-                            <strong>{member.headword}</strong>
-                            <small>{getPosLabel(member.pos)}</small>
-                          </button>
-                        ))}
+                  <div className="english-study-sheet">
+                    <p className="english-study-word">{displayedStudyChunk.headword}</p>
+
+                    <div className="english-study-timer">
+                      <div className="english-study-timer-line">
+                        <i
+                          key={`${selectedChunk.id}-${displayedStudyChunk.variantId}-${studyTimerPhase}`}
+                          style={{ "--timer-duration": `${activeTimerSeconds}s` }}
+                        />
                       </div>
+                      <span>
+                        {studyTimerPhase === "question"
+                          ? `出題 ${questionSeconds}秒`
+                          : studyTimerPhase === "answer"
+                            ? `答え ${answerSeconds}秒`
+                            : "判定待ち"}
+                      </span>
                     </div>
-                  ) : null}
 
-                  {studyPhase === "revealed" ? (
-                    <div className="english-study-answer">
+                    <div className={`english-study-answer ${isAnswerVisible ? "is-visible" : "is-hidden"}`}>
                       <span>答え</span>
-                      <strong>{selectedChunk.meaning}</strong>
+                      <strong>{displayedStudyChunk.meaning}</strong>
                     </div>
-                  ) : null}
-                </div>
 
-                {studyPhase === "revealed" ? (
-                  <div className="english-judge-stack">
-                    <button
-                      type="button"
-                      className="english-judge-button is-correct"
-                      onClick={() => handleStudyAction(true)}
-                    >
-                      <span>○</span>
-                      <small>わかる</small>
-                    </button>
-                    <button
-                      type="button"
-                      className="english-judge-button is-wrong"
-                      onClick={() => handleStudyAction(false)}
-                    >
-                      <span>×</span>
-                      <small>まだ</small>
-                    </button>
+                    {selectedFamilyMembers.length ? (
+                      <div className="english-family-strip" aria-label="派生語">
+                        <span>派生語</span>
+                        <div>
+                          {selectedFamilyMembers.map((member) => (
+                            <button
+                              key={member.id}
+                              type="button"
+                              className="english-family-chip"
+                              onClick={() => handleSelectChunk(member.id)}
+                            >
+                              <strong>{member.headword}</strong>
+                              <small>{getPosLabel(member.pos)}</small>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
-                ) : (
-                  <div className="english-next-stack">
-                    <button
-                      type="button"
-                      className="english-next-button"
-                      onClick={handleRevealAnswer}
-                    >
-                      次へ
-                    </button>
+
+                  <button
+                    type="button"
+                    className="english-judge-button is-correct"
+                    onClick={() => handleStudyAction(true)}
+                    aria-label="正解した"
+                  >
+                    <small>→</small>
+                    <span>○</span>
+                    <small>わかる</small>
+                  </button>
+                </section>
+              ) : (
+                <section className="english-review-card">
+                  <div className="english-section-head">
+                    <h3>この条件の単語はすべて長期記憶に入りました</h3>
+                    <span>{longTermCount}語</span>
                   </div>
-                )}
-              </section>
+                  <p className="english-feedback-text">品詞フィルタを変えるか、長期記憶リストを確認できます。</p>
+                </section>
+              )}
 
               <div className="english-progress-rail">
                 <div className="english-progress-rail-line">
-                  <i style={{ width: `${Math.max(6, progressRatio * 100)}%` }} />
+                  <i style={{ width: `${Math.max(0, progressRatio * 100)}%` }} />
                 </div>
                 <div className="english-progress-rail-copy">
-                  <span>start</span>
-                  <span>next</span>
+                  <span>長期記憶 {longTermCount}</span>
+                  <span>残り {sessionTotal}</span>
                 </div>
               </div>
 
               <div className="english-action-row">
-                <button type="button" className="button button-secondary" onClick={() => handleSpeak(selectedChunk.headword)}>
+                <button type="button" className="button button-secondary" onClick={() => handleSpeak(displayedStudyChunk.headword)}>
                   単語を聞く
                 </button>
                 <button type="button" className="button button-secondary" onClick={() => setMode("history")}>
@@ -420,7 +584,7 @@ export function EnglishChunksApp() {
               <div className="english-card-head">
                 <div>
                   <p className="eyebrow">Meaning</p>
-                  <h2>{selectedChunk.headword}</h2>
+                  <h2>{displayedStudyChunk.headword}</h2>
                 </div>
                 <div className={`english-stage-pill ${selectedProgress.stage}`}>
                   {getStageLabel(selectedProgress.stage)}
@@ -429,17 +593,17 @@ export function EnglishChunksApp() {
 
               <section className="english-meaning-card">
                 <div className="english-meaning-main">
-                  <p className="english-meaning-japanese">{selectedChunk.meaning}</p>
-                  <p className="english-meaning-chunk">{selectedChunk.coreChunk}</p>
+                  <p className="english-meaning-japanese">{displayedStudyChunk.meaning}</p>
+                  <p className="english-meaning-chunk">{displayedStudyChunk.coreChunk}</p>
                 </div>
                 <div className="english-note-grid">
                   <article className="english-note-card">
                     <strong>ニュアンス</strong>
-                    <p>{selectedChunk.nuance}</p>
+                    <p>{displayedStudyChunk.nuance}</p>
                   </article>
                   <article className="english-note-card">
                     <strong>使い方</strong>
-                    <p>{selectedChunk.grammarNote}</p>
+                    <p>{displayedStudyChunk.grammarNote}</p>
                   </article>
                 </div>
               </section>
@@ -451,7 +615,7 @@ export function EnglishChunksApp() {
                 </div>
                 <div className="english-example-list">
                   {allExamples.slice(0, 4).map((example) => (
-                    <article key={`${selectedChunk.id}-${example.text}`} className="english-example-card">
+                    <article key={`${displayedStudyChunk.variantId}-${example.text}`} className="english-example-card">
                       <span className={`english-topic-badge topic-${example.topic}`}>{getTopicLabel(example.topic)}</span>
                       <p>{example.text}</p>
                       <small>{example.ja}</small>
@@ -467,11 +631,11 @@ export function EnglishChunksApp() {
               <section className="english-shadow-card">
                 <div className="english-section-head">
                   <h3>音をまねる</h3>
-                  <span>{selectedChunk.coreChunk}</span>
+                  <span>{displayedStudyChunk.coreChunk}</span>
                 </div>
 
                 <div className="english-shadow-chip-row">
-                  {selectedChunk.shadowPrompts.map((prompt, index) => (
+                  {displayedStudyChunk.shadowPrompts.map((prompt, index) => (
                     <button
                       key={prompt}
                       type="button"
@@ -551,6 +715,22 @@ export function EnglishChunksApp() {
               </section>
             </div>
           ) : null}
+
+          {mode === "memory" ? (
+            <div className="english-pane-stack">
+              <section className="english-review-card">
+                <div className="english-section-head">
+                  <h3>長期記憶リスト</h3>
+                  <span>{longTermWordList.length}語</span>
+                </div>
+
+                {renderLongTermWordList({
+                  visibleEntries: mainVisibleLongTermWords,
+                  hiddenEntries: mainHiddenLongTermWords
+                })}
+              </section>
+            </div>
+          ) : null}
         </section>
 
         <aside className="english-side-stack">
@@ -604,9 +784,47 @@ export function EnglishChunksApp() {
               </div>
               <div>
                 <dt>復習段階</dt>
-                <dd>{getEnglishReviewStepLabel(selectedProgress.reviewStep)}</dd>
+                <dd>{isSelectedLongTerm ? "長期記憶" : getEnglishReviewStepLabel(selectedProgress.reviewStep)}</dd>
               </div>
             </dl>
+          </section>
+
+          <section className="surface english-side-card">
+            <div className="english-section-head">
+              <h3>表示時間</h3>
+              <span>{questionSeconds}s / {answerSeconds}s</span>
+            </div>
+            <div className="english-timing-grid">
+              <label>
+                <span>出題</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  step="1"
+                  value={questionSeconds}
+                  onChange={handleQuestionSecondsChange}
+                />
+                <small>秒</small>
+              </label>
+              <label>
+                <span>答え</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="30"
+                  step="1"
+                  value={answerSeconds}
+                  onChange={handleAnswerSecondsChange}
+                />
+                <small>秒</small>
+              </label>
+            </div>
+            <div className="english-timing-presets">
+              <button type="button" onClick={() => applyTimingPreset(4, 5)}>4 / 5</button>
+              <button type="button" onClick={() => applyTimingPreset(2, 3)}>2 / 3</button>
+              <button type="button" onClick={() => applyTimingPreset(6, 6)}>6 / 6</button>
+            </div>
           </section>
 
           <section className="surface english-side-card">
@@ -615,7 +833,7 @@ export function EnglishChunksApp() {
               <span>note</span>
             </div>
             <p className="english-side-copy">
-              {detailMode === "gentle" ? selectedChunk.nuance : selectedChunk.grammarNote}
+              {detailMode === "gentle" ? displayedStudyChunk.nuance : displayedStudyChunk.grammarNote}
             </p>
           </section>
         </aside>
@@ -685,6 +903,59 @@ export function EnglishChunksApp() {
                   </button>
                 );
               })}
+            </div>
+          </details>
+        ) : null}
+      </div>
+    );
+  }
+
+  function renderLongTermWordList({ visibleEntries, hiddenEntries }) {
+    if (!longTermWordList.length) {
+      return <p className="english-feedback-text">まだ長期記憶に入った単語はありません。初回で○にした単語、または復習5ステージを抜けた単語がここに入ります。</p>;
+    }
+
+    return (
+      <div className="english-history-list is-compact is-main">
+        {visibleEntries.map((entry) => (
+          <button
+            key={entry.chunkId}
+            type="button"
+            className="english-history-row is-dense"
+            onClick={() => handleSelectMemoryChunk(entry.chunkId)}
+          >
+            <span className="english-history-word">
+              <strong>{entry.headword}</strong>
+              <small>{entry.meaning}</small>
+            </span>
+            <span className="english-history-line">
+              <em>長期</em>
+              <small>○{entry.correctCount}</small>
+            </span>
+          </button>
+        ))}
+
+        {hiddenEntries.length ? (
+          <details className="english-history-fold is-main">
+            <summary>さらに {hiddenEntries.length} 語</summary>
+            <div className="english-history-list is-compact is-main">
+              {hiddenEntries.map((entry) => (
+                <button
+                  key={entry.chunkId}
+                  type="button"
+                  className="english-history-row is-dense"
+                  onClick={() => handleSelectMemoryChunk(entry.chunkId)}
+                >
+                  <span className="english-history-word">
+                    <strong>{entry.headword}</strong>
+                    <small>{entry.meaning}</small>
+                  </span>
+                  <span className="english-history-line">
+                    <em>長期</em>
+                    <small>○{entry.correctCount}</small>
+                  </span>
+                </button>
+              ))}
             </div>
           </details>
         ) : null}
@@ -802,4 +1073,9 @@ function formatNextReview(nextReviewAt) {
   if (diff < 60 * 60 * 1000) return `${Math.max(1, Math.round(diff / (60 * 1000)))}分後`;
   if (diff < 24 * 60 * 60 * 1000) return `${Math.max(1, Math.round(diff / (60 * 60 * 1000)))}時間後`;
   return `${Math.max(1, Math.round(diff / (24 * 60 * 60 * 1000)))}日後`;
+}
+
+function clampStudySeconds(value) {
+  if (!Number.isFinite(value)) return DEFAULT_QUESTION_SECONDS;
+  return Math.max(1, Math.min(30, Math.round(value)));
 }

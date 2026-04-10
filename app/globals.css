@@ -7240,7 +7240,7 @@ textarea {
 
 .english-study-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 112px;
+  grid-template-columns: 132px minmax(0, 1fr) 132px;
   gap: 24px;
   min-height: 520px;
   padding: 34px;
@@ -7281,6 +7281,49 @@ textarea {
   font-weight: 800;
   line-height: 1.02;
   letter-spacing: -0.06em;
+}
+
+.english-study-timer {
+  display: grid;
+  gap: 8px;
+  max-width: 18rem;
+}
+
+.english-study-timer-line {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(201, 210, 213, 0.34);
+}
+
+.english-study-timer-line i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(28, 91, 94, 0.72), rgba(133, 146, 151, 0.74));
+  animation: english-study-timer var(--timer-duration, 4s) linear forwards;
+}
+
+.english-study-timer span {
+  color: rgba(87, 101, 107, 0.78);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@keyframes english-study-timer {
+  from {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  to {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
 }
 
 .english-family-strip {
@@ -7360,6 +7403,14 @@ textarea {
   border-top: 1px solid rgba(35, 58, 65, 0.09);
 }
 
+.english-study-answer.is-hidden {
+  visibility: hidden;
+}
+
+.english-study-answer.is-visible {
+  visibility: visible;
+}
+
 .english-study-answer span {
   color: var(--muted-foreground);
   font-size: 0.8rem;
@@ -7420,7 +7471,7 @@ textarea {
   display: grid;
   place-items: center;
   gap: 6px;
-  min-height: 132px;
+  min-height: 100%;
   border-radius: 28px;
   border: 1px solid rgba(35, 58, 65, 0.12);
   background: rgba(255, 255, 255, 0.9);
@@ -7435,6 +7486,16 @@ textarea {
 .english-judge-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 16px 28px rgba(28, 46, 51, 0.08);
+}
+
+.english-judge-button.is-correct:hover {
+  border-color: rgba(48, 127, 96, 0.28);
+  background: rgba(232, 246, 239, 0.94);
+}
+
+.english-judge-button.is-wrong:hover {
+  border-color: rgba(161, 88, 88, 0.28);
+  background: rgba(250, 240, 237, 0.95);
 }
 
 .english-judge-button span {
@@ -7491,6 +7552,60 @@ textarea {
   letter-spacing: 0.06em;
 }
 
+.english-timing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.english-timing-grid label {
+  display: grid;
+  grid-template-columns: 1fr 3.8rem auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(31, 56, 61, 0.08);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.english-timing-grid span,
+.english-timing-grid small {
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.english-timing-grid input {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 8px 6px;
+  background: rgba(239, 244, 244, 0.86);
+  color: rgba(18, 33, 36, 0.94);
+  font: inherit;
+  font-weight: 800;
+  text-align: center;
+}
+
+.english-timing-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.english-timing-presets button {
+  border: 1px solid rgba(31, 56, 61, 0.1);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.68);
+  color: rgba(24, 39, 44, 0.88);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .english-meaning-card {
   display: grid;
   gap: 16px;
@@ -7529,7 +7644,7 @@ textarea {
 }
 
 .english-history-list.is-main {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   column-gap: 18px;
   row-gap: 0;
   border-top: none;
