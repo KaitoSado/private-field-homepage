@@ -29,6 +29,7 @@ export function EnglishChunksApp() {
   const [supportMode, setSupportMode] = useState(true);
   const [selectedChunkId, setSelectedChunkId] = useState(ENGLISH_CHUNK_LIBRARY[0].id);
   const [studyPhase, setStudyPhase] = useState("front");
+  const [sessionStep, setSessionStep] = useState(1);
   const [shadowPromptIndex, setShadowPromptIndex] = useState(0);
   const [isScriptVisible, setIsScriptVisible] = useState(true);
   const [recordingState, setRecordingState] = useState({
@@ -130,11 +131,7 @@ export function EnglishChunksApp() {
   const studyExample = allExamples[(selectedProgress.seenCount + selectedProgress.incorrectCount) % allExamples.length];
   const shadowPrompt = selectedChunk.shadowPrompts[shadowPromptIndex % selectedChunk.shadowPrompts.length];
   const studyPosition = Math.max(0, recommendedIds.indexOf(selectedChunk.id));
-  const studiedWordCount = useMemo(
-    () => Object.values(progressMap || {}).filter((progress) => progress.seenCount > 0 || progress.reviewCount > 0).length,
-    [progressMap]
-  );
-  const progressRatio = ENGLISH_CHUNK_LIBRARY.length ? studiedWordCount / ENGLISH_CHUNK_LIBRARY.length : 0;
+  const progressRatio = ENGLISH_CHUNK_LIBRARY.length ? sessionStep / ENGLISH_CHUNK_LIBRARY.length : 0;
   const historyForChunk = attemptHistory.filter((entry) => entry.chunkId === selectedChunk.id);
   const wrongWordList = useMemo(() => {
     const latestWrongMap = new Map();
@@ -175,6 +172,7 @@ export function EnglishChunksApp() {
     const nextId = recommendedIds[(studyPosition + 1) % recommendedIds.length];
     setSelectedChunkId(nextId);
     setStudyPhase("front");
+    setSessionStep((current) => Math.min(current + 1, ENGLISH_CHUNK_LIBRARY.length));
   };
 
   const handleRevealAnswer = () => {
@@ -293,7 +291,7 @@ export function EnglishChunksApp() {
           {mode === "study" ? (
             <div className="english-pane-stack">
               <div className="english-study-topline">
-                <span>{studiedWordCount} / {ENGLISH_CHUNK_LIBRARY.length}</span>
+                <span>{sessionStep} / {ENGLISH_CHUNK_LIBRARY.length}</span>
               </div>
 
               <section className={`english-study-card ${studyPhase === "revealed" ? "is-revealed" : ""}`}>
@@ -361,7 +359,7 @@ export function EnglishChunksApp() {
 
               <div className="english-progress-rail">
                 <div className="english-progress-rail-line">
-                  <i style={{ width: `${studiedWordCount ? Math.max(6, progressRatio * 100) : 0}%` }} />
+                  <i style={{ width: `${Math.max(6, progressRatio * 100)}%` }} />
                 </div>
                 <div className="english-progress-rail-copy">
                   <span>start</span>
