@@ -244,7 +244,6 @@ export function ResearchProjectPortfolio({ dashboard, slug, session, canManagePr
         <div className="research-progress-section-head">
           <div>
             <h2>研究室パイプライン</h2>
-            <p>研究計画、研究費申請、ポスター、論文投稿までを一本の線で見ます。主役は週報ではなくプロジェクトです。</p>
           </div>
         </div>
 
@@ -388,7 +387,6 @@ export function ResearchProjectPortfolio({ dashboard, slug, session, canManagePr
           <div className="research-progress-section-head">
             <div>
               <h2>メンバー別の現在地</h2>
-              <p>誰がどの案件を持ち、どこで詰まりやすいかを人単位で見ます。</p>
             </div>
           </div>
 
@@ -443,7 +441,6 @@ export function ResearchProjectPortfolio({ dashboard, slug, session, canManagePr
             <div className="research-progress-section-head">
               <div>
                 <h2>{projectForm.id ? "研究ラインを更新" : "研究ラインを作成"}</h2>
-                <p>group owner が案件単位で現在地と次の締切を管理します。</p>
               </div>
             </div>
 

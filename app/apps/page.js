@@ -31,6 +31,12 @@ const plannedApps = [
     color: "lemon"
   },
   {
+    name: "英語コンテンツ",
+    body: "単語ではなくチャンクで覚え、高制約文脈、シャドーイング、多文脈レビューで定着させる English Chunks Lab です。",
+    href: "/apps/english",
+    color: "sky"
+  },
+  {
     name: "3Dモデル3Dグラフィック",
     body: "立方体や球体を置いて、触って、色と光を変えて遊べる、玩具寄りの 3D スタジオです。",
     href: "/apps/3d",
@@ -70,7 +76,7 @@ const plannedApps = [
 
 const privateApps = [
   {
-    name: "リサーチプログレス",
+    name: "Research Progress",
     body: "研究計画、研究費申請、ポスター、論文投稿までの研究ラインを一覧化し、研究室全体の現在地と停滞を把握する招待制ダッシュボードです。",
     status: "招待制",
     color: "mint",

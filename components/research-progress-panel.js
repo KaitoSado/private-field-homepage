@@ -444,7 +444,7 @@ export function ResearchProgressPanel({ slug }) {
         <div className="research-progress-hero-copy">
           <p className="eyebrow">Research Progress</p>
           <h1>{dashboard.group.name}</h1>
-          <p>{dashboard.group.description || "研究ラインと週次チェックインをまとめて見える化する招待制グループです。"}</p>
+          {dashboard.group.description ? <p>{dashboard.group.description}</p> : null}
           <div className="research-progress-hero-meta">
             <span className="research-progress-chip">{getResearchRoleLabel(dashboard.group.my_role)}</span>
             <span className="research-progress-meta-line">週: {formatResearchWeekLabel(weekStart)}</span>
@@ -503,11 +503,9 @@ export function ResearchProgressPanel({ slug }) {
           <div className="research-progress-section-head">
             <div>
               <h2>自分の週報</h2>
-              <p>
-                {dashboard.my_update
-                  ? `更新済み: ${new Date(dashboard.my_update.updated_at).toLocaleString("ja-JP")}`
-                  : "まだこの週の提出がありません。3分で出せる量に絞っています。"}
-              </p>
+              {dashboard.my_update ? (
+                <p>更新済み: {new Date(dashboard.my_update.updated_at).toLocaleString("ja-JP")}</p>
+              ) : null}
             </div>
             {dashboard.my_update?.submitted_late ? <span className="research-progress-chip is-warning">遅れて提出</span> : null}
           </div>
@@ -650,7 +648,6 @@ export function ResearchProgressPanel({ slug }) {
             <div className="research-progress-section-head">
               <div>
                 <h2>今週の要注意</h2>
-                <p>blocked / help / 会議候補だけを先に拾います。</p>
               </div>
             </div>
             {dashboard.meeting_candidates.length ? (
@@ -675,7 +672,6 @@ export function ResearchProgressPanel({ slug }) {
               <div className="research-progress-section-head">
                 <div>
                   <h2>メンバー追加</h2>
-                  <p>既存アカウントの username でグループへ追加します。</p>
                 </div>
               </div>
               <form className="research-progress-form" onSubmit={handleAddMember}>
@@ -711,7 +707,6 @@ export function ResearchProgressPanel({ slug }) {
         <div className="research-progress-section-head">
           <div>
             <h2>今週の進捗一覧</h2>
-            <p>未提出、停滞、help 要請、会議候補をここで絞り込みます。</p>
           </div>
         </div>
 
@@ -863,7 +858,6 @@ export function ResearchProgressPanel({ slug }) {
         <div className="research-progress-section-head">
           <div>
             <h2>履歴</h2>
-            <p>週別とメンバー別で、どこで止まりやすいかを追います。</p>
           </div>
           <div className="research-progress-tab-row">
             <button

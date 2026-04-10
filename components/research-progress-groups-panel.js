@@ -169,9 +169,6 @@ export function ResearchProgressGroupsPanel() {
         <div className="research-progress-hero-copy">
           <p className="eyebrow">Research Progress</p>
           <h1>研究会の危険箇所を 30 秒で把握する</h1>
-          <p>
-            研究計画からポスター、論文投稿までのラインと、週次チェックインを同じ場所で見ます。研究室のポートフォリオ管理と日々のフォローを一体化した MVP です。
-          </p>
           {weekStart ? <p className="research-progress-meta-line">対象週: {formatResearchWeekLabel(weekStart)} 週</p> : null}
         </div>
       </section>
@@ -181,7 +178,6 @@ export function ResearchProgressGroupsPanel() {
           <div className="research-progress-section-head">
             <div>
               <h2>所属グループ</h2>
-              <p>自分が参加している研究会・ゼミ・PJだけが表示されます。</p>
             </div>
           </div>
 
@@ -227,7 +223,6 @@ export function ResearchProgressGroupsPanel() {
           <div className="research-progress-section-head">
             <div>
               <h2>新しいグループを作る</h2>
-              <p>最初の owner として自分が登録されます。招待リンクではなく username 指定で追加する運用です。</p>
             </div>
           </div>
 
