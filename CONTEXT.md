@@ -7,6 +7,7 @@
 
 - サービス名: `New Commune`
 - 性質: 公開プロフィール + 記事 + 学生向け Apps を持つ Next.js アプリ
+- ブランドロゴ: `public/brand/commune-logo.png`
 - 想定ユーザー: 慶應 / SFC 周辺の学生・院生
 - 中心導線:
   - 公開プロフィール `/@username`
@@ -46,6 +47,14 @@
 - `skills/`
   - Codex / 他エージェント向けの project-local skill
   - 実運用する skill の正本は repo 内 `skills/` に置き、`scripts/sync-skill-to-codex.sh` で `~/.codex/skills/` に同期する
+- `agents/`
+  - planner / coder / reviewer など、複数AI運用時の軽量な役割定義
+- `prompts/`
+  - 再利用する短いプロンプトテンプレート
+- `scripts/harness/`
+  - AI 協調作業用の preflight / context summary などの実行ハーネス
+- `logs/`
+  - harness や試作のローカル実行ログ置き場。`.gitkeep` 以外は commit しない
 - `.claude/worktrees/`
   - Claude 側の試作・分岐用
 
@@ -134,6 +143,9 @@
 - 進行中タスクは `CURRENT_TASK.md`
 - 引き継ぎは `HANDOFF.md`
 - 変更履歴は `CHANGELOG.md`
+- `PROJECT.md` は新設せず、現在の状態・目的は `CONTEXT.md` に寄せる
+- `TASKS.md` は現時点では新設せず、進行中の作業は `CURRENT_TASK.md` に置く
+- 役割定義は `agents/`、恒常的な workflow は `skills/`、実行系は `scripts/harness/` に分ける
 
 ## 10. いま重要な注意点
 

@@ -1,0 +1,11 @@
+CONTEXT.md, CURRENT_TASK.md, DECISIONS.md を読んでから作業してください。
+
+目的:
+- 小さく安全な patch で実装する
+- 無関係なファイルを触らない
+- 変更後に npm run build を通す
+
+出力:
+- 変更概要
+- 検証結果
+- live 反映や追加作業が必要な点

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "preflight": "node scripts/preflight.mjs"
+    "preflight": "node scripts/preflight.mjs",
+    "harness:preflight": "node scripts/harness/preflight.mjs",
+    "harness:summary": "node scripts/harness/context-summary.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

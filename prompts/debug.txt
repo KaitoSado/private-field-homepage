@@ -1,0 +1,13 @@
+CONTEXT.md, CURRENT_TASK.md, DECISIONS.md を読んでから調査してください。
+
+目的:
+- 再現条件を特定する
+- 原因をコード上の箇所へ絞る
+- 最小修正で直す
+
+順序:
+1. 症状と期待挙動を確認
+2. 関係する route / component / lib を特定
+3. 原因を説明
+4. patch
+5. 検証

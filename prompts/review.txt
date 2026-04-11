@@ -1,0 +1,11 @@
+CONTEXT.md, CURRENT_TASK.md, DECISIONS.md を読んでから review してください。
+
+優先するもの:
+- bug
+- behavioral regression
+- auth / RLS / DB 保存の事故
+- missing tests
+- live 反映漏れ
+
+出力は findings first。
+問題がなければ「重大な finding なし」と書いて、残るリスクだけ短く示してください。

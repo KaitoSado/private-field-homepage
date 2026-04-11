@@ -6,6 +6,8 @@ import { HeaderNav } from "@/components/header-nav";
 import { TelemetryClient } from "@/components/telemetry-client";
 import { BRAND_DESCRIPTION, BRAND_NAME, buildAbsoluteUrl } from "@/lib/brand";
 
+const BRAND_LOGO_PATH = "/brand/commune-logo.png";
+
 export const metadata = {
   metadataBase: new URL(buildAbsoluteUrl("/")),
   title: {
@@ -32,9 +34,9 @@ export const metadata = {
     images: ["/opengraph-image"]
   },
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg"
+    icon: BRAND_LOGO_PATH,
+    shortcut: BRAND_LOGO_PATH,
+    apple: BRAND_LOGO_PATH
   }
 };
 
@@ -51,7 +53,7 @@ export default function RootLayout({ children }) {
         <header className="site-header">
           <div className="site-header-inner">
             <Link href="/" className="brand-lockup">
-              <img className="brand-cube" src="/icon.svg" alt="Commune" width={40} height={40} />
+              <img className="brand-cube" src={BRAND_LOGO_PATH} alt="Commune" width={48} height={48} />
               <strong>{BRAND_NAME}</strong>
             </Link>
             <HeaderNav />

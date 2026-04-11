@@ -94,3 +94,11 @@
 - 大きく表示される語は、語族内の派生語から出題ごとにランダムに選ぶ
 - `family` の機械生成だけで 1900 見出し語へ畳むと誤グループ化や分離漏れがあるため、完全な 1900 グループ化は原本見出し語IDの整備後に行う
 - ランダム表示、主語と派生語の入れ替え、品詞別プレイは `family` と `pos` を使う
+
+### 16. AI 協調用の状態管理は既存ファイルを正本にする
+
+- `PROJECT.md` は作らず、現在の状態と目的は `CONTEXT.md` に集約する
+- `TASKS.md` は作らず、進行中作業は `CURRENT_TASK.md` に集約する
+- 役割定義は `agents/`、再利用プロンプトは `prompts/`、実行ハーネスは `scripts/harness/` に分離する
+- `logs/` はローカル実行ログ用に確保するが、`.gitkeep` 以外は commit しない
+- `npm run preflight` は `scripts/harness/preflight.mjs` を入口にし、env / 運用ファイル / schema 変更の付随更新を確認する
