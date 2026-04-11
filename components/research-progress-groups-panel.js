@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import { formatResearchWeekLabel, getResearchRoleLabel } from "@/lib/research-progress";
+import { getResearchRoleLabel } from "@/lib/research-progress";
 
 const emptyForm = {
   name: "",
@@ -166,11 +166,7 @@ export function ResearchProgressGroupsPanel() {
   return (
     <div className="research-progress-shell">
       <section className="surface research-progress-hero">
-        <div className="research-progress-hero-copy">
-          <p className="eyebrow">Research Progress</p>
-          <h1>研究会の危険箇所を 30 秒で把握する</h1>
-          {weekStart ? <p className="research-progress-meta-line">対象週: {formatResearchWeekLabel(weekStart)} 週</p> : null}
-        </div>
+        <h1>Research Progress</h1>
       </section>
 
       <section className="research-progress-groups-layout">
