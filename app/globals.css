@@ -1094,6 +1094,7 @@ textarea {
 .research-progress-shell {
   display: grid;
   gap: 18px;
+  overflow: hidden;
 }
 
 .research-progress-hero,
@@ -1107,6 +1108,7 @@ textarea {
 .research-progress-summary-card {
   display: grid;
   gap: 16px;
+  overflow: hidden;
 }
 
 .research-progress-hero {
@@ -1143,6 +1145,12 @@ textarea {
   flex-wrap: wrap;
   gap: 10px;
   align-items: center;
+}
+
+.research-progress-filter-row input,
+.research-progress-filter-row select {
+  min-width: 0;
+  max-width: 240px;
 }
 
 .research-progress-week-nav {
@@ -1185,10 +1193,13 @@ textarea {
   justify-content: space-between;
   align-items: flex-start;
   gap: 10px;
+  min-width: 0;
 }
 
 .research-progress-card-head strong {
   font-size: 1.05rem;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .research-progress-chip,
@@ -1371,7 +1382,6 @@ textarea {
   width: 100%;
   min-width: 980px;
   border-collapse: collapse;
-  table-layout: fixed;
 }
 
 .research-progress-table th,
@@ -1380,6 +1390,8 @@ textarea {
   border: 1px solid rgba(23, 29, 36, 0.08);
   vertical-align: top;
   text-align: left;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .research-progress-table thead th {
@@ -1409,6 +1421,7 @@ textarea {
 .research-progress-cell-stack {
   display: grid;
   gap: 6px;
+  min-width: 0;
 }
 
 .research-progress-review-box {
@@ -1447,6 +1460,7 @@ textarea {
 .research-progress-portfolio {
   display: grid;
   gap: 18px;
+  overflow: hidden;
 }
 
 .research-project-stage-strip {
