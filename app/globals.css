@@ -105,8 +105,7 @@ body {
   object-fit: contain;
   flex-shrink: 0;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 10px 24px rgba(11, 17, 20, 0.1);
+  background: transparent;
 }
 
 .site-nav,
@@ -1094,9 +1093,11 @@ textarea {
   letter-spacing: 0.04em;
 }
 
+/* ── Research Progress: flat structured style ── */
+
 .research-progress-shell {
   display: grid;
-  gap: 20px;
+  gap: 24px;
   overflow: hidden;
 }
 
@@ -1110,18 +1111,27 @@ textarea {
 .research-progress-history-card,
 .research-progress-summary-card {
   display: grid;
-  gap: 14px;
+  gap: 12px;
   overflow: hidden;
 }
 
 .research-progress-hero {
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 10px;
+  border-bottom: 2px solid var(--ink);
+  border-radius: 0;
+  padding-bottom: 16px;
+}
+
+.research-progress-hero h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
 }
 
 .research-progress-hero-copy {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .research-progress-hero-copy h1,
@@ -1137,7 +1147,8 @@ textarea {
 .research-progress-note-box p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 0.88rem;
 }
 
 .research-progress-hero-meta,
@@ -1146,7 +1157,7 @@ textarea {
 .research-progress-tab-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 }
 
@@ -1169,45 +1180,53 @@ textarea {
 .research-progress-muted-inline,
 .form-status {
   color: var(--muted);
+  font-size: 0.84rem;
 }
 
 .research-progress-groups-layout,
 .research-progress-main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
-  gap: 20px;
+  grid-template-columns: minmax(0, 3fr) minmax(260px, 2fr);
+  gap: 24px;
   align-items: start;
 }
 
 .research-progress-groups-list,
 .research-progress-side-stack {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 
 .research-progress-group-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
 }
 
 .research-progress-group-card {
   color: inherit;
   text-decoration: none;
+  border-radius: 6px;
+}
+
+.research-progress-group-card:hover {
+  border-color: var(--ink);
 }
 
 .research-progress-card-head {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
   min-width: 0;
 }
 
 .research-progress-card-head strong {
-  font-size: 1rem;
+  font-size: 0.95rem;
   min-width: 0;
-  overflow-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .research-progress-chip,
@@ -1215,130 +1234,137 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 26px;
-  padding: 0 9px;
-  border-radius: 999px;
-  border: 1px solid rgba(23, 29, 36, 0.08);
-  background: rgba(255, 255, 255, 0.72);
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 3px;
+  border: 1px solid rgba(23, 29, 36, 0.12);
+  background: #f4f2ee;
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.05em;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #36404b;
+  color: #4a525d;
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .research-progress-chip.is-warning,
 .research-progress-status.is-at_risk {
-  background: rgba(247, 178, 103, 0.2);
+  background: #fef3e2;
   color: #8d4a11;
-  border-color: rgba(247, 178, 103, 0.28);
+  border-color: #f0d4a8;
 }
 
 .research-progress-chip.is-danger,
 .research-progress-status.is-blocked {
-  background: rgba(228, 158, 196, 0.2);
+  background: #fce8f0;
   color: #8a235c;
-  border-color: rgba(228, 158, 196, 0.28);
+  border-color: #edc0d4;
 }
 
 .research-progress-status.is-on_track {
-  background: rgba(190, 223, 194, 0.26);
+  background: #e8f5ea;
   color: #25603a;
-  border-color: rgba(190, 223, 194, 0.35);
+  border-color: #b8dcc0;
 }
 
 .research-progress-status.is-review_needed {
-  background: rgba(160, 216, 234, 0.25);
+  background: #e4f2f8;
   color: #175a72;
-  border-color: rgba(160, 216, 234, 0.34);
+  border-color: #a8d4e6;
 }
 
 .research-progress-status.is-missing {
-  background: rgba(23, 29, 36, 0.08);
+  background: #ededeb;
   color: #4a525d;
-  border-color: rgba(23, 29, 36, 0.1);
+  border-color: #d4d2ce;
 }
 
 .research-progress-mini-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 4px;
   margin: 0;
 }
 
 .research-progress-mini-stats div,
 .research-progress-summary-card {
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.62);
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: #faf9f7;
   border: 1px solid var(--line);
 }
 
 .research-progress-mini-stats dt,
 .research-progress-summary-card span {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.06em;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .research-progress-mini-stats dd,
 .research-progress-summary-card strong {
-  margin: 3px 0 0;
-  font-size: 1.05rem;
+  margin: 2px 0 0;
+  font-size: 1rem;
   line-height: 1;
 }
 
 .research-progress-summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 8px;
 }
 
 .research-progress-section-head {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+
+.research-progress-section-head h2 {
+  font-size: 1rem;
+  letter-spacing: -0.005em;
 }
 
 .research-progress-form {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .research-progress-form label {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .research-progress-form label span {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .research-progress-form select[multiple] {
-  min-height: 120px;
+  min-height: 100px;
 }
 
 .research-progress-form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
 }
 
 .research-progress-toggle,
 .research-progress-inline-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .research-progress-toggle input,
@@ -1349,57 +1375,56 @@ textarea {
 .research-progress-inline-toggle span,
 .research-progress-toggle span {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
 .research-progress-note-box {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border: 1px dashed var(--line);
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.42);
+  border-radius: 4px;
+  background: #faf9f7;
 }
 
 .research-progress-queue,
 .research-progress-history-list,
 .research-progress-history-items {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .research-progress-queue-item,
 .research-progress-history-block,
 .research-progress-history-item {
   display: grid;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.58);
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: #faf9f7;
   border: 1px solid var(--line);
 }
 
 .research-progress-queue-item strong,
 .research-progress-history-item strong {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .research-progress-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
 }
 
 .research-progress-table {
   width: 100%;
-  min-width: 720px;
+  min-width: 680px;
   border-collapse: collapse;
 }
 
 .research-progress-table th,
 .research-progress-table td {
-  padding: 10px 12px;
-  border: 1px solid rgba(23, 29, 36, 0.06);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
   vertical-align: top;
   text-align: left;
   overflow-wrap: break-word;
@@ -1407,18 +1432,22 @@ textarea {
 }
 
 .research-progress-table thead th {
-  background: rgba(255, 255, 255, 0.68);
+  background: transparent;
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--muted);
   white-space: nowrap;
+  border-bottom: 2px solid var(--ink);
+}
+
+.research-progress-table tbody tr:hover td {
+  background: rgba(23, 29, 36, 0.02);
 }
 
 .research-progress-table tbody td {
-  background: rgba(255, 255, 255, 0.46);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .research-progress-table td strong,
@@ -1430,144 +1459,141 @@ textarea {
 .research-progress-table td span,
 .research-progress-table td small {
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
 }
 
 .research-progress-cell-stack {
   display: grid;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
 }
 
 .research-progress-review-box {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .research-progress-review-box textarea {
-  min-height: 96px;
+  min-height: 80px;
 }
 
 .research-progress-status.is-risk-on_track {
-  background: rgba(190, 223, 194, 0.26);
+  background: #e8f5ea;
   color: #25603a;
-  border-color: rgba(190, 223, 194, 0.35);
+  border-color: #b8dcc0;
 }
 
 .research-progress-status.is-risk-at_risk {
-  background: rgba(247, 178, 103, 0.2);
+  background: #fef3e2;
   color: #8d4a11;
-  border-color: rgba(247, 178, 103, 0.28);
+  border-color: #f0d4a8;
 }
 
 .research-progress-status.is-risk-blocked {
-  background: rgba(228, 158, 196, 0.2);
+  background: #fce8f0;
   color: #8a235c;
-  border-color: rgba(228, 158, 196, 0.28);
+  border-color: #edc0d4;
 }
 
 .research-progress-status.is-risk-needs_decision {
-  background: rgba(160, 216, 234, 0.25);
+  background: #e4f2f8;
   color: #175a72;
-  border-color: rgba(160, 216, 234, 0.34);
+  border-color: #a8d4e6;
 }
 
 .research-progress-portfolio {
   display: grid;
-  gap: 20px;
+  gap: 24px;
   overflow: hidden;
 }
 
 .research-project-stage-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .research-project-stage-pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(23, 29, 36, 0.08);
-  background: rgba(255, 255, 255, 0.58);
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  background: #faf9f7;
 }
 
 .research-project-stage-pill span {
   color: var(--muted);
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.05em;
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .research-project-track {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
-  gap: 4px;
-  min-width: 480px;
+  grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+  gap: 3px;
+  min-width: 420px;
 }
 
 .research-project-track-stack {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .research-project-track-step {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 0 8px;
-  border-radius: 12px;
-  border: 1px solid rgba(23, 29, 36, 0.08);
-  background: rgba(255, 255, 255, 0.55);
+  min-height: 28px;
+  padding: 0 6px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  background: #faf9f7;
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.66rem;
-  letter-spacing: 0.03em;
+  font-size: 0.6rem;
+  letter-spacing: 0.02em;
   color: #4a525d;
   white-space: nowrap;
 }
 
 .research-project-track-step.is-complete {
-  background: rgba(190, 223, 194, 0.3);
+  background: #e8f5ea;
   color: #25603a;
-  border-color: rgba(190, 223, 194, 0.35);
+  border-color: #b8dcc0;
 }
 
 .research-project-track-step.is-current {
-  background: rgba(160, 216, 234, 0.35);
+  background: #e4f2f8;
   color: #175a72;
-  border-color: rgba(160, 216, 234, 0.4);
-  box-shadow: inset 0 0 0 1px rgba(23, 29, 36, 0.06);
+  border-color: #a8d4e6;
+  font-weight: 600;
 }
 
 .research-project-track-step.is-upcoming {
-  background: rgba(255, 255, 255, 0.42);
-  color: #606975;
+  background: #faf9f7;
+  color: #808890;
 }
 
 .research-project-track-step.is-inactive {
-  background: rgba(23, 29, 36, 0.04);
-  color: rgba(23, 29, 36, 0.35);
+  background: transparent;
+  color: rgba(23, 29, 36, 0.25);
   border-style: dashed;
 }
 
 .research-project-progress-meter {
   display: grid;
-  gap: 6px;
-  min-width: 480px;
+  gap: 4px;
+  min-width: 420px;
 }
 
 .research-project-progress-rail {
   position: relative;
-  height: 14px;
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, rgba(160, 216, 234, 0.12), rgba(255, 214, 130, 0.18)),
-    rgba(255, 255, 255, 0.62);
-  border: 1px solid rgba(23, 29, 36, 0.08);
+  height: 6px;
+  border-radius: 3px;
+  background: #ededeb;
   overflow: hidden;
 }
 
@@ -1575,48 +1601,36 @@ textarea {
   position: absolute;
   inset: 0 auto 0 0;
   border-radius: inherit;
-  background: linear-gradient(90deg, #5aa4bd 0%, #b6ca78 45%, #f1c267 100%);
+  background: var(--ink);
 }
 
 .research-project-progress-knob {
-  position: absolute;
-  top: 50%;
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #ffffff;
-  border: 2px solid rgba(23, 29, 36, 0.18);
-  box-shadow: 0 8px 18px rgba(23, 29, 36, 0.14);
-  transform: translate(-50%, -50%);
+  display: none;
 }
 
 .research-project-progress-meta {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 10px;
-  font-size: 0.78rem;
+  gap: 8px;
+  font-size: 0.72rem;
 }
 
 .research-project-progress-meta span {
   color: var(--muted);
 }
 
-.research-project-progress-meta span:last-child {
-  text-align: right;
-}
-
 .research-project-progress-meta strong {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.78rem;
-  letter-spacing: 0.04em;
-  color: #1b2430;
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  color: var(--ink);
 }
 
 .research-project-form-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .physics-app-shell {

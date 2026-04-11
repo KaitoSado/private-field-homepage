@@ -52,7 +52,7 @@
 - `prompts/`
   - 再利用する短いプロンプトテンプレート
 - `scripts/harness/`
-  - AI 協調作業用の preflight / context summary などの実行ハーネス
+  - AI 協調作業用の preflight / context summary / task classifier などの実行ハーネス
 - `logs/`
   - harness や試作のローカル実行ログ置き場。`.gitkeep` 以外は commit しない
 - `.claude/worktrees/`
@@ -146,6 +146,7 @@
 - `PROJECT.md` は新設せず、現在の状態・目的は `CONTEXT.md` に寄せる
 - `TASKS.md` は現時点では新設せず、進行中の作業は `CURRENT_TASK.md` に置く
 - 役割定義は `agents/`、恒常的な workflow は `skills/`、実行系は `scripts/harness/` に分ける
+- 推論深度と探索量の切り替えは project-local skill `skills/reasoning-effort-router/` と `npm run harness:classify` で補助する
 
 ## 10. いま重要な注意点
 

@@ -8,7 +8,8 @@
     "start": "next start",
     "preflight": "node scripts/preflight.mjs",
     "harness:preflight": "node scripts/harness/preflight.mjs",
-    "harness:summary": "node scripts/harness/context-summary.mjs"
+    "harness:summary": "node scripts/harness/context-summary.mjs",
+    "harness:classify": "node scripts/harness/task-classifier.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

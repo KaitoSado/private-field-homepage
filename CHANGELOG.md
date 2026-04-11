@@ -4,6 +4,8 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-12 | codex | agent harness | `reasoning-effort-router` skill と `harness:classify` を追加し、作業リスクに応じた推論深度・探索量・検証量の切替を標準化 | `npm run harness:classify -- "ロゴを差し替えて"`, `npm run harness:classify -- "Supabase RLS を変更して"` |
+| 2026-04-12 | codex | branding | header / favicon 用ロゴを透過背景版に差し替え、ヘッダー側の白い台座を削除 | `npm run build` |
 | 2026-04-12 | codex | branding | header / favicon 用ロゴを `public/brand/commune-logo.png` に差し替え | `npm run build` |
 | 2026-04-11 | codex | agent harness | `agents/`, `prompts/`, `scripts/harness/`, `logs/` を追加し、`npm run preflight` を AI 協調用ハーネス入口へ整理 | `npm run preflight`, `npm run build` |
 | 2026-04-11 | codex | english app / supabase | `/apps/english` に自動読み上げON/OFF・停止、復習間隔カスタム、復習予定日前の再出題抑制、Supabase `english_progress` 同期を追加 | `npm run build` |

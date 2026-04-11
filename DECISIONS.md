@@ -102,3 +102,10 @@
 - 役割定義は `agents/`、再利用プロンプトは `prompts/`、実行ハーネスは `scripts/harness/` に分離する
 - `logs/` はローカル実行ログ用に確保するが、`.gitkeep` 以外は commit しない
 - `npm run preflight` は `scripts/harness/preflight.mjs` を入口にし、env / 運用ファイル / schema 変更の付随更新を確認する
+
+### 17. 推論深度は作業リスクで切り替える
+
+- 全タスクを高推論で扱わず、`low / medium / high / xhigh` の4段階で作業深度を決める
+- 低リスクの文言・画像・既知CSS変更は shallow に処理し、DB / 認証 / RLS / 同期 / 本番影響は high 以上に上げる
+- モデル設定そのものを常に変えられない環境でも、読む範囲・検証量・計画の厚さを変えることで token 消費を抑える
+- 判断基準は `skills/reasoning-effort-router/` に置き、CLI で確認したい時は `npm run harness:classify -- "task text"` を使う
