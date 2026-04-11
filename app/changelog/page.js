@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "更新履歴 | New Commune"
+  title: "更新履歴 | Commune"
 };
 
 export default function ChangelogPage() {

@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "プライバシーポリシー | New Commune"
+  title: "プライバシーポリシー | Commune"
 };
 
 export default function PrivacyPage() {
@@ -8,7 +8,7 @@ export default function PrivacyPage() {
       <section className="surface legal-page">
         <p className="eyebrow">Privacy</p>
         <h1>プライバシーポリシー</h1>
-        <p>New Commune は、アカウント作成、認証、公開プロフィール表示、投稿配信のために必要な情報を扱います。</p>
+        <p>Commune は、アカウント作成、認証、公開プロフィール表示、投稿配信のために必要な情報を扱います。</p>
         <h2>取得する情報</h2>
         <p>メールアドレス、プロフィール情報、投稿内容、アップロードした画像・動画、サービス利用ログ。</p>
         <h2>利用目的</h2>

@@ -1,7 +1,7 @@
 import { NotificationsPanel } from "@/components/notifications-panel";
 
 export const metadata = {
-  title: "通知 | New Commune"
+  title: "通知 | Commune"
 };
 
 export default function NotificationsPage() {

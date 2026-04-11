@@ -1,7 +1,7 @@
 import { AuthPanel } from "@/components/auth-panel";
 
 export const metadata = {
-  title: "ログイン | New Commune"
+  title: "ログイン | Commune"
 };
 
 export default function AuthPage() {

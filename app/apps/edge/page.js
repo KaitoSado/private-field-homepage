@@ -2,7 +2,7 @@ import { EdgeInfoBoard } from "@/components/edge-info-board";
 import { getEdgeInfoData } from "@/lib/data";
 
 export const metadata = {
-  title: "エッジ情報 | Apps | New Commune",
+  title: "エッジ情報 | Apps | Commune",
   description: "大学生向けの学割、無料枠、助成、地味に得する情報を持ち寄るボード。"
 };
 

@@ -1,7 +1,7 @@
 import { ResearchProgressPanel } from "@/components/research-progress-panel";
 
 export const metadata = {
-  title: "Research Progress | Apps | New Commune",
+  title: "Research Progress | Apps | Commune",
   description: "研究ラインの現在地、直近締切、停滞案件を一覧で確認する招待制ダッシュボード。"
 };
 

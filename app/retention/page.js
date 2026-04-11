@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "データ保持ポリシー | New Commune"
+  title: "データ保持ポリシー | Commune"
 };
 
 export default function RetentionPage() {

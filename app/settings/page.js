@@ -1,7 +1,7 @@
 import { AccountSettingsPanel } from "@/components/account-settings-panel";
 
 export const metadata = {
-  title: "アカウント設定 | New Commune"
+  title: "アカウント設定 | Commune"
 };
 
 export default function SettingsPage() {

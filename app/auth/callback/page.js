@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { AuthCallbackPanel } from "@/components/auth-callback-panel";
 
 export const metadata = {
-  title: "認証確認 | New Commune"
+  title: "認証確認 | Commune"
 };
 
 export default function AuthCallbackPage() {

@@ -1,5 +1,5 @@
 export const metadata = {
-  title: "利用規約 | New Commune"
+  title: "利用規約 | Commune"
 };
 
 export default function TermsPage() {
@@ -8,7 +8,7 @@ export default function TermsPage() {
       <section className="surface legal-page">
         <p className="eyebrow">Terms</p>
         <h1>利用規約</h1>
-        <p>New Commune は、プロフィールと記事を公開する個人向け発信サービスです。</p>
+        <p>Commune は、プロフィールと記事を公開する個人向け発信サービスです。</p>
         <h2>禁止事項</h2>
         <p>違法行為、なりすまし、権利侵害、スパム、過度な自動投稿、他者への嫌がらせを禁止します。</p>
         <h2>コンテンツ</h2>

@@ -1,7 +1,7 @@
 import { ResetPasswordPanel } from "@/components/reset-password-panel";
 
 export const metadata = {
-  title: "パスワード再設定 | New Commune"
+  title: "パスワード再設定 | Commune"
 };
 
 export default function ResetPasswordPage() {

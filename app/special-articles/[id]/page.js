@@ -17,12 +17,12 @@ export async function generateMetadata({ params }) {
 
   if (!article) {
     return {
-      title: "特別記事が見つかりません | New Commune"
+      title: "特別記事が見つかりません | Commune"
     };
   }
 
   return {
-    title: `${article.title} | 特別記事 | New Commune`,
+    title: `${article.title} | 特別記事 | Commune`,
     description: article.excerpt || article.body.slice(0, 140)
   };
 }

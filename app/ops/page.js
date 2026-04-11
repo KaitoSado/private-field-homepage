@@ -1,7 +1,7 @@
 import { getSupabaseAdminClient } from "@/lib/supabase-admin";
 
 export const metadata = {
-  title: "運用状況 | New Commune"
+  title: "運用状況 | Commune"
 };
 
 export default async function OpsPage() {

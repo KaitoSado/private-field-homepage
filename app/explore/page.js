@@ -4,7 +4,7 @@ import { KeioBadge } from "@/components/keio-badge";
 import { getExploreData } from "@/lib/data";
 
 export const metadata = {
-  title: "Explore | New Commune",
+  title: "Explore | Commune",
   description: "Browse creators, researchers, freelancers, and public posts."
 };
 

@@ -102,12 +102,8 @@ body {
 .brand-cube {
   width: 40px;
   height: 40px;
-  border-radius: 14px;
-  display: grid;
-  place-items: center;
-  background: var(--ink);
-  color: white;
-  font-family: "IBM Plex Mono", monospace;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .site-nav,
@@ -6045,7 +6041,6 @@ textarea {
   .brand-cube {
     width: 34px;
     height: 34px;
-    border-radius: 12px;
   }
 
   .shell {
