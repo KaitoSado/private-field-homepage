@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-11 | codex | english app / supabase | `/apps/english` に自動読み上げON/OFF・停止、復習間隔カスタム、復習予定日前の再出題抑制、Supabase `english_progress` 同期を追加 | `npm run build` |
 | 2026-04-11 | codex | english app | `/apps/english` に出題表示時間・答え表示時間のユーザー設定を追加し、英語表示後に自動で日本語答えへ切り替わるよう変更 | `npm run build` |
 | 2026-04-11 | codex | english app | `/apps/english` を語族単位の出題に変更し、自動読み上げ、左右判定、user/guest別localStorage保存、3列見直しリスト、品詞フィルタ整理を追加 | `npm run build` |
 | 2026-04-11 | codex | english app | `/apps/english` に `長期記憶リスト` を追加し、初回正解語と5ステージ完了語を通常出題キューから除外して残り単語数が減るよう変更 | `npm run build` |

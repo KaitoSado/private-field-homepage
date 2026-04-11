@@ -7558,7 +7558,14 @@ textarea {
   gap: 10px;
 }
 
-.english-timing-grid label {
+.english-review-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.english-timing-grid label,
+.english-review-schedule-grid label {
   display: grid;
   grid-template-columns: 1fr 3.8rem auto;
   align-items: center;
@@ -7570,13 +7577,16 @@ textarea {
 }
 
 .english-timing-grid span,
-.english-timing-grid small {
+.english-timing-grid small,
+.english-review-schedule-grid span,
+.english-review-schedule-grid small {
   color: var(--muted-foreground);
   font-size: 0.78rem;
   font-weight: 800;
 }
 
-.english-timing-grid input {
+.english-timing-grid input,
+.english-review-schedule-grid input {
   width: 100%;
   border: 0;
   border-radius: 12px;
@@ -7586,6 +7596,15 @@ textarea {
   font: inherit;
   font-weight: 800;
   text-align: center;
+}
+
+.english-review-schedule-grid label {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.english-review-schedule-grid input {
+  max-width: 3.6rem;
 }
 
 .english-timing-presets {
@@ -8090,6 +8109,10 @@ textarea {
 
   .english-history-list.is-main {
     grid-template-columns: 1fr;
+  }
+
+  .english-review-schedule-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .english-study-card {

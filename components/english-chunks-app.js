@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import {
+  DEFAULT_ENGLISH_REVIEW_DAY_OFFSETS,
   ENGLISH_CHUNK_LIBRARY,
   ENGLISH_MODE_TABS,
   ENGLISH_POS_OPTIONS,
@@ -16,6 +17,8 @@ import {
   getExamplesForFocus,
   getEnglishReviewStepLabel,
   isEnglishLongTermProgress,
+  mergeEnglishSyncedProgressMaps,
+  normalizeEnglishReviewDayOffsets,
   recordStudyAttempt,
   markShadowComplete
 } from "@/lib/english-content";
@@ -26,10 +29,16 @@ const ACTIVE_MODE_IDS = new Set(ENGLISH_MODE_TABS.map((tab) => tab.id));
 const ACTIVE_POS_IDS = new Set(ENGLISH_POS_OPTIONS.map((option) => option.id));
 const DEFAULT_QUESTION_SECONDS = 4;
 const DEFAULT_ANSWER_SECONDS = 5;
+const ENGLISH_REVIEW_PRESETS = [
+  { id: "standard", label: "標準", days: DEFAULT_ENGLISH_REVIEW_DAY_OFFSETS },
+  { id: "short", label: "短期", days: [0, 1, 2, 3, 7] },
+  { id: "middle", label: "中期", days: [0, 1, 3, 7, 14] }
+];
 
 export function EnglishChunksApp() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [hydrated, setHydrated] = useState(false);
+  const [session, setSession] = useState(null);
   const [storageOwnerId, setStorageOwnerId] = useState("");
   const [progressMap, setProgressMap] = useState(() => createEmptyEnglishProgress());
   const [attemptHistory, setAttemptHistory] = useState([]);
@@ -40,7 +49,11 @@ export function EnglishChunksApp() {
   const [supportMode, setSupportMode] = useState(true);
   const [questionSeconds, setQuestionSeconds] = useState(DEFAULT_QUESTION_SECONDS);
   const [answerSeconds, setAnswerSeconds] = useState(DEFAULT_ANSWER_SECONDS);
+  const [reviewDayOffsets, setReviewDayOffsets] = useState(DEFAULT_ENGLISH_REVIEW_DAY_OFFSETS);
+  const [isAutoSpeakEnabled, setIsAutoSpeakEnabled] = useState(true);
   const [studyTimerPhase, setStudyTimerPhase] = useState("question");
+  const [syncStatus, setSyncStatus] = useState("local");
+  const [syncError, setSyncError] = useState("");
   const [selectedChunkId, setSelectedChunkId] = useState(ENGLISH_CHUNK_LIBRARY[0].id);
   const [sessionStep, setSessionStep] = useState(1);
   const [queueSeed, setQueueSeed] = useState(0);
@@ -74,6 +87,7 @@ export function EnglishChunksApp() {
       } = await supabase.auth.getSession();
 
       if (!mounted) return;
+      setSession(session);
       setStorageOwnerId(session?.user?.id || "guest");
     }
 
@@ -82,6 +96,7 @@ export function EnglishChunksApp() {
     const {
       data: { subscription }
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      setSession(nextSession);
       setStorageOwnerId(nextSession?.user?.id || "guest");
     });
 
@@ -94,50 +109,40 @@ export function EnglishChunksApp() {
   useEffect(() => {
     if (typeof window === "undefined" || !storageKey) return;
 
+    let cancelled = false;
     setHydrated(false);
 
-    try {
-      const raw = window.localStorage.getItem(storageKey) || window.localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.progressMap) {
-          setProgressMap(compactEnglishProgressMap(parsed.progressMap));
-        }
-        if (Array.isArray(parsed.attemptHistory)) {
-          setAttemptHistory(parsed.attemptHistory);
-        }
-        if (parsed.mode && ACTIVE_MODE_IDS.has(parsed.mode)) setMode(parsed.mode);
-        if (parsed.focusTopic) setFocusTopic(parsed.focusTopic);
-        if (parsed.posFilter && ACTIVE_POS_IDS.has(parsed.posFilter)) {
-          setPosFilter(parsed.posFilter);
-        } else {
-          setPosFilter("all");
-        }
-        if (parsed.detailMode) setDetailMode(parsed.detailMode);
-        if (typeof parsed.supportMode === "boolean") setSupportMode(parsed.supportMode);
-        if (Number.isFinite(parsed.questionSeconds)) setQuestionSeconds(clampStudySeconds(parsed.questionSeconds));
-        if (Number.isFinite(parsed.answerSeconds)) setAnswerSeconds(clampStudySeconds(parsed.answerSeconds));
-        if (parsed.selectedChunkId && chunkMap[parsed.selectedChunkId]) {
-          setSelectedChunkId(parsed.selectedChunkId);
-        }
+    async function hydrateEnglishProgress() {
+      const localSnapshot = readLocalEnglishSnapshot(storageKey);
+      const remoteResult = session?.user?.id
+        ? await fetchRemoteEnglishSnapshot(supabase, session.user.id)
+        : { snapshot: null, error: "" };
+
+      if (cancelled) return;
+
+      const mergedSnapshot = mergeEnglishSnapshots(localSnapshot, remoteResult.snapshot);
+      applyEnglishSnapshot(mergedSnapshot);
+
+      if (session?.user?.id && !remoteResult.error) {
+        setSyncStatus("synced");
+        setSyncError("");
+      } else if (session?.user?.id) {
+        setSyncStatus("local");
+        setSyncError(remoteResult.error);
       } else {
-        setProgressMap(createEmptyEnglishProgress());
-        setAttemptHistory([]);
-        setMode("study");
-        setFocusTopic("all");
-        setPosFilter("all");
-        setDetailMode("gentle");
-        setSupportMode(true);
-        setQuestionSeconds(DEFAULT_QUESTION_SECONDS);
-        setAnswerSeconds(DEFAULT_ANSWER_SECONDS);
-        setSelectedChunkId(ENGLISH_CHUNK_LIBRARY[0].id);
+        setSyncStatus("local");
+        setSyncError("");
       }
-    } catch (_error) {
-      // ignore broken local data
+
+      setHydrated(true);
     }
 
-    setHydrated(true);
-  }, [chunkMap, storageKey]);
+    hydrateEnglishProgress();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [chunkMap, session?.user?.id, storageKey, supabase]);
 
   useEffect(() => {
     if (hydrated && queueSeed === 0) {
@@ -150,11 +155,10 @@ export function EnglishChunksApp() {
 
   useEffect(() => {
     if (!hydrated || typeof window === "undefined" || !storageKey) return;
-    window.localStorage.setItem(
-      storageKey,
-      JSON.stringify({
-        progressMap: compactEnglishProgressMap(progressMap),
-        attemptHistory,
+    const snapshot = buildEnglishSnapshot({
+      progressMap,
+      attemptHistory,
+      settings: {
         mode,
         focusTopic,
         posFilter,
@@ -162,10 +166,35 @@ export function EnglishChunksApp() {
         supportMode,
         questionSeconds,
         answerSeconds,
+        reviewDayOffsets,
+        isAutoSpeakEnabled,
         selectedChunkId
-      })
+      }
+    });
+
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify(snapshot)
     );
-  }, [answerSeconds, attemptHistory, detailMode, focusTopic, hydrated, mode, posFilter, progressMap, questionSeconds, selectedChunkId, storageKey, supportMode]);
+
+    if (!session?.user?.id) return;
+
+    setSyncStatus("syncing");
+    setSyncError("");
+    const syncTimer = window.setTimeout(async () => {
+      const result = await saveRemoteEnglishSnapshot(supabase, session.user.id, snapshot);
+
+      if (result.ok) {
+        setSyncStatus("synced");
+        setSyncError("");
+      } else {
+        setSyncStatus("local");
+        setSyncError(result.message);
+      }
+    }, 900);
+
+    return () => window.clearTimeout(syncTimer);
+  }, [answerSeconds, attemptHistory, detailMode, focusTopic, hydrated, isAutoSpeakEnabled, mode, posFilter, progressMap, questionSeconds, reviewDayOffsets, selectedChunkId, session?.user?.id, storageKey, supabase, supportMode]);
 
   useEffect(() => {
     return () => {
@@ -282,6 +311,7 @@ export function EnglishChunksApp() {
   }, [progressMap]);
   const mainVisibleWrongWords = wrongWordList.slice(0, 24);
   const mainHiddenWrongWords = wrongWordList.slice(24);
+  const pendingFutureReviewCount = wrongWordList.filter((entry) => entry.nextReviewAt > Date.now()).length;
   const mainVisibleLongTermWords = longTermWordList.slice(0, 36);
   const mainHiddenLongTermWords = longTermWordList.slice(36);
   const isAnswerVisible = studyTimerPhase !== "question";
@@ -323,6 +353,16 @@ export function EnglishChunksApp() {
     setStudyTimerPhase("question");
   };
 
+  const handleReviewDayChange = (index, value) => {
+    const nextReviewDayOffsets = [...reviewDayOffsets];
+    nextReviewDayOffsets[index] = clampReviewDayOffset(Number(value));
+    setReviewDayOffsets(normalizeEnglishReviewDayOffsets(nextReviewDayOffsets));
+  };
+
+  const applyReviewPreset = (days) => {
+    setReviewDayOffsets(normalizeEnglishReviewDayOffsets(days));
+  };
+
   const handleAdvanceChunk = () => {
     if (!recommendedIds.length) return;
     const nextIndex = (safeStudyPosition + 1) % recommendedIds.length;
@@ -343,7 +383,7 @@ export function EnglishChunksApp() {
   const handleStudyAction = (wasCorrect) => {
     if (mode !== "study" || !recommendedIds.length) return;
 
-    setProgressMap((current) => recordStudyAttempt(current, selectedChunk, wasCorrect, studyExample.topic));
+    setProgressMap((current) => recordStudyAttempt(current, selectedChunk, wasCorrect, studyExample.topic, Date.now(), reviewDayOffsets));
     setAttemptHistory((current) => [
       {
         id: `${selectedChunk.id}-${displayedStudyChunk.variantId}-${Date.now()}`,
@@ -360,10 +400,10 @@ export function EnglishChunksApp() {
   };
 
   useEffect(() => {
-    if (!hydrated || mode !== "study" || !recommendedIds.length) return;
+    if (!hydrated || !isAutoSpeakEnabled || mode !== "study" || !recommendedIds.length) return;
     const timer = window.setTimeout(() => handleSpeak(displayedStudyChunk.headword), 180);
     return () => window.clearTimeout(timer);
-  }, [displayedStudyChunk.headword, displayedStudyChunk.variantId, hydrated, mode, recommendedIds.length, selectedChunk.id]);
+  }, [displayedStudyChunk.headword, displayedStudyChunk.variantId, hydrated, isAutoSpeakEnabled, mode, recommendedIds.length, selectedChunk.id]);
 
   useEffect(() => {
     if (mode !== "study" || !recommendedIds.length) return;
@@ -392,6 +432,11 @@ export function EnglishChunksApp() {
     utterance.pitch = 1;
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
+  }
+
+  function handleStopSpeech() {
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
   }
 
   const handleStartRecording = async () => {
@@ -466,9 +511,34 @@ export function EnglishChunksApp() {
 
   const handleSaveShadow = () => {
     if (!recordingState.durationMs) return;
-    setProgressMap((current) => markShadowComplete(current, selectedChunk, getPromptTopic(displayedStudyChunk, shadowPrompt), recordingState.durationMs));
+    setProgressMap((current) => markShadowComplete(
+      current,
+      selectedChunk,
+      getPromptTopic(displayedStudyChunk, shadowPrompt),
+      recordingState.durationMs,
+      Date.now(),
+      reviewDayOffsets
+    ));
     setShadowPromptIndex((current) => current + 1);
   };
+
+  function applyEnglishSnapshot(snapshot) {
+    const settings = normalizeEnglishSnapshotSettings(snapshot.settings || {});
+
+    setProgressMap(compactEnglishProgressMap(snapshot.progressMap || {}));
+    setAttemptHistory(Array.isArray(snapshot.attemptHistory) ? snapshot.attemptHistory : []);
+    setMode(settings.mode);
+    setFocusTopic(settings.focusTopic);
+    setPosFilter(settings.posFilter);
+    setDetailMode(settings.detailMode);
+    setSupportMode(settings.supportMode);
+    setQuestionSeconds(settings.questionSeconds);
+    setAnswerSeconds(settings.answerSeconds);
+    setReviewDayOffsets(settings.reviewDayOffsets);
+    setIsAutoSpeakEnabled(settings.isAutoSpeakEnabled);
+    setSelectedChunkId(chunkMap[settings.selectedChunkId] ? settings.selectedChunkId : ENGLISH_CHUNK_LIBRARY[0].id);
+    setStudyTimerPhase("question");
+  }
 
   return (
     <div className="english-shell">
@@ -551,10 +621,14 @@ export function EnglishChunksApp() {
               ) : (
                 <section className="english-review-card">
                   <div className="english-section-head">
-                    <h3>この条件の単語はすべて長期記憶に入りました</h3>
-                    <span>{longTermCount}語</span>
+                    <h3>{pendingFutureReviewCount ? "いま出せる復習はありません" : "この条件の単語はすべて長期記憶に入りました"}</h3>
+                    <span>{pendingFutureReviewCount ? `${pendingFutureReviewCount}語待機` : `${longTermCount}語`}</span>
                   </div>
-                  <p className="english-feedback-text">品詞フィルタを変えるか、長期記憶リストを確認できます。</p>
+                  <p className="english-feedback-text">
+                    {pendingFutureReviewCount
+                      ? "復習予定日の前なので、間違えた単語はまだ通常キューに戻していません。品詞フィルタを変えるか、次の復習タイミングを待ちます。"
+                      : "品詞フィルタを変えるか、長期記憶リストを確認できます。"}
+                  </p>
                 </section>
               )}
 
@@ -571,6 +645,16 @@ export function EnglishChunksApp() {
               <div className="english-action-row">
                 <button type="button" className="button button-secondary" onClick={() => handleSpeak(displayedStudyChunk.headword)}>
                   単語を聞く
+                </button>
+                <button
+                  type="button"
+                  className="button button-secondary"
+                  onClick={() => setIsAutoSpeakEnabled((current) => !current)}
+                >
+                  自動再生 {isAutoSpeakEnabled ? "ON" : "OFF"}
+                </button>
+                <button type="button" className="button button-secondary" onClick={handleStopSpeech}>
+                  停止
                 </button>
                 <button type="button" className="button button-secondary" onClick={() => setMode("history")}>
                   見直しリスト
@@ -784,7 +868,7 @@ export function EnglishChunksApp() {
               </div>
               <div>
                 <dt>復習段階</dt>
-                <dd>{isSelectedLongTerm ? "長期記憶" : getEnglishReviewStepLabel(selectedProgress.reviewStep)}</dd>
+                <dd>{isSelectedLongTerm ? "長期記憶" : getEnglishReviewStepLabel(selectedProgress.reviewStep, reviewDayOffsets)}</dd>
               </div>
             </dl>
           </section>
@@ -829,6 +913,49 @@ export function EnglishChunksApp() {
 
           <section className="surface english-side-card">
             <div className="english-section-head">
+              <h3>復習間隔</h3>
+              <span>{reviewDayOffsets.map((day) => formatReviewDayLabel(day)).join(" / ")}</span>
+            </div>
+            <div className="english-review-schedule-grid">
+              {reviewDayOffsets.map((day, index) => (
+                <label key={`review-day-${index}`}>
+                  <span>{index + 1}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="365"
+                    step="1"
+                    value={day}
+                    disabled={index === 0}
+                    onChange={(event) => handleReviewDayChange(index, event.target.value)}
+                  />
+                  <small>日後</small>
+                </label>
+              ))}
+            </div>
+            <div className="english-timing-presets">
+              {ENGLISH_REVIEW_PRESETS.map((preset) => (
+                <button key={preset.id} type="button" onClick={() => applyReviewPreset(preset.days)}>
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="surface english-side-card">
+            <div className="english-section-head">
+              <h3>同期</h3>
+              <span>{getSyncLabel(syncStatus, session)}</span>
+            </div>
+            <p className="english-side-copy">
+              {session?.user?.id
+                ? syncError || "ログイン中の進捗は Supabase に保存され、別端末でも同じアカウントで引き継げます。"
+                : "未ログイン時はこのブラウザだけに保存されます。同期するにはログインしてください。"}
+            </p>
+          </section>
+
+          <section className="surface english-side-card">
+            <div className="english-section-head">
               <h3>メモ</h3>
               <span>note</span>
             </div>
@@ -863,7 +990,7 @@ export function EnglishChunksApp() {
                 <small>{entry.meaning}</small>
               </span>
               <span className="english-history-line">
-                <em>{getEnglishReviewStepLabel(progress.reviewStep)}</em>
+                <em>{getEnglishReviewStepLabel(progress.reviewStep, reviewDayOffsets)}</em>
                 <small>
                   {variant === "main"
                     ? `×${entry.wrongCount} / ${formatNextReview(progress.nextReviewAt)}`
@@ -893,7 +1020,7 @@ export function EnglishChunksApp() {
                       <small>{entry.meaning}</small>
                     </span>
                     <span className="english-history-line">
-                      <em>{getEnglishReviewStepLabel(progress.reviewStep)}</em>
+                      <em>{getEnglishReviewStepLabel(progress.reviewStep, reviewDayOffsets)}</em>
                       <small>
                         {variant === "main"
                           ? `×${entry.wrongCount} / ${formatNextReview(progress.nextReviewAt)}`
@@ -990,6 +1117,151 @@ function getStageLabel(stage) {
   }
 }
 
+function buildEnglishSnapshot({ progressMap, attemptHistory, settings }) {
+  const savedAt = Date.now();
+
+  return {
+    progressMap: compactEnglishProgressMap(progressMap),
+    attemptHistory: Array.isArray(attemptHistory) ? attemptHistory : [],
+    settings: normalizeEnglishSnapshotSettings(settings),
+    savedAt
+  };
+}
+
+function readLocalEnglishSnapshot(storageKey) {
+  if (typeof window === "undefined") return createEmptyEnglishSnapshot();
+
+  try {
+    const raw = window.localStorage.getItem(storageKey) || window.localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (!raw) return createEmptyEnglishSnapshot();
+    return normalizeEnglishSnapshot(JSON.parse(raw));
+  } catch (_error) {
+    return createEmptyEnglishSnapshot();
+  }
+}
+
+async function fetchRemoteEnglishSnapshot(supabase, userId) {
+  try {
+    const { data, error } = await supabase
+      .from("english_progress")
+      .select("progress_map, attempt_history, settings, updated_at")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (error) {
+      return { snapshot: null, error: "Supabase 同期テーブルが未適用、または読み込みに失敗しました。localStorage に退避しています。" };
+    }
+
+    if (!data) return { snapshot: null, error: "" };
+
+    return {
+      snapshot: normalizeEnglishSnapshot({
+        progressMap: data.progress_map,
+        attemptHistory: data.attempt_history,
+        settings: data.settings,
+        savedAt: data.updated_at ? Date.parse(data.updated_at) : 0
+      }),
+      error: ""
+    };
+  } catch (_error) {
+    return { snapshot: null, error: "Supabase 同期の読み込みに失敗しました。localStorage に退避しています。" };
+  }
+}
+
+async function saveRemoteEnglishSnapshot(supabase, userId, snapshot) {
+  try {
+    const { error } = await supabase
+      .from("english_progress")
+      .upsert({
+        user_id: userId,
+        progress_map: snapshot.progressMap,
+        attempt_history: snapshot.attemptHistory,
+        settings: snapshot.settings
+      }, { onConflict: "user_id" });
+
+    if (error) {
+      return {
+        ok: false,
+        message: "Supabase 同期テーブルが未適用、または保存に失敗しました。localStorage には保存済みです。"
+      };
+    }
+
+    return { ok: true, message: "" };
+  } catch (_error) {
+    return {
+      ok: false,
+      message: "Supabase 同期保存に失敗しました。localStorage には保存済みです。"
+    };
+  }
+}
+
+function mergeEnglishSnapshots(localSnapshot, remoteSnapshot) {
+  const local = normalizeEnglishSnapshot(localSnapshot);
+  const remote = normalizeEnglishSnapshot(remoteSnapshot);
+  const localIsNewer = (local.savedAt || 0) >= (remote.savedAt || 0);
+
+  return {
+    progressMap: mergeEnglishSyncedProgressMaps(remote.progressMap, local.progressMap),
+    attemptHistory: mergeAttemptHistory(remote.attemptHistory, local.attemptHistory),
+    settings: localIsNewer
+      ? { ...remote.settings, ...local.settings }
+      : { ...local.settings, ...remote.settings },
+    savedAt: Math.max(local.savedAt || 0, remote.savedAt || 0)
+  };
+}
+
+function normalizeEnglishSnapshot(snapshot) {
+  if (!snapshot) return createEmptyEnglishSnapshot();
+
+  return {
+    progressMap: compactEnglishProgressMap(snapshot.progressMap || {}),
+    attemptHistory: Array.isArray(snapshot.attemptHistory) ? snapshot.attemptHistory : [],
+    settings: normalizeEnglishSnapshotSettings(snapshot.settings || snapshot),
+    savedAt: Number(snapshot.savedAt) || 0
+  };
+}
+
+function createEmptyEnglishSnapshot() {
+  return {
+    progressMap: createEmptyEnglishProgress(),
+    attemptHistory: [],
+    settings: normalizeEnglishSnapshotSettings({}),
+    savedAt: 0
+  };
+}
+
+function normalizeEnglishSnapshotSettings(settings) {
+  const selectedChunkId = settings.selectedChunkId && ENGLISH_CHUNK_LIBRARY.some((chunk) => chunk.id === settings.selectedChunkId)
+    ? settings.selectedChunkId
+    : ENGLISH_CHUNK_LIBRARY[0].id;
+
+  return {
+    mode: settings.mode && ACTIVE_MODE_IDS.has(settings.mode) ? settings.mode : "study",
+    focusTopic: settings.focusTopic || "all",
+    posFilter: settings.posFilter && ACTIVE_POS_IDS.has(settings.posFilter) ? settings.posFilter : "all",
+    detailMode: settings.detailMode || "gentle",
+    supportMode: typeof settings.supportMode === "boolean" ? settings.supportMode : true,
+    questionSeconds: clampStudySeconds(settings.questionSeconds ?? DEFAULT_QUESTION_SECONDS),
+    answerSeconds: clampStudySeconds(settings.answerSeconds ?? DEFAULT_ANSWER_SECONDS),
+    reviewDayOffsets: normalizeEnglishReviewDayOffsets(settings.reviewDayOffsets),
+    isAutoSpeakEnabled: typeof settings.isAutoSpeakEnabled === "boolean" ? settings.isAutoSpeakEnabled : true,
+    selectedChunkId
+  };
+}
+
+function mergeAttemptHistory(...histories) {
+  const byId = new Map();
+
+  for (const history of histories) {
+    for (const entry of Array.isArray(history) ? history : []) {
+      if (!entry?.id) continue;
+      byId.set(entry.id, entry);
+    }
+  }
+
+  return [...byId.values()].sort((left, right) => (right.answeredAt || 0) - (left.answeredAt || 0));
+}
+
 function getPosLabel(pos) {
   switch (pos) {
     case "noun":
@@ -1078,4 +1350,22 @@ function formatNextReview(nextReviewAt) {
 function clampStudySeconds(value) {
   if (!Number.isFinite(value)) return DEFAULT_QUESTION_SECONDS;
   return Math.max(1, Math.min(30, Math.round(value)));
+}
+
+function clampReviewDayOffset(value) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(365, Math.round(value)));
+}
+
+function formatReviewDayLabel(dayOffset) {
+  if (dayOffset <= 0) return "当日";
+  if (dayOffset === 1) return "翌日";
+  return `${dayOffset}日後`;
+}
+
+function getSyncLabel(syncStatus, session) {
+  if (!session?.user?.id) return "local";
+  if (syncStatus === "syncing") return "syncing";
+  if (syncStatus === "synced") return "synced";
+  return "local fallback";
 }

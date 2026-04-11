@@ -188,6 +188,15 @@ create table if not exists public.economy_accounts (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.english_progress (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  progress_map jsonb not null default '{}'::jsonb,
+  attempt_history jsonb not null default '[]'::jsonb,
+  settings jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
 create table if not exists public.point_transactions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
@@ -430,6 +439,12 @@ alter table public.economy_accounts add column if not exists evaluation_cycle_st
 alter table public.economy_accounts add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.economy_accounts add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
 
+alter table public.english_progress add column if not exists progress_map jsonb not null default '{}'::jsonb;
+alter table public.english_progress add column if not exists attempt_history jsonb not null default '[]'::jsonb;
+alter table public.english_progress add column if not exists settings jsonb not null default '{}'::jsonb;
+alter table public.english_progress add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.english_progress add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+
 alter table public.point_transactions add column if not exists counterparty_user_id uuid references public.profiles(id) on delete set null;
 alter table public.point_transactions add column if not exists direction text;
 alter table public.point_transactions add column if not exists amount integer;
@@ -642,6 +657,7 @@ create index if not exists edge_tips_updated_idx on public.edge_tips(updated_at 
 create index if not exists edge_tips_author_idx on public.edge_tips(author_id);
 create index if not exists edge_tips_category_idx on public.edge_tips(category, updated_at desc);
 create index if not exists economy_accounts_balance_idx on public.economy_accounts(point_balance desc);
+create index if not exists english_progress_updated_idx on public.english_progress(updated_at desc);
 create index if not exists point_transactions_user_idx on public.point_transactions(user_id, created_at desc);
 create index if not exists point_transactions_kind_idx on public.point_transactions(kind, created_at desc);
 create index if not exists helpful_votes_target_idx on public.helpful_votes(target_type, target_id, created_at desc);
@@ -1593,6 +1609,11 @@ create trigger economy_accounts_set_updated_at
 before update on public.economy_accounts
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists english_progress_set_updated_at on public.english_progress;
+create trigger english_progress_set_updated_at
+before update on public.english_progress
+for each row execute procedure public.handle_updated_at();
+
 drop trigger if exists help_requests_set_updated_at on public.help_requests;
 create trigger help_requests_set_updated_at
 before update on public.help_requests
@@ -1696,6 +1717,7 @@ alter table public.class_notes enable row level security;
 alter table public.special_articles enable row level security;
 alter table public.edge_tips enable row level security;
 alter table public.economy_accounts enable row level security;
+alter table public.english_progress enable row level security;
 alter table public.point_transactions enable row level security;
 alter table public.helpful_votes enable row level security;
 alter table public.help_requests enable row level security;
@@ -2049,6 +2071,39 @@ for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "users can read own english progress" on public.english_progress;
+create policy "users can read own english progress"
+on public.english_progress
+for select
+using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "users can insert own english progress" on public.english_progress;
+create policy "users can insert own english progress"
+on public.english_progress
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+drop policy if exists "users can update own english progress" on public.english_progress;
+create policy "users can update own english progress"
+on public.english_progress
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "users can delete own english progress" on public.english_progress;
+create policy "users can delete own english progress"
+on public.english_progress
+for delete
+using (auth.uid() = user_id);
+
+drop policy if exists "admins can manage english progress" on public.english_progress;
+create policy "admins can manage english progress"
+on public.english_progress
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
 drop policy if exists "users can read own point transactions" on public.point_transactions;
 create policy "users can read own point transactions"
 on public.point_transactions
@@ -2084,6 +2139,7 @@ with check (public.is_admin());
 
 grant usage on schema public to authenticated;
 grant select on public.economy_accounts to authenticated;
+grant select, insert, update, delete on public.english_progress to authenticated;
 grant select on public.point_transactions to authenticated;
 grant select, insert on public.helpful_votes to authenticated;
 grant select on public.help_request_feedback to authenticated;

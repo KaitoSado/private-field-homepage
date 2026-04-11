@@ -76,9 +76,9 @@
     - 現在は `放物運動`, `衝突と運動量保存`, `単振動`, `理想気体`, `波の反射・屈折`, `ローレンツ変換`, `1D量子井戸` の 7 scene を実装
   - 英語コンテンツ `/apps/english`
     - `English Chunks Lab` として、単語暗記カードを主役にしつつ、チャンク中心、高制約文脈、シャドーイング、多文脈レビューを持つ client-side 英語学習 app
-    - 進捗は初版では Supabase DB を使わず、ログイン中なら user id 別、未ログインなら guest として `localStorage` に保存する
+    - 進捗はログイン時に Supabase `english_progress` と同期し、未ログイン時または live schema 未適用時は `localStorage` に退避する
     - 現在は `単語` と `見直しリスト` を主導線にし、英単語を自動読み上げして `←/×` または `→/○` で自己判定すると次単語へ進む暗記導線を持つ
-    - 単語面では出題表示時間と答え表示時間をユーザーが秒単位で変更でき、設定は user id / guest 別の `localStorage` に保存される
+    - 単語面では自動読み上げの ON/OFF と停止、出題表示時間、答え表示時間、5ステージ復習間隔をユーザーが変更でき、設定は進捗と一緒に保存される
     - 語彙データの正本は `英単語/target1900_normalized.tsv` で、`scripts/build-english-vocabulary.mjs` により `lib/english-target1900.js` を生成して読み込む
     - 現在の英単語データは 3441 語を `family` で束ねた 2686 出題グループで、進捗保存は全件ではなく学習済み差分だけ `localStorage` に保持する
     - `family` が同じ語は1つの出題グループとして扱い、実際に大きく表示される派生語は出題ごとにランダムに選ぶ。現データを `family` で畳むと 2686 グループで、原本の 1900 見出し語とはまだ一致しない
@@ -105,7 +105,7 @@
   3. live 環境に再適用が必要な場合は明記
 - `if exists` / `drop policy if exists` 前提で、再実行可能な schema を維持する
 - `research_*` 系テーブルはリサーチプログレス用の正本で、`research_groups`, `research_group_members`, `research_updates`, `research_projects`, `research_project_members` を含む
-- `research_*` 系の変更は live 反映に Supabase への schema 再適用が必要
+- `research_*` 系の変更と `english_progress` の追加は live 反映に Supabase への schema 再適用が必要
 
 ## 7. デザインと CSS の現状
 

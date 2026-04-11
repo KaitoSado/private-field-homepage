@@ -34,6 +34,12 @@ schema を変える時は:
 - `research_project_members`
 - 関連 helper function / trigger / RLS policy
 
+今回の `English Chunks Lab` 同期追加では以下が live 適用対象:
+
+- `english_progress`
+- `english_progress_set_updated_at` trigger
+- `english_progress` の RLS policy / grant
+
 ## 注意点
 
 - DB だけ更新してコードを更新しない、またはその逆は避ける
