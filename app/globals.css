@@ -1093,7 +1093,7 @@ textarea {
 
 .research-progress-shell {
   display: grid;
-  gap: 18px;
+  gap: 20px;
   overflow: hidden;
 }
 
@@ -1107,18 +1107,18 @@ textarea {
 .research-progress-history-card,
 .research-progress-summary-card {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   overflow: hidden;
 }
 
 .research-progress-hero {
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .research-progress-hero-copy {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .research-progress-hero-copy h1,
@@ -1134,7 +1134,7 @@ textarea {
 .research-progress-note-box p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .research-progress-hero-meta,
@@ -1143,18 +1143,23 @@ textarea {
 .research-progress-tab-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 }
 
-.research-progress-filter-row input,
+.research-progress-filter-row input {
+  min-width: 0;
+  flex: 1 1 180px;
+  max-width: 260px;
+}
+
 .research-progress-filter-row select {
   min-width: 0;
-  max-width: 240px;
+  max-width: 180px;
 }
 
 .research-progress-week-nav {
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .research-progress-meta-line,
@@ -1166,8 +1171,8 @@ textarea {
 .research-progress-groups-layout,
 .research-progress-main-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+  gap: 20px;
   align-items: start;
 }
 
@@ -1179,8 +1184,8 @@ textarea {
 
 .research-progress-group-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
 }
 
 .research-progress-group-card {
@@ -1192,12 +1197,12 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
 .research-progress-card-head strong {
-  font-size: 1.05rem;
+  font-size: 1rem;
   min-width: 0;
   overflow-wrap: break-word;
 }
@@ -1207,16 +1212,18 @@ textarea {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 28px;
-  padding: 0 10px;
+  min-height: 26px;
+  padding: 0 9px;
   border-radius: 999px;
   border: 1px solid rgba(23, 29, 36, 0.08);
   background: rgba(255, 255, 255, 0.72);
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #36404b;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .research-progress-chip.is-warning,
@@ -1254,14 +1261,14 @@ textarea {
 .research-progress-mini-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
   margin: 0;
 }
 
 .research-progress-mini-stats div,
 .research-progress-summary-card {
-  padding: 14px;
-  border-radius: 18px;
+  padding: 10px 12px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.62);
   border: 1px solid var(--line);
 }
@@ -1269,7 +1276,7 @@ textarea {
 .research-progress-mini-stats dt,
 .research-progress-summary-card span {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
@@ -1277,50 +1284,51 @@ textarea {
 
 .research-progress-mini-stats dd,
 .research-progress-summary-card strong {
-  margin: 4px 0 0;
-  font-size: 1.15rem;
+  margin: 3px 0 0;
+  font-size: 1.05rem;
   line-height: 1;
 }
 
 .research-progress-summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
 }
 
 .research-progress-section-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .research-progress-form {
   display: grid;
-  gap: 14px;
+  gap: 12px;
 }
 
 .research-progress-form label {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .research-progress-form label span {
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
 .research-progress-form select[multiple] {
-  min-height: 132px;
+  min-height: 120px;
 }
 
 .research-progress-form-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
 }
 
 .research-progress-toggle,
@@ -1344,9 +1352,9 @@ textarea {
 }
 
 .research-progress-note-box {
-  padding: 16px 18px;
+  padding: 14px 16px;
   border: 1px dashed var(--line);
-  border-radius: 22px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.42);
 }
 
@@ -1354,40 +1362,41 @@ textarea {
 .research-progress-history-list,
 .research-progress-history-items {
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .research-progress-queue-item,
 .research-progress-history-block,
 .research-progress-history-item {
   display: grid;
-  gap: 8px;
-  padding: 14px 16px;
-  border-radius: 20px;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.58);
   border: 1px solid var(--line);
 }
 
 .research-progress-queue-item strong,
 .research-progress-history-item strong {
-  font-size: 0.98rem;
+  font-size: 0.95rem;
 }
 
 .research-progress-table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: 4px;
 }
 
 .research-progress-table {
   width: 100%;
-  min-width: 980px;
+  min-width: 720px;
   border-collapse: collapse;
 }
 
 .research-progress-table th,
 .research-progress-table td {
-  padding: 12px 14px;
-  border: 1px solid rgba(23, 29, 36, 0.08);
+  padding: 10px 12px;
+  border: 1px solid rgba(23, 29, 36, 0.06);
   vertical-align: top;
   text-align: left;
   overflow-wrap: break-word;
@@ -1397,14 +1406,16 @@ textarea {
 .research-progress-table thead th {
   background: rgba(255, 255, 255, 0.68);
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
+  white-space: nowrap;
 }
 
 .research-progress-table tbody td {
   background: rgba(255, 255, 255, 0.46);
+  font-size: 0.9rem;
 }
 
 .research-progress-table td strong,
@@ -1416,11 +1427,12 @@ textarea {
 .research-progress-table td span,
 .research-progress-table td small {
   color: var(--muted);
+  font-size: 0.82rem;
 }
 
 .research-progress-cell-stack {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -1459,21 +1471,21 @@ textarea {
 
 .research-progress-portfolio {
   display: grid;
-  gap: 18px;
+  gap: 20px;
   overflow: hidden;
 }
 
 .research-project-stage-strip {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .research-project-stage-pill {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 8px 12px;
   border-radius: 999px;
   border: 1px solid rgba(23, 29, 36, 0.08);
   background: rgba(255, 255, 255, 0.58);
@@ -1482,16 +1494,16 @@ textarea {
 .research-project-stage-pill span {
   color: var(--muted);
   font-family: "IBM Plex Mono", monospace;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .research-project-track {
   display: grid;
-  grid-template-columns: repeat(10, minmax(58px, 1fr));
-  gap: 6px;
-  min-width: 680px;
+  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
+  gap: 4px;
+  min-width: 480px;
 }
 
 .research-project-track-stack {
@@ -1541,8 +1553,8 @@ textarea {
 
 .research-project-progress-meter {
   display: grid;
-  gap: 8px;
-  min-width: 680px;
+  gap: 6px;
+  min-width: 480px;
 }
 
 .research-project-progress-rail {
@@ -5992,17 +6004,13 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .research-progress-hero,
   .research-progress-groups-layout,
-  .research-progress-main-grid,
-  .research-progress-section-head,
-  .research-progress-form-row,
-  .research-progress-group-grid {
+  .research-progress-main-grid {
     grid-template-columns: 1fr;
   }
 
   .research-progress-summary-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .arcade-memory-grid {
@@ -6063,6 +6071,10 @@ textarea {
   }
 
   .research-progress-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .research-progress-mini-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
