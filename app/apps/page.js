@@ -35,7 +35,7 @@ export default function AppsPage() {
 
       <section className="apps-grid">
         {plannedApps.map((app) => (
-          <Link key={app.name} href={app.href} className="apps-card">
+          <Link key={app.name} href={app.href} className={`apps-card is-${app.tag}`}>
             <span className="apps-tag">{app.tag}</span>
             <h2>{app.name}</h2>
           </Link>
