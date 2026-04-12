@@ -1098,7 +1098,7 @@ textarea {
 .research-progress-shell {
   display: grid;
   gap: 24px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .research-progress-hero,
@@ -1113,6 +1113,7 @@ textarea {
   display: grid;
   gap: 12px;
   overflow: hidden;
+  padding: 18px;
 }
 
 .research-progress-hero {
@@ -1454,12 +1455,12 @@ textarea {
 }
 
 .research-progress-table td strong,
-.research-progress-table td span,
+.research-progress-table td span:not(.research-progress-chip):not(.research-progress-status),
 .research-progress-table td small {
   display: block;
 }
 
-.research-progress-table td span,
+.research-progress-table td span:not(.research-progress-chip):not(.research-progress-status),
 .research-progress-table td small {
   color: var(--muted);
   font-size: 0.78rem;
@@ -1469,6 +1470,11 @@ textarea {
   display: grid;
   gap: 2px;
   min-width: 0;
+}
+
+.research-progress-cell-stack > .research-progress-chip,
+.research-progress-cell-stack > .research-progress-status {
+  justify-self: start;
 }
 
 .research-progress-review-box {
@@ -1507,7 +1513,7 @@ textarea {
 .research-progress-portfolio {
   display: grid;
   gap: 24px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .research-project-stage-strip {

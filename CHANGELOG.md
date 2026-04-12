@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-12 | codex | research progress ui | 研究進捗カードに内側余白を戻し、丸い枠やテーブル内ステータスチップの文字が左端で見切れないよう修正 | `npm run build` |
 | 2026-04-12 | codex | workflow | 実装・修正依頼は原則 `build -> commit -> push` まで一連で進める運用ルールを `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`, `DECISIONS.md` に明文化 | `npm run build` |
 | 2026-04-12 | codex | research progress ui | 研究室パイプラインとメンバー別現在地の小型ラベル見切れを修正し、プロジェクト名 placeholder を卒論向けに変更 | `npm run build` |
 | 2026-04-12 | codex | agent harness | `reasoning-effort-router` skill と `harness:classify` を追加し、作業リスクに応じた推論深度・探索量・検証量の切替を標準化 | `npm run harness:classify -- "ロゴを差し替えて"`, `npm run harness:classify -- "Supabase RLS を変更して"` |
