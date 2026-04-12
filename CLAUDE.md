@@ -33,9 +33,10 @@
 - Claude 側ブランチは `claude/<task>` を使う
 - 直接 `main` を編集しない
 - commit 前に `npm run build` を通す
+- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> push` まで一連で行う
+- build 失敗、未確認の無関係差分、schema の live 適用判断、衝突リスクがある場合は commit / push せず報告する
 
 ## Claude 固有メモ
 
 - 試作や大きめのデザイン案は `.claude/worktrees/` に逃がしてから本体へ取り込む
 - 本体へ入れる時は差分を小さくし、取り込んだ理由を `CHANGELOG.md` に残す
-

@@ -450,7 +450,7 @@ export function ResearchProjectPortfolio({ dashboard, slug, session, canManagePr
                 <input
                   value={projectForm.title}
                   onChange={(event) => setProjectForm((current) => ({ ...current, title: event.target.value }))}
-                  placeholder="例: HCI 2026 春学会"
+                  placeholder="例: 2026 卒論 佐藤太郎"
                   maxLength={160}
                   required
                 />

@@ -57,6 +57,8 @@
 - Claude: `claude/<task>`
 - 安定運用ブランチ: `public-site`
 - push 前に `npm run build`
+- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> push` まで一連で行う
+- build 失敗、未確認の無関係差分、schema の live 適用判断、衝突リスクがある場合は commit / push せず報告する
 
 ## 編集時の注意点
 
@@ -68,4 +70,3 @@
 
 - Codex は patch 単位で小さく変更する
 - 変更後は build を通し、最後に確認先 URL を残す
-

@@ -109,3 +109,9 @@
 - 低リスクの文言・画像・既知CSS変更は shallow に処理し、DB / 認証 / RLS / 同期 / 本番影響は high 以上に上げる
 - モデル設定そのものを常に変えられない環境でも、読む範囲・検証量・計画の厚さを変えることで token 消費を抑える
 - 判断基準は `skills/reasoning-effort-router/` に置き、CLI で確認したい時は `npm run harness:classify -- "task text"` を使う
+
+### 18. 実装依頼は commit / push まで一連で完了させる
+
+- 公開サイト運用では「修正済みだが未 push」の状態が混乱を生むため、ユーザーが止めない限り実装・修正依頼は `build -> commit -> push` まで進める
+- ただし、build 失敗、未確認の無関係差分、schema の live 適用判断、別AIとの衝突リスクがある場合は commit / push せず、人間判断へ戻す
+- stage は関連差分だけを明示し、既存の未追跡ファイルや他作業の差分は巻き込まない
