@@ -551,18 +551,7 @@ export function EnglishChunksApp() {
               </div>
 
               {recommendedIds.length ? (
-                <section className="english-study-card is-fast-review">
-                  <button
-                    type="button"
-                    className="english-judge-button is-wrong"
-                    onClick={() => handleStudyAction(false)}
-                    aria-label="間違えた"
-                  >
-                    <small>←</small>
-                    <span>×</span>
-                    <small>まだ</small>
-                  </button>
-
+                <section className="english-study-card">
                   <div className="english-study-sheet">
                     <p className="english-study-word">{displayedStudyChunk.headword}</p>
 
@@ -605,18 +594,28 @@ export function EnglishChunksApp() {
                         </div>
                       </div>
                     ) : null}
-                  </div>
 
-                  <button
-                    type="button"
-                    className="english-judge-button is-correct"
-                    onClick={() => handleStudyAction(true)}
-                    aria-label="正解した"
-                  >
-                    <small>→</small>
-                    <span>○</span>
-                    <small>わかる</small>
-                  </button>
+                    <div className="english-judge-row">
+                      <button
+                        type="button"
+                        className="english-judge-button is-wrong"
+                        onClick={() => handleStudyAction(false)}
+                        aria-label="間違えた"
+                      >
+                        <span>×</span>
+                        <small>まだ</small>
+                      </button>
+                      <button
+                        type="button"
+                        className="english-judge-button is-correct"
+                        onClick={() => handleStudyAction(true)}
+                        aria-label="正解した"
+                      >
+                        <span>○</span>
+                        <small>わかる</small>
+                      </button>
+                    </div>
+                  </div>
                 </section>
               ) : (
                 <section className="english-review-card">
