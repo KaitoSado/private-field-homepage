@@ -7359,7 +7359,7 @@ textarea {
   inset: 0 auto 0 0;
   width: 100%;
   border-radius: 0;
-  background: var(--ink);
+  background: #c8c6c1;
   animation: english-study-timer var(--timer-duration, 4s) linear forwards;
 }
 
@@ -7514,13 +7514,12 @@ textarea {
 }
 
 .english-judge-button.is-correct:hover {
-  border-color: #4a9a6e;
-  background: #e8f5ea;
+  border-color: #b0d4bc;
+  background: #f2f9f4;
 }
 
 .english-judge-button.is-wrong:hover {
-  border-color: #c06060;
-  background: #fce8e8;
+  border-color: var(--ink);
 }
 
 .english-judge-button span {
@@ -7538,13 +7537,12 @@ textarea {
 }
 
 .english-judge-button.is-correct.is-active {
-  background: #e8f5ea;
-  border-color: #4a9a6e;
+  background: #f2f9f4;
+  border-color: #b0d4bc;
 }
 
-.english-judge-button.is-wrong.is-active {
-  background: #fce8e8;
-  border-color: #c06060;
+.english-judge-button.is-skip.is-active {
+  border-color: var(--ink);
 }
 
 .english-progress-rail {

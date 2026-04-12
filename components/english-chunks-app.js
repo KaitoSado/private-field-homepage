@@ -411,6 +411,14 @@ export function EnglishChunksApp() {
     return () => window.clearTimeout(timer);
   }, [displayedStudyChunk.headword, displayedStudyChunk.variantId, hydrated, isAutoSpeakEnabled, mode, recommendedIds.length, selectedChunk.id]);
 
+  const handleSkipChunk = () => {
+    if (mode !== "study" || !recommendedIds.length) return;
+    if (judgeFlashTimer.current) clearTimeout(judgeFlashTimer.current);
+    setJudgeFlash("skip");
+    judgeFlashTimer.current = setTimeout(() => setJudgeFlash(""), 350);
+    handleAdvanceChunk();
+  };
+
   useEffect(() => {
     if (mode !== "study" || !recommendedIds.length) return;
 
@@ -423,6 +431,10 @@ export function EnglishChunksApp() {
       if (event.key === "ArrowRight") {
         event.preventDefault();
         handleStudyAction(true);
+      }
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        handleSkipChunk();
       }
     };
 
@@ -568,17 +580,16 @@ export function EnglishChunksApp() {
                           style={{ "--timer-duration": `${activeTimerSeconds}s` }}
                         />
                       </div>
-                      <span>
-                        {studyTimerPhase === "question"
-                          ? `出題 ${questionSeconds}秒`
-                          : studyTimerPhase === "answer"
-                            ? `答え ${answerSeconds}秒`
-                            : "判定待ち"}
-                      </span>
+                      {studyTimerPhase !== "judge" && (
+                        <span>
+                          {studyTimerPhase === "question"
+                            ? `${questionSeconds}秒`
+                            : `${answerSeconds}秒`}
+                        </span>
+                      )}
                     </div>
 
                     <div className={`english-study-answer ${isAnswerVisible ? "is-visible" : "is-hidden"}`}>
-                      <span>答え</span>
                       <strong>{displayedStudyChunk.meaning}</strong>
                     </div>
 
@@ -602,6 +613,15 @@ export function EnglishChunksApp() {
                     ) : null}
 
                     <div className="english-judge-row">
+                      <button
+                        type="button"
+                        className={`english-judge-button is-skip${judgeFlash === "skip" ? " is-active" : ""}`}
+                        onClick={() => handleSkipChunk()}
+                        aria-label="スキップ"
+                      >
+                        <span>↑</span>
+                        <small>流す</small>
+                      </button>
                       <button
                         type="button"
                         className={`english-judge-button is-wrong${judgeFlash === "wrong" ? " is-active" : ""}`}
