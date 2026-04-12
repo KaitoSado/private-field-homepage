@@ -184,6 +184,13 @@ const DERIVATIVE_MISSIONS = [
     title: "接線が決まりにくい点を見つける",
     description: "折れ曲がりの真ん中へ点を持っていきます。",
     type: "nondiff"
+  },
+  {
+    id: "inflection",
+    label: "変曲点を探す",
+    title: "曲がり方が変わる場所を見つける",
+    description: "傾きが増えている→減っている（または逆）に切り替わる点を探します。二階微分が 0 になる場所です。",
+    type: "inflection"
   }
 ];
 
@@ -276,8 +283,8 @@ const LINEAR_PRESETS = [
     id: "rotate",
     label: "くるっと回す",
     basis: [
-      [0.71, 0.71],
-      [-0.71, 0.71]
+      [Math.SQRT2 / 2, Math.SQRT2 / 2],
+      [-Math.SQRT2 / 2, Math.SQRT2 / 2]
     ]
   },
   {
@@ -631,7 +638,8 @@ const TAYLOR_PRESETS = [
     minCenter: -0.75,
     maxCenter: 2.4,
     fn: (x) => (x <= -1 ? Number.NaN : Math.log(1 + x)),
-    derivativeAt: (x, order) => logOnePlusDerivativeAt(x, order)
+    derivativeAt: (x, order) => logOnePlusDerivativeAt(x, order),
+    convergenceRadius: (center) => 1 + center
   }
 ];
 
@@ -749,11 +757,12 @@ const GEOMETRY_TOOLS = [
 ];
 
 const CALCULATOR_KEYS = [
-  ["7", "8", "9", "/", "sqrt("],
-  ["4", "5", "6", "*", "^"],
-  ["1", "2", "3", "-", "("],
-  ["0", ".", "pi", "+", ")"],
-  ["sin(", "cos(", "tan(", "log(", "exp("]
+  ["7", "8", "9", "/", "("],
+  ["4", "5", "6", "*", ")"],
+  ["1", "2", "3", "-", "^"],
+  ["0", ".", "pi", "+", "e"],
+  ["sin(", "cos(", "tan(", "ln(", "log10("],
+  ["exp(", "abs(", "sqrt(", "pow(", "asin("]
 ];
 
 const SAFE_FUNCTIONS = new Set([
@@ -2563,9 +2572,9 @@ function RegressionPlaygroundPanel() {
   const currentScore = useMemo(() => computeRegressionScore(dataset.points, currentLine), [currentLine, dataset.points]);
   const bestScore = useMemo(() => computeRegressionScore(dataset.points, bestFit), [bestFit, dataset.points]);
   const fitPercent = useMemo(() => {
-    if (!Number.isFinite(currentScore.meanSquared) || !Number.isFinite(bestScore.meanSquared)) return 0;
-    return Math.max(0, Math.min(100, 100 - ((currentScore.meanSquared - bestScore.meanSquared) / (bestScore.meanSquared + 0.18)) * 100));
-  }, [bestScore.meanSquared, currentScore.meanSquared]);
+    if (!Number.isFinite(currentScore.rSquared)) return 0;
+    return Math.max(0, Math.min(100, currentScore.rSquared * 100));
+  }, [currentScore.rSquared]);
   const mission = useMemo(
     () => buildRegressionMissionState(activeMission, currentLine, currentScore, bestFit, bestScore, outlierFreeFit, showOutlier),
     [activeMission, bestFit, bestScore, currentLine, currentScore, outlierFreeFit, showOutlier]
@@ -2775,13 +2784,13 @@ function RegressionPlaygroundPanel() {
           </div>
 
           <MathValueMeter
-            label="ズレメーター"
+            label="R²（決定係数）"
             value={fitPercent}
             min={0}
             max={100}
-            displayValue={`${Math.round(fitPercent)}%`}
+            displayValue={`${(currentScore.rSquared).toFixed(3)}`}
             accentClass={fitPercent > 80 ? "is-positive" : fitPercent > 55 ? "is-soft" : "is-warm"}
-            valueLabel={fitPercent > 80 ? "かなりそれっぽい線です" : fitPercent > 55 ? "だいぶ傾向をつかめています" : "まだズレが大きいです"}
+            valueLabel={fitPercent > 80 ? "データの変動をよく説明できています" : fitPercent > 55 ? "傾向をつかめています" : "まだ説明力が低い状態です"}
           />
 
           <MathStatusMessage title="状態メッセージ">{statusText}</MathStatusMessage>
@@ -2983,6 +2992,9 @@ function TaylorPlaygroundPanel() {
             <MathKpi label="次数" value={`${degree}次`} />
             <MathKpi label="近くの誤差" value={formatNumber(localError)} />
             <MathKpi label="広めの誤差" value={formatNumber(globalError)} />
+            {preset.convergenceRadius && (
+              <MathKpi label="収束半径" value={`R = ${formatNumber(preset.convergenceRadius(centerX))}`} />
+            )}
           </div>
 
           <MathValueMeter
@@ -3013,6 +3025,7 @@ function TaylorPlaygroundPanel() {
             <p>
               テイラー展開は、複雑な曲線を <strong>その場の近く限定でまねる</strong> 遊びです。中心を変えると似る場所が変わり、
               次数を上げるとコピーの精度が育っていきます。
+              関数によっては <strong>収束半径</strong> があり、中心からその距離を超えると次数をいくら上げても近似が発散します（例: ln(1+x) は中心から 1+center の距離が限界）。
             </p>
           </div>
           <MathMissionCard mission={mission} />
@@ -3355,6 +3368,29 @@ function GeometryPanel() {
             </div>
           </div>
 
+          {(segments.length > 0 || polygons.length > 0 || circles.length > 0) && (
+            <div className="math-measure-list">
+              {segments.map((seg, i) => (
+                <div key={`seg-${i}`} className="math-measure-row">
+                  <span>線分 {nextPointLabel(i)}</span>
+                  <strong>{distanceBetween(seg.from, seg.to).toFixed(2)}</strong>
+                </div>
+              ))}
+              {polygons.map((poly, i) => (
+                <div key={`poly-${i}`} className="math-measure-row">
+                  <span>多角形 {i + 1}</span>
+                  <strong>面積 {Math.abs(shoelaceArea(poly)).toFixed(2)}　周長 {polygonPerimeter(poly).toFixed(2)}</strong>
+                </div>
+              ))}
+              {circles.map((c, i) => (
+                <div key={`cir-${i}`} className="math-measure-row">
+                  <span>円 {i + 1} (r={c.radius.toFixed(2)})</span>
+                  <strong>面積 {(Math.PI * c.radius * c.radius).toFixed(2)}　周長 {(2 * Math.PI * c.radius).toFixed(2)}</strong>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="hero-actions">
             <button type="button" className="button button-secondary" onClick={closePolygon} disabled={polygonDraft.length < 3}>
               多角形を閉じる
@@ -3651,8 +3687,10 @@ function CalculatorPanel() {
     if (compiled.error) return { error: compiled.error };
 
     try {
-      const value = compiled.fn();
-      return { value: formatNumber(value) };
+      const rawValue = compiled.fn();
+      if (rawValue === Infinity || rawValue === -Infinity) return { error: "∞（定義されない計算です）" };
+      if (Number.isNaN(rawValue)) return { error: "定義域外です（負の数の対数・ゼロ除算など）" };
+      return { value: formatNumber(rawValue) };
     } catch (error) {
       return { error: error.message };
     }
@@ -3673,14 +3711,18 @@ function CalculatorPanel() {
       sorted.length % 2 === 1
         ? sorted[(sorted.length - 1) / 2]
         : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
-    const variance = values.reduce((total, value) => total + (value - mean) ** 2, 0) / values.length;
+    const popVariance = values.reduce((total, value) => total + (value - mean) ** 2, 0) / values.length;
+    const sampleVariance = values.length > 1
+      ? values.reduce((total, value) => total + (value - mean) ** 2, 0) / (values.length - 1)
+      : popVariance;
 
     return {
       count: values.length,
       sum,
       mean,
       median,
-      std: Math.sqrt(variance),
+      std: Math.sqrt(popVariance),
+      sampleStd: Math.sqrt(sampleVariance),
       min: sorted[0],
       max: sorted[sorted.length - 1]
     };
@@ -3699,8 +3741,8 @@ function CalculatorPanel() {
         </div>
 
         <div className="math-calculator-keypad">
-          {CALCULATOR_KEYS.flat().map((key) => (
-            <button key={key} type="button" className="button button-ghost math-key" onClick={() => appendValue(key)}>
+          {CALCULATOR_KEYS.flat().map((key, index) => (
+            <button key={`${key}-${index}`} type="button" className="button button-ghost math-key" onClick={() => appendValue(key)}>
               {key}
             </button>
           ))}
@@ -3739,7 +3781,8 @@ function CalculatorPanel() {
               <MathStat label="合計" value={formatNumber(stats.sum)} />
               <MathStat label="平均" value={formatNumber(stats.mean)} />
               <MathStat label="中央値" value={formatNumber(stats.median)} />
-              <MathStat label="標準偏差" value={formatNumber(stats.std)} />
+              <MathStat label="標準偏差 (母σ)" value={formatNumber(stats.std)} />
+              <MathStat label="標準偏差 (標本s)" value={formatNumber(stats.sampleStd)} />
               <MathStat label="最小 / 最大" value={`${formatNumber(stats.min)} / ${formatNumber(stats.max)}`} />
             </div>
           ) : (
@@ -3800,7 +3843,11 @@ function solveEquationRoots(fn, min, max) {
     }
 
     if (Number.isFinite(previousY) && Number.isFinite(currentY) && previousY * currentY < 0) {
-      pushUnique(roots, bisectRoot(fn, previousX, currentX));
+      const candidate = bisectRoot(fn, previousX, currentX);
+      const candidateValue = safeEvaluate(fn, candidate);
+      if (Number.isFinite(candidateValue) && Math.abs(candidateValue) < 1) {
+        pushUnique(roots, candidate);
+      }
     }
 
     previousX = currentX;
@@ -4414,17 +4461,21 @@ function predictRegressionY(line, x) {
 }
 
 function computeRegressionScore(points, line) {
-  if (!points.length) return { meanSquared: 0, meanAbsolute: 0 };
-  let squared = 0;
+  if (!points.length) return { meanSquared: 0, meanAbsolute: 0, rSquared: 0 };
+  const meanY = points.reduce((sum, point) => sum + point.y, 0) / points.length;
+  let ssRes = 0;
+  let ssTot = 0;
   let absolute = 0;
   points.forEach((point) => {
     const residual = point.y - predictRegressionY(line, point.x);
-    squared += residual * residual;
+    ssRes += residual * residual;
+    ssTot += (point.y - meanY) ** 2;
     absolute += Math.abs(residual);
   });
   return {
-    meanSquared: squared / points.length,
-    meanAbsolute: absolute / points.length
+    meanSquared: ssRes / points.length,
+    meanAbsolute: absolute / points.length,
+    rSquared: ssTot > 1e-9 ? 1 - ssRes / ssTot : 0
   };
 }
 
@@ -4746,8 +4797,8 @@ function computeEigenDirections(basis) {
 
   values.forEach((value, index) => {
     let vector = Math.abs(b) > Math.abs(c)
-      ? { x: value - d, y: b }
-      : { x: c, y: value - a };
+      ? { x: value - d, y: c }
+      : { x: b, y: value - a };
     if (Math.hypot(vector.x, vector.y) < 1e-9) {
       vector = Math.abs(a - value) > Math.abs(d - value) ? { x: b, y: value - a } : { x: value - d, y: c };
     }
@@ -5494,6 +5545,7 @@ function buildDerivativeSnapshot(fn, x, h) {
     Math.abs(leftSlope - rightSlope) < Math.max(0.3, Math.abs(leftSlope) * 0.18 + Math.abs(rightSlope) * 0.18);
 
   return {
+    fn,
     x,
     y,
     h: safeH,
@@ -5533,6 +5585,18 @@ function buildDerivativeMissionState(mission, snapshot) {
     statusText = done
       ? "左右の坂がちがうので、接線が 1 本に定まりません。"
       : "折れ曲がりの真ん中へ点を持っていくと、接線が決めにくくなります。";
+  } else if (mission.type === "inflection") {
+    const h = 1e-3;
+    const fn = snapshot.fn;
+    if (fn) {
+      const d2 = (safeEvaluate(fn, snapshot.x + h) - 2 * safeEvaluate(fn, snapshot.x) + safeEvaluate(fn, snapshot.x - h)) / (h * h);
+      done = Number.isFinite(d2) && Math.abs(d2) < 0.5;
+      statusText = done
+        ? "二階微分 ≈ 0 の場所を見つけました。ここで曲がり方が切り替わります。"
+        : `いまの二階微分は ${formatNumber(d2)}。曲がり方が変わる場所を探しましょう。`;
+    } else {
+      statusText = "この関数で変曲点を探してみましょう。";
+    }
   }
 
   return {
@@ -5633,10 +5697,12 @@ function drawGeometryScene(context, scene) {
 
   for (const circle of scene.circles) {
     const center = worldToGeometryScreen(circle.center.x, circle.center.y, canvas.width, canvas.height);
+    const rx = circle.radius * geometryScaleX(canvas.width);
+    const ry = circle.radius * (canvas.height / 20);
     context.fillStyle = "rgba(168, 85, 247, 0.12)";
     context.strokeStyle = "#7c3aed";
     context.beginPath();
-    context.arc(center.x, center.y, circle.radius * geometryScaleX(canvas.width), 0, Math.PI * 2);
+    context.ellipse(center.x, center.y, rx, ry, 0, 0, Math.PI * 2);
     context.fill();
     context.stroke();
   }
@@ -5804,6 +5870,25 @@ function distanceBetween(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
+function shoelaceArea(vertices) {
+  let area = 0;
+  for (let i = 0; i < vertices.length; i++) {
+    const j = (i + 1) % vertices.length;
+    area += vertices[i].x * vertices[j].y;
+    area -= vertices[j].x * vertices[i].y;
+  }
+  return area / 2;
+}
+
+function polygonPerimeter(vertices) {
+  let perimeter = 0;
+  for (let i = 0; i < vertices.length; i++) {
+    const j = (i + 1) % vertices.length;
+    perimeter += distanceBetween(vertices[i], vertices[j]);
+  }
+  return perimeter;
+}
+
 function nextPointLabel(index) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   if (index < alphabet.length) return alphabet[index];
@@ -5960,19 +6045,19 @@ function parsePolynomial(input) {
 
 function tokenizePolynomial(input) {
   const source = `${input || ""}`.replace(/\s+/g, "");
-  const tokens = [];
+  const raw = [];
   let index = 0;
 
   while (index < source.length) {
     const char = source[index];
     if ("+-*^()".includes(char)) {
-      tokens.push({ type: "operator", value: char });
+      raw.push({ type: "operator", value: char });
       index += 1;
       continue;
     }
 
     if (char === "x" || char === "X") {
-      tokens.push({ type: "variable", value: "x" });
+      raw.push({ type: "variable", value: "x" });
       index += 1;
       continue;
     }
@@ -5987,12 +6072,28 @@ function tokenizePolynomial(input) {
       if (!Number.isFinite(numeric)) {
         throw new Error("数値を解釈できませんでした。");
       }
-      tokens.push({ type: "number", value: slice, numeric });
+      raw.push({ type: "number", value: slice, numeric });
       index = end;
       continue;
     }
 
     throw new Error(`未対応の文字があります: ${char}`);
+  }
+
+  const tokens = [];
+  for (let i = 0; i < raw.length; i++) {
+    if (i > 0) {
+      const prev = raw[i - 1];
+      const curr = raw[i];
+      const needsMul =
+        (prev.type === "number" && (curr.type === "variable" || curr.value === "(")) ||
+        (prev.type === "variable" && (curr.type === "number" || curr.value === "(")) ||
+        (prev.value === ")" && (curr.type === "number" || curr.type === "variable" || curr.value === "("));
+      if (needsMul) {
+        tokens.push({ type: "operator", value: "*" });
+      }
+    }
+    tokens.push(raw[i]);
   }
 
   return tokens;
