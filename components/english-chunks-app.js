@@ -59,6 +59,8 @@ export function EnglishChunksApp() {
   const [queueSeed, setQueueSeed] = useState(0);
   const [shadowPromptIndex, setShadowPromptIndex] = useState(0);
   const [isScriptVisible, setIsScriptVisible] = useState(true);
+  const [judgeFlash, setJudgeFlash] = useState("");
+  const judgeFlashTimer = useRef(null);
   const [recordingState, setRecordingState] = useState({
     status: "idle",
     audioUrl: "",
@@ -383,6 +385,10 @@ export function EnglishChunksApp() {
   const handleStudyAction = (wasCorrect) => {
     if (mode !== "study" || !recommendedIds.length) return;
 
+    if (judgeFlashTimer.current) clearTimeout(judgeFlashTimer.current);
+    setJudgeFlash(wasCorrect ? "correct" : "wrong");
+    judgeFlashTimer.current = setTimeout(() => setJudgeFlash(""), 350);
+
     setProgressMap((current) => recordStudyAttempt(current, selectedChunk, wasCorrect, studyExample.topic, Date.now(), reviewDayOffsets));
     setAttemptHistory((current) => [
       {
@@ -598,7 +604,7 @@ export function EnglishChunksApp() {
                     <div className="english-judge-row">
                       <button
                         type="button"
-                        className="english-judge-button is-wrong"
+                        className={`english-judge-button is-wrong${judgeFlash === "wrong" ? " is-active" : ""}`}
                         onClick={() => handleStudyAction(false)}
                         aria-label="間違えた"
                       >
@@ -607,7 +613,7 @@ export function EnglishChunksApp() {
                       </button>
                       <button
                         type="button"
-                        className="english-judge-button is-correct"
+                        className={`english-judge-button is-correct${judgeFlash === "correct" ? " is-active" : ""}`}
                         onClick={() => handleStudyAction(true)}
                         aria-label="正解した"
                       >
