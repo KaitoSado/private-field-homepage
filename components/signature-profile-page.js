@@ -58,6 +58,8 @@ export function SignatureProfilePage({ profile, posts }) {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [expandedCurrentEntries, setExpandedCurrentEntries] = useState({});
   const [expandedRecordItems, setExpandedRecordItems] = useState({});
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth() + 1);
   const [showAllCurrentEntries, setShowAllCurrentEntries] = useState(false);
   const [postCreateSignal, setPostCreateSignal] = useState(0);
   const [postManagerOpen, setPostManagerOpen] = useState(false);
@@ -199,6 +201,8 @@ export function SignatureProfilePage({ profile, posts }) {
       : currentEntries.slice(-4);
   const hiddenCurrentEntryCount = Math.max(0, currentEntries.length - visibleCurrentEntries.length);
   const weeklySchedule = mergeWeeklySchedule(draft.weekly_schedule);
+  const monthlyCalendar = mergeMonthlyCalendar(draft.monthly_calendar);
+  const calendarYear = new Date().getFullYear();
   const recordItems = mergeRecordItems(draft.record_items, buildDefaultRecordItems());
   const defaultLeadCopy = "なんか書ける";
 
@@ -222,7 +226,8 @@ export function SignatureProfilePage({ profile, posts }) {
         weeklySchedule,
         draft.schedule_note,
         recordItems,
-        draft.record_heading
+        draft.record_heading,
+        monthlyCalendar
       ),
       focus_area: `${draft.focus_area || ""}`.trim(),
       open_to: `${draft.open_to || ""}`.trim(),
@@ -358,6 +363,19 @@ export function SignatureProfilePage({ profile, posts }) {
             ...nextSchedule[dayKey],
             [periodKey]: value
           }
+        }
+      };
+    });
+  }
+
+  function updateCalendarDay(month, day, value) {
+    setDraft((current) => {
+      const nextCalendar = mergeMonthlyCalendar(current.monthly_calendar);
+      return {
+        ...current,
+        monthly_calendar: {
+          ...nextCalendar,
+          [month]: { ...nextCalendar[month], [day]: value }
         }
       };
     });
@@ -890,7 +908,13 @@ export function SignatureProfilePage({ profile, posts }) {
           <article className="signature-schedule-card">
             <div className="signature-schedule-head">
               <div>
-                <p className="eyebrow">Week</p>
+                <button
+                  type="button"
+                  className="signature-calendar-toggle"
+                  onClick={() => setShowCalendar((c) => !c)}
+                >
+                  {showCalendar ? "週間に戻す" : "カレンダー"}
+                </button>
                 <h3>デフォルト予定</h3>
               </div>
               <div className="signature-schedule-note">
@@ -910,46 +934,94 @@ export function SignatureProfilePage({ profile, posts }) {
                 )}
               </div>
             </div>
-            <div className="signature-schedule-wrap">
-              <table className="signature-schedule-table">
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    {SCHEDULE_DAYS.map((day) => (
-                      <th key={day.key}>
-                        <span>{day.short}</span>
-                        <small>{day.label}</small>
-                      </th>
+
+            {showCalendar ? (
+              <div className="signature-calendar-panel">
+                <div className="signature-calendar-months">
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      className={`signature-calendar-month-chip${selectedMonth === m ? " active" : ""}`}
+                      onClick={() => setSelectedMonth(m)}
+                    >
+                      {m}月
+                    </button>
+                  ))}
+                </div>
+                <p className="signature-calendar-year">{calendarYear}年 {selectedMonth}月</p>
+                <div className="signature-calendar-grid">
+                  <div className="signature-calendar-weekdays">
+                    {["月", "火", "水", "木", "金", "土", "日"].map((d) => (
+                      <span key={d} className="signature-calendar-weekday">{d}</span>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {SCHEDULE_PERIODS.map((period) => (
-                    <tr key={period.key}>
-                      <th>
-                        <span>{period.label}</span>
-                        <small>{period.time}</small>
-                      </th>
-                      {SCHEDULE_DAYS.map((day) => (
-                        <td key={`${day.key}-${period.key}`}>
+                  </div>
+                  <div className="signature-calendar-days">
+                    {buildCalendarCells(selectedMonth, calendarYear).map((cell, i) =>
+                      cell.empty ? (
+                        <div key={`empty-${i}`} className="signature-calendar-day empty" />
+                      ) : (
+                        <div key={cell.day} className={`signature-calendar-day${monthlyCalendar[selectedMonth]?.[cell.day] ? " has-entry" : ""}`}>
+                          <span className="signature-calendar-day-num">{cell.day}</span>
                           {isEditing ? (
                             <textarea
-                              rows="2"
-                              value={weeklySchedule[day.key]?.[period.key] || ""}
-                              onChange={(event) => updateScheduleCell(day.key, period.key, event.target.value)}
-                              maxLength={PROFILE_HEADLINE_LIMIT}
-                              placeholder="授業 / 制作 / 移動"
+                              rows="1"
+                              value={monthlyCalendar[selectedMonth]?.[cell.day] || ""}
+                              onChange={(e) => updateCalendarDay(selectedMonth, cell.day, e.target.value)}
+                              maxLength={80}
+                              placeholder=""
                             />
-                          ) : (
-                            <span>{weeklySchedule[day.key]?.[period.key] || "空き"}</span>
-                          )}
-                        </td>
+                          ) : monthlyCalendar[selectedMonth]?.[cell.day] ? (
+                            <span className="signature-calendar-day-text">{monthlyCalendar[selectedMonth][cell.day]}</span>
+                          ) : null}
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="signature-schedule-wrap">
+                <table className="signature-schedule-table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      {SCHEDULE_DAYS.map((day) => (
+                        <th key={day.key}>
+                          <span>{day.short}</span>
+                          <small>{day.label}</small>
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {SCHEDULE_PERIODS.map((period) => (
+                      <tr key={period.key}>
+                        <th>
+                          <span>{period.label}</span>
+                          <small>{period.time}</small>
+                        </th>
+                        {SCHEDULE_DAYS.map((day) => (
+                          <td key={`${day.key}-${period.key}`}>
+                            {isEditing ? (
+                              <textarea
+                                rows="2"
+                                value={weeklySchedule[day.key]?.[period.key] || ""}
+                                onChange={(event) => updateScheduleCell(day.key, period.key, event.target.value)}
+                                maxLength={PROFILE_HEADLINE_LIMIT}
+                                placeholder="授業 / 制作 / 移動"
+                              />
+                            ) : (
+                              <span>{weeklySchedule[day.key]?.[period.key] || "空き"}</span>
+                            )}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </article>
         </div>
       </SignatureInteractiveSection>
@@ -1326,6 +1398,24 @@ function mergeWeeklySchedule(weeklySchedule) {
   );
 }
 
+function mergeMonthlyCalendar(monthlyCalendar) {
+  const merged = {};
+  for (let m = 1; m <= 12; m++) {
+    merged[m] = { ...(monthlyCalendar?.[m] || {}) };
+  }
+  return merged;
+}
+
+function buildCalendarCells(month, year) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+  const cells = [];
+  for (let i = 0; i < startOffset; i++) cells.push({ empty: true });
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d });
+  return cells;
+}
+
 function mergeRecordItems(recordItems, defaults) {
   const mergedDefaults = defaults.map((fallback, index) => {
     const current = recordItems?.[index] || {};
@@ -1368,7 +1458,7 @@ function normalizeUsername(value) {
 }
 
 function inflateSignatureProfile(profile) {
-  const { heading, recordHeading, affiliation, currentEntries, weeklySchedule, scheduleNote, recordItems } = unpackSignatureAffiliation(
+  const { heading, recordHeading, affiliation, currentEntries, weeklySchedule, scheduleNote, recordItems, monthlyCalendar } = unpackSignatureAffiliation(
     profile.affiliation
   );
 
@@ -1381,7 +1471,8 @@ function inflateSignatureProfile(profile) {
     current_entries: currentEntries,
     weekly_schedule: weeklySchedule,
     schedule_note: scheduleNote,
-    record_items: recordItems
+    record_items: recordItems,
+    monthly_calendar: monthlyCalendar
   };
 }
 
@@ -1399,7 +1490,8 @@ function unpackSignatureAffiliation(value) {
           currentEntries: Array.isArray(meta.current_entries) ? meta.current_entries : [],
           weeklySchedule: meta.weekly_schedule && typeof meta.weekly_schedule === "object" ? meta.weekly_schedule : {},
           scheduleNote: `${meta.schedule_note || ""}`,
-          recordItems: Array.isArray(meta.record_items) ? meta.record_items : []
+          recordItems: Array.isArray(meta.record_items) ? meta.record_items : [],
+          monthlyCalendar: meta.monthly_calendar && typeof meta.monthly_calendar === "object" ? meta.monthly_calendar : {}
         };
       } catch {
         return {
@@ -1409,7 +1501,8 @@ function unpackSignatureAffiliation(value) {
           currentEntries: [],
           weeklySchedule: {},
           scheduleNote: "",
-          recordItems: []
+          recordItems: [],
+          monthlyCalendar: {}
         };
       }
     }
@@ -1450,14 +1543,24 @@ function unpackSignatureAffiliation(value) {
     currentEntries: [],
     weeklySchedule: {},
     scheduleNote: "",
-    recordItems: []
+    recordItems: [],
+    monthlyCalendar: {}
   };
 }
 
-function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule, scheduleNote, recordItems, recordHeading) {
+function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySchedule, scheduleNote, recordItems, recordHeading, monthlyCalendar) {
   const trimmedAffiliation = `${affiliation || ""}`.trim();
   const trimmedHeading = `${heading || ""}`.trim() || DEFAULT_IDENTITY_HEADING;
   const trimmedRecordHeading = `${recordHeading || ""}`.trim() || DEFAULT_RECORD_HEADING;
+  const packedCalendar = mergeMonthlyCalendar(monthlyCalendar);
+  const sparseCalendar = {};
+  for (let m = 1; m <= 12; m++) {
+    const days = {};
+    for (const [d, v] of Object.entries(packedCalendar[m] || {})) {
+      if (`${v || ""}`.trim()) days[d] = `${v}`.trim();
+    }
+    if (Object.keys(days).length) sparseCalendar[m] = days;
+  }
   const meta = encodeURIComponent(
     JSON.stringify({
       identity_heading: trimmedHeading,
@@ -1472,7 +1575,8 @@ function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySc
       record_items: mergeRecordItems(recordItems, buildDefaultRecordItems()).map((item) => ({
         title: `${item.title || ""}`.trim(),
         body: `${item.body || ""}`.trim()
-      }))
+      })),
+      monthly_calendar: sparseCalendar
     })
   );
 

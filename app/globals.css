@@ -4993,6 +4993,156 @@ textarea {
   outline: none;
 }
 
+.signature-calendar-toggle {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: #fff;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  cursor: pointer;
+  margin-bottom: 4px;
+}
+.signature-calendar-toggle:hover {
+  border-color: var(--ink);
+}
+
+.signature-calendar-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.signature-calendar-months {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.signature-calendar-month-chip {
+  padding: 4px 10px;
+  border: 1px solid rgba(184, 154, 93, 0.12);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.5);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  color: #657075;
+  cursor: pointer;
+}
+.signature-calendar-month-chip:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.signature-calendar-month-chip.active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.signature-calendar-year {
+  margin: 0;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  color: #7b725d;
+}
+
+.signature-calendar-grid {
+  display: grid;
+  gap: 0;
+}
+
+.signature-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0;
+}
+
+.signature-calendar-weekday {
+  padding: 10px 6px;
+  text-align: center;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: #7b725d;
+  background: rgba(244, 239, 228, 0.82);
+  border: 1px solid rgba(184, 154, 93, 0.12);
+}
+
+.signature-calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0;
+}
+
+.signature-calendar-day {
+  min-height: 64px;
+  padding: 6px 8px;
+  border: 1px solid rgba(184, 154, 93, 0.12);
+  background: rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.signature-calendar-day.empty {
+  background: rgba(248, 245, 238, 0.4);
+  min-height: 0;
+}
+.signature-calendar-day.has-entry {
+  background: rgba(255, 252, 246, 0.9);
+}
+
+.signature-calendar-day-num {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  color: #7b725d;
+  line-height: 1;
+}
+
+.signature-calendar-day-text {
+  font-size: 0.74rem;
+  color: #22313a;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.signature-calendar-day textarea {
+  width: 100%;
+  min-height: 32px;
+  resize: vertical;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #22313a;
+  font-size: 0.74rem;
+  font-family: inherit;
+  line-height: 1.4;
+  padding: 0;
+}
+.signature-calendar-day textarea:focus {
+  outline: none;
+}
+
+@media (max-width: 900px) {
+  .signature-calendar-days,
+  .signature-calendar-weekdays {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .signature-calendar-day {
+    min-height: 52px;
+    padding: 4px 4px;
+  }
+  .signature-calendar-day-num {
+    font-size: 0.66rem;
+  }
+  .signature-calendar-day-text {
+    font-size: 0.66rem;
+  }
+}
+
 @media (max-width: 900px) {
   .signature-schedule-head {
     grid-template-columns: 1fr;
