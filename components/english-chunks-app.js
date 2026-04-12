@@ -914,7 +914,6 @@ export function EnglishChunksApp() {
           <section className="surface english-side-card">
             <div className="english-section-head">
               <h3>復習間隔</h3>
-              <span>{reviewDayOffsets.map((day) => formatReviewDayLabel(day)).join(" / ")}</span>
             </div>
             <div className="english-review-schedule-grid">
               {reviewDayOffsets.map((day, index) => (
@@ -945,19 +944,13 @@ export function EnglishChunksApp() {
           <section className="surface english-side-card">
             <div className="english-section-head">
               <h3>同期</h3>
-              <span>{getSyncLabel(syncStatus, session)}</span>
+              <span className="english-stage-pill solid">{getSyncLabel(syncStatus, session)}</span>
             </div>
-            <p className="english-side-copy">
-              {session?.user?.id
-                ? syncError || "ログイン中の進捗は Supabase に保存され、別端末でも同じアカウントで引き継げます。"
-                : "未ログイン時はこのブラウザだけに保存されます。同期するにはログインしてください。"}
-            </p>
           </section>
 
           <section className="surface english-side-card">
             <div className="english-section-head">
               <h3>メモ</h3>
-              <span>note</span>
             </div>
             <p className="english-side-copy">
               {detailMode === "gentle" ? displayedStudyChunk.nuance : displayedStudyChunk.grammarNote}
