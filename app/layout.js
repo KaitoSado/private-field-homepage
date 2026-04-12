@@ -7,6 +7,8 @@ import { TelemetryClient } from "@/components/telemetry-client";
 import { BRAND_DESCRIPTION, BRAND_NAME, buildAbsoluteUrl } from "@/lib/brand";
 
 const BRAND_LOGO_PATH = "/brand/commune-logo.png";
+const FAVICON_PATH = "/icon.png?v=20260412";
+const APPLE_ICON_PATH = "/apple-icon.png?v=20260412";
 
 export const metadata = {
   metadataBase: new URL(buildAbsoluteUrl("/")),
@@ -34,9 +36,21 @@ export const metadata = {
     images: ["/opengraph-image"]
   },
   icons: {
-    icon: BRAND_LOGO_PATH,
-    shortcut: BRAND_LOGO_PATH,
-    apple: BRAND_LOGO_PATH
+    icon: [
+      {
+        url: FAVICON_PATH,
+        type: "image/png",
+        sizes: "512x512"
+      }
+    ],
+    shortcut: FAVICON_PATH,
+    apple: [
+      {
+        url: APPLE_ICON_PATH,
+        type: "image/png",
+        sizes: "180x180"
+      }
+    ]
   }
 };
 
