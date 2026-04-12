@@ -61,6 +61,8 @@ export function EnglishChunksApp() {
   const [isScriptVisible, setIsScriptVisible] = useState(true);
   const [judgeFlash, setJudgeFlash] = useState("");
   const judgeFlashTimer = useRef(null);
+  const answerRevealedAtRef = useRef(0);
+  const studySessionRef = useRef({ id: `s-${Date.now()}`, startedAt: Date.now(), wordCount: 0 });
   const [recordingState, setRecordingState] = useState({
     status: "idle",
     audioUrl: "",
@@ -232,7 +234,10 @@ export function EnglishChunksApp() {
 
     const timer = window.setTimeout(() => {
       setStudyTimerPhase((current) => {
-        if (current === "question") return "answer";
+        if (current === "question") {
+          answerRevealedAtRef.current = Date.now();
+          return "answer";
+        }
         if (current === "answer") return "ready";
         return current;
       });
@@ -319,6 +324,56 @@ export function EnglishChunksApp() {
   const isAnswerVisible = studyTimerPhase !== "question";
   const activeTimerSeconds = studyTimerPhase === "question" ? questionSeconds : answerSeconds;
 
+  const studyStats = useMemo(() => {
+    const now = Date.now();
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+    const todayMs = todayStart.getTime();
+
+    const todayAttempts = attemptHistory.filter((a) => a.answeredAt >= todayMs && a.result !== "skip");
+    const todayWords = new Set(todayAttempts.map((a) => a.chunkId)).size;
+
+    const daySet = new Set();
+    for (const a of attemptHistory) {
+      if (a.result === "skip") continue;
+      const d = new Date(a.answeredAt);
+      daySet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+    }
+    const sortedDays = [...daySet].sort().reverse();
+    let streak = 0;
+    const checkDate = new Date(now);
+    for (let i = 0; i < sortedDays.length; i++) {
+      const key = `${checkDate.getFullYear()}-${checkDate.getMonth()}-${checkDate.getDate()}`;
+      if (sortedDays[i] === key) {
+        streak++;
+        checkDate.setDate(checkDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const weeklyMastered = [];
+    for (let w = 3; w >= 0; w--) {
+      const wStart = todayMs - (w + 1) * weekMs;
+      const wEnd = todayMs - w * weekMs;
+      let count = 0;
+      for (const chunk of ENGLISH_CHUNK_LIBRARY) {
+        const p = getEnglishProgressForId(progressMap, chunk.id);
+        const lt = p.longTermAt || p.memorizedAt || 0;
+        if (lt >= wStart && lt < wEnd) count++;
+      }
+      weeklyMastered.push(count);
+    }
+
+    const QUICK_MS = 2000;
+    const judgedAttempts = todayAttempts.filter((a) => a.responseMs != null && a.responseMs > 0);
+    const quickCount = judgedAttempts.filter((a) => a.responseMs <= QUICK_MS).length;
+    const quickRatio = judgedAttempts.length > 0 ? quickCount / judgedAttempts.length : 0;
+
+    return { todayWords, streak, weeklyMastered, quickRatio, quickCount, judgedCount: judgedAttempts.length };
+  }, [attemptHistory, progressMap]);
+
   const handleSelectChunk = (chunkId) => {
     setSelectedChunkId(chunkId);
     setMode("study");
@@ -389,16 +444,23 @@ export function EnglishChunksApp() {
     setJudgeFlash(wasCorrect ? "correct" : "wrong");
     judgeFlashTimer.current = setTimeout(() => setJudgeFlash(""), 350);
 
-    setProgressMap((current) => recordStudyAttempt(current, selectedChunk, wasCorrect, studyExample.topic, Date.now(), reviewDayOffsets));
+    const now = Date.now();
+    const responseMs = answerRevealedAtRef.current > 0 ? now - answerRevealedAtRef.current : null;
+    studySessionRef.current.wordCount += 1;
+
+    setProgressMap((current) => recordStudyAttempt(current, selectedChunk, wasCorrect, studyExample.topic, now, reviewDayOffsets));
     setAttemptHistory((current) => [
       {
-        id: `${selectedChunk.id}-${displayedStudyChunk.variantId}-${Date.now()}`,
+        id: `${selectedChunk.id}-${displayedStudyChunk.variantId}-${now}`,
         chunkId: selectedChunk.id,
         variantId: displayedStudyChunk.variantId,
         headword: displayedStudyChunk.headword,
         result: wasCorrect ? "correct" : "wrong",
         topic: studyExample.topic,
-        answeredAt: Date.now()
+        answeredAt: now,
+        responseMs,
+        timerPhase: studyTimerPhase,
+        sessionId: studySessionRef.current.id
       },
       ...current
     ]);
@@ -416,6 +478,25 @@ export function EnglishChunksApp() {
     if (judgeFlashTimer.current) clearTimeout(judgeFlashTimer.current);
     setJudgeFlash("skip");
     judgeFlashTimer.current = setTimeout(() => setJudgeFlash(""), 350);
+
+    const now = Date.now();
+    studySessionRef.current.wordCount += 1;
+
+    setAttemptHistory((current) => [
+      {
+        id: `${selectedChunk.id}-${displayedStudyChunk.variantId}-${now}`,
+        chunkId: selectedChunk.id,
+        variantId: displayedStudyChunk.variantId,
+        headword: displayedStudyChunk.headword,
+        result: "skip",
+        topic: studyExample.topic,
+        answeredAt: now,
+        responseMs: null,
+        timerPhase: studyTimerPhase,
+        sessionId: studySessionRef.current.id
+      },
+      ...current
+    ]);
     handleAdvanceChunk();
   };
 
@@ -871,6 +952,38 @@ export function EnglishChunksApp() {
                 </button>
               ))}
             </div>
+          </section>
+
+          <section className="surface english-side-card english-stats-card">
+            <div className="english-stats-row">
+              <div className="english-stat-block">
+                <strong>{studyStats.todayWords}</strong>
+                <small>今日の語数</small>
+              </div>
+              <div className="english-stat-block">
+                <strong>{studyStats.streak || "—"}</strong>
+                <small>連続日数</small>
+              </div>
+              <div className="english-stat-block">
+                <div className="english-quick-bar">
+                  <i style={{ width: `${Math.round(studyStats.quickRatio * 100)}%` }} />
+                </div>
+                <small>即答 {studyStats.quickCount}/{studyStats.judgedCount}</small>
+              </div>
+            </div>
+            {studyStats.weeklyMastered.some((v) => v > 0) && (
+              <div className="english-weekly-trend">
+                <small>週別 覚えた語数</small>
+                <div className="english-weekly-bars">
+                  {studyStats.weeklyMastered.map((count, i) => (
+                    <div key={i} className="english-weekly-col">
+                      <i style={{ height: `${Math.min(100, count * 4)}%` }} />
+                      <small>{count}</small>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           <section className="surface english-side-card">
