@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-12 | codex | branding | Safari が `/favicon.ico` を優先しても新ロゴになるよう `app/favicon.ico` を追加し、metadata の icon 指定も ico + png の両方に更新 | `npm run build` |
 | 2026-04-12 | codex | branding | Safari / browser tab icon 用に `app/icon.png` と `app/apple-icon.png` を生成し、古い `app/icon.svg` を外して metadata icon をPNGに固定 | `npm run build` |
 | 2026-04-12 | codex | research progress ui | 研究進捗カードに内側余白を戻し、丸い枠やテーブル内ステータスチップの文字が左端で見切れないよう修正 | `npm run build` |
 | 2026-04-12 | codex | workflow | 実装・修正依頼は原則 `build -> commit -> push` まで一連で進める運用ルールを `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`, `DECISIONS.md` に明文化 | `npm run build` |

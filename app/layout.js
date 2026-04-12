@@ -7,8 +7,10 @@ import { TelemetryClient } from "@/components/telemetry-client";
 import { BRAND_DESCRIPTION, BRAND_NAME, buildAbsoluteUrl } from "@/lib/brand";
 
 const BRAND_LOGO_PATH = "/brand/commune-logo.png";
-const FAVICON_PATH = "/icon.png?v=20260412";
-const APPLE_ICON_PATH = "/apple-icon.png?v=20260412";
+const FAVICON_VERSION = "20260412b";
+const FAVICON_PATH = `/icon.png?v=${FAVICON_VERSION}`;
+const ICO_PATH = `/favicon.ico?v=${FAVICON_VERSION}`;
+const APPLE_ICON_PATH = `/apple-icon.png?v=${FAVICON_VERSION}`;
 
 export const metadata = {
   metadataBase: new URL(buildAbsoluteUrl("/")),
@@ -38,12 +40,17 @@ export const metadata = {
   icons: {
     icon: [
       {
+        url: ICO_PATH,
+        type: "image/x-icon",
+        sizes: "64x64"
+      },
+      {
         url: FAVICON_PATH,
         type: "image/png",
         sizes: "512x512"
       }
     ],
-    shortcut: FAVICON_PATH,
+    shortcut: ICO_PATH,
     apple: [
       {
         url: APPLE_ICON_PATH,
