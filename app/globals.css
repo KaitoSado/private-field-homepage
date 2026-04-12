@@ -7626,14 +7626,7 @@ textarea {
 }
 
 .english-review-schedule-grid input {
-  width: 3.5rem;
-  -moz-appearance: textfield;
-}
-
-.english-review-schedule-grid input::-webkit-inner-spin-button,
-.english-review-schedule-grid input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+  width: 4rem;
 }
 
 .english-timing-presets {
