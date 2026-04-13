@@ -7846,6 +7846,31 @@ textarea {
   letter-spacing: -0.04em;
 }
 
+.german-study-word {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.18em;
+}
+
+.german-article-mark {
+  font-size: 0.62em;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.german-article-mark.is-masculine {
+  color: #1f62d1;
+}
+
+.german-article-mark.is-feminine {
+  color: #d53b36;
+}
+
+.german-article-mark.is-neuter {
+  color: #d0a11e;
+}
+
 .english-study-timer {
   display: grid;
   gap: 6px;

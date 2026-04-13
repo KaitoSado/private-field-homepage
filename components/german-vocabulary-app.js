@@ -9,7 +9,6 @@ import {
   GERMAN_VOCABULARY_LIBRARY,
   compactGermanProgressMap,
   createEmptyGermanProgress,
-  getGermanPosLabel,
   getGermanProgressForId,
   getGermanRecommendedIds,
   getGermanReviewStepLabel,
@@ -29,6 +28,13 @@ const GERMAN_REVIEW_PRESETS = [
   { id: "short", label: "短期", days: [0, 1, 2, 3, 7] },
   { id: "middle", label: "中期", days: [0, 1, 3, 7, 14] }
 ];
+
+function getGermanArticleTone(article) {
+  if (article === "der") return "masculine";
+  if (article === "die") return "feminine";
+  if (article === "das") return "neuter";
+  return "unknown";
+}
 
 export function GermanVocabularyApp() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
@@ -503,7 +509,16 @@ export function GermanVocabularyApp() {
               {recommendedIds.length ? (
                 <section className="english-study-card">
                   <div className="english-study-sheet">
-                    <p className="english-study-word">{selectedEntry.headword}</p>
+                    {selectedEntry.pos === "noun" && selectedEntry.article ? (
+                      <p className="english-study-word german-study-word">
+                        <span className={`german-article-mark is-${getGermanArticleTone(selectedEntry.article)}`}>
+                          {selectedEntry.article}
+                        </span>
+                        <span>{selectedEntry.headword}</span>
+                      </p>
+                    ) : (
+                      <p className="english-study-word">{selectedEntry.headword}</p>
+                    )}
 
                     <div className="english-study-timer">
                       <div className="english-study-timer-line">
@@ -519,29 +534,6 @@ export function GermanVocabularyApp() {
 
                     <div className={`english-study-answer ${isAnswerVisible ? "is-visible" : "is-hidden"}`}>
                       <strong>{selectedEntry.meaning}</strong>
-                      <span>{selectedEntry.coreChunk}</span>
-                    </div>
-
-                    <div className="english-family-strip" aria-label="ドイツ語メモ">
-                      <span>語形</span>
-                      <div>
-                        <button type="button" className="english-family-chip">
-                          <strong>{getGermanPosLabel(selectedEntry.pos)}</strong>
-                          <small>{selectedEntry.grammarNote}</small>
-                        </button>
-                        {selectedEntry.article ? (
-                          <button type="button" className="english-family-chip">
-                            <strong>{selectedEntry.article}</strong>
-                            <small>冠詞</small>
-                          </button>
-                        ) : null}
-                        {selectedEntry.plural ? (
-                          <button type="button" className="english-family-chip">
-                            <strong>{selectedEntry.plural}</strong>
-                            <small>複数形</small>
-                          </button>
-                        ) : null}
-                      </div>
                     </div>
 
                     <div className="english-judge-row">
