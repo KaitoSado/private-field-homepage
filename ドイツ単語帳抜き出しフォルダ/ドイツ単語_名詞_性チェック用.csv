@@ -1,846 +1,844 @@
 lemma_de,article,gender,plural,meaning_ja,review_status,notes
-Abend,,,,,needs_enrichment,
-Abfahrt,,,,,needs_enrichment,
-Abitur,,,,,needs_enrichment,
-Abschied,,,,,needs_enrichment,
-Absender,,,,,needs_enrichment,
-Absicht,,,,,needs_enrichment,
-Achtung,,,,,needs_enrichment,
-Adresse,,,,,needs_enrichment,
-Affe,,,,,needs_enrichment,
-Ahnung,,,,,needs_enrichment,
-Alkohol,,,,,needs_enrichment,
-Allee,,,,,needs_enrichment,
-Alte,,,,,needs_enrichment,
-Alter,,,,,needs_enrichment,
-Ampel,,,,,needs_enrichment,
-Anfang,,,,,needs_enrichment,
-Angabe,,,,,needs_enrichment,
-Angebot,,,,,needs_enrichment,
-Angestellte,,,,,needs_enrichment,
-Angst,,,,,needs_enrichment,
-Ankunft,,,,,needs_enrichment,
-Anmeldung,,,,,needs_enrichment,
-Anruf,,,,,needs_enrichment,
-Antwort,,,,,needs_enrichment,
-Anwalt,,,,,needs_enrichment,
-Anzeige,,,,,needs_enrichment,
-Anzug,,,,,needs_enrichment,
-Apfel,,,,,needs_enrichment,
-Apotheke,,,,,needs_enrichment,
-Apparat,,,,,needs_enrichment,
-Appetit,,,,,needs_enrichment,
-Arbeit,,,,,needs_enrichment,
-Arbeiter,,,,,needs_enrichment,
-Arbeitsplatz,,,,,needs_enrichment,
-Arzt,,,,,needs_enrichment,
-Astronaut,,,,,needs_enrichment,
-Atem,,,,,needs_enrichment,
-Atmosphäre,,,,,needs_enrichment,
-Atom,,,,,needs_enrichment,
-Aufenthalt,,,,,needs_enrichment,
-Aufgabe,,,,,needs_enrichment,
-Aufsatz,,,,,needs_enrichment,
-Auge,,,,,needs_enrichment,
-Augenblick,,,,,needs_enrichment,
-Ausdruck,,,,,needs_enrichment,
-Ausflug,,,,,needs_enrichment,
-Ausgang,,,,,needs_enrichment,
-Auskunft,,,,,needs_enrichment,
-Ausland,,,,,needs_enrichment,
-Ausländer,,,,,needs_enrichment,
-Aussage,,,,,needs_enrichment,
-Aussprache,,,,,needs_enrichment,
-Ausweis,,,,,needs_enrichment,
-Auto,,,,,needs_enrichment,
-Autobahn,,,,,needs_enrichment,
-Automat,,,,,needs_enrichment,
-Autor,,,,,needs_enrichment,
-Baby,,,,,needs_enrichment,
-Bach,,,,,needs_enrichment,
-Bäcker,,,,,needs_enrichment,
-Bäckerei,,,,,needs_enrichment,
-Bad,,,,,needs_enrichment,
-Bahn,,,,,needs_enrichment,
-Bahnhof,,,,,needs_enrichment,
-Bahnsteig,,,,,needs_enrichment,
-Balkon,,,,,needs_enrichment,
-Band,,,,,needs_enrichment,
-Bank,,,,,needs_enrichment,
-Bauch,,,,,needs_enrichment,
-Bauer,,,,,needs_enrichment,
-Baum,,,,,needs_enrichment,
-Beamte,,,,,needs_enrichment,
-Bedeutung,,,,,needs_enrichment,
-Bedienung,,,,,needs_enrichment,
-Bedingung,,,,,needs_enrichment,
-Begriff,,,,,needs_enrichment,
-Bein,,,,,needs_enrichment,
-Beispiel,,,,,needs_enrichment,
-Bekannte,,,,,needs_enrichment,
-Benzin,,,,,needs_enrichment,
-Berg,,,,,needs_enrichment,
-Beruf,,,,,needs_enrichment,
-Besuch,,,,,needs_enrichment,
-Bett,,,,,needs_enrichment,
-Bewegung,,,,,needs_enrichment,
-Beziehung,,,,,needs_enrichment,
-Bibel,,,,,needs_enrichment,
-Bibliothek,,,,,needs_enrichment,
-Bier,,,,,needs_enrichment,
-Bild,,,,,needs_enrichment,
-Biologie,,,,,needs_enrichment,
-Birne,,,,,needs_enrichment,
-Bitte,,,,,needs_enrichment,
-Blatt,,,,,needs_enrichment,
-Bleistift,,,,,needs_enrichment,
-Blick,,,,,needs_enrichment,
-Blitz,,,,,needs_enrichment,
-Blume,,,,,needs_enrichment,
-Bluse,,,,,needs_enrichment,
-Blut,,,,,needs_enrichment,
-Boden,,,,,needs_enrichment,
-Bonbon,,,,,needs_enrichment,
-Boot,,,,,needs_enrichment,
-Braut,,,,,needs_enrichment,
-Breite,,,,,needs_enrichment,
-Brief,,,,,needs_enrichment,
-Briefmarke,,,,,needs_enrichment,
-Brille,,,,,needs_enrichment,
-Brot,,,,,needs_enrichment,
-Brötchen,,,,,needs_enrichment,
-Brücke,,,,,needs_enrichment,
-Bruder,,,,,needs_enrichment,
-Brunnen,,,,,needs_enrichment,
-Brust,,,,,needs_enrichment,
-Buch,,,,,needs_enrichment,
-Buchhandlung,,,,,needs_enrichment,
-Buchstabe,,,,,needs_enrichment,
-Burg,,,,,needs_enrichment,
-Bürger,,,,,needs_enrichment,
-Büro,,,,,needs_enrichment,
-Bus,,,,,needs_enrichment,
-Butter,,,,,needs_enrichment,
-Café,,,,,needs_enrichment,
-Cent,,,,,needs_enrichment,
-Chance,,,,,needs_enrichment,
-Charakter,,,,,needs_enrichment,
-Chef,,,,,needs_enrichment,
-Chemie,,,,,needs_enrichment,
-Christ,,,,,needs_enrichment,
-Christentum,,,,,needs_enrichment,
-Computer,,,,,needs_enrichment,
-Dach,,,,,needs_enrichment,
-Dame,,,,,needs_enrichment,
-Dank,,,,,needs_enrichment,
-Datum,,,,,needs_enrichment,
-Decke,,,,,needs_enrichment,
-Demokratie,,,,,needs_enrichment,
-Dichter,,,,,needs_enrichment,
-Dieb,,,,,needs_enrichment,
-Ding,,,,,needs_enrichment,
-Doktor,,,,,needs_enrichment,
-Donner,,,,,needs_enrichment,
-Doppelzimmer,,,,,needs_enrichment,
-Dorf,,,,,needs_enrichment,
-Durst,,,,,needs_enrichment,
-Dusche,,,,,needs_enrichment,
-Dutzend,,,,,needs_enrichment,
-E-Mail,,,,,needs_enrichment,
-Ecke,,,,,needs_enrichment,
-Ehe,,,,,needs_enrichment,
-Ehre,,,,,needs_enrichment,
-Eingang,,,,,needs_enrichment,
-Einladung,,,,,needs_enrichment,
-Einzelzimmer,,,,,needs_enrichment,
-Eis,,,,,needs_enrichment,
-Eisen,,,,,needs_enrichment,
-Eisenbahn,,,,,needs_enrichment,
-Element,,,,,needs_enrichment,
-Eltern,,,,,needs_enrichment,
-Empfänger,,,,,needs_enrichment,
-Ende,,,,,needs_enrichment,
-Enkel,,,,,needs_enrichment,
-Entschuldigung,,,,,needs_enrichment,
-Erdbeben,,,,,needs_enrichment,
-Erde,,,,,needs_enrichment,
-Erdgeschoss,,,,,needs_enrichment,
-Erfahrung,,,,,needs_enrichment,
-Erfolg,,,,,needs_enrichment,
-Erinnerung,,,,,needs_enrichment,
-Erkältung,,,,,needs_enrichment,
-Erlaubnis,,,,,needs_enrichment,
-Ernte,,,,,needs_enrichment,
-Erwachsene,,,,,needs_enrichment,
-Erzählung,,,,,needs_enrichment,
-Erziehung,,,,,needs_enrichment,
-Essig,,,,,needs_enrichment,
-Esszimmer,,,,,needs_enrichment,
-Euro,,,,,needs_enrichment,
-Europa,,,,,needs_enrichment,
-Europäer,,,,,needs_enrichment,
-Examen,,,,,needs_enrichment,
-Export,,,,,needs_enrichment,
-Fabrik,,,,,needs_enrichment,
-Fach,,,,,needs_enrichment,
-Fahrer,,,,,needs_enrichment,
-Fahrkarte,,,,,needs_enrichment,
-Fahrrad,,,,,needs_enrichment,
-Fahrt,,,,,needs_enrichment,
-Fall,,,,,needs_enrichment,
-Familie,,,,,needs_enrichment,
-Familienname,,,,,needs_enrichment,
-Farbe,,,,,needs_enrichment,
-Fehler,,,,,needs_enrichment,
-Feier,,,,,needs_enrichment,
-Feiertag,,,,,needs_enrichment,
-Feld,,,,,needs_enrichment,
-Fenster,,,,,needs_enrichment,
-Ferien,,,,,needs_enrichment,
-Fernseher,,,,,needs_enrichment,
-Feuer,,,,,needs_enrichment,
-Fieber,,,,,needs_enrichment,
-Film,,,,,needs_enrichment,
-Finger,,,,,needs_enrichment,
-Firma,,,,,needs_enrichment,
-Fisch,,,,,needs_enrichment,
-Flasche,,,,,needs_enrichment,
-Fleisch,,,,,needs_enrichment,
-Flug,,,,,needs_enrichment,
-Flughafen,,,,,needs_enrichment,
-Flugzeug,,,,,needs_enrichment,
-Flur,,,,,needs_enrichment,
-Fluss,,,,,needs_enrichment,
-Form,,,,,needs_enrichment,
-Formular,,,,,needs_enrichment,
-Forschung,,,,,needs_enrichment,
-Fortschritt,,,,,needs_enrichment,
-Foto,,,,,needs_enrichment,
-Frage,,,,,needs_enrichment,
-Frau,,,,,needs_enrichment,
-Freiheit,,,,,needs_enrichment,
-Fremde,,,,,needs_enrichment,
-Fremdsprache,,,,,needs_enrichment,
-Freude,,,,,needs_enrichment,
-Freund,,,,,needs_enrichment,
-Frieden,,,,,needs_enrichment,
-Friseur,,,,,needs_enrichment,
-Frucht,,,,,needs_enrichment,
-Frühling,,,,,needs_enrichment,
-Frühstück,,,,,needs_enrichment,
-Führerschein,,,,,needs_enrichment,
-Fuß,,,,,needs_enrichment,
-Fußball,,,,,needs_enrichment,
-Fußgänger,,,,,needs_enrichment,
-Gabel,,,,,needs_enrichment,
-Garage,,,,,needs_enrichment,
-Garten,,,,,needs_enrichment,
-Gast,,,,,needs_enrichment,
-Gasthaus,,,,,needs_enrichment,
-Gebäude,,,,,needs_enrichment,
-Gebiet,,,,,needs_enrichment,
-Gebirge,,,,,needs_enrichment,
-Geburtsort,,,,,needs_enrichment,
-Geburtstag,,,,,needs_enrichment,
-Gedanke,,,,,needs_enrichment,
-Gedicht,,,,,needs_enrichment,
-Gefühl,,,,,needs_enrichment,
-Gegend,,,,,needs_enrichment,
-Gegenwart,,,,,needs_enrichment,
-Gehalt,,,,,needs_enrichment,
-Geige,,,,,needs_enrichment,
-Geist,,,,,needs_enrichment,
-Geld,,,,,needs_enrichment,
-Gemüse,,,,,needs_enrichment,
-Gepäck,,,,,needs_enrichment,
-Gericht,,,,,needs_enrichment,
-Geschäft,,,,,needs_enrichment,
-Geschenk,,,,,needs_enrichment,
-Geschichte,,,,,needs_enrichment,
-Geschirr,,,,,needs_enrichment,
-Geschmack,,,,,needs_enrichment,
-Geschwister,,,,,needs_enrichment,
-Gesellschaft,,,,,needs_enrichment,
-Gesetz,,,,,needs_enrichment,
-Gesicht,,,,,needs_enrichment,
-Gespräch,,,,,needs_enrichment,
-Gesundheit,,,,,needs_enrichment,
-Getränk,,,,,needs_enrichment,
-Gewalt,,,,,needs_enrichment,
-Gewitter,,,,,needs_enrichment,
-Glas,,,,,needs_enrichment,
-Gleis,,,,,needs_enrichment,
-Glück,,,,,needs_enrichment,
-Gold,,,,,needs_enrichment,
-Gott,,,,,needs_enrichment,
-Grad,,,,,needs_enrichment,
-Gramm,,,,,needs_enrichment,
-Gras,,,,,needs_enrichment,
-Grenze,,,,,needs_enrichment,
-Grippe,,,,,needs_enrichment,
-Größe,,,,,needs_enrichment,
-Großmutter,,,,,needs_enrichment,
-Großstadt,,,,,needs_enrichment,
-Großvater,,,,,needs_enrichment,
-Grund,,,,,needs_enrichment,
-Grundgesetz,,,,,needs_enrichment,
-Grundschule,,,,,needs_enrichment,
-Gruppe,,,,,needs_enrichment,
-Gruß,,,,,needs_enrichment,
-Gymnasium,,,,,needs_enrichment,
-Haar,,,,,needs_enrichment,
-Hafen,,,,,needs_enrichment,
-Hals,,,,,needs_enrichment,
-Haltestelle,,,,,needs_enrichment,
-Hand,,,,,needs_enrichment,
-Handel,,,,,needs_enrichment,
-Handtasche,,,,,needs_enrichment,
-Handy,,,,,needs_enrichment,
-Hauptstadt,,,,,needs_enrichment,
-Hauptstraße,,,,,needs_enrichment,
-Haus,,,,,needs_enrichment,
-Hausaufgabe,,,,,needs_enrichment,
-Hausfrau,,,,,needs_enrichment,
-Heft,,,,,needs_enrichment,
-Heimat,,,,,needs_enrichment,
-Heizung,,,,,needs_enrichment,
-Hemd,,,,,needs_enrichment,
-Herbst,,,,,needs_enrichment,
-Herr,,,,,needs_enrichment,
-Herz,,,,,needs_enrichment,
-Hilfe,,,,,needs_enrichment,
-Himmel,,,,,needs_enrichment,
-Hitze,,,,,needs_enrichment,
-Hobby,,,,,needs_enrichment,
-Hochschule,,,,,needs_enrichment,
-Hochzeit,,,,,needs_enrichment,
-Höhe,,,,,needs_enrichment,
-Holz,,,,,needs_enrichment,
-Hose,,,,,needs_enrichment,
-Hotel,,,,,needs_enrichment,
-Huhn,,,,,needs_enrichment,
-Hund,,,,,needs_enrichment,
-Hunger,,,,,needs_enrichment,
-Hut,,,,,needs_enrichment,
-Idee,,,,,needs_enrichment,
-Import,,,,,needs_enrichment,
-Industrie,,,,,needs_enrichment,
-Information,,,,,needs_enrichment,
-Ingenieur,,,,,needs_enrichment,
-Inhalt,,,,,needs_enrichment,
-Insel,,,,,needs_enrichment,
-Institut,,,,,needs_enrichment,
-Interesse,,,,,needs_enrichment,
-Jacke,,,,,needs_enrichment,
-Jahr,,,,,needs_enrichment,
-Jahreszeit,,,,,needs_enrichment,
-Jahrhundert,,,,,needs_enrichment,
-Jazz,,,,,needs_enrichment,
-Job,,,,,needs_enrichment,
-Journalist,,,,,needs_enrichment,
-Jugend,,,,,needs_enrichment,
-Junge,,,,,needs_enrichment,
-Jura,,,,,needs_enrichment,
-Jurist,,,,,needs_enrichment,
-Kaffee,,,,,needs_enrichment,
-Kaiser,,,,,needs_enrichment,
-Kamera,,,,,needs_enrichment,
-Kamerad,,,,,needs_enrichment,
-Kanzler,,,,,needs_enrichment,
-Kapitalismus,,,,,needs_enrichment,
-Kartoffel,,,,,needs_enrichment,
-Käse,,,,,needs_enrichment,
-Kasse,,,,,needs_enrichment,
-Kasten,,,,,needs_enrichment,
-Katze,,,,,needs_enrichment,
-Kaufhaus,,,,,needs_enrichment,
-Kaufmann,,,,,needs_enrichment,
-Keller,,,,,needs_enrichment,
-Kellner,,,,,needs_enrichment,
-Kenner,,,,,needs_enrichment,
-Kenntnis,,,,,needs_enrichment,
-Kern,,,,,needs_enrichment,
-Kerze,,,,,needs_enrichment,
-Kilometer,,,,,needs_enrichment,
-Kind,,,,,needs_enrichment,
-Kindergarten,,,,,needs_enrichment,
-Kino,,,,,needs_enrichment,
-Kirche,,,,,needs_enrichment,
-Klasse,,,,,needs_enrichment,
-Klavier,,,,,needs_enrichment,
-Kleid,,,,,needs_enrichment,
-Kleidung,,,,,needs_enrichment,
-Klima,,,,,needs_enrichment,
-Knie,,,,,needs_enrichment,
-Knochen,,,,,needs_enrichment,
-Knopf,,,,,needs_enrichment,
-Koch,,,,,needs_enrichment,
-Koffer,,,,,needs_enrichment,
-Kohl,,,,,needs_enrichment,
-Kollege,,,,,needs_enrichment,
-Kommunismus,,,,,needs_enrichment,
-König,,,,,needs_enrichment,
-Königin,,,,,needs_enrichment,
-Konto,,,,,needs_enrichment,
-Konzert,,,,,needs_enrichment,
-Kopf,,,,,needs_enrichment,
-Kopfschmerzen,,,,,needs_enrichment,
-Korb,,,,,needs_enrichment,
-Körper,,,,,needs_enrichment,
-Kraft,,,,,needs_enrichment,
-Kraftwerk,,,,,needs_enrichment,
-Kranke,,,,,needs_enrichment,
-Krankenhaus,,,,,needs_enrichment,
-Krankenpfleger,,,,,needs_enrichment,
-Krankheit,,,,,needs_enrichment,
-Krawatte,,,,,needs_enrichment,
-Kreditkarte,,,,,needs_enrichment,
-Kreis,,,,,needs_enrichment,
-Kreuzung,,,,,needs_enrichment,
-Krieg,,,,,needs_enrichment,
-Küche,,,,,needs_enrichment,
-Kuchen,,,,,needs_enrichment,
-Kugelschreiber,,,,,needs_enrichment,
-Kuh,,,,,needs_enrichment,
-Kühlschrank,,,,,needs_enrichment,
-Kultur,,,,,needs_enrichment,
-Kunde,,,,,needs_enrichment,
-Kunst,,,,,needs_enrichment,
-Künstler,,,,,needs_enrichment,
-Kurs,,,,,needs_enrichment,
-Kuss,,,,,needs_enrichment,
-Laden,,,,,needs_enrichment,
-Lampe,,,,,needs_enrichment,
-Land,,,,,needs_enrichment,
-Landschaft,,,,,needs_enrichment,
-Landwirtschaft,,,,,needs_enrichment,
-Lärm,,,,,needs_enrichment,
-Laune,,,,,needs_enrichment,
-Leben,,,,,needs_enrichment,
-Lebensmittel,,,,,needs_enrichment,
-Lehrer,,,,,needs_enrichment,
-Leute,,,,,needs_enrichment,
-Licht,,,,,needs_enrichment,
-Liebe,,,,,needs_enrichment,
-Lied,,,,,needs_enrichment,
-Linie,,,,,needs_enrichment,
-Liste,,,,,needs_enrichment,
-Liter,,,,,needs_enrichment,
-Literatur,,,,,needs_enrichment,
-Lkw,,,,,needs_enrichment,
-Loch,,,,,needs_enrichment,
-Löffel,,,,,needs_enrichment,
-Lohn,,,,,needs_enrichment,
-Lösung,,,,,needs_enrichment,
-Luft,,,,,needs_enrichment,
-Luftpost,,,,,needs_enrichment,
-Lust,,,,,needs_enrichment,
-Macht,,,,,needs_enrichment,
-Mädchen,,,,,needs_enrichment,
-Magen,,,,,needs_enrichment,
-Maler,,,,,needs_enrichment,
-Mangel,,,,,needs_enrichment,
-Mann,,,,,needs_enrichment,
-Mannschaft,,,,,needs_enrichment,
-Mantel,,,,,needs_enrichment,
-Märchen,,,,,needs_enrichment,
-Mark,,,,,needs_enrichment,
-Markt,,,,,needs_enrichment,
-Marktplatz,,,,,needs_enrichment,
-Marmelade,,,,,needs_enrichment,
-Maschine,,,,,needs_enrichment,
-Mathematik,,,,,needs_enrichment,
-Mauer,,,,,needs_enrichment,
-Maus,,,,,needs_enrichment,
-Medikament,,,,,needs_enrichment,
-Medizin,,,,,needs_enrichment,
-Meer,,,,,needs_enrichment,
-Meinung,,,,,needs_enrichment,
-Meister,,,,,needs_enrichment,
-Mensa,,,,,needs_enrichment,
-Mensch,,,,,needs_enrichment,
-Menü,,,,,needs_enrichment,
-Messer,,,,,needs_enrichment,
-Meter,,,,,needs_enrichment,
-Miete,,,,,needs_enrichment,
-Milch,,,,,needs_enrichment,
-Million,,,,,needs_enrichment,
-Minister,,,,,needs_enrichment,
-Minute,,,,,needs_enrichment,
-Mittag,,,,,needs_enrichment,
-Mitte,,,,,needs_enrichment,
-Mittel,,,,,needs_enrichment,
-Mitternacht,,,,,needs_enrichment,
-Möbel,,,,,needs_enrichment,
-Mode,,,,,needs_enrichment,
-Moment,,,,,needs_enrichment,
-Monat,,,,,needs_enrichment,
-Mond,,,,,needs_enrichment,
-Motorrad,,,,,needs_enrichment,
-Mühe,,,,,needs_enrichment,
-Müll,,,,,needs_enrichment,
-Mund,,,,,needs_enrichment,
-Münze,,,,,needs_enrichment,
-Museum,,,,,needs_enrichment,
-Musik,,,,,needs_enrichment,
-Musiker,,,,,needs_enrichment,
-Mut,,,,,needs_enrichment,
-Mutter,,,,,needs_enrichment,
-Nachbar,,,,,needs_enrichment,
-Nachmittag,,,,,needs_enrichment,
-Nachricht,,,,,needs_enrichment,
-Nacht,,,,,needs_enrichment,
-Nachtisch,,,,,needs_enrichment,
-Name,,,,,needs_enrichment,
-Nase,,,,,needs_enrichment,
-Nation,,,,,needs_enrichment,
-Natur,,,,,needs_enrichment,
-Neffe,,,,,needs_enrichment,
-Netz,,,,,needs_enrichment,
-Nichte,,,,,needs_enrichment,
-Norden,,,,,needs_enrichment,
-Not,,,,,needs_enrichment,
-Nummer,,,,,needs_enrichment,
-Ober,,,,,needs_enrichment,
-Obst,,,,,needs_enrichment,
-Ohr,,,,,needs_enrichment,
-Öl,,,,,needs_enrichment,
-Onkel,,,,,needs_enrichment,
-Oper,,,,,needs_enrichment,
-Operation,,,,,needs_enrichment,
-Opfer,,,,,needs_enrichment,
-Orange,,,,,needs_enrichment,
-Ordnung,,,,,needs_enrichment,
-Ort,,,,,needs_enrichment,
-Osten,,,,,needs_enrichment,
-Ostern,,,,,needs_enrichment,
-Paket,,,,,needs_enrichment,
-Papier,,,,,needs_enrichment,
-Park,,,,,needs_enrichment,
-Partei,,,,,needs_enrichment,
-Party,,,,,needs_enrichment,
-Pass,,,,,needs_enrichment,
-Patient,,,,,needs_enrichment,
-Pause,,,,,needs_enrichment,
-Person,,,,,needs_enrichment,
-Pfanne,,,,,needs_enrichment,
-Pferd,,,,,needs_enrichment,
-Pflanze,,,,,needs_enrichment,
-Pflicht,,,,,needs_enrichment,
-Pfund,,,,,needs_enrichment,
-Philosoph,,,,,needs_enrichment,
-Physik,,,,,needs_enrichment,
-Pilz,,,,,needs_enrichment,
-Pkw,,,,,needs_enrichment,
-Plan,,,,,needs_enrichment,
-Platz,,,,,needs_enrichment,
-Politik,,,,,needs_enrichment,
-Polizei,,,,,needs_enrichment,
-Polizist,,,,,needs_enrichment,
-Portemonnaie,,,,,needs_enrichment,
-Post,,,,,needs_enrichment,
-Postamt,,,,,needs_enrichment,
-Postkarte,,,,,needs_enrichment,
-Preis,,,,,needs_enrichment,
-Prinz,,,,,needs_enrichment,
-Prinzessin,,,,,needs_enrichment,
-Problem,,,,,needs_enrichment,
-Professor,,,,,needs_enrichment,
-Programm,,,,,needs_enrichment,
-Prozent,,,,,needs_enrichment,
-Prozess,,,,,needs_enrichment,
-Prüfung,,,,,needs_enrichment,
-Publikum,,,,,needs_enrichment,
-Pullover,,,,,needs_enrichment,
-Punkt,,,,,needs_enrichment,
-Puppe,,,,,needs_enrichment,
-Qualität,,,,,needs_enrichment,
-Quelle,,,,,needs_enrichment,
-Quittung,,,,,needs_enrichment,
-Rad,,,,,needs_enrichment,
-Radio,,,,,needs_enrichment,
-Rat,,,,,needs_enrichment,
-Rathaus,,,,,needs_enrichment,
-Rätsel,,,,,needs_enrichment,
-Räuber,,,,,needs_enrichment,
-Raucher,,,,,needs_enrichment,
-Raum,,,,,needs_enrichment,
-Rechnung,,,,,needs_enrichment,
-Recht,,,,,needs_enrichment,
-Regal,,,,,needs_enrichment,
-Regel,,,,,needs_enrichment,
-Regen,,,,,needs_enrichment,
-Regenmantel,,,,,needs_enrichment,
-Regenschirm,,,,,needs_enrichment,
-Regierung,,,,,needs_enrichment,
-Reis,,,,,needs_enrichment,
-Reise,,,,,needs_enrichment,
-Reisebüro,,,,,needs_enrichment,
-Religion,,,,,needs_enrichment,
-Rente,,,,,needs_enrichment,
-Reparatur,,,,,needs_enrichment,
-Republik,,,,,needs_enrichment,
-Restaurant,,,,,needs_enrichment,
-Revolution,,,,,needs_enrichment,
-Rezept,,,,,needs_enrichment,
-Richter,,,,,needs_enrichment,
-Richtung,,,,,needs_enrichment,
-Riese,,,,,needs_enrichment,
-Ring,,,,,needs_enrichment,
-Rock,,,,,needs_enrichment,
-Rolle,,,,,needs_enrichment,
-Roman,,,,,needs_enrichment,
-Rose,,,,,needs_enrichment,
-Rücken,,,,,needs_enrichment,
-Ruhe,,,,,needs_enrichment,
-Ruhm,,,,,needs_enrichment,
-Sache,,,,,needs_enrichment,
-Saft,,,,,needs_enrichment,
-Salat,,,,,needs_enrichment,
-Salz,,,,,needs_enrichment,
-Sänger,,,,,needs_enrichment,
-Satellit,,,,,needs_enrichment,
-Satz,,,,,needs_enrichment,
-Schach,,,,,needs_enrichment,
-Schaden,,,,,needs_enrichment,
-Schalter,,,,,needs_enrichment,
-Schatten,,,,,needs_enrichment,
-Schauen,,,,,needs_enrichment,
-Schauspiel,,,,,needs_enrichment,
-Schauspieler,,,,,needs_enrichment,
-Scheck,,,,,needs_enrichment,
-Schein,,,,,needs_enrichment,
-Schere,,,,,needs_enrichment,
-Scherz,,,,,needs_enrichment,
-Schicksal,,,,,needs_enrichment,
-Schiff,,,,,needs_enrichment,
-Schild,,,,,needs_enrichment,
-Schinken,,,,,needs_enrichment,
-Schirm,,,,,needs_enrichment,
-Schloss,,,,,needs_enrichment,
-Schluss,,,,,needs_enrichment,
-Schlüssel,,,,,needs_enrichment,
-Schmerz,,,,,needs_enrichment,
-Schmetterling,,,,,needs_enrichment,
-Schmuck,,,,,needs_enrichment,
-Schnee,,,,,needs_enrichment,
-Schokolade,,,,,needs_enrichment,
-Schrank,,,,,needs_enrichment,
-Schrift,,,,,needs_enrichment,
-Schriftsteller,,,,,needs_enrichment,
-Schuh,,,,,needs_enrichment,
-Schule,,,,,needs_enrichment,
-Schüler,,,,,needs_enrichment,
-Schulter,,,,,needs_enrichment,
-Schwein,,,,,needs_enrichment,
-Schwester,,,,,needs_enrichment,
-Schwimmbad,,,,,needs_enrichment,
-See,,,,,needs_enrichment,
-Seele,,,,,needs_enrichment,
-Sehenswürdigkeit,,,,,needs_enrichment,
-Seite,,,,,needs_enrichment,
-Sekretärin,,,,,needs_enrichment,
-Sekunde,,,,,needs_enrichment,
-Semester,,,,,needs_enrichment,
-Sessel,,,,,needs_enrichment,
-Silber,,,,,needs_enrichment,
-Silvester,,,,,needs_enrichment,
-Sinn,,,,,needs_enrichment,
-Sitte,,,,,needs_enrichment,
-Sitzung,,,,,needs_enrichment,
-Ski,,,,,needs_enrichment,
-Socken,,,,,needs_enrichment,
-Sofa,,,,,needs_enrichment,
-Sohn,,,,,needs_enrichment,
-Soldat,,,,,needs_enrichment,
-Sommer,,,,,needs_enrichment,
-Sonne,,,,,needs_enrichment,
-Sorge,,,,,needs_enrichment,
-Sorte,,,,,needs_enrichment,
-Soße,,,,,needs_enrichment,
-Spaß,,,,,needs_enrichment,
-Spaziergang,,,,,needs_enrichment,
-Speisekarte,,,,,needs_enrichment,
-Spiegel,,,,,needs_enrichment,
-Spiel,,,,,needs_enrichment,
-Sport,,,,,needs_enrichment,
-Sprache,,,,,needs_enrichment,
-Spur,,,,,needs_enrichment,
-Staat,,,,,needs_enrichment,
-Stadt,,,,,needs_enrichment,
-Stadtplan,,,,,needs_enrichment,
-Staubsauger,,,,,needs_enrichment,
-Stein,,,,,needs_enrichment,
-Stelle,,,,,needs_enrichment,
-Stern,,,,,needs_enrichment,
-Stiefel,,,,,needs_enrichment,
-Stil,,,,,needs_enrichment,
-Stimme,,,,,needs_enrichment,
-Stock,,,,,needs_enrichment,
-Stoff,,,,,needs_enrichment,
-Strafe,,,,,needs_enrichment,
-Straße,,,,,needs_enrichment,
-Straßenbahn,,,,,needs_enrichment,
-Strecke,,,,,needs_enrichment,
-Strom,,,,,needs_enrichment,
-Strumpf,,,,,needs_enrichment,
-Stück,,,,,needs_enrichment,
-Student,,,,,needs_enrichment,
-Studentenheim,,,,,needs_enrichment,
-Studium,,,,,needs_enrichment,
-Stufe,,,,,needs_enrichment,
-Stuhl,,,,,needs_enrichment,
-Stunde,,,,,needs_enrichment,
-Sturm,,,,,needs_enrichment,
-Süden,,,,,needs_enrichment,
-Supermarkt,,,,,needs_enrichment,
-Suppe,,,,,needs_enrichment,
-Symbol,,,,,needs_enrichment,
-System,,,,,needs_enrichment,
-T-Shirt,,,,,needs_enrichment,
-Tablette,,,,,needs_enrichment,
-Tag,,,,,needs_enrichment,
-Tante,,,,,needs_enrichment,
-Tasche,,,,,needs_enrichment,
-Tasse,,,,,needs_enrichment,
-Tatsache,,,,,needs_enrichment,
-Taxi,,,,,needs_enrichment,
-Technik,,,,,needs_enrichment,
-Technologie,,,,,needs_enrichment,
-Tee,,,,,needs_enrichment,
-Teil,,,,,needs_enrichment,
-Telefon,,,,,needs_enrichment,
-Teller,,,,,needs_enrichment,
-Temperatur,,,,,needs_enrichment,
-Tennis,,,,,needs_enrichment,
-Teppich,,,,,needs_enrichment,
-Theater,,,,,needs_enrichment,
-Tier,,,,,needs_enrichment,
-Tisch,,,,,needs_enrichment,
-Tochter,,,,,needs_enrichment,
-Tod,,,,,needs_enrichment,
-Toilette,,,,,needs_enrichment,
-Tomate,,,,,needs_enrichment,
-Ton,,,,,needs_enrichment,
-Topf,,,,,needs_enrichment,
-Tourist,,,,,needs_enrichment,
-Träne,,,,,needs_enrichment,
-Traube,,,,,needs_enrichment,
-Traum,,,,,needs_enrichment,
-Treppe,,,,,needs_enrichment,
-Trost,,,,,needs_enrichment,
-Tuch,,,,,needs_enrichment,
-Tür,,,,,needs_enrichment,
-Turm,,,,,needs_enrichment,
-Tüte,,,,,needs_enrichment,
-U-Bahn,,,,,needs_enrichment,
-Übersetzung,,,,,needs_enrichment,
-Übung,,,,,needs_enrichment,
-Uhr,,,,,needs_enrichment,
-Umgebung,,,,,needs_enrichment,
-Umwelt,,,,,needs_enrichment,
-Unfall,,,,,needs_enrichment,
-Unglück,,,,,needs_enrichment,
-Uniform,,,,,needs_enrichment,
-Universität,,,,,needs_enrichment,
-Unterhaltung,,,,,needs_enrichment,
-Unternehmen,,,,,needs_enrichment,
-Unterricht,,,,,needs_enrichment,
-Unterschied,,,,,needs_enrichment,
-Unterschrift,,,,,needs_enrichment,
-Urlaub,,,,,needs_enrichment,
-Ursache,,,,,needs_enrichment,
-Urteil,,,,,needs_enrichment,
-Vase,,,,,needs_enrichment,
-Vater,,,,,needs_enrichment,
-Verantwortung,,,,,needs_enrichment,
-Verbrechen,,,,,needs_enrichment,
-Verein,,,,,needs_enrichment,
-Verfassung,,,,,needs_enrichment,
-Vergangenheit,,,,,needs_enrichment,
-Vergnügen,,,,,needs_enrichment,
-Verhältnis,,,,,needs_enrichment,
-Verkäuferin,,,,,needs_enrichment,
-Verkehr,,,,,needs_enrichment,
-Verspätung,,,,,needs_enrichment,
-Versuch,,,,,needs_enrichment,
-Vertrag,,,,,needs_enrichment,
-Verwandte,,,,,needs_enrichment,
-Viertel,,,,,needs_enrichment,
-Visum,,,,,needs_enrichment,
-Vogel,,,,,needs_enrichment,
-Volk,,,,,needs_enrichment,
-Vorlesung,,,,,needs_enrichment,
-Vormittag,,,,,needs_enrichment,
-Vorname,,,,,needs_enrichment,
-Vorschlag,,,,,needs_enrichment,
-Vorsicht,,,,,needs_enrichment,
-Vorstadt,,,,,needs_enrichment,
-Vorteil,,,,,needs_enrichment,
-Waffe,,,,,needs_enrichment,
-Wagen,,,,,needs_enrichment,
-Wahl,,,,,needs_enrichment,
-Wahrheit,,,,,needs_enrichment,
-Währung,,,,,needs_enrichment,
-Wald,,,,,needs_enrichment,
-Wand,,,,,needs_enrichment,
-Ware,,,,,needs_enrichment,
-Wäsche,,,,,needs_enrichment,
-Waschmaschine,,,,,needs_enrichment,
-Wasser,,,,,needs_enrichment,
-Wecker,,,,,needs_enrichment,
-Weg,,,,,needs_enrichment,
-Weihnachten,,,,,needs_enrichment,
-Wein,,,,,needs_enrichment,
-Weise,,,,,needs_enrichment,
-Welt,,,,,needs_enrichment,
-Weltraum,,,,,needs_enrichment,
-Werk,,,,,needs_enrichment,
-Wesen,,,,,needs_enrichment,
-Westen,,,,,needs_enrichment,
-Wetter,,,,,needs_enrichment,
-Wiedersehen,,,,,needs_enrichment,
-Wiese,,,,,needs_enrichment,
-Wille,,,,,needs_enrichment,
-Wind,,,,,needs_enrichment,
-Winter,,,,,needs_enrichment,
-Wirklichkeit,,,,,needs_enrichment,
-Wirtschaft,,,,,needs_enrichment,
-Wissenschaft,,,,,needs_enrichment,
-Witz,,,,,needs_enrichment,
-Woche,,,,,needs_enrichment,
-Wochenende,,,,,needs_enrichment,
-Wohl,,,,,needs_enrichment,
-Wohnung,,,,,needs_enrichment,
-Wohnzimmer,,,,,needs_enrichment,
-Wolke,,,,,needs_enrichment,
-Wort,,,,,needs_enrichment,
-Wörterbuch,,,,,needs_enrichment,
-Wunder,,,,,needs_enrichment,
-Wunsch,,,,,needs_enrichment,
-Wurst,,,,,needs_enrichment,
-Zahl,,,,,needs_enrichment,
-Zahn,,,,,needs_enrichment,
-Zahnarzt,,,,,needs_enrichment,
-Zeichen,,,,,needs_enrichment,
-Zeile,,,,,needs_enrichment,
-Zeit,,,,,needs_enrichment,
-Zeitschrift,,,,,needs_enrichment,
-Zeitung,,,,,needs_enrichment,
-Zentimeter,,,,,needs_enrichment,
-Zentrum,,,,,needs_enrichment,
-Zeugnis,,,,,needs_enrichment,
-Ziel,,,,,needs_enrichment,
-Zigarette,,,,,needs_enrichment,
-Zimmer,,,,,needs_enrichment,
-Zivilisation,,,,,needs_enrichment,
-Zoll,,,,,needs_enrichment,
-Zone,,,,,needs_enrichment,
-Zucker,,,,,needs_enrichment,
-Zug,,,,,needs_enrichment,
-Zukunft,,,,,needs_enrichment,
-Zunge,,,,,needs_enrichment,
-Zustand,,,,,needs_enrichment,
-Zweck,,,,,needs_enrichment,
-Zweifel,,,,,needs_enrichment,
-Zwiebel,,,,,needs_enrichment,
+Abend,der,masculine,Abende,夕方,machine_translated,meaning_ja: Google Translate candidate
+Abfahrt,die,feminine,Abfahrten,出発,machine_translated,meaning_ja: Google Translate candidate
+Abitur,das,neuter,Abiture,高校卒業資格,machine_translated,meaning_ja: Google Translate candidate
+Abschied,der,masculine,Abschiede,別れ,machine_translated,meaning_ja: Google Translate candidate
+Absender,der,masculine,Absender,送信者,machine_translated,meaning_ja: Google Translate candidate
+Absicht,die,feminine,Absichten,意図,machine_translated,meaning_ja: Google Translate candidate
+Achtung,die,feminine,,危険,machine_translated,meaning_ja: Google Translate candidate
+Adresse,die,feminine,Adressen,住所,machine_translated,meaning_ja: Google Translate candidate
+Affe,der,masculine,Affen,類人猿,machine_translated,meaning_ja: Google Translate candidate
+Ahnung,die,feminine,Ahnungen,アイデア,machine_translated,meaning_ja: Google Translate candidate
+Alkohol,der,masculine,Alkohole,アルコール,machine_translated,meaning_ja: Google Translate candidate
+Allee,die,feminine,Alleen,大通り,machine_translated,meaning_ja: Google Translate candidate
+Alte,die,feminine,,古いもの,machine_translated,meaning_ja: Google Translate candidate
+Alter,der,masculine,,古い,machine_translated,"noun candidate: Substantiv,adjektivische Deklination; noun candidate: Substantiv,adjektivische Deklination; noun candidate: Substantiv,adjektivische Deklination; meaning_ja: Google Translate candidate"
+Ampel,die,feminine,Ampeln,信号機,machine_translated,meaning_ja: Google Translate candidate
+Anfang,der,masculine,Anfänge,始まり,machine_translated,meaning_ja: Google Translate candidate
+Angabe,die,feminine,Angaben,情報,machine_translated,meaning_ja: Google Translate candidate
+Angebot,das,neuter,Angebote,オファー,machine_translated,meaning_ja: Google Translate candidate
+Angestellte,die,feminine,,従業員,machine_translated,meaning_ja: Google Translate candidate
+Angst,die,feminine,Ängste,恐れ,machine_translated,meaning_ja: Google Translate candidate
+Ankunft,die,feminine,Ankünfte,到着,machine_translated,meaning_ja: Google Translate candidate
+Anmeldung,die,feminine,Anmeldungen,登録,machine_translated,meaning_ja: Google Translate candidate
+Anruf,der,masculine,Anrufe,電話,machine_translated,meaning_ja: Google Translate candidate
+Antwort,die,feminine,Antworten,答え,machine_translated,meaning_ja: Google Translate candidate
+Anwalt,der,masculine,Anwälte,弁護士,machine_translated,meaning_ja: Google Translate candidate
+Anzeige,die,feminine,Anzeigen,広告,machine_translated,meaning_ja: Google Translate candidate
+Anzug,der,masculine,Anzüge,メンズスーツ,machine_translated,meaning_ja: Google Translate candidate
+Apfel,der,masculine,Äpfel,りんご,machine_translated,meaning_ja: Google Translate candidate
+Apotheke,die,feminine,Apotheken,薬局,machine_translated,meaning_ja: Google Translate candidate
+Apparat,der,masculine,Apparate,装置,machine_translated,meaning_ja: Google Translate candidate
+Appetit,der,masculine,,食欲,machine_translated,meaning_ja: Google Translate candidate
+Arbeit,die,feminine,Arbeiten,仕事,machine_translated,meaning_ja: Google Translate candidate
+Arbeiter,der,masculine,Arbeiter,労働者,machine_translated,meaning_ja: Google Translate candidate
+Arbeitsplatz,der,masculine,Arbeitsplätze,職場,machine_translated,meaning_ja: Google Translate candidate
+Arzt,der,masculine,Ärzte,医師,machine_translated,meaning_ja: Google Translate candidate
+Astronaut,der,masculine,Astronauten,宇宙飛行士,machine_translated,meaning_ja: Google Translate candidate
+Atem,der,masculine,,呼吸,machine_translated,meaning_ja: Google Translate candidate
+Atmosphäre,die,feminine,Atmosphären,雰囲気,machine_translated,meaning_ja: Google Translate candidate
+Atom,das,neuter,Atome,原子,machine_translated,meaning_ja: Google Translate candidate
+Aufenthalt,der,masculine,Aufenthalte,滞在する,machine_translated,meaning_ja: Google Translate candidate
+Aufgabe,die,feminine,Aufgaben,タスク,machine_translated,meaning_ja: Google Translate candidate
+Aufsatz,der,masculine,Aufsätze,エッセイ,machine_translated,meaning_ja: Google Translate candidate
+Auge,das,neuter,Augen,目,machine_translated,meaning_ja: Google Translate candidate
+Augenblick,der,masculine,Augenblicke,一瞬,machine_translated,meaning_ja: Google Translate candidate
+Ausdruck,der,masculine,Ausdrücke,表現,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Ausflug,der,masculine,Ausflüge,寄り道,machine_translated,meaning_ja: Google Translate candidate
+Ausgang,der,masculine,Ausgänge,出口,machine_translated,meaning_ja: Google Translate candidate
+Auskunft,die,feminine,Auskünfte,情報,machine_translated,meaning_ja: Google Translate candidate
+Ausland,das,neuter,,海外,machine_translated,meaning_ja: Google Translate candidate
+Ausländer,der,masculine,Ausländer,外国人,machine_translated,meaning_ja: Google Translate candidate
+Aussage,die,feminine,Aussagen,声明,machine_translated,meaning_ja: Google Translate candidate
+Aussprache,die,feminine,Aussprachen,発音,machine_translated,meaning_ja: Google Translate candidate
+Ausweis,der,masculine,Ausweise,ID,machine_translated,meaning_ja: Google Translate candidate
+Auto,das,neuter,Autos,車,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Autobahn,die,feminine,Autobahnen,高速道路,machine_translated,meaning_ja: Google Translate candidate
+Automat,der,masculine,Automaten,オートマチック,machine_translated,meaning_ja: Google Translate candidate
+Autor,der,masculine,Autoren,著者,machine_translated,meaning_ja: Google Translate candidate
+Baby,das,neuter,Babys,赤ちゃん,machine_translated,meaning_ja: Google Translate candidate
+Bach,der,masculine,Bäche,バッハ,machine_translated,meaning_ja: Google Translate candidate
+Bäcker,der,masculine,Bäcker,ベイカー,machine_translated,meaning_ja: Google Translate candidate
+Bäckerei,die,feminine,Bäckereien,ベーカリー,machine_translated,meaning_ja: Google Translate candidate
+Bad,das,neuter,Bäder,バスルーム,machine_translated,meaning_ja: Google Translate candidate
+Bahn,die,feminine,Bahnen,電車,machine_translated,meaning_ja: Google Translate candidate
+Bahnhof,der,masculine,Bahnhöfe,鉄道駅,machine_translated,meaning_ja: Google Translate candidate
+Bahnsteig,der,masculine,Bahnsteige,プラットフォーム,machine_translated,meaning_ja: Google Translate candidate
+Balkon,der,masculine,Balkons,バルコニー,machine_translated,meaning_ja: Google Translate candidate
+Band,das,neuter,Bänder,バンド,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Bank,die,feminine,Bänke,銀行,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Bauch,der,masculine,Bäuche,腹,machine_translated,meaning_ja: Google Translate candidate
+Bauer,der,masculine,Bauern,農家,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Baum,der,masculine,Bäume,木,machine_translated,meaning_ja: Google Translate candidate
+Beamte,,,,役員,needs_enrichment,meaning_ja: Google Translate candidate
+Bedeutung,die,feminine,Bedeutungen,意味,machine_translated,meaning_ja: Google Translate candidate
+Bedienung,die,feminine,Bedienungen,サービス,machine_translated,meaning_ja: Google Translate candidate
+Bedingung,die,feminine,Bedingungen,状態,machine_translated,meaning_ja: Google Translate candidate
+Begriff,der,masculine,Begriffe,表現,machine_translated,meaning_ja: Google Translate candidate
+Bein,das,neuter,Beine,脚,machine_translated,meaning_ja: Google Translate candidate
+Beispiel,das,neuter,Beispiele,例,machine_translated,meaning_ja: Google Translate candidate
+Bekannte,die,feminine,,知り合い,machine_translated,meaning_ja: Google Translate candidate
+Benzin,das,neuter,Benzine,ガソリン,machine_translated,meaning_ja: Google Translate candidate
+Berg,der,masculine,Berge,山,machine_translated,meaning_ja: Google Translate candidate
+Beruf,der,masculine,Berufe,職業,machine_translated,meaning_ja: Google Translate candidate
+Besuch,der,masculine,Besuche,訪問,machine_translated,meaning_ja: Google Translate candidate
+Bett,das,neuter,Betten,ベッド,machine_translated,meaning_ja: Google Translate candidate
+Bewegung,die,feminine,Bewegungen,動き,machine_translated,meaning_ja: Google Translate candidate
+Beziehung,die,feminine,Beziehungen,関係,machine_translated,meaning_ja: Google Translate candidate
+Bibel,die,feminine,Bibeln,聖書,machine_translated,meaning_ja: Google Translate candidate
+Bibliothek,die,feminine,Bibliotheken,図書館,machine_translated,meaning_ja: Google Translate candidate
+Bier,das,neuter,Biere,ビール,machine_translated,meaning_ja: Google Translate candidate
+Bild,das,neuter,Bilder,写真,machine_translated,meaning_ja: Google Translate candidate
+Biologie,die,feminine,,生物学,machine_translated,meaning_ja: Google Translate candidate
+Birne,die,feminine,Birnen,梨,machine_translated,meaning_ja: Google Translate candidate
+Bitte,die,feminine,Bitten,お願いします,machine_translated,meaning_ja: Google Translate candidate
+Blatt,das,neuter,Blätter,シート,machine_translated,meaning_ja: Google Translate candidate
+Bleistift,der,masculine,Bleistifte,鉛筆,machine_translated,meaning_ja: Google Translate candidate
+Blick,der,masculine,Blicke,ビュー,machine_translated,meaning_ja: Google Translate candidate
+Blitz,der,masculine,Blitze,フラッシュ,machine_translated,meaning_ja: Google Translate candidate
+Blume,die,feminine,Blumen,花,machine_translated,meaning_ja: Google Translate candidate
+Bluse,die,feminine,Blusen,ブラウス,machine_translated,meaning_ja: Google Translate candidate
+Blut,das,neuter,Blute,血,machine_translated,meaning_ja: Google Translate candidate
+Boden,der,masculine,Böden,床,machine_translated,meaning_ja: Google Translate candidate
+Bonbon,der,masculine,Bonbons,甘い,machine_translated,meaning_ja: Google Translate candidate
+Boot,das,neuter,Boote,ボート,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Braut,die,feminine,Bräute,花嫁,machine_translated,meaning_ja: Google Translate candidate
+Breite,die,feminine,Breiten,幅,machine_translated,meaning_ja: Google Translate candidate
+Brief,der,masculine,Briefe,手紙,machine_translated,meaning_ja: Google Translate candidate
+Briefmarke,die,feminine,Briefmarken,切手,machine_translated,meaning_ja: Google Translate candidate
+Brille,die,feminine,Brillen,眼鏡,machine_translated,meaning_ja: Google Translate candidate
+Brot,das,neuter,Brote,パン,machine_translated,meaning_ja: Google Translate candidate
+Brötchen,das,neuter,Brötchen,ロールパン,machine_translated,meaning_ja: Google Translate candidate
+Brücke,die,feminine,Brücken,橋,machine_translated,meaning_ja: Google Translate candidate
+Bruder,der,masculine,Brüder,兄弟,machine_translated,meaning_ja: Google Translate candidate
+Brunnen,der,masculine,Brunnen,春,machine_translated,meaning_ja: Google Translate candidate
+Brust,die,feminine,Brüste,胸,machine_translated,meaning_ja: Google Translate candidate
+Buch,das,neuter,Bücher,本,machine_translated,meaning_ja: Google Translate candidate
+Buchhandlung,die,feminine,Buchhandlungen,本屋,machine_translated,meaning_ja: Google Translate candidate
+Buchstabe,der,masculine,Buchstaben,手紙,machine_translated,meaning_ja: Google Translate candidate
+Burg,die,feminine,Burgen,城,machine_translated,meaning_ja: Google Translate candidate
+Bürger,der,masculine,Bürger,国民,machine_translated,meaning_ja: Google Translate candidate
+Büro,das,neuter,Büros,オフィス,machine_translated,meaning_ja: Google Translate candidate
+Bus,der,masculine,Busse,バス,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Butter,die,feminine,,バター,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Café,die,feminine,,カフェ,machine_translated,meaning_ja: Google Translate candidate
+Cent,der,masculine,Cent,セント,machine_translated,meaning_ja: Google Translate candidate
+Chance,die,feminine,Chancen,チャンス,machine_translated,meaning_ja: Google Translate candidate
+Charakter,der,masculine,Charaktere,キャラクター,machine_translated,meaning_ja: Google Translate candidate
+Chef,der,masculine,Chefs,ボス,machine_translated,meaning_ja: Google Translate candidate
+Chemie,die,feminine,Chemien,化学,machine_translated,meaning_ja: Google Translate candidate
+Christ,der,masculine,Christen,キリスト教徒,machine_translated,meaning_ja: Google Translate candidate
+Christentum,das,neuter,Christentümer,キリスト教,machine_translated,meaning_ja: Google Translate candidate
+Computer,der,masculine,Computer,コンピューター,machine_translated,meaning_ja: Google Translate candidate
+Dach,das,neuter,Dächer,屋根,machine_translated,meaning_ja: Google Translate candidate
+Dame,die,feminine,Damen,レディ,machine_translated,meaning_ja: Google Translate candidate
+Dank,der,masculine,,おかげで,machine_translated,meaning_ja: Google Translate candidate
+Datum,das,neuter,Daten,日付,machine_translated,meaning_ja: Google Translate candidate
+Decke,die,feminine,Decken,シーリング,machine_translated,meaning_ja: Google Translate candidate
+Demokratie,die,feminine,Demokratien,民主主義,machine_translated,meaning_ja: Google Translate candidate
+Dichter,der,masculine,Dichter,詩人,machine_translated,meaning_ja: Google Translate candidate
+Dieb,der,masculine,Diebe,泥棒,machine_translated,meaning_ja: Google Translate candidate
+Ding,das,neuter,Dinge,もの,machine_translated,meaning_ja: Google Translate candidate
+Doktor,der,masculine,Doktoren,医者,machine_translated,meaning_ja: Google Translate candidate
+Donner,der,masculine,Donner,雷,machine_translated,meaning_ja: Google Translate candidate
+Doppelzimmer,das,neuter,Doppelzimmer,ダブルルーム,machine_translated,meaning_ja: Google Translate candidate
+Dorf,das,neuter,Dörfer,村,machine_translated,meaning_ja: Google Translate candidate
+Durst,der,masculine,,渇き,machine_translated,meaning_ja: Google Translate candidate
+Dusche,die,feminine,Duschen,シャワー,machine_translated,meaning_ja: Google Translate candidate
+Dutzend,das,neuter,Dutzende,ダース,machine_translated,meaning_ja: Google Translate candidate
+E-Mail,das,neuter,Emails,電子メール,machine_translated,meaning_ja: Google Translate candidate
+Ecke,die,feminine,Ecken,コーナー,machine_translated,meaning_ja: Google Translate candidate
+Ehe,die,feminine,Ehen,前に,machine_translated,meaning_ja: Google Translate candidate
+Ehre,die,feminine,Ehren,名誉,machine_translated,meaning_ja: Google Translate candidate
+Eingang,der,masculine,Eingänge,入り口,machine_translated,meaning_ja: Google Translate candidate
+Einladung,die,feminine,Einladungen,招待,machine_translated,meaning_ja: Google Translate candidate
+Einzelzimmer,das,neuter,Einzelzimmer,シングルルーム,machine_translated,meaning_ja: Google Translate candidate
+Eis,das,neuter,,氷,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Eisen,das,neuter,Eisen,鉄,machine_translated,meaning_ja: Google Translate candidate
+Eisenbahn,die,feminine,Eisenbahnen,鉄道,machine_translated,meaning_ja: Google Translate candidate
+Element,das,neuter,Elemente,要素,machine_translated,meaning_ja: Google Translate candidate
+Eltern,die,plural,Eltern,両親,machine_translated,meaning_ja: Google Translate candidate
+Empfänger,der,masculine,Empfänger,受信者,machine_translated,meaning_ja: Google Translate candidate
+Ende,das,neuter,Enden,終わり,machine_translated,meaning_ja: Google Translate candidate
+Enkel,der,masculine,Enkel,孫,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Entschuldigung,die,feminine,Entschuldigungen,すみません,machine_translated,meaning_ja: Google Translate candidate
+Erdbeben,das,neuter,Erdbeben,地震,machine_translated,meaning_ja: Google Translate candidate
+Erde,die,feminine,Erden,地球,machine_translated,meaning_ja: Google Translate candidate
+Erdgeschoss,das,neuter,Erdgeschosse,1階,machine_translated,meaning_ja: Google Translate candidate
+Erfahrung,die,feminine,Erfahrungen,経験,machine_translated,meaning_ja: Google Translate candidate
+Erfolg,der,masculine,Erfolge,成功,machine_translated,meaning_ja: Google Translate candidate
+Erinnerung,die,feminine,Erinnerungen,メモリ,machine_translated,meaning_ja: Google Translate candidate
+Erkältung,die,feminine,Erkältungen,風邪,machine_translated,meaning_ja: Google Translate candidate
+Erlaubnis,die,feminine,Erlaubnisse,許可,machine_translated,meaning_ja: Google Translate candidate
+Ernte,die,feminine,Ernten,収穫,machine_translated,meaning_ja: Google Translate candidate
+Erwachsene,die,feminine,,アダルト,machine_translated,meaning_ja: Google Translate candidate
+Erzählung,die,feminine,Erzählungen,物語,machine_translated,meaning_ja: Google Translate candidate
+Erziehung,die,feminine,,育成,machine_translated,meaning_ja: Google Translate candidate
+Essig,der,masculine,Essige,酢,machine_translated,meaning_ja: Google Translate candidate
+Esszimmer,das,neuter,Esszimmer,ダイニングルーム,machine_translated,meaning_ja: Google Translate candidate
+Euro,der,masculine,Euros,ユーロ,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Europa,die,feminine,,ヨーロッパ,machine_translated,meaning_ja: Google Translate candidate
+Europäer,der,masculine,Europäer,ヨーロッパ人,machine_translated,meaning_ja: Google Translate candidate
+Examen,das,neuter,Examina,テスト,machine_translated,meaning_ja: Google Translate candidate
+Export,der,masculine,Exporte,輸出,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Fabrik,die,feminine,Fabriken,工場,machine_translated,meaning_ja: Google Translate candidate
+Fach,das,neuter,Fächer,学問,machine_translated,meaning_ja: Google Translate candidate
+Fahrer,der,masculine,Fahrer,ドライバ,machine_translated,meaning_ja: Google Translate candidate
+Fahrkarte,die,feminine,Fahrkarten,チケット,machine_translated,meaning_ja: Google Translate candidate
+Fahrrad,das,neuter,Fahrräder,自転車,machine_translated,meaning_ja: Google Translate candidate
+Fahrt,die,feminine,Fahrten,ドライブ,machine_translated,meaning_ja: Google Translate candidate
+Fall,der,masculine,Fälle,場合,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Familie,die,feminine,Familien,家族,machine_translated,meaning_ja: Google Translate candidate
+Familienname,der,masculine,Familiennamen,姓,machine_translated,meaning_ja: Google Translate candidate
+Farbe,die,feminine,Farben,色,machine_translated,meaning_ja: Google Translate candidate
+Fehler,der,masculine,Fehler,間違い,machine_translated,meaning_ja: Google Translate candidate
+Feier,die,feminine,Feiern,お祝い,machine_translated,meaning_ja: Google Translate candidate
+Feiertag,der,masculine,Feiertage,休日,machine_translated,meaning_ja: Google Translate candidate
+Feld,das,neuter,Felder,分野,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Fenster,das,neuter,Fenster,ウィンドウ,machine_translated,meaning_ja: Google Translate candidate
+Ferien,die,plural,Ferien,休暇,machine_translated,meaning_ja: Google Translate candidate
+Fernseher,der,masculine,Fernseher,テレビ,machine_translated,meaning_ja: Google Translate candidate
+Feuer,das,neuter,Feuer,火,machine_translated,meaning_ja: Google Translate candidate
+Fieber,das,neuter,Fieber,熱,machine_translated,meaning_ja: Google Translate candidate
+Film,der,masculine,Filme,膜,machine_translated,meaning_ja: Google Translate candidate
+Finger,der,masculine,Finger,指,machine_translated,meaning_ja: Google Translate candidate
+Firma,die,feminine,Firmen,会社,machine_translated,meaning_ja: Google Translate candidate
+Fisch,der,masculine,Fische,魚,machine_translated,meaning_ja: Google Translate candidate
+Flasche,die,feminine,Flaschen,ボトル,machine_translated,meaning_ja: Google Translate candidate
+Fleisch,das,neuter,,肉,machine_translated,meaning_ja: Google Translate candidate
+Flug,der,masculine,Flüge,フライト,machine_translated,meaning_ja: Google Translate candidate
+Flughafen,der,masculine,Flughäfen,空港,machine_translated,meaning_ja: Google Translate candidate
+Flugzeug,das,neuter,Flugzeuge,飛行機,machine_translated,meaning_ja: Google Translate candidate
+Flur,der,masculine,Flure,廊下,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Fluss,der,masculine,Flüsse,流れ,machine_translated,meaning_ja: Google Translate candidate
+Form,die,feminine,Formen,形状,machine_translated,meaning_ja: Google Translate candidate
+Formular,das,neuter,Formulare,形状,machine_translated,meaning_ja: Google Translate candidate
+Forschung,die,feminine,Forschungen,研究,machine_translated,meaning_ja: Google Translate candidate
+Fortschritt,der,masculine,Fortschritte,進捗,machine_translated,meaning_ja: Google Translate candidate
+Foto,das,neuter,Fotos,写真,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Frage,die,feminine,Fragen,聞く,machine_translated,meaning_ja: Google Translate candidate
+Frau,die,feminine,Frauen,女性,machine_translated,meaning_ja: Google Translate candidate
+Freiheit,die,feminine,Freiheiten,自由,machine_translated,meaning_ja: Google Translate candidate
+Fremde,die,feminine,,見知らぬ人,machine_translated,"noun candidate: Substantiv,adjektivische Deklination; noun candidate: Substantiv,adjektivische Deklination; noun candidate: Substantiv,adjektivische Deklination; meaning_ja: Google Translate candidate"
+Fremdsprache,die,feminine,Fremdsprachen,外国語,machine_translated,meaning_ja: Google Translate candidate
+Freude,die,feminine,Freuden,喜び,machine_translated,meaning_ja: Google Translate candidate
+Freund,der,masculine,Freunde,友達,machine_translated,meaning_ja: Google Translate candidate
+Frieden,der,masculine,Frieden,平和,machine_translated,meaning_ja: Google Translate candidate
+Friseur,der,masculine,Friseure,理容師,machine_translated,meaning_ja: Google Translate candidate
+Frucht,die,feminine,Früchte,フルーツ,machine_translated,meaning_ja: Google Translate candidate
+Frühling,der,masculine,Frühlinge,春,machine_translated,meaning_ja: Google Translate candidate
+Frühstück,das,neuter,Frühstücke,朝食,machine_translated,meaning_ja: Google Translate candidate
+Führerschein,der,masculine,Führerscheine,運転免許証,machine_translated,meaning_ja: Google Translate candidate
+Fuß,der,masculine,Füße,足,machine_translated,meaning_ja: Google Translate candidate
+Fußball,der,masculine,Fußbälle,フットボール,machine_translated,meaning_ja: Google Translate candidate
+Fußgänger,der,masculine,Fußgänger,歩行者,machine_translated,meaning_ja: Google Translate candidate
+Gabel,die,feminine,Gabeln,フォーク,machine_translated,meaning_ja: Google Translate candidate
+Garage,die,feminine,Garagen,ガレージ,machine_translated,meaning_ja: Google Translate candidate
+Garten,der,masculine,Gärten,庭,machine_translated,meaning_ja: Google Translate candidate
+Gast,der,masculine,Gäste,ゲスト,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Gasthaus,das,neuter,Gasthäuser,宿,machine_translated,meaning_ja: Google Translate candidate
+Gebäude,das,neuter,Gebäude,建物,machine_translated,meaning_ja: Google Translate candidate
+Gebiet,das,neuter,Gebiete,エリア,machine_translated,meaning_ja: Google Translate candidate
+Gebirge,das,neuter,Gebirge,山,machine_translated,meaning_ja: Google Translate candidate
+Geburtsort,der,masculine,Geburtsorte,出生地,machine_translated,meaning_ja: Google Translate candidate
+Geburtstag,der,masculine,Geburtstage,誕生日,machine_translated,meaning_ja: Google Translate candidate
+Gedanke,der,masculine,Gedanken,考え,machine_translated,meaning_ja: Google Translate candidate
+Gedicht,das,neuter,Gedichte,詩,machine_translated,meaning_ja: Google Translate candidate
+Gefühl,das,neuter,Gefühle,フィーリング,machine_translated,meaning_ja: Google Translate candidate
+Gegend,die,feminine,Gegenden,エリア,machine_translated,meaning_ja: Google Translate candidate
+Gegenwart,die,feminine,,現在,machine_translated,meaning_ja: Google Translate candidate
+Gehalt,der,masculine,Gehalte,給料,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Geige,die,feminine,Geigen,バイオリン,machine_translated,meaning_ja: Google Translate candidate
+Geist,der,masculine,Geister,精神,machine_translated,meaning_ja: Google Translate candidate
+Geld,das,neuter,Gelder,お金,machine_translated,meaning_ja: Google Translate candidate
+Gemüse,das,neuter,Gemüse,野菜,machine_translated,meaning_ja: Google Translate candidate
+Gepäck,das,neuter,,手荷物,machine_translated,meaning_ja: Google Translate candidate
+Gericht,das,neuter,Gerichte,裁判所,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Geschäft,das,neuter,Geschäfte,仕事,machine_translated,meaning_ja: Google Translate candidate
+Geschenk,das,neuter,Geschenke,贈り物,machine_translated,meaning_ja: Google Translate candidate
+Geschichte,die,feminine,Geschichten,話,machine_translated,meaning_ja: Google Translate candidate
+Geschirr,das,neuter,Geschirre,料理,machine_translated,meaning_ja: Google Translate candidate
+Geschmack,der,masculine,Geschmäcke,味,machine_translated,meaning_ja: Google Translate candidate
+Geschwister,das,neuter,Geschwister,兄弟,machine_translated,meaning_ja: Google Translate candidate
+Gesellschaft,die,feminine,Gesellschaften,会社,machine_translated,meaning_ja: Google Translate candidate
+Gesetz,das,neuter,Gesetze,法,machine_translated,meaning_ja: Google Translate candidate
+Gesicht,das,neuter,Gesichter,顔,machine_translated,meaning_ja: Google Translate candidate
+Gespräch,das,neuter,Gespräche,会話,machine_translated,meaning_ja: Google Translate candidate
+Gesundheit,die,feminine,,健康,machine_translated,meaning_ja: Google Translate candidate
+Getränk,das,neuter,Getränke,飲み物,machine_translated,meaning_ja: Google Translate candidate
+Gewalt,die,feminine,Gewalten,暴力,machine_translated,meaning_ja: Google Translate candidate
+Gewitter,das,neuter,Gewitter,雷雨,machine_translated,meaning_ja: Google Translate candidate
+Glas,das,neuter,Gläser,ガラス,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Gleis,das,neuter,Gleise,追跡,machine_translated,meaning_ja: Google Translate candidate
+Glück,das,neuter,,運,machine_translated,meaning_ja: Google Translate candidate
+Gold,das,neuter,,金,machine_translated,meaning_ja: Google Translate candidate
+Gott,der,masculine,Götter,神,machine_translated,meaning_ja: Google Translate candidate
+Grad,der,masculine,Grade,程度,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Gramm,das,neuter,Gramme,グラム,machine_translated,meaning_ja: Google Translate candidate
+Gras,das,neuter,Gräser,草,machine_translated,meaning_ja: Google Translate candidate
+Grenze,die,feminine,Grenzen,国境,machine_translated,meaning_ja: Google Translate candidate
+Grippe,die,feminine,Grippen,インフルエンザ,machine_translated,meaning_ja: Google Translate candidate
+Größe,die,feminine,Größen,サイズ,machine_translated,meaning_ja: Google Translate candidate
+Großmutter,die,feminine,Großmütter,祖母,machine_translated,meaning_ja: Google Translate candidate
+Großstadt,die,feminine,Großstädte,大都市,machine_translated,meaning_ja: Google Translate candidate
+Großvater,der,masculine,Großväter,祖父,machine_translated,meaning_ja: Google Translate candidate
+Grund,der,masculine,Gründe,理由,machine_translated,meaning_ja: Google Translate candidate
+Grundgesetz,das,neuter,Grundgesetze,基本法,machine_translated,meaning_ja: Google Translate candidate
+Grundschule,die,feminine,Grundschulen,小学校,machine_translated,meaning_ja: Google Translate candidate
+Gruppe,die,feminine,Gruppen,グループ,machine_translated,meaning_ja: Google Translate candidate
+Gruß,der,masculine,Grüße,挨拶,machine_translated,meaning_ja: Google Translate candidate
+Gymnasium,das,neuter,Gymnasien,高校,machine_translated,meaning_ja: Google Translate candidate
+Haar,das,neuter,Haare,髪,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Hafen,der,masculine,Häfen,港,machine_translated,meaning_ja: Google Translate candidate
+Hals,der,masculine,Hälse,ネック,machine_translated,meaning_ja: Google Translate candidate
+Haltestelle,die,feminine,Haltestellen,停止,machine_translated,meaning_ja: Google Translate candidate
+Hand,die,feminine,Hände,手,machine_translated,meaning_ja: Google Translate candidate
+Handel,der,masculine,Händel,貿易,machine_translated,meaning_ja: Google Translate candidate
+Handtasche,die,feminine,Handtaschen,ハンドバッグ,machine_translated,meaning_ja: Google Translate candidate
+Handy,das,neuter,Handys,携帯電話,machine_translated,meaning_ja: Google Translate candidate
+Hauptstadt,die,feminine,Hauptstädte,首都,machine_translated,meaning_ja: Google Translate candidate
+Hauptstraße,die,feminine,Hauptstraßen,メインストリート,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Haus,das,neuter,Häuser,家,machine_translated,meaning_ja: Google Translate candidate
+Hausaufgabe,die,feminine,Hausaufgaben,宿題,machine_translated,meaning_ja: Google Translate candidate
+Hausfrau,die,feminine,Hausfrauen,主婦,machine_translated,meaning_ja: Google Translate candidate
+Heft,das,neuter,Hefte,ノート,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Heimat,die,feminine,Heimaten,ホームタウン,machine_translated,meaning_ja: Google Translate candidate
+Heizung,die,feminine,Heizungen,加熱,machine_translated,meaning_ja: Google Translate candidate
+Hemd,das,neuter,Hemden,シャツ,machine_translated,meaning_ja: Google Translate candidate
+Herbst,der,masculine,Herbste,秋,machine_translated,meaning_ja: Google Translate candidate
+Herr,der,masculine,Herren,ミスター,machine_translated,meaning_ja: Google Translate candidate
+Herz,das,neuter,Herzen,心臓,machine_translated,meaning_ja: Google Translate candidate
+Hilfe,die,feminine,Hilfen,ヘルプ,machine_translated,meaning_ja: Google Translate candidate
+Himmel,der,masculine,Himmel,天国,machine_translated,meaning_ja: Google Translate candidate
+Hitze,die,feminine,Hitzen,熱,machine_translated,meaning_ja: Google Translate candidate
+Hobby,das,neuter,Hobbys,趣味,machine_translated,meaning_ja: Google Translate candidate
+Hochschule,die,feminine,Hochschulen,カレッジ,machine_translated,meaning_ja: Google Translate candidate
+Hochzeit,die,feminine,Hochzeiten,結婚式,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Höhe,die,feminine,Höhen,身長,machine_translated,meaning_ja: Google Translate candidate
+Holz,das,neuter,Hölzer,木材,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Hose,die,feminine,Hosen,パンツ,machine_translated,meaning_ja: Google Translate candidate
+Hotel,das,neuter,Hotels,ホテル,machine_translated,meaning_ja: Google Translate candidate
+Huhn,das,neuter,Hühner,チキン,machine_translated,meaning_ja: Google Translate candidate
+Hund,der,masculine,Hunde,犬,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Hunger,der,masculine,,飢え,machine_translated,meaning_ja: Google Translate candidate
+Hut,der,masculine,Hüte,帽子,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Idee,die,feminine,Ideen,アイデア,machine_translated,meaning_ja: Google Translate candidate
+Import,der,masculine,Importe,輸入,machine_translated,meaning_ja: Google Translate candidate
+Industrie,die,feminine,Industrien,業界,machine_translated,meaning_ja: Google Translate candidate
+Information,die,feminine,Informationen,情報,machine_translated,meaning_ja: Google Translate candidate
+Ingenieur,der,masculine,Ingenieure,エンジニア,machine_translated,meaning_ja: Google Translate candidate
+Inhalt,der,masculine,Inhalte,コンテンツ,machine_translated,meaning_ja: Google Translate candidate
+Insel,die,feminine,Inseln,島,machine_translated,meaning_ja: Google Translate candidate
+Institut,das,neuter,Institute,研究所,machine_translated,meaning_ja: Google Translate candidate
+Interesse,das,neuter,Interessen,興味,machine_translated,meaning_ja: Google Translate candidate
+Jacke,die,feminine,Jacken,ジャケット,machine_translated,meaning_ja: Google Translate candidate
+Jahr,das,neuter,Jahre,年,machine_translated,meaning_ja: Google Translate candidate
+Jahreszeit,die,feminine,Jahreszeiten,季節,machine_translated,meaning_ja: Google Translate candidate
+Jahrhundert,das,neuter,Jahrhunderte,世紀,machine_translated,meaning_ja: Google Translate candidate
+Jazz,der,masculine,,ジャズ,machine_translated,meaning_ja: Google Translate candidate
+Job,der,masculine,Jobs,仕事,machine_translated,meaning_ja: Google Translate candidate
+Journalist,der,masculine,Journalisten,ジャーナリスト,machine_translated,meaning_ja: Google Translate candidate
+Jugend,die,feminine,,若者,machine_translated,meaning_ja: Google Translate candidate
+Junge,der,masculine,Jungen,男の子,machine_translated,meaning_ja: Google Translate candidate
+Jura,der,masculine,,法,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Jurist,der,masculine,Juristen,法学者,machine_translated,meaning_ja: Google Translate candidate
+Kaffee,der,masculine,Kaffees,コーヒー,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Kaiser,der,masculine,Kaiser,天皇,machine_translated,meaning_ja: Google Translate candidate
+Kamera,die,feminine,Kameras,カメラ,machine_translated,meaning_ja: Google Translate candidate
+Kamerad,der,masculine,Kameraden,メイト,machine_translated,meaning_ja: Google Translate candidate
+Kanzler,der,masculine,Kanzler,首相,machine_translated,meaning_ja: Google Translate candidate
+Kapitalismus,der,masculine,,資本主義,machine_translated,meaning_ja: Google Translate candidate
+Kartoffel,die,feminine,Kartoffeln,じゃがいも,machine_translated,meaning_ja: Google Translate candidate
+Käse,der,masculine,Käse,チーズ,machine_translated,meaning_ja: Google Translate candidate
+Kasse,die,feminine,Kassen,チェックアウト,machine_translated,meaning_ja: Google Translate candidate
+Kasten,der,masculine,Kästen,木箱,machine_translated,meaning_ja: Google Translate candidate
+Katze,die,feminine,Katzen,猫,machine_translated,meaning_ja: Google Translate candidate
+Kaufhaus,das,neuter,Kaufhäuser,デパート,machine_translated,meaning_ja: Google Translate candidate
+Kaufmann,der,masculine,Kaufmänner,商人,machine_translated,meaning_ja: Google Translate candidate
+Keller,der,masculine,Keller,地下室,machine_translated,meaning_ja: Google Translate candidate
+Kellner,der,masculine,Kellner,ウェイター,machine_translated,meaning_ja: Google Translate candidate
+Kenner,der,masculine,Kenner,鑑定家,machine_translated,meaning_ja: Google Translate candidate
+Kenntnis,die,feminine,Kenntnisse,知識,machine_translated,meaning_ja: Google Translate candidate
+Kern,der,masculine,Kerne,コア,machine_translated,meaning_ja: Google Translate candidate
+Kerze,die,feminine,Kerzen,キャンドル,machine_translated,meaning_ja: Google Translate candidate
+Kilometer,der,masculine,Kilometer,キロメートル,machine_translated,meaning_ja: Google Translate candidate
+Kind,das,neuter,Kinder,子供,machine_translated,meaning_ja: Google Translate candidate
+Kindergarten,der,masculine,Kindergärten,幼稚園,machine_translated,meaning_ja: Google Translate candidate
+Kino,das,neuter,Kinos,シネマ,machine_translated,meaning_ja: Google Translate candidate
+Kirche,die,feminine,Kirchen,教会,machine_translated,meaning_ja: Google Translate candidate
+Klasse,die,feminine,Klassen,クラス,machine_translated,meaning_ja: Google Translate candidate
+Klavier,das,neuter,Klaviere,ピアノ,machine_translated,meaning_ja: Google Translate candidate
+Kleid,das,neuter,Kleider,ドレス,machine_translated,meaning_ja: Google Translate candidate
+Kleidung,die,feminine,Kleidungen,衣類,machine_translated,meaning_ja: Google Translate candidate
+Klima,das,neuter,Klimas,気候,machine_translated,meaning_ja: Google Translate candidate
+Knie,das,neuter,Knie,膝,machine_translated,meaning_ja: Google Translate candidate
+Knochen,der,masculine,Knochen,骨,machine_translated,meaning_ja: Google Translate candidate
+Knopf,der,masculine,Knöpfe,ボタン,machine_translated,meaning_ja: Google Translate candidate
+Koch,der,masculine,Köche,料理する,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Koffer,der,masculine,Koffer,スーツケース,machine_translated,meaning_ja: Google Translate candidate
+Kohl,der,masculine,Kohle,キャベツ,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Kollege,der,masculine,Kollegen,同僚,machine_translated,meaning_ja: Google Translate candidate
+Kommunismus,der,masculine,,共産主義,machine_translated,meaning_ja: Google Translate candidate
+König,der,masculine,Könige,王,machine_translated,meaning_ja: Google Translate candidate
+Königin,die,feminine,Königinnen,女王,machine_translated,meaning_ja: Google Translate candidate
+Konto,das,neuter,Konten,アカウント,machine_translated,meaning_ja: Google Translate candidate
+Konzert,das,neuter,Konzerte,コンサート,machine_translated,meaning_ja: Google Translate candidate
+Kopf,der,masculine,Köpfe,頭,machine_translated,meaning_ja: Google Translate candidate
+Kopfschmerzen,die,plural,Kopfschmerzen,頭痛,machine_translated,meaning_ja: Google Translate candidate
+Korb,der,masculine,Körbe,バスケット,machine_translated,meaning_ja: Google Translate candidate
+Körper,der,masculine,Körper,体,machine_translated,meaning_ja: Google Translate candidate
+Kraft,die,feminine,Kräfte,力,machine_translated,meaning_ja: Google Translate candidate
+Kraftwerk,das,neuter,Kraftwerke,発電所,machine_translated,meaning_ja: Google Translate candidate
+Kranke,die,feminine,,病気,machine_translated,meaning_ja: Google Translate candidate
+Krankenhaus,das,neuter,Krankenhäuser,病院,machine_translated,meaning_ja: Google Translate candidate
+Krankenpfleger,der,masculine,Krankenpfleger,看護師,machine_translated,meaning_ja: Google Translate candidate
+Krankheit,die,feminine,Krankheiten,病気,machine_translated,meaning_ja: Google Translate candidate
+Krawatte,die,feminine,Krawatten,ネクタイ,machine_translated,meaning_ja: Google Translate candidate
+Kreditkarte,die,feminine,Kreditkarten,クレジットカード,machine_translated,meaning_ja: Google Translate candidate
+Kreis,der,masculine,Kreise,丸,machine_translated,meaning_ja: Google Translate candidate
+Kreuzung,die,feminine,Kreuzungen,交差点,machine_translated,meaning_ja: Google Translate candidate
+Krieg,der,masculine,Kriege,戦争,machine_translated,meaning_ja: Google Translate candidate
+Küche,die,feminine,Küchen,台所,machine_translated,meaning_ja: Google Translate candidate
+Kuchen,der,masculine,Kuchen,ケーキ,machine_translated,meaning_ja: Google Translate candidate
+Kugelschreiber,der,masculine,Kugelschreiber,ボールペン,machine_translated,meaning_ja: Google Translate candidate
+Kuh,die,feminine,Kühe,牛,machine_translated,meaning_ja: Google Translate candidate
+Kühlschrank,der,masculine,Kühlschränke,冷蔵庫,machine_translated,meaning_ja: Google Translate candidate
+Kultur,die,feminine,Kulturen,文化,machine_translated,meaning_ja: Google Translate candidate
+Kunde,der,masculine,Kunden,お客様,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Kunst,die,feminine,Künste,美術,machine_translated,meaning_ja: Google Translate candidate
+Künstler,der,masculine,Künstler,アーティスト,machine_translated,meaning_ja: Google Translate candidate
+Kurs,der,masculine,Kurse,コース,machine_translated,meaning_ja: Google Translate candidate
+Kuss,der,masculine,Küsse,キス,machine_translated,meaning_ja: Google Translate candidate
+Laden,der,masculine,Läden,負荷,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Lampe,die,feminine,Lampen,ランプ,machine_translated,meaning_ja: Google Translate candidate
+Land,das,neuter,Länder,国,machine_translated,meaning_ja: Google Translate candidate
+Landschaft,die,feminine,Landschaften,風景,machine_translated,meaning_ja: Google Translate candidate
+Landwirtschaft,die,feminine,Landwirtschaften,農業,machine_translated,meaning_ja: Google Translate candidate
+Lärm,der,masculine,,ノイズ,machine_translated,meaning_ja: Google Translate candidate
+Laune,die,feminine,Launen,気分,machine_translated,meaning_ja: Google Translate candidate
+Leben,das,neuter,Leben,人生,machine_translated,meaning_ja: Google Translate candidate
+Lebensmittel,das,neuter,Lebensmittel,食料品,machine_translated,meaning_ja: Google Translate candidate
+Lehrer,der,masculine,Lehrer,教師,machine_translated,meaning_ja: Google Translate candidate
+Leute,die,plural,Leute,人々,machine_translated,meaning_ja: Google Translate candidate
+Licht,das,neuter,Lichter,ライト,machine_translated,meaning_ja: Google Translate candidate
+Liebe,die,feminine,Lieben,愛,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Lied,das,neuter,Lieder,歌,machine_translated,meaning_ja: Google Translate candidate
+Linie,die,feminine,Linien,ライン,machine_translated,meaning_ja: Google Translate candidate
+Liste,die,feminine,Listen,リスト,machine_translated,meaning_ja: Google Translate candidate
+Liter,der,masculine,Liter,リットル,machine_translated,meaning_ja: Google Translate candidate
+Literatur,die,feminine,Literaturen,文学,machine_translated,meaning_ja: Google Translate candidate
+Lkw,der,masculine,Lkw,トラック,machine_translated,meaning_ja: Google Translate candidate
+Loch,das,neuter,Löcher,穴,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Löffel,der,masculine,Löffel,スプーン,machine_translated,meaning_ja: Google Translate candidate
+Lohn,der,masculine,Löhne,給料,machine_translated,meaning_ja: Google Translate candidate
+Lösung,die,feminine,Lösungen,解決,machine_translated,meaning_ja: Google Translate candidate
+Luft,die,feminine,Lüfte,空気,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Luftpost,die,feminine,,航空便,machine_translated,meaning_ja: Google Translate candidate
+Lust,die,feminine,Lüste,欲望,machine_translated,meaning_ja: Google Translate candidate
+Macht,die,feminine,Mächte,力,machine_translated,meaning_ja: Google Translate candidate
+Mädchen,das,neuter,Mädchen,女の子,machine_translated,meaning_ja: Google Translate candidate
+Magen,der,masculine,Mägen,胃,machine_translated,meaning_ja: Google Translate candidate
+Maler,der,masculine,Maler,画家,machine_translated,meaning_ja: Google Translate candidate
+Mangel,der,masculine,Mängel,不足,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Mann,der,masculine,Männer,男,machine_translated,meaning_ja: Google Translate candidate
+Mannschaft,die,feminine,Mannschaften,チーム,machine_translated,meaning_ja: Google Translate candidate
+Mantel,der,masculine,Mäntel,コート,machine_translated,meaning_ja: Google Translate candidate
+Märchen,das,neuter,Märchen,おとぎ話,machine_translated,meaning_ja: Google Translate candidate
+Mark,die,feminine,Mark,マーク,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Markt,der,masculine,Märkte,市場,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Marktplatz,der,masculine,Marktplätze,市場,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Marmelade,die,feminine,Marmeladen,ジャム,machine_translated,meaning_ja: Google Translate candidate
+Maschine,die,feminine,Maschinen,機械,machine_translated,meaning_ja: Google Translate candidate
+Mathematik,die,feminine,,数学,machine_translated,meaning_ja: Google Translate candidate
+Mauer,die,feminine,Mauern,壁,machine_translated,meaning_ja: Google Translate candidate
+Maus,die,feminine,Mäuse,ねずみ,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Medikament,das,neuter,Medikamente,薬,machine_translated,meaning_ja: Google Translate candidate
+Medizin,die,feminine,Medizinen,薬,machine_translated,meaning_ja: Google Translate candidate
+Meer,das,neuter,Meere,海,machine_translated,meaning_ja: Google Translate candidate
+Meinung,die,feminine,Meinungen,意見,machine_translated,meaning_ja: Google Translate candidate
+Meister,der,masculine,Meister,マスター,machine_translated,meaning_ja: Google Translate candidate
+Mensa,die,feminine,Mensen,食堂,machine_translated,meaning_ja: Google Translate candidate
+Mensch,der,masculine,Menschen,人,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Menü,das,neuter,Menüs,メニュー,machine_translated,meaning_ja: Google Translate candidate
+Messer,das,neuter,Messer,ナイフ,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Meter,der,masculine,Meter,メーター,machine_translated,meaning_ja: Google Translate candidate
+Miete,die,feminine,Mieten,家賃,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Milch,die,feminine,Milche,牛乳,machine_translated,meaning_ja: Google Translate candidate
+Million,die,feminine,Millionen,百万,machine_translated,meaning_ja: Google Translate candidate
+Minister,der,masculine,Minister,大臣,machine_translated,meaning_ja: Google Translate candidate
+Minute,die,feminine,Minuten,分,machine_translated,meaning_ja: Google Translate candidate
+Mittag,der,masculine,Mittage,正午,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Mitte,die,feminine,Mitten,中心,machine_translated,meaning_ja: Google Translate candidate
+Mittel,das,neuter,Mittel,中くらい,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Mitternacht,die,feminine,Mitternächte,夜中,machine_translated,meaning_ja: Google Translate candidate
+Möbel,das,neuter,Möbel,家具,machine_translated,meaning_ja: Google Translate candidate
+Mode,die,feminine,Moden,ファッション,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Moment,der,masculine,Momente,一瞬,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Monat,der,masculine,Monate,月,machine_translated,meaning_ja: Google Translate candidate
+Mond,der,masculine,Monde,月,machine_translated,meaning_ja: Google Translate candidate
+Motorrad,das,neuter,Motorräder,オートバイ,machine_translated,meaning_ja: Google Translate candidate
+Mühe,die,feminine,Mühen,努力,machine_translated,meaning_ja: Google Translate candidate
+Müll,der,masculine,,ごみ,machine_translated,meaning_ja: Google Translate candidate
+Mund,der,masculine,Münder,口,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Münze,die,feminine,Münzen,コイン,machine_translated,meaning_ja: Google Translate candidate
+Museum,das,neuter,Museen,博物館,machine_translated,meaning_ja: Google Translate candidate
+Musik,die,feminine,Musiken,音楽,machine_translated,meaning_ja: Google Translate candidate
+Musiker,der,masculine,Musiker,ミュージシャン,machine_translated,meaning_ja: Google Translate candidate
+Mut,der,masculine,,勇気,machine_translated,meaning_ja: Google Translate candidate
+Mutter,die,feminine,Mütter,母親,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Nachbar,der,masculine,Nachbarn,近所の人,machine_translated,meaning_ja: Google Translate candidate
+Nachmittag,der,masculine,Nachmittage,午後,machine_translated,meaning_ja: Google Translate candidate
+Nachricht,die,feminine,Nachrichten,ニュース,machine_translated,meaning_ja: Google Translate candidate
+Nacht,die,feminine,Nächte,夜,machine_translated,meaning_ja: Google Translate candidate
+Nachtisch,der,masculine,Nachtische,デザート,machine_translated,meaning_ja: Google Translate candidate
+Name,der,masculine,Namen,名前,machine_translated,meaning_ja: Google Translate candidate
+Nase,die,feminine,Nasen,鼻,machine_translated,meaning_ja: Google Translate candidate
+Nation,die,feminine,Nationen,国家,machine_translated,meaning_ja: Google Translate candidate
+Natur,die,feminine,Naturen,自然,machine_translated,meaning_ja: Google Translate candidate
+Neffe,der,masculine,Neffen,甥,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Netz,das,neuter,Netze,ネットワーク,machine_translated,meaning_ja: Google Translate candidate
+Nichte,die,feminine,Nichten,姪,machine_translated,meaning_ja: Google Translate candidate
+Norden,der,masculine,,北,machine_translated,meaning_ja: Google Translate candidate
+Not,die,feminine,Nöte,苦痛,machine_translated,meaning_ja: Google Translate candidate
+Nummer,die,feminine,Nummern,番号,machine_translated,meaning_ja: Google Translate candidate
+Ober,der,masculine,Ober,オーバー,machine_translated,meaning_ja: Google Translate candidate
+Obst,das,neuter,,フルーツ,machine_translated,meaning_ja: Google Translate candidate
+Ohr,das,neuter,Ohren,耳,machine_translated,meaning_ja: Google Translate candidate
+Öl,das,neuter,Öle,油,machine_translated,meaning_ja: Google Translate candidate
+Onkel,der,masculine,Onkel,叔父,machine_translated,meaning_ja: Google Translate candidate
+Oper,die,feminine,Opern,オペラ,machine_translated,meaning_ja: Google Translate candidate
+Operation,die,feminine,Operationen,手術,machine_translated,meaning_ja: Google Translate candidate
+Opfer,das,neuter,Opfer,被害者,machine_translated,meaning_ja: Google Translate candidate
+Orange,die,feminine,Orangen,オレンジ,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Ordnung,die,feminine,Ordnungen,注文,machine_translated,meaning_ja: Google Translate candidate
+Ort,der,masculine,Orte,位置,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Osten,der,masculine,,東,machine_translated,meaning_ja: Google Translate candidate
+Ostern,das,neuter,Ostern,イースター,machine_translated,meaning_ja: Google Translate candidate
+Paket,das,neuter,Pakete,パッケージ,machine_translated,meaning_ja: Google Translate candidate
+Papier,das,neuter,Papiere,紙,machine_translated,meaning_ja: Google Translate candidate
+Park,der,masculine,Parks,公園,machine_translated,meaning_ja: Google Translate candidate
+Partei,die,feminine,Parteien,パーティー,machine_translated,meaning_ja: Google Translate candidate
+Party,die,feminine,Partys,パーティー,machine_translated,meaning_ja: Google Translate candidate
+Pass,der,masculine,Pässe,パスポート,machine_translated,meaning_ja: Google Translate candidate
+Patient,der,masculine,Patienten,忍耐強い,machine_translated,meaning_ja: Google Translate candidate
+Pause,die,feminine,Pausen,一時停止,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Person,die,feminine,Personen,人,machine_translated,meaning_ja: Google Translate candidate
+Pfanne,die,feminine,Pfannen,パン,machine_translated,meaning_ja: Google Translate candidate
+Pferd,das,neuter,Pferde,馬,machine_translated,meaning_ja: Google Translate candidate
+Pflanze,die,feminine,Pflanzen,植物,machine_translated,meaning_ja: Google Translate candidate
+Pflicht,die,feminine,Pflichten,義務,machine_translated,meaning_ja: Google Translate candidate
+Pfund,das,neuter,Pfunde,ポンド,machine_translated,meaning_ja: Google Translate candidate
+Philosoph,der,masculine,Philosophen,哲学者,machine_translated,meaning_ja: Google Translate candidate
+Physik,die,feminine,,物理,machine_translated,meaning_ja: Google Translate candidate
+Pilz,der,masculine,Pilze,キノコ,machine_translated,meaning_ja: Google Translate candidate
+Pkw,der,masculine,Pkw,車,machine_translated,meaning_ja: Google Translate candidate
+Plan,der,masculine,Pläne,プラン,machine_translated,meaning_ja: Google Translate candidate
+Platz,der,masculine,Plätze,場所,machine_translated,meaning_ja: Google Translate candidate
+Politik,die,feminine,Politiken,政治,machine_translated,meaning_ja: Google Translate candidate
+Polizei,die,feminine,Polizeien,警察,machine_translated,meaning_ja: Google Translate candidate
+Polizist,der,masculine,Polizisten,警官,machine_translated,meaning_ja: Google Translate candidate
+Portemonnaie,das,neuter,Portemonnaies,財布,machine_translated,meaning_ja: Google Translate candidate
+Post,die,feminine,Posten,役職,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Postamt,das,neuter,Postämter,郵便局,machine_translated,meaning_ja: Google Translate candidate
+Postkarte,die,feminine,Postkarten,ポストカード,machine_translated,meaning_ja: Google Translate candidate
+Preis,der,masculine,Preise,価格,machine_translated,meaning_ja: Google Translate candidate
+Prinz,der,masculine,Prinzen,王子,machine_translated,meaning_ja: Google Translate candidate
+Prinzessin,die,feminine,Prinzessinnen,お姫様,machine_translated,meaning_ja: Google Translate candidate
+Problem,das,neuter,Probleme,問題,machine_translated,meaning_ja: Google Translate candidate
+Professor,der,masculine,Professoren,教授,machine_translated,meaning_ja: Google Translate candidate
+Programm,das,neuter,Programme,プログラム,machine_translated,meaning_ja: Google Translate candidate
+Prozent,das,neuter,Prozente,パーセント,machine_translated,meaning_ja: Google Translate candidate
+Prozess,der,masculine,Prozesse,プロセス,machine_translated,meaning_ja: Google Translate candidate
+Prüfung,die,feminine,Prüfungen,テスト,machine_translated,meaning_ja: Google Translate candidate
+Publikum,das,neuter,Publika,観客,machine_translated,meaning_ja: Google Translate candidate
+Pullover,der,masculine,Pullover,セーター,machine_translated,meaning_ja: Google Translate candidate
+Punkt,der,masculine,Punkte,ポイント,machine_translated,meaning_ja: Google Translate candidate
+Puppe,die,feminine,Puppen,人形,machine_translated,meaning_ja: Google Translate candidate
+Qualität,die,feminine,Qualitäten,品質,machine_translated,meaning_ja: Google Translate candidate
+Quelle,die,feminine,Quellen,ソース,machine_translated,meaning_ja: Google Translate candidate
+Quittung,die,feminine,Quittungen,レシート,machine_translated,meaning_ja: Google Translate candidate
+Rad,das,neuter,Räder,車輪,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Radio,das,neuter,Radios,無線,machine_translated,meaning_ja: Google Translate candidate
+Rat,der,masculine,Räte,アドバイス,machine_translated,meaning_ja: Google Translate candidate
+Rathaus,das,neuter,Rathäuser,市役所,machine_translated,meaning_ja: Google Translate candidate
+Rätsel,das,neuter,Rätsel,パズル,machine_translated,meaning_ja: Google Translate candidate
+Räuber,der,masculine,Räuber,強盗,machine_translated,meaning_ja: Google Translate candidate
+Raucher,der,masculine,Raucher,喫煙者,machine_translated,meaning_ja: Google Translate candidate
+Raum,der,masculine,Räume,空間,machine_translated,meaning_ja: Google Translate candidate
+Rechnung,die,feminine,Rechnungen,請求書,machine_translated,meaning_ja: Google Translate candidate
+Recht,das,neuter,Rechte,右,machine_translated,meaning_ja: Google Translate candidate
+Regal,das,neuter,Regale,棚,machine_translated,meaning_ja: Google Translate candidate
+Regel,die,feminine,Regeln,ルール,machine_translated,meaning_ja: Google Translate candidate
+Regen,der,masculine,Regen,雨,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Regenmantel,der,masculine,Regenmäntel,レインコート,machine_translated,meaning_ja: Google Translate candidate
+Regenschirm,der,masculine,Regenschirme,傘,machine_translated,meaning_ja: Google Translate candidate
+Regierung,die,feminine,Regierungen,政府,machine_translated,meaning_ja: Google Translate candidate
+Reis,der,masculine,Reise,米,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Reise,die,feminine,Reisen,旅行,machine_translated,meaning_ja: Google Translate candidate
+Reisebüro,das,neuter,Reisebüros,旅行代理店,machine_translated,meaning_ja: Google Translate candidate
+Religion,die,feminine,Religionen,宗教,machine_translated,meaning_ja: Google Translate candidate
+Rente,die,feminine,Renten,年金,machine_translated,meaning_ja: Google Translate candidate
+Reparatur,die,feminine,Reparaturen,修理,machine_translated,meaning_ja: Google Translate candidate
+Republik,die,feminine,Republiken,共和国,machine_translated,meaning_ja: Google Translate candidate
+Restaurant,das,neuter,Restaurants,レストラン,machine_translated,meaning_ja: Google Translate candidate
+Revolution,die,feminine,Revolutionen,回転,machine_translated,meaning_ja: Google Translate candidate
+Rezept,das,neuter,Rezepte,レシピ,machine_translated,meaning_ja: Google Translate candidate
+Richter,der,masculine,Richter,裁判官,machine_translated,meaning_ja: Google Translate candidate
+Richtung,die,feminine,Richtungen,方向,machine_translated,meaning_ja: Google Translate candidate
+Riese,der,masculine,Riesen,巨人,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Ring,der,masculine,Ringe,指輪,machine_translated,meaning_ja: Google Translate candidate
+Rock,der,masculine,Röcke,ロック,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Rolle,die,feminine,Rollen,役割,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Roman,der,masculine,Romane,小説,machine_translated,meaning_ja: Google Translate candidate
+Rose,die,feminine,Rosen,薔薇,machine_translated,meaning_ja: Google Translate candidate
+Rücken,der,masculine,Rücken,戻る,machine_translated,meaning_ja: Google Translate candidate
+Ruhe,die,feminine,,静かな,machine_translated,meaning_ja: Google Translate candidate
+Ruhm,der,masculine,,名声,machine_translated,meaning_ja: Google Translate candidate
+Sache,die,feminine,Sachen,案件,machine_translated,meaning_ja: Google Translate candidate
+Saft,der,masculine,Säfte,ジュース,machine_translated,meaning_ja: Google Translate candidate
+Salat,der,masculine,Salate,レタス,machine_translated,meaning_ja: Google Translate candidate
+Salz,das,neuter,Salze,塩,machine_translated,meaning_ja: Google Translate candidate
+Sänger,der,masculine,Sänger,歌手,machine_translated,meaning_ja: Google Translate candidate
+Satellit,der,masculine,Satelliten,衛星,machine_translated,meaning_ja: Google Translate candidate
+Satz,der,masculine,Sätze,文,machine_translated,meaning_ja: Google Translate candidate
+Schach,das,neuter,Schachs,チェス,machine_translated,meaning_ja: Google Translate candidate
+Schaden,der,masculine,Schäden,ダメージ,machine_translated,meaning_ja: Google Translate candidate
+Schalter,der,masculine,Schalter,スイッチ,machine_translated,meaning_ja: Google Translate candidate
+Schatten,der,masculine,Schatten,影,machine_translated,meaning_ja: Google Translate candidate
+Schauspiel,das,neuter,Schauspiele,演技,machine_translated,meaning_ja: Google Translate candidate
+Schauspieler,der,masculine,Schauspieler,俳優,machine_translated,meaning_ja: Google Translate candidate
+Scheck,der,masculine,Schecks,チェック,machine_translated,meaning_ja: Google Translate candidate
+Schein,der,masculine,Scheine,外観,machine_translated,meaning_ja: Google Translate candidate
+Schere,die,feminine,Scheren,ハサミ,machine_translated,meaning_ja: Google Translate candidate
+Scherz,der,masculine,Scherze,ジョーク,machine_translated,meaning_ja: Google Translate candidate
+Schicksal,das,neuter,Schicksale,運命,machine_translated,meaning_ja: Google Translate candidate
+Schiff,das,neuter,Schiffe,船,machine_translated,meaning_ja: Google Translate candidate
+Schild,der,masculine,Schilde,サイン,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Schinken,der,masculine,Schinken,ハム,machine_translated,meaning_ja: Google Translate candidate
+Schirm,der,masculine,Schirme,画面,machine_translated,meaning_ja: Google Translate candidate
+Schloss,das,neuter,Schlösser,ロック,machine_translated,meaning_ja: Google Translate candidate
+Schluss,der,masculine,Schlüsse,エンディング,machine_translated,meaning_ja: Google Translate candidate
+Schlüssel,der,masculine,Schlüssel,鍵,machine_translated,meaning_ja: Google Translate candidate
+Schmerz,der,masculine,Schmerzen,痛み,machine_translated,meaning_ja: Google Translate candidate
+Schmetterling,der,masculine,Schmetterlinge,蝶,machine_translated,meaning_ja: Google Translate candidate
+Schmuck,der,masculine,Schmucke,ジュエリー,machine_translated,meaning_ja: Google Translate candidate
+Schnee,der,masculine,,雪,machine_translated,meaning_ja: Google Translate candidate
+Schokolade,die,feminine,Schokoladen,チョコレート,machine_translated,meaning_ja: Google Translate candidate
+Schrank,der,masculine,Schränke,ワードローブ,machine_translated,meaning_ja: Google Translate candidate
+Schrift,die,feminine,Schriften,書き込み,machine_translated,meaning_ja: Google Translate candidate
+Schriftsteller,der,masculine,Schriftsteller,ライター,machine_translated,meaning_ja: Google Translate candidate
+Schuh,der,masculine,Schuhe,靴,machine_translated,meaning_ja: Google Translate candidate
+Schule,die,feminine,Schulen,学校,machine_translated,meaning_ja: Google Translate candidate
+Schüler,der,masculine,Schüler,生徒,machine_translated,meaning_ja: Google Translate candidate
+Schulter,die,feminine,Schultern,ショルダー,machine_translated,meaning_ja: Google Translate candidate
+Schwein,das,neuter,Schweine,豚,machine_translated,meaning_ja: Google Translate candidate
+Schwester,die,feminine,Schwestern,妹,machine_translated,meaning_ja: Google Translate candidate
+Schwimmbad,das,neuter,Schwimmbäder,スイミングプール,machine_translated,meaning_ja: Google Translate candidate
+See,der,masculine,Seen,湖,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Seele,die,feminine,Seelen,魂,machine_translated,meaning_ja: Google Translate candidate
+Sehenswürdigkeit,die,feminine,Sehenswürdigkeiten,アトラクション,machine_translated,meaning_ja: Google Translate candidate
+Seite,die,feminine,Seiten,ページ,machine_translated,meaning_ja: Google Translate candidate
+Sekretärin,die,feminine,Sekretärinnen,秘書,machine_translated,meaning_ja: Google Translate candidate
+Sekunde,die,feminine,Sekunden,2番,machine_translated,meaning_ja: Google Translate candidate
+Semester,das,neuter,Semester,学期,machine_translated,meaning_ja: Google Translate candidate
+Sessel,der,masculine,Sessel,アームチェア,machine_translated,meaning_ja: Google Translate candidate
+Silber,das,neuter,,銀,machine_translated,meaning_ja: Google Translate candidate
+Silvester,der,masculine,Silvester,大晦日,machine_translated,meaning_ja: Google Translate candidate
+Sinn,der,masculine,Sinne,センス,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Sitte,die,feminine,Sitten,カスタム,machine_translated,meaning_ja: Google Translate candidate
+Sitzung,die,feminine,Sitzungen,ミーティング,machine_translated,meaning_ja: Google Translate candidate
+Ski,der,masculine,Ski,スキー,machine_translated,meaning_ja: Google Translate candidate
+Socken,der,masculine,Socken,ソックス,machine_translated,meaning_ja: Google Translate candidate
+Sofa,das,neuter,Sofas,ソファー,machine_translated,meaning_ja: Google Translate candidate
+Sohn,der,masculine,Söhne,息子,machine_translated,meaning_ja: Google Translate candidate
+Soldat,der,masculine,Soldaten,兵士,machine_translated,meaning_ja: Google Translate candidate
+Sommer,der,masculine,Sommer,夏,machine_translated,meaning_ja: Google Translate candidate
+Sonne,die,feminine,Sonnen,太陽,machine_translated,meaning_ja: Google Translate candidate
+Sorge,die,feminine,Sorgen,心配事,machine_translated,meaning_ja: Google Translate candidate
+Sorte,die,feminine,Sorten,バラエティ,machine_translated,meaning_ja: Google Translate candidate
+Soße,die,feminine,Soßen,ソース,machine_translated,meaning_ja: Google Translate candidate
+Spaß,der,masculine,Spässe,楽しい,machine_translated,meaning_ja: Google Translate candidate
+Spaziergang,der,masculine,Spaziergänge,散歩,machine_translated,meaning_ja: Google Translate candidate
+Speisekarte,die,feminine,Speisekarten,メニュー,machine_translated,meaning_ja: Google Translate candidate
+Spiegel,der,masculine,Spiegel,鏡,machine_translated,meaning_ja: Google Translate candidate
+Spiel,das,neuter,Spiele,ゲーム,machine_translated,meaning_ja: Google Translate candidate
+Sport,der,masculine,Sporte,スポーツ,machine_translated,meaning_ja: Google Translate candidate
+Sprache,die,feminine,Sprachen,言語,machine_translated,meaning_ja: Google Translate candidate
+Spur,die,feminine,Spuren,追跡,machine_translated,meaning_ja: Google Translate candidate
+Staat,der,masculine,Staaten,州,machine_translated,meaning_ja: Google Translate candidate
+Stadt,die,feminine,Städte,市,machine_translated,meaning_ja: Google Translate candidate
+Stadtplan,der,masculine,Stadtpläne,地図,machine_translated,meaning_ja: Google Translate candidate
+Staubsauger,der,masculine,Staubsauger,掃除機,machine_translated,meaning_ja: Google Translate candidate
+Stein,der,masculine,Steine,石,machine_translated,meaning_ja: Google Translate candidate
+Stelle,die,feminine,Stellen,位置,machine_translated,meaning_ja: Google Translate candidate
+Stern,der,masculine,Sterne,星,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Stiefel,der,masculine,Stiefel,ブーツ,machine_translated,meaning_ja: Google Translate candidate
+Stil,der,masculine,Stile,スタイル,machine_translated,meaning_ja: Google Translate candidate
+Stimme,die,feminine,Stimmen,同意する,machine_translated,meaning_ja: Google Translate candidate
+Stock,der,masculine,Stöcke,ストック,machine_translated,meaning_ja: Google Translate candidate
+Stoff,der,masculine,Stoffe,材料,machine_translated,meaning_ja: Google Translate candidate
+Strafe,die,feminine,Strafen,ペナルティ,machine_translated,meaning_ja: Google Translate candidate
+Straße,die,feminine,Straßen,通り,machine_translated,meaning_ja: Google Translate candidate
+Straßenbahn,die,feminine,Straßenbahnen,トラム,machine_translated,meaning_ja: Google Translate candidate
+Strecke,die,feminine,Strecken,ルート,machine_translated,meaning_ja: Google Translate candidate
+Strom,der,masculine,Ströme,電気,machine_translated,meaning_ja: Google Translate candidate
+Strumpf,der,masculine,Strümpfe,ストッキング,machine_translated,meaning_ja: Google Translate candidate
+Stück,das,neuter,Stücke,ピース,machine_translated,meaning_ja: Google Translate candidate
+Student,der,masculine,Studenten,学生,machine_translated,meaning_ja: Google Translate candidate
+Studentenheim,das,neuter,Studentenheime,学生寮,machine_translated,meaning_ja: Google Translate candidate
+Studium,das,neuter,Studien,研究,machine_translated,meaning_ja: Google Translate candidate
+Stufe,die,feminine,Stufen,レベル,machine_translated,meaning_ja: Google Translate candidate
+Stuhl,der,masculine,Stühle,椅子,machine_translated,meaning_ja: Google Translate candidate
+Stunde,die,feminine,Stunden,時間,machine_translated,meaning_ja: Google Translate candidate
+Sturm,der,masculine,Stürme,嵐,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Süden,der,masculine,,南,machine_translated,meaning_ja: Google Translate candidate
+Supermarkt,der,masculine,Supermärkte,スーパーマーケット,machine_translated,meaning_ja: Google Translate candidate
+Suppe,die,feminine,Suppen,スープ,machine_translated,meaning_ja: Google Translate candidate
+Symbol,das,neuter,Symbole,シンボル,machine_translated,meaning_ja: Google Translate candidate
+System,das,neuter,Systeme,システム,machine_translated,meaning_ja: Google Translate candidate
+T-Shirt,das,neuter,T-Shirts,Tシャツ,machine_translated,meaning_ja: Google Translate candidate
+Tablette,die,feminine,Tabletten,錠剤,machine_translated,meaning_ja: Google Translate candidate
+Tag,der,masculine,Tage,日,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Tante,die,feminine,Tanten,叔母,machine_translated,meaning_ja: Google Translate candidate
+Tasche,die,feminine,Taschen,バッグ,machine_translated,meaning_ja: Google Translate candidate
+Tasse,die,feminine,Tassen,カップ,machine_translated,meaning_ja: Google Translate candidate
+Tatsache,die,feminine,Tatsachen,事実,machine_translated,meaning_ja: Google Translate candidate
+Taxi,das,neuter,Taxis,タクシー,machine_translated,meaning_ja: Google Translate candidate
+Technik,die,feminine,Techniken,テクノロジー,machine_translated,meaning_ja: Google Translate candidate
+Technologie,die,feminine,Technologien,テクノロジー,machine_translated,meaning_ja: Google Translate candidate
+Tee,der,masculine,Tees,お茶,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Teil,das,neuter,Teile,一部,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Telefon,das,neuter,Telefone,電話,machine_translated,meaning_ja: Google Translate candidate
+Teller,der,masculine,Teller,皿,machine_translated,meaning_ja: Google Translate candidate
+Temperatur,die,feminine,Temperaturen,温度,machine_translated,meaning_ja: Google Translate candidate
+Tennis,das,neuter,,テニス,machine_translated,meaning_ja: Google Translate candidate
+Teppich,der,masculine,Teppiche,カーペット,machine_translated,meaning_ja: Google Translate candidate
+Theater,das,neuter,Theater,劇場,machine_translated,meaning_ja: Google Translate candidate
+Tier,das,neuter,Tiere,動物,machine_translated,meaning_ja: Google Translate candidate
+Tisch,der,masculine,Tische,テーブル,machine_translated,meaning_ja: Google Translate candidate
+Tochter,die,feminine,Töchter,娘,machine_translated,meaning_ja: Google Translate candidate
+Tod,der,masculine,Tode,死,machine_translated,meaning_ja: Google Translate candidate
+Toilette,die,feminine,Toiletten,トイレ,machine_translated,meaning_ja: Google Translate candidate
+Tomate,die,feminine,Tomaten,トマト,machine_translated,meaning_ja: Google Translate candidate
+Ton,der,masculine,Tone,粘土,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Topf,der,masculine,Töpfe,ポット,machine_translated,meaning_ja: Google Translate candidate
+Tourist,der,masculine,Touristen,観光客,machine_translated,meaning_ja: Google Translate candidate
+Träne,die,feminine,Tränen,破れ目,machine_translated,meaning_ja: Google Translate candidate
+Traube,die,feminine,Trauben,グレープ,machine_translated,meaning_ja: Google Translate candidate
+Traum,der,masculine,Träume,夢,machine_translated,meaning_ja: Google Translate candidate
+Treppe,die,feminine,Treppen,階段,machine_translated,meaning_ja: Google Translate candidate
+Trost,der,masculine,,慰め,machine_translated,meaning_ja: Google Translate candidate
+Tuch,das,neuter,Tücher,布,machine_translated,meaning_ja: Google Translate candidate
+Tür,die,feminine,Türen,ドア,machine_translated,meaning_ja: Google Translate candidate
+Turm,der,masculine,Türme,タワー,machine_translated,meaning_ja: Google Translate candidate
+Tüte,die,feminine,Tüten,バッグ,machine_translated,meaning_ja: Google Translate candidate
+U-Bahn,die,feminine,U-Bahnen,地下鉄,machine_translated,meaning_ja: Google Translate candidate
+Übersetzung,die,feminine,Übersetzungen,翻訳,machine_translated,meaning_ja: Google Translate candidate
+Übung,die,feminine,Übungen,エクササイズ,machine_translated,meaning_ja: Google Translate candidate
+Uhr,die,feminine,Uhren,クロック,machine_translated,meaning_ja: Google Translate candidate
+Umgebung,die,feminine,Umgebungen,近傍,machine_translated,meaning_ja: Google Translate candidate
+Umwelt,die,feminine,Umwelten,環境,machine_translated,meaning_ja: Google Translate candidate
+Unfall,der,masculine,Unfälle,事故,machine_translated,meaning_ja: Google Translate candidate
+Unglück,das,neuter,Unglücke,事故,machine_translated,meaning_ja: Google Translate candidate
+Uniform,die,feminine,Uniformen,ユニフォーム,machine_translated,meaning_ja: Google Translate candidate
+Universität,die,feminine,Universitäten,大学,machine_translated,meaning_ja: Google Translate candidate
+Unterhaltung,die,feminine,Unterhaltungen,エンターテインメント,machine_translated,meaning_ja: Google Translate candidate
+Unternehmen,das,neuter,Unternehmen,追求する,machine_translated,meaning_ja: Google Translate candidate
+Unterricht,der,masculine,Unterrichte,命令,machine_translated,meaning_ja: Google Translate candidate
+Unterschied,der,masculine,Unterschiede,違い,machine_translated,meaning_ja: Google Translate candidate
+Unterschrift,die,feminine,Unterschriften,サイン,machine_translated,meaning_ja: Google Translate candidate
+Urlaub,der,masculine,Urlaube,休暇,machine_translated,meaning_ja: Google Translate candidate
+Ursache,die,feminine,Ursachen,原因,machine_translated,meaning_ja: Google Translate candidate
+Urteil,das,neuter,Urteile,評決,machine_translated,meaning_ja: Google Translate candidate
+Vase,die,feminine,Vasen,花瓶,machine_translated,meaning_ja: Google Translate candidate
+Vater,der,masculine,Väter,父親,machine_translated,meaning_ja: Google Translate candidate
+Verantwortung,die,feminine,Verantwortungen,責任,machine_translated,meaning_ja: Google Translate candidate
+Verbrechen,das,neuter,Verbrechen,犯罪,machine_translated,meaning_ja: Google Translate candidate
+Verein,der,masculine,Vereine,協会,machine_translated,meaning_ja: Google Translate candidate
+Verfassung,die,feminine,Verfassungen,憲法,machine_translated,meaning_ja: Google Translate candidate
+Vergangenheit,die,feminine,Vergangenheiten,過去,machine_translated,meaning_ja: Google Translate candidate
+Vergnügen,das,neuter,Vergnügen,楽しみ,machine_translated,meaning_ja: Google Translate candidate
+Verhältnis,das,neuter,Verhältnisse,関係,machine_translated,meaning_ja: Google Translate candidate
+Verkäuferin,die,feminine,Verkäuferinnen,店員,machine_translated,meaning_ja: Google Translate candidate
+Verkehr,der,masculine,Verkehre,渋滞,machine_translated,meaning_ja: Google Translate candidate
+Verspätung,die,feminine,Verspätungen,遅刻,machine_translated,meaning_ja: Google Translate candidate
+Versuch,der,masculine,Versuche,試み,machine_translated,meaning_ja: Google Translate candidate
+Vertrag,der,masculine,Verträge,契約,machine_translated,meaning_ja: Google Translate candidate
+Verwandte,die,feminine,,関連している,machine_translated,meaning_ja: Google Translate candidate
+Viertel,das,neuter,Viertel,四半期,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Visum,das,neuter,Visa,ビザ,machine_translated,meaning_ja: Google Translate candidate
+Vogel,der,masculine,Vögel,鳥,machine_translated,meaning_ja: Google Translate candidate
+Volk,das,neuter,Völker,人々,machine_translated,meaning_ja: Google Translate candidate
+Vorlesung,die,feminine,Vorlesungen,講義,machine_translated,meaning_ja: Google Translate candidate
+Vormittag,der,masculine,Vormittage,遅い朝,machine_translated,meaning_ja: Google Translate candidate
+Vorname,der,masculine,Vornamen,ファーストネーム,machine_translated,meaning_ja: Google Translate candidate
+Vorschlag,der,masculine,Vorschläge,提案,machine_translated,meaning_ja: Google Translate candidate
+Vorsicht,die,feminine,,注意,machine_translated,meaning_ja: Google Translate candidate
+Vorstadt,die,feminine,Vorstädte,郊外,machine_translated,meaning_ja: Google Translate candidate
+Vorteil,der,masculine,Vorteile,アドバンテージ,machine_translated,meaning_ja: Google Translate candidate
+Waffe,die,feminine,Waffen,武器,machine_translated,meaning_ja: Google Translate candidate
+Wahl,die,feminine,Wahlen,選択,machine_translated,meaning_ja: Google Translate candidate
+Wahrheit,die,feminine,Wahrheiten,真実,machine_translated,meaning_ja: Google Translate candidate
+Währung,die,feminine,Währungen,通貨,machine_translated,meaning_ja: Google Translate candidate
+Wald,der,masculine,Wälder,森,machine_translated,meaning_ja: Google Translate candidate
+Wand,die,feminine,Wände,壁,machine_translated,meaning_ja: Google Translate candidate
+Ware,die,feminine,Waren,品,machine_translated,meaning_ja: Google Translate candidate
+Wäsche,die,feminine,Wäschen,洗う,machine_translated,meaning_ja: Google Translate candidate
+Waschmaschine,die,feminine,Waschmaschinen,洗濯機,machine_translated,meaning_ja: Google Translate candidate
+Wasser,das,neuter,Wasser,水,machine_translated,meaning_ja: Google Translate candidate
+Wecker,der,masculine,Wecker,目覚まし時計,machine_translated,meaning_ja: Google Translate candidate
+Weg,der,masculine,Wege,離れて,machine_translated,meaning_ja: Google Translate candidate
+Weihnachten,das,neuter,Weihnachten,クリスマス,machine_translated,meaning_ja: Google Translate candidate
+Wein,der,masculine,Weine,ワイン,machine_translated,meaning_ja: Google Translate candidate
+Weise,die,feminine,Weisen,方法,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Welt,die,feminine,Welten,世界,machine_translated,meaning_ja: Google Translate candidate
+Weltraum,der,masculine,,空間,machine_translated,meaning_ja: Google Translate candidate
+Werk,das,neuter,Werke,工場,machine_translated,meaning_ja: Google Translate candidate
+Wesen,das,neuter,Wesen,存在,machine_translated,meaning_ja: Google Translate candidate
+Westen,der,masculine,,西,machine_translated,meaning_ja: Google Translate candidate
+Wetter,das,neuter,Wetter,天気,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Wiedersehen,das,neuter,Wiedersehen,さようなら,machine_translated,meaning_ja: Google Translate candidate
+Wiese,die,feminine,Wiesen,草原,machine_translated,meaning_ja: Google Translate candidate
+Wille,der,masculine,Willen,意思,machine_translated,meaning_ja: Google Translate candidate
+Wind,der,masculine,Winde,風,machine_translated,meaning_ja: Google Translate candidate
+Winter,der,masculine,Winter,冬,machine_translated,meaning_ja: Google Translate candidate
+Wirklichkeit,die,feminine,Wirklichkeiten,現実,machine_translated,meaning_ja: Google Translate candidate
+Wirtschaft,die,feminine,Wirtschaften,仕事,machine_translated,meaning_ja: Google Translate candidate
+Wissenschaft,die,feminine,Wissenschaften,科学,machine_translated,meaning_ja: Google Translate candidate
+Witz,der,masculine,Witze,ジョーク,machine_translated,meaning_ja: Google Translate candidate
+Woche,die,feminine,Wochen,週,machine_translated,meaning_ja: Google Translate candidate
+Wochenende,das,neuter,Wochenenden,週末,machine_translated,meaning_ja: Google Translate candidate
+Wohl,das,neuter,,おそらく,machine_translated,meaning_ja: Google Translate candidate
+Wohnung,die,feminine,Wohnungen,アパート,machine_translated,meaning_ja: Google Translate candidate
+Wohnzimmer,das,neuter,Wohnzimmer,リビングルーム,machine_translated,meaning_ja: Google Translate candidate
+Wolke,die,feminine,Wolken,雲,machine_translated,meaning_ja: Google Translate candidate
+Wort,das,neuter,Wörter,言葉,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Wörterbuch,das,neuter,Wörterbücher,辞書,machine_translated,meaning_ja: Google Translate candidate
+Wunder,das,neuter,Wunder,不思議,machine_translated,meaning_ja: Google Translate candidate
+Wunsch,der,masculine,Wünsche,願い,machine_translated,meaning_ja: Google Translate candidate
+Wurst,die,feminine,Würste,ソーセージ,machine_translated,meaning_ja: Google Translate candidate
+Zahl,die,feminine,Zahlen,番号,machine_translated,meaning_ja: Google Translate candidate
+Zahn,der,masculine,Zähne,歯,machine_translated,meaning_ja: Google Translate candidate
+Zahnarzt,der,masculine,Zahnärzte,歯医者,machine_translated,meaning_ja: Google Translate candidate
+Zeichen,das,neuter,Zeichen,サイン,machine_translated,meaning_ja: Google Translate candidate
+Zeile,die,feminine,Zeilen,ライン,machine_translated,meaning_ja: Google Translate candidate
+Zeit,die,feminine,Zeiten,時間,machine_translated,meaning_ja: Google Translate candidate
+Zeitschrift,die,feminine,Zeitschriften,雑誌,machine_translated,meaning_ja: Google Translate candidate
+Zeitung,die,feminine,Zeitungen,新聞,machine_translated,meaning_ja: Google Translate candidate
+Zentimeter,der,masculine,Zentimeter,センチメートル,machine_translated,meaning_ja: Google Translate candidate
+Zentrum,das,neuter,Zentren,中心,machine_translated,meaning_ja: Google Translate candidate
+Zeugnis,das,neuter,Zeugnisse,成績証明書,machine_translated,meaning_ja: Google Translate candidate
+Ziel,das,neuter,Ziele,ゴール,machine_translated,meaning_ja: Google Translate candidate
+Zigarette,die,feminine,Zigaretten,シガレット,machine_translated,meaning_ja: Google Translate candidate
+Zimmer,das,neuter,Zimmer,部屋,machine_translated,meaning_ja: Google Translate candidate
+Zivilisation,die,feminine,Zivilisationen,文明,machine_translated,meaning_ja: Google Translate candidate
+Zoll,der,masculine,Zölle,税関,machine_translated,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+Zone,die,feminine,Zonen,ゾーン,machine_translated,meaning_ja: Google Translate candidate
+Zucker,der,masculine,Zucker,砂糖,machine_translated,meaning_ja: Google Translate candidate
+Zug,der,masculine,Züge,電車,machine_translated,meaning_ja: Google Translate candidate
+Zukunft,die,feminine,Zukünfte,未来,machine_translated,meaning_ja: Google Translate candidate
+Zunge,die,feminine,Zungen,舌,machine_translated,meaning_ja: Google Translate candidate
+Zustand,der,masculine,Zustände,状態,machine_translated,meaning_ja: Google Translate candidate
+Zweck,der,masculine,Zwecke,目的,machine_translated,meaning_ja: Google Translate candidate
+Zweifel,der,masculine,Zweifel,疑い,machine_translated,meaning_ja: Google Translate candidate
+Zwiebel,die,feminine,Zwiebeln,タマネギ,machine_translated,meaning_ja: Google Translate candidate

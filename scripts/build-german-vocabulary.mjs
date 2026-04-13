@@ -17,7 +17,8 @@ const POS_LABELS = {
 const GENDER_LABELS = {
   masculine: "男性",
   feminine: "女性",
-  neuter: "中性"
+  neuter: "中性",
+  plural: "複数扱い"
 };
 
 function normalizePos(value) {

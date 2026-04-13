@@ -16,8 +16,18 @@ const ARTICLE_TO_GENDER = {
 const GENDER_TO_ARTICLE = {
   masculine: "der",
   feminine: "die",
-  neuter: "das"
+  neuter: "das",
+  plural: "die"
 };
+
+const KNOWN_RECORD_OVERRIDES = new Map([
+  ["eltern", { article: "die", gender: "plural", plural: "Eltern" }],
+  ["ferien", { article: "die", gender: "plural", plural: "Ferien", meaning_ja: "休暇" }],
+  ["kopfschmerzen", { article: "die", gender: "plural", plural: "Kopfschmerzen" }],
+  ["leute", { article: "die", gender: "plural", plural: "Leute" }],
+  ["schauen", { part_of_speech: "verb", article: "", gender: "", plural: "", meaning_ja: "見る" }],
+  ["wagen", { part_of_speech: "verb", article: "", gender: "", plural: "", meaning_ja: "思い切ってする、あえてする" }]
+]);
 
 export function cleanText(value) {
   return String(value ?? "").trim();
@@ -43,6 +53,7 @@ export function normalizeGender(value) {
   if (normalized === "masculine" || normalized === "m" || normalized === "der" || normalized === "男性") return "masculine";
   if (normalized === "feminine" || normalized === "f" || normalized === "die" || normalized === "女性") return "feminine";
   if (normalized === "neuter" || normalized === "n" || normalized === "das" || normalized === "中性") return "neuter";
+  if (normalized === "plural" || normalized === "pl" || normalized === "複数") return "plural";
   return "";
 }
 
@@ -55,27 +66,39 @@ export function getArticleFromGender(gender) {
 }
 
 export function normalizeGermanRecord(record) {
-  const partOfSpeech = cleanText(record.part_of_speech || "unknown").toLowerCase();
-  const article = normalizeArticle(record.article);
-  const gender = normalizeGender(record.gender) || getGenderFromArticle(article);
+  const key = normalizeGermanKey(record.normalized_key || record.lemma_de || record.display_de);
+  const sourceRecord = {
+    ...record,
+    ...(KNOWN_RECORD_OVERRIDES.get(key) || {})
+  };
+  const partOfSpeech = cleanText(sourceRecord.part_of_speech || "unknown").toLowerCase();
+  const article = normalizeArticle(sourceRecord.article);
+  const gender = normalizeGender(sourceRecord.gender) || getGenderFromArticle(article);
   const inferredArticle = article || getArticleFromGender(gender);
   const isNoun = partOfSpeech === "noun";
   const needsGender = isNoun && !(inferredArticle && gender);
   const hasMeaning = Boolean(cleanText(record.meaning_ja));
+  const incomingStatus = cleanText(record.review_status);
+  const reviewStatus = needsGender || !hasMeaning
+    ? "needs_enrichment"
+    : incomingStatus === "machine_translated"
+      ? "machine_translated"
+      : "ready";
 
   return {
     ...record,
+    ...sourceRecord,
     part_of_speech: partOfSpeech,
     article: isNoun ? inferredArticle : "",
     gender: isNoun ? gender : "",
-    plural: cleanText(record.plural),
-    meaning_ja: cleanText(record.meaning_ja),
-    example_de: cleanText(record.example_de),
-    example_ja: cleanText(record.example_ja),
-    tags: cleanText(record.tags),
-    notes: cleanText(record.notes),
+    plural: cleanText(sourceRecord.plural),
+    meaning_ja: cleanText(sourceRecord.meaning_ja),
+    example_de: cleanText(sourceRecord.example_de),
+    example_ja: cleanText(sourceRecord.example_ja),
+    tags: cleanText(sourceRecord.tags),
+    notes: cleanText(sourceRecord.notes),
     needs_gender: needsGender,
-    review_status: needsGender || !hasMeaning ? "needs_enrichment" : "ready"
+    review_status: reviewStatus
   };
 }
 
@@ -168,7 +191,8 @@ export function mergeGermanEnrichment(seedRows, enrichmentRows) {
 }
 
 export function writeGermanNounChecklist(rows) {
-  const nouns = rows
+  const normalizedRows = rows.map(normalizeGermanRecord);
+  const nouns = normalizedRows
     .filter((record) => record.part_of_speech === "noun")
     .map((record) => ({
       lemma_de: record.lemma_de || record.display_de || "",
@@ -192,14 +216,15 @@ export function writeGermanNounChecklist(rows) {
 }
 
 export function getGermanEnrichmentSummary(rows) {
-  const nouns = rows.filter((record) => record.part_of_speech === "noun");
+  const normalizedRows = rows.map(normalizeGermanRecord);
+  const nouns = normalizedRows.filter((record) => record.part_of_speech === "noun");
   const countFilled = (records, field) => records.filter((record) => cleanText(record[field])).length;
 
   return {
-    total: rows.length,
-    meaning_ja: countFilled(rows, "meaning_ja"),
-    example_de: countFilled(rows, "example_de"),
-    example_ja: countFilled(rows, "example_ja"),
+    total: normalizedRows.length,
+    meaning_ja: countFilled(normalizedRows, "meaning_ja"),
+    example_de: countFilled(normalizedRows, "example_de"),
+    example_ja: countFilled(normalizedRows, "example_ja"),
     nouns: nouns.length,
     noun_article: countFilled(nouns, "article"),
     noun_gender: countFilled(nouns, "gender"),

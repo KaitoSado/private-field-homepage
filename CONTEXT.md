@@ -100,7 +100,8 @@
     - UI 上の `見直しリスト` は日時を見せず、間違えた単語一覧と現在ステージを中心に見直せる
   - ドイツ語コンテンツ `/apps/german`
     - `ドイツ単語帳抜き出しフォルダ/ドイツ単語_app_seed.json` を正本 seed とし、`scripts/build-german-vocabulary.mjs` で `lib/german-vocabulary.js` を生成して読む
-    - 現在のドイツ語 seed は 1593 語で、`meaning_ja`, `example_de`, `example_ja`, 名詞の性・冠詞・複数形は多くが未登録のため、アプリ側では「意味未登録」として表示する
+    - 現在のドイツ語 seed は 1593 語で、`meaning_ja` は全件 machine translated draft として補完済み。例文はまだ未登録
+    - 名詞は 843 語で、冠詞・性は 842 語、複数形は 790 語まで補完済み。未確認名詞 1 語は `needs_gender` のまま残す
     - 英語コンテンツと同じく、自動読み上げ、左右判定、品詞フィルタ、表示時間設定、5ステージ復習間隔、見直しリスト、長期記憶リストを持つ
     - 進捗はログイン時に Supabase `german_progress` と同期し、未ログイン時または live schema 未適用時は `localStorage` に退避する
   - リサーチプログレス `/apps/research-progress`

@@ -1,16 +1,20 @@
 {
-  "updatedFields": 0,
-  "enrichmentRows": 1593,
-  "createdTemplate": true,
+  "meaningSource": "https://translate.googleapis.com",
+  "mode": "applied_to_seed",
+  "translated": 0,
+  "cacheEntries": 2602,
+  "skipped": 1593,
+  "failed": 0,
+  "candidatesPath": "ドイツ単語帳抜き出しフォルダ/ドイツ単語_meaning_candidates.csv",
   "summary": {
     "total": 1593,
-    "meaning_ja": 0,
+    "meaning_ja": 1593,
     "example_de": 0,
     "example_ja": 0,
-    "nouns": 845,
-    "noun_article": 0,
-    "noun_gender": 0,
-    "noun_plural": 0,
-    "needs_gender": 845
+    "nouns": 843,
+    "noun_article": 842,
+    "noun_gender": 842,
+    "noun_plural": 790,
+    "needs_gender": 1
   }
 }
