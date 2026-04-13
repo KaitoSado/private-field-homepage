@@ -678,10 +678,10 @@ export function SignatureProfilePage({ profile, posts }) {
 
           <div className="hero-actions signature-hero-actions">
             <a className="button button-primary" href="#signature-works">
-              作品を見る
+              記事
             </a>
             <a className="button button-secondary" href="#signature-thinking">
-              思考を読む
+              記録したいこと
             </a>
             <a className="button button-ghost" href="#signature-contact">
               連絡する
