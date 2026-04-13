@@ -64,6 +64,7 @@ export function GermanVocabularyApp() {
   const [selectedEntryId, setSelectedEntryId] = useState(GERMAN_VOCABULARY_LIBRARY[0]?.id || "");
   const [sessionStep, setSessionStep] = useState(1);
   const [queueSeed, setQueueSeed] = useState(0);
+  const [sessionAnsweredIds, setSessionAnsweredIds] = useState(() => new Set());
   const [judgeFlash, setJudgeFlash] = useState("");
   const judgeFlashTimer = useRef(null);
   const answerRevealedAtRef = useRef(0);
@@ -186,10 +187,14 @@ export function GermanVocabularyApp() {
     };
   }, []);
 
-  const recommendedIds = useMemo(
+  const baseRecommendedIds = useMemo(
     () => getGermanRecommendedIds(progressMap, { posFilter, seed: queueSeed }),
     [posFilter, progressMap, queueSeed]
   );
+  const recommendedIds = useMemo(() => {
+    const filteredIds = baseRecommendedIds.filter((id) => !sessionAnsweredIds.has(id));
+    return filteredIds.length ? filteredIds : baseRecommendedIds;
+  }, [baseRecommendedIds, sessionAnsweredIds]);
 
   useEffect(() => {
     if (hydrated && queueSeed === 0) {
@@ -327,6 +332,7 @@ export function GermanVocabularyApp() {
   function handlePosFilterChange(nextPosFilter) {
     const nextSeed = Date.now();
     const nextIds = getGermanRecommendedIds(progressMap, { posFilter: nextPosFilter, seed: nextSeed });
+    setSessionAnsweredIds(new Set());
     setPosFilter(nextPosFilter);
     setSessionStep(1);
     setQueueSeed(nextSeed);
@@ -359,23 +365,40 @@ export function GermanVocabularyApp() {
     setReviewDayOffsets(normalizeGermanReviewDayOffsets(days));
   }
 
-  function advanceWithProgress(nextProgressMap) {
-    const nextIds = getGermanRecommendedIds(nextProgressMap, { posFilter, seed: queueSeed });
+  function advanceWithProgress(nextProgressMap, blockedIds = sessionAnsweredIds) {
+    const baseNextIds = getGermanRecommendedIds(nextProgressMap, { posFilter, seed: queueSeed });
+    let nextIds = baseNextIds.filter((id) => !blockedIds.has(id));
 
     if (!nextIds.length) {
-      setSessionStep(1);
-      return;
+      setSessionAnsweredIds(new Set());
+      nextIds = baseNextIds;
+      if (!nextIds.length) {
+        setSessionStep(1);
+        return;
+      }
     }
 
     const currentIndex = nextIds.indexOf(selectedEntry.id);
-    const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % nextIds.length : 0;
+    if (currentIndex < 0) {
+      setSelectedEntryId(nextIds[0]);
+      setSessionStep((current) => Math.min(current + 1, nextIds.length));
+      return;
+    }
+
+    const nextIndex = (currentIndex + 1) % nextIds.length;
 
     if (nextIndex === 0) {
       const nextSeed = Date.now();
-      const reshuffledIds = getGermanRecommendedIds(nextProgressMap, { posFilter, seed: nextSeed });
+      const reshuffledBaseIds = getGermanRecommendedIds(nextProgressMap, { posFilter, seed: nextSeed });
+      const reshuffledIds = reshuffledBaseIds.filter((id) => !blockedIds.has(id));
       setQueueSeed(nextSeed);
       setSessionStep(1);
-      if (reshuffledIds.length) setSelectedEntryId(reshuffledIds[0]);
+      if (reshuffledIds.length) {
+        setSelectedEntryId(reshuffledIds[0]);
+      } else {
+        setSessionAnsweredIds(new Set());
+        if (reshuffledBaseIds.length) setSelectedEntryId(reshuffledBaseIds[0]);
+      }
     } else {
       setSelectedEntryId(nextIds[nextIndex]);
       setSessionStep((current) => Math.min(current + 1, nextIds.length));
@@ -393,8 +416,11 @@ export function GermanVocabularyApp() {
     const responseMs = answerRevealedAtRef.current > 0 ? now - answerRevealedAtRef.current : null;
     studySessionRef.current.wordCount += 1;
     const nextProgressMap = recordGermanStudyAttempt(progressMap, selectedEntry, wasCorrect, now, reviewDayOffsets);
+    const nextSessionAnsweredIds = new Set(sessionAnsweredIds);
+    nextSessionAnsweredIds.add(selectedEntry.id);
 
     setProgressMap(nextProgressMap);
+    setSessionAnsweredIds(nextSessionAnsweredIds);
     setAttemptHistory((current) => [
       {
         id: `${selectedEntry.id}-${now}`,
@@ -408,7 +434,7 @@ export function GermanVocabularyApp() {
       },
       ...current
     ].slice(0, 2500));
-    advanceWithProgress(nextProgressMap);
+    advanceWithProgress(nextProgressMap, nextSessionAnsweredIds);
   }
 
   function handleSkipEntry() {
@@ -418,6 +444,9 @@ export function GermanVocabularyApp() {
     judgeFlashTimer.current = setTimeout(() => setJudgeFlash(""), 350);
 
     const now = Date.now();
+    const nextSessionAnsweredIds = new Set(sessionAnsweredIds);
+    nextSessionAnsweredIds.add(selectedEntry.id);
+    setSessionAnsweredIds(nextSessionAnsweredIds);
     setAttemptHistory((current) => [
       {
         id: `${selectedEntry.id}-${now}`,
@@ -431,7 +460,7 @@ export function GermanVocabularyApp() {
       },
       ...current
     ].slice(0, 2500));
-    advanceWithProgress(progressMap);
+    advanceWithProgress(progressMap, nextSessionAnsweredIds);
   }
 
   useEffect(() => {
