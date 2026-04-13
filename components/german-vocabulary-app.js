@@ -37,14 +37,6 @@ function getGermanArticleTone(article) {
   return "unknown";
 }
 
-function getGermanGenderLabel(gender) {
-  if (gender === "masculine") return "男性";
-  if (gender === "feminine") return "女性";
-  if (gender === "neuter") return "中性";
-  if (gender === "plural") return "複数扱い";
-  return "";
-}
-
 export function GermanVocabularyApp() {
   const supabase = useMemo(() => getSupabaseBrowserClient(), []);
   const [hydrated, setHydrated] = useState(false);
@@ -582,12 +574,6 @@ export function GermanVocabularyApp() {
                         <span className="english-family-chip german-form-chip">
                           <strong>{getGermanPosLabel(selectedEntry.pos)}</strong>
                         </span>
-                        {selectedEntry.gender ? (
-                          <span className="english-family-chip german-form-chip">
-                            <strong>{getGermanGenderLabel(selectedEntry.gender)}</strong>
-                            <small>性</small>
-                          </span>
-                        ) : null}
                         {selectedEntry.plural ? (
                           <span className="english-family-chip german-form-chip">
                             <strong>{selectedEntry.plural}</strong>
