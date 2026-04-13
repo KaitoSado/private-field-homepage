@@ -22,6 +22,7 @@ const GENDER_TO_ARTICLE = {
 
 const KNOWN_RECORD_OVERRIDES = new Map([
   ["beamte", { display_de: "Beamte", article: "der", gender: "masculine", plural: "Beamten", meaning_ja: "公務員", form_note: "形容詞変化" }],
+  ["einsteigen", { meaning_ja: "乗り込む、乗車する" }],
   ["eltern", { article: "die", gender: "plural", plural: "Eltern" }],
   ["ferien", { article: "die", gender: "plural", plural: "Ferien", meaning_ja: "休暇" }],
   ["kopfschmerzen", { article: "die", gender: "plural", plural: "Kopfschmerzen" }],

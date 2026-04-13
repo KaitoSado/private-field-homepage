@@ -48,6 +48,7 @@ const MEANING_OVERRIDES = new Map([
   ["legen", "横に置く"],
   ["abholen", "迎えに行く、受け取る"],
   ["brechen", "壊す、折る"],
+  ["einsteigen", "乗り込む、乗車する"],
   ["politik", "政治"],
   ["rock", "スカート"],
   ["meter", "メートル"],

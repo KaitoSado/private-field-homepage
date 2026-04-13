@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-14 | codex | german app data | `einsteigen` の訳を機械翻訳由来の `入れ` から `乗り込む、乗車する` に補正し、翻訳補正ルールにも追加 | `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-14 | codex | german app ui | `/apps/german` の品詞フィルタから、現在0件の `その他` と `性未登録` を削除。古い保存フィルタは起動時に `すべて` へ戻る | `npm run build` |
 | 2026-04-14 | codex | german app data | `der Meter` の訳を機械翻訳由来の `メーター` から単位として自然な `メートル` に補正し、翻訳補正ルールにも追加 | `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-14 | codex | german app data | `/apps/german` の品詞フィルタに `間投詞` を追加し、`danke`, `hallo`, `ach`, `oh` を間投詞として分類。`ach` / `oh` は副詞リストから外した | `node scripts/build-german-vocabulary.mjs`, `npm run build` |
