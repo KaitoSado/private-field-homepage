@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-13 | codex | german app ui | `/apps/german` の答え表示後チップを複数形だけに絞り、訳で判断できる品詞表示を暗記画面から削除 | `npm run build` |
 | 2026-04-13 | codex | german app ui | `/apps/german` の答え表示後チップから `男性/女性/中性 + 性` の性別表示を削除し、冠詞色だけで性を伝える形に整理 | `npm run build` |
 | 2026-04-13 | codex | marketplace routing | MVP段階では `/apps/carshare` と `/apps/matching` の説明ページを挟まず、アプリ一覧から即 `/apps/roomshare` へ遷移するようリダイレクトへ変更 | `npm run build` |
 | 2026-04-13 | codex | german app copy | `/apps/german` の説明セクションを「科学的に最適化できるパーソナライズドイツ単語アプリ」に差し替え、忘却曲線・フラッシュ式・弱点管理・フィードバック・性の色つけの5項目で説明する形に更新 | `npm run build` |

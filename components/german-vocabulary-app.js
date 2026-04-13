@@ -9,7 +9,6 @@ import {
   GERMAN_VOCABULARY_LIBRARY,
   compactGermanProgressMap,
   createEmptyGermanProgress,
-  getGermanPosLabel,
   getGermanProgressForId,
   getGermanRecommendedIds,
   getGermanReviewStepLabel,
@@ -566,22 +565,19 @@ export function GermanVocabularyApp() {
                       <strong>{selectedEntry.meaning}</strong>
                     </div>
 
-                    <div
-                      className={`english-family-strip german-form-strip ${isAnswerVisible ? "is-visible" : "is-hidden"}`}
-                      aria-label="ドイツ語の変化情報"
-                    >
-                      <div>
-                        <span className="english-family-chip german-form-chip">
-                          <strong>{getGermanPosLabel(selectedEntry.pos)}</strong>
-                        </span>
-                        {selectedEntry.plural ? (
+                    {selectedEntry.plural ? (
+                      <div
+                        className={`english-family-strip german-form-strip ${isAnswerVisible ? "is-visible" : "is-hidden"}`}
+                        aria-label="ドイツ語の複数形"
+                      >
+                        <div>
                           <span className="english-family-chip german-form-chip">
                             <strong>{selectedEntry.plural}</strong>
                             <small>複数形</small>
                           </span>
-                        ) : null}
+                        </div>
                       </div>
-                    </div>
+                    ) : null}
 
                     <div className="english-judge-row">
                       <button
