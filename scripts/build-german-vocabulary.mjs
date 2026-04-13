@@ -13,6 +13,7 @@ const POS_LABELS = {
   preposition: "前置詞",
   conjunction: "接続詞",
   pronoun: "代名詞",
+  interjection: "間投詞",
   phrase: "句",
   unknown: "未分類"
 };
@@ -34,7 +35,8 @@ function normalizePos(value) {
     pos === "adverb" ||
     pos === "preposition" ||
     pos === "conjunction" ||
-    pos === "pronoun"
+    pos === "pronoun" ||
+    pos === "interjection"
   ) return pos;
   if (pos === "phrase") return "phrase";
   return "unknown";
@@ -49,7 +51,8 @@ function mapStudyPos(pos) {
     pos === "adverb" ||
     pos === "preposition" ||
     pos === "conjunction" ||
-    pos === "pronoun"
+    pos === "pronoun" ||
+    pos === "interjection"
   ) return pos;
   return "other";
 }

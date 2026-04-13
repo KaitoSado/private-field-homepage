@@ -52,15 +52,17 @@ const PRONOUN_WORDS = new Set([
 
 const VERB_WORDS = new Set(["leid|tun", "tun", "wehtun"]);
 
+const INTERJECTION_WORDS = new Set(["ach", "danke", "hallo", "oh"]);
+
 const ADVERB_WORDS = new Set([
-  "abends", "ach", "allein", "allerdings", "also", "auch", "außerdem", "bald", "beinahe", "besonders",
+  "abends", "allein", "allerdings", "also", "auch", "außerdem", "bald", "beinahe", "besonders",
   "besser", "da", "dabei", "damals", "dann", "darauf", "darüber", "darum", "dazu", "deshalb", "diesmal",
   "direkt", "doch", "doppelt", "dort", "durchaus", "echt", "eher", "einfach", "einmal", "erst", "etwa",
   "fast", "fort", "früher", "ganz", "gar", "genau", "genug", "gerade", "geradeaus", "gleichfalls", "her",
   "heraus", "herein", "heute", "hier", "hin", "höchstens", "immer", "insgesamt", "ja", "jetzt", "kaum",
   "lange", "leider", "links", "los", "mal", "manchmal", "mehr", "meist", "meistens", "miteinander",
   "mittags", "morgens", "nachmittags", "nachts", "nein", "neuerdings", "nicht", "nie", "niemals", "noch",
-  "nun", "nur", "oft", "oh", "quer", "rechts", "rein", "schade", "sehr", "selbst", "so", "sofort",
+  "nun", "nur", "oft", "quer", "rechts", "rein", "schade", "sehr", "selbst", "so", "sofort",
   "sogar", "sonst", "später", "trotzdem", "überall", "überhaupt", "übrigens", "unbedingt", "ungefähr",
   "vielleicht", "voll", "voraus", "vorbei", "vorher", "vormittags", "vorn", "wann", "warum", "weiter",
   "wenigstens", "wieder", "wieso", "wo", "woher", "wohin", "zuerst", "zugleich", "zuletzt", "zurück"
@@ -93,6 +95,7 @@ function normalizePartOfSpeech(value, keys) {
   if (matchesKnownWord(CONJUNCTION_WORDS, keys)) return "conjunction";
   if (matchesKnownWord(PREPOSITION_WORDS, keys)) return "preposition";
   if (matchesKnownWord(PRONOUN_WORDS, keys)) return "pronoun";
+  if (matchesKnownWord(INTERJECTION_WORDS, keys)) return "interjection";
   if (matchesKnownWord(ADVERB_WORDS, keys)) return "adverb";
   if (matchesKnownWord(ADJECTIVE_WORDS, keys)) return "adjective";
   return pos;

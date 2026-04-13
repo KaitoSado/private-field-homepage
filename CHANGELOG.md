@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-14 | codex | german app data | `/apps/german` の品詞フィルタに `間投詞` を追加し、`danke`, `hallo`, `ach`, `oh` を間投詞として分類。`ach` / `oh` は副詞リストから外した | `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-14 | codex | german app data | `Beamte` を `der Beamte / 公務員` に補正し、答え下に `形容詞変化` の変化メモを表示できるようにした | `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-14 | codex | marketplace routing | `/apps/carshare` と `/apps/matching` を `/apps/roomshare` へのリダイレクトから、それぞれ専用の準備面に戻した。カーシェアは車両・予約・免許確認・事故対応、マッチングは相互いいね・Match・チャット制限・通報ブロックを表示 | `npm run build` |
 | 2026-04-13 | codex | profile copy | マイページの hero action 文言を `作品を見る` -> `記事`, `思考を読む` -> `記録したいこと` に変更 | `npm run build` |
