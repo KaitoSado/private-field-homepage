@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-13 | codex | marketplace routing | MVP段階では `/apps/carshare` と `/apps/matching` の説明ページを挟まず、アプリ一覧から即 `/apps/roomshare` へ遷移するようリダイレクトへ変更 | `npm run build` |
 | 2026-04-13 | codex | german app copy | `/apps/german` の説明セクションを「科学的に最適化できるパーソナライズドイツ単語アプリ」に差し替え、忘却曲線・フラッシュ式・弱点管理・フィードバック・性の色つけの5項目で説明する形に更新 | `npm run build` |
 | 2026-04-13 | codex | german app data | `der Rock` の機械翻訳が `ロック` になっていたため、ドイツ語単語帳文脈に合わせて `スカート` に補正し、翻訳補正ルールにも追加 | `node scripts/import-german-meanings-google.mjs --apply --refresh`, `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-13 | codex | german app queue | `/apps/german` で同じ単語が同一セッション内に早く戻りすぎないよう、回答済み単語を一周するまで一時的に出題キューから外す制御を追加 | `npm run build` |
