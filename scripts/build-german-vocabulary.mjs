@@ -80,6 +80,7 @@ function toEntry(record, index) {
   const gender = cleanText(normalizedRecord.gender);
   const plural = cleanText(normalizedRecord.plural);
   const formNote = cleanText(normalizedRecord.form_note);
+  const homonymNote = cleanText(normalizedRecord.homonym_note);
   const reviewStatus = cleanText(normalizedRecord.review_status);
 
   return {
@@ -94,6 +95,7 @@ function toEntry(record, index) {
     gender,
     plural,
     ...(formNote ? { formNote } : {}),
+    ...(homonymNote ? { homonymNote } : {}),
     needsGender: Boolean(normalizedRecord.needs_gender),
     coreChunk: article ? `${article} ${headword}` : headword,
     meaning: meaning || "意味未登録",

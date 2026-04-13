@@ -1,12 +1,12 @@
 {
-  "generated_at": "2026-04-13T16:19:59.017Z",
-  "total_entries": 1593,
-  "review_candidates": 438,
-  "auto_fixable": 16,
+  "generated_at": "2026-04-13T16:47:17.268Z",
+  "total_entries": 1604,
+  "review_candidates": 436,
+  "auto_fixable": 13,
   "by_confidence": {
-    "high": 16,
+    "high": 13,
     "medium": 183,
-    "low": 239
+    "low": 240
   },
   "outputs": {
     "review_csv": "/Users/sadokaito/Downloads/homepage/ドイツ単語帳抜き出しフォルダ/ドイツ単語_訳確認リスト.csv",

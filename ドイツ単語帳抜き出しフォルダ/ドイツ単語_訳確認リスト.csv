@@ -5,8 +5,6 @@ order,lemma_de,display_de,article,pos,current_meaning_ja,suggested_meaning_ja,re
 27,Alter,Alter,der,noun,古い,年齢,Alter は形容詞 alt ではなく名詞として年齢が基本 / 名詞化された語を形容詞として訳している可能性,high,auto-fixable,"noun candidate: Substantiv,adjektivische Deklination; noun candidate: Substantiv,adjektivische Deklination; noun candidate: Substantiv,adjektivische Deklination; meaning_ja: Google Translate candidate"
 105,Automat,Automat,der,noun,オートマチック,自動販売機、券売機,Automat はオートマチックではなく機械装置・販売機 / カタカナ直訳でドイツ語の普通語義とずれる可能性 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
 108,Bach,Bach,der,noun,バッハ,小川,der Bach は作曲家名ではなく普通名詞では小川 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
-119,Band,Band,das,noun,バンド,テープ、リボン、帯,das Band は音楽バンドではなく帯状のもの / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
-120,Bank,Bank,die,noun,銀行,ベンチ,複数形 Bänke なので金融機関ではなくベンチ,high,auto-fixable,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
 130,Bedingung,Bedingung,die,noun,状態,条件,Bedingung は状態ではなく条件 / Bedingung / Zustand などの区別が必要,high,auto-fixable,meaning_ja: Google Translate candidate
 135,Begriff,Begriff,der,noun,表現,概念、用語,Begriff は表現より概念・用語 / Ausdruck / Begriff などの区別が必要,high,auto-fixable,meaning_ja: Google Translate candidate
 145,Bekannte,Bekannte,die,noun,知り合い,知人,Bekannte は知っている人・知人,high,auto-fixable,meaning_ja: Google Translate candidate
@@ -14,7 +12,6 @@ order,lemma_de,display_de,article,pos,current_meaning_ja,suggested_meaning_ja,re
 748,kriegen,kriegen,,verb,得る,得る、受け取る,口語の kriegen は戦争ではなく bekommen に近い,high,auto-fixable,meaning_ja: Google Translate candidate
 1035,Rat,Rat,der,noun,アドバイス,助言、評議会,Rat はネズミではなく助言・評議会 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
 1073,Rezept,Rezept,das,noun,レシピ,処方箋、レシピ,Rezept は処方箋と料理レシピの両方 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
-1133,Schloss,Schloss,das,noun,ロック,城、錠,Schloss はロック音楽ではなく城・錠 / false friend か文脈違いの可能性 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
 5,abfahren,abfahren,,verb,出発,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
 29,anbieten,anbieten,,verb,オファー,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
 31,ändern,ändern,,verb,変化,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
@@ -207,6 +204,7 @@ order,lemma_de,display_de,article,pos,current_meaning_ja,suggested_meaning_ja,re
 112,Bad,Bad,das,noun,バスルーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
 116,Bahnsteig,Bahnsteig,der,noun,プラットフォーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
 118,Balkon,Balkon,der,noun,バルコニー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+120,Bank,Bank,die,noun,ベンチ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,homonym corrected: die Bank/Bänke = ベンチ
 121,bar,bar,,adjective,クマ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
 169,Bett,Bett,das,noun,ベッド,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
 187,Blatt,Blatt,das,noun,シート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate

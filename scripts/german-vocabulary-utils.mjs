@@ -171,6 +171,7 @@ export function normalizeGermanRecord(record) {
     example_de: cleanText(sourceRecord.example_de),
     example_ja: cleanText(sourceRecord.example_ja),
     form_note: cleanText(sourceRecord.form_note),
+    homonym_note: cleanText(sourceRecord.homonym_note),
     tags: cleanText(sourceRecord.tags),
     notes: cleanText(sourceRecord.notes),
     needs_gender: needsGender,
@@ -220,6 +221,7 @@ export function ensureGermanEnrichmentTemplate(seedRows) {
     example_de: record.example_de || "",
     example_ja: record.example_ja || "",
     part_of_speech: record.part_of_speech || "",
+    homonym_note: record.homonym_note || "",
     notes: record.notes || ""
   }));
 
@@ -232,6 +234,7 @@ export function ensureGermanEnrichmentTemplate(seedRows) {
     "example_de",
     "example_ja",
     "part_of_speech",
+    "homonym_note",
     "notes"
   ]);
   return true;
@@ -253,7 +256,7 @@ export function mergeGermanEnrichment(seedRows, enrichmentRows) {
     if (!enrichment) return normalizeGermanRecord(record);
 
     const next = { ...record };
-    for (const field of ["article", "gender", "plural", "meaning_ja", "example_de", "example_ja", "part_of_speech", "tags", "notes"]) {
+    for (const field of ["article", "gender", "plural", "meaning_ja", "example_de", "example_ja", "part_of_speech", "tags", "homonym_note", "notes"]) {
       const value = cleanText(enrichment[field]);
       if (value && cleanText(next[field]) !== value) {
         next[field] = value;
@@ -276,6 +279,7 @@ export function writeGermanNounChecklist(rows) {
       gender: record.gender || "",
       plural: record.plural || "",
       meaning_ja: record.meaning_ja || "",
+      homonym_note: record.homonym_note || "",
       review_status: record.review_status || "",
       notes: record.notes || ""
     }));
@@ -286,6 +290,7 @@ export function writeGermanNounChecklist(rows) {
     "gender",
     "plural",
     "meaning_ja",
+    "homonym_note",
     "review_status",
     "notes"
   ]);

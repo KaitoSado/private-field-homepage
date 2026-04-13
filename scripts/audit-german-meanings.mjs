@@ -26,8 +26,8 @@ const CURATED_SUGGESTIONS = new Map([
   ["automat", ["自動販売機、券売機", "Automat はオートマチックではなく機械装置・販売機", "high"]],
   ["bach", ["小川", "der Bach は作曲家名ではなく普通名詞では小川", "high"]],
   ["bäcker", ["パン屋", "Bäcker は人・店としてパン屋", "high"]],
-  ["bank", ["ベンチ", "複数形 Bänke なので金融機関ではなくベンチ", "high"]],
-  ["band", ["テープ、リボン、帯", "das Band は音楽バンドではなく帯状のもの", "high"]],
+  ["band|das|bänder", ["テープ、リボン、帯", "das Band は音楽バンドではなく帯状のもの", "high"]],
+  ["bank|die|bänke", ["ベンチ", "複数形 Bänke なので金融機関ではなくベンチ", "high"]],
   ["bekannte", ["知人", "Bekannte は知っている人・知人", "high"]],
   ["begriff", ["概念、用語", "Begriff は表現より概念・用語", "high"]],
   ["bedeutung", ["意味、重要性", "Bedeutung は意味と重要性の両方を持つ", "medium"]],
@@ -48,8 +48,11 @@ const CURATED_SUGGESTIONS = new Map([
   ["rat", ["助言、評議会", "Rat はネズミではなく助言・評議会", "high"]],
   ["rezept", ["処方箋、レシピ", "Rezept は処方箋と料理レシピの両方", "high"]],
   ["rock", ["スカート", "false friend: der Rock は音楽ロックではなくスカート", "high"]],
-  ["schloss", ["城、錠", "Schloss はロック音楽ではなく城・錠", "high"]],
-  ["see", ["湖", "der See は湖。die See なら海", "high"]],
+  ["gehalt|der|gehalte", ["内容、含有量", "der Gehalt は内容・含有量。das Gehalt なら給料", "high"]],
+  ["gehalt|das|gehälter", ["給料", "das Gehalt は給料", "high"]],
+  ["schloss|das|schlösser", ["城、錠", "Schloss はロック音楽ではなく城・錠", "high"]],
+  ["see|der|seen", ["湖", "der See は湖。die See なら海", "high"]],
+  ["see|die|", ["海", "die See は海。der See なら湖", "high"]],
   ["steuer", ["税、ハンドル", "Steuer は性で意味が分かれる多義語", "medium"]],
   ["wange", ["頬", "Wange は姓ではなく頬", "high"]],
   ["wirt", ["主人、店主", "Wirt は宿主・店主で文脈注意", "medium"]],
@@ -102,8 +105,21 @@ function looksLikeJapaneseVerbMeaning(value) {
   return /(う|く|ぐ|す|つ|ぬ|ぶ|む|る)$/.test(value);
 }
 
+function getReviewKey(record) {
+  return [
+    normalizeGermanKey(record.normalized_key || record.lemma_de || record.display_de),
+    normalizeGermanKey(record.article),
+    normalizeGermanKey(record.plural)
+  ].join("|");
+}
+
+function getCuratedSuggestion(record) {
+  return CURATED_SUGGESTIONS.get(getReviewKey(record))
+    || CURATED_SUGGESTIONS.get(normalizeGermanKey(record.normalized_key || record.lemma_de || record.display_de));
+}
+
 function upsertIssue(issuesByKey, record, issue) {
-  const key = normalizeGermanKey(record.normalized_key || record.lemma_de || record.display_de);
+  const key = getReviewKey(record);
   const existing = issuesByKey.get(key);
   const next = {
     order: record.order || "",
@@ -150,7 +166,7 @@ function auditRecord(record, issuesByKey) {
     return;
   }
 
-  const curated = CURATED_SUGGESTIONS.get(key);
+  const curated = getCuratedSuggestion(record);
   if (curated && meaning !== curated[0]) {
     upsertIssue(issuesByKey, record, {
       suggested: curated[0],

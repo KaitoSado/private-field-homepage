@@ -100,11 +100,12 @@
     - UI 上の `見直しリスト` は日時を見せず、間違えた単語一覧と現在ステージを中心に見直せる
   - ドイツ語コンテンツ `/apps/german`
     - `ドイツ単語帳抜き出しフォルダ/ドイツ単語_app_seed.json` を正本 seed とし、`scripts/build-german-vocabulary.mjs` で `lib/german-vocabulary.js` を生成して読む
-    - 現在のドイツ語 seed は 1593 語で、`meaning_ja` は全件 machine translated draft として補完済み。例文はまだ未登録
-    - 名詞は 843 語で、冠詞・性は 843 語、複数形は 790 語まで補完済み。未確認名詞は 0 語
+    - 現在のドイツ語 seed は 1604 語で、`meaning_ja` は全件 machine translated draft または手動補正として補完済み。例文はまだ未登録
+    - 名詞は 854 語で、冠詞・性は 854 語、複数形は 801 語まで補完済み。未確認名詞は 0 語
+    - `See`, `Leiter`, `Band`, `Bank`, `Gehalt`, `Erbe`, `Kiefer`, `Schloss` など冠詞や文脈で意味が分かれる語は、答え表示時に `同音異義` の注意を出す
     - 英語コンテンツと同じく、自動読み上げ、左右判定、品詞フィルタ、表示時間設定、5ステージ復習間隔、見直しリスト、長期記憶リストを持つ
     - 品詞フィルタは `名詞`, `動詞`, `助動詞`, `形容詞`, `副詞`, `前置詞`, `接続詞`, `代名詞`, `間投詞` を持つ
-    - `npm run audit:german-meanings` で訳の怪しい候補を `ドイツ単語帳抜き出しフォルダ/ドイツ単語_訳確認リスト.csv` に出力し、high confidence の自動修正候補と review-required 候補を分けられる
+    - `npm run audit:german-meanings` で訳の怪しい候補を `ドイツ単語帳抜き出しフォルダ/ドイツ単語_訳確認リスト.csv` に出力し、high confidence の自動修正候補と review-required 候補を分けられる。現在は 1604 語から 436 候補、high 13 件
     - 進捗はログイン時に Supabase `german_progress` と同期し、未ログイン時または live schema 未適用時は `localStorage` に退避する
   - リサーチプログレス `/apps/research-progress`
     - 招待制の研究会 / ゼミ / 小規模PJ向け研究ライン + 週次チェックイン面

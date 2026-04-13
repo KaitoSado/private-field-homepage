@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-14 | codex | german app data | ドイツ語 seed に `See`, `Leiter`, `Band`, `Bank`, `Gehalt`, `Erbe`, `Kiefer`, `Schloss` の同音異義情報を追加・補正し、答え表示時だけ冠詞違い/同冠詞の別義を `同音異義` として出すようにした。seed は 1604 語、訳確認候補は 436 件に更新 | `node scripts/build-german-vocabulary.mjs`, `npm run audit:german-meanings`, `npm run build` |
 | 2026-04-14 | codex | german app data | ドイツ語訳のAI補助確認用に `npm run audit:german-meanings` を追加し、1593語から訳確認候補438件、高確度自動修正候補16件をCSV/JSONへ出力できるようにした | `npm run audit:german-meanings`, `npm run build` |
 | 2026-04-14 | codex | german app data | `einsteigen` の訳を機械翻訳由来の `入れ` から `乗り込む、乗車する` に補正し、翻訳補正ルールにも追加 | `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-14 | codex | german app ui | `/apps/german` の品詞フィルタから、現在0件の `その他` と `性未登録` を削除。古い保存フィルタは起動時に `すべて` へ戻る | `npm run build` |

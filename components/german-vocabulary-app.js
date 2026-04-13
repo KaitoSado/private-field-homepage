@@ -586,6 +586,20 @@ export function GermanVocabularyApp() {
                       </div>
                     ) : null}
 
+                    {selectedEntry.homonymNote ? (
+                      <div
+                        className={`english-family-strip german-form-strip ${isAnswerVisible ? "is-visible" : "is-hidden"}`}
+                        aria-label="同音異義の注意"
+                      >
+                        <div>
+                          <span className="english-family-chip german-form-chip">
+                            <strong>{selectedEntry.homonymNote}</strong>
+                            <small>同音異義</small>
+                          </span>
+                        </div>
+                      </div>
+                    ) : null}
+
                     <div className="english-judge-row">
                       <button
                         type="button"
