@@ -1,0 +1,439 @@
+order,lemma_de,display_de,article,pos,current_meaning_ja,suggested_meaning_ja,reason,confidence,action,notes
+14,Achtung,Achtung,die,noun,危険,注意,機械翻訳が警告語を名詞の危険として寄せすぎている,high,auto-fixable,meaning_ja: Google Translate candidate
+16,Affe,Affe,der,noun,類人猿,猿,類人猿より一般語としては猿,high,auto-fixable,meaning_ja: Google Translate candidate
+18,Ahnung,Ahnung,die,noun,アイデア,予感、見当,Ahnung はアイデアよりも予感・見当・心当たり / 英語寄り・意味がずれている可能性 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
+27,Alter,Alter,der,noun,古い,年齢,Alter は形容詞 alt ではなく名詞として年齢が基本 / 名詞化された語を形容詞として訳している可能性,high,auto-fixable,"noun candidate: Substantiv,adjektivische Deklination; noun candidate: Substantiv,adjektivische Deklination; noun candidate: Substantiv,adjektivische Deklination; meaning_ja: Google Translate candidate"
+105,Automat,Automat,der,noun,オートマチック,自動販売機、券売機,Automat はオートマチックではなく機械装置・販売機 / カタカナ直訳でドイツ語の普通語義とずれる可能性 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
+108,Bach,Bach,der,noun,バッハ,小川,der Bach は作曲家名ではなく普通名詞では小川 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
+119,Band,Band,das,noun,バンド,テープ、リボン、帯,das Band は音楽バンドではなく帯状のもの / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+120,Bank,Bank,die,noun,銀行,ベンチ,複数形 Bänke なので金融機関ではなくベンチ,high,auto-fixable,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+130,Bedingung,Bedingung,die,noun,状態,条件,Bedingung は状態ではなく条件 / Bedingung / Zustand などの区別が必要,high,auto-fixable,meaning_ja: Google Translate candidate
+135,Begriff,Begriff,der,noun,表現,概念、用語,Begriff は表現より概念・用語 / Ausdruck / Begriff などの区別が必要,high,auto-fixable,meaning_ja: Google Translate candidate
+145,Bekannte,Bekannte,die,noun,知り合い,知人,Bekannte は知っている人・知人,high,auto-fixable,meaning_ja: Google Translate candidate
+577,Handy,Handy,das,noun,携帯電話,携帯電話、スマホ,Handy は便利なではなく携帯電話,high,auto-fixable,meaning_ja: Google Translate candidate
+748,kriegen,kriegen,,verb,得る,得る、受け取る,口語の kriegen は戦争ではなく bekommen に近い,high,auto-fixable,meaning_ja: Google Translate candidate
+1035,Rat,Rat,der,noun,アドバイス,助言、評議会,Rat はネズミではなく助言・評議会 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
+1073,Rezept,Rezept,das,noun,レシピ,処方箋、レシピ,Rezept は処方箋と料理レシピの両方 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
+1133,Schloss,Schloss,das,noun,ロック,城、錠,Schloss はロック音楽ではなく城・錠 / false friend か文脈違いの可能性 / カタカナ直訳。false friend や文脈違いの可能性,high,auto-fixable,meaning_ja: Google Translate candidate
+5,abfahren,abfahren,,verb,出発,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+29,anbieten,anbieten,,verb,オファー,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+31,ändern,ändern,,verb,変化,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+37,angeln,angeln,,verb,釣り,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+41,ankommen,ankommen,,verb,到着,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+47,anrufen,anrufen,,verb,電話,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+48,ansehen,ansehen,,verb,ビュー,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+50,antworten,antworten,,verb,答え,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+60,arbeiten,arbeiten,,verb,仕事,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+73,Aufenthalt,Aufenthalt,der,noun,滞在する,,名詞なのに日本語訳が動詞句になっている,medium,review-required,meaning_ja: Google Translate candidate
+74,Aufgabe,Aufgabe,die,noun,タスク,,Aufgabe などは課題・任務が自然な場合が多い / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+75,aufgehen,aufgehen,,verb,上昇,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+76,aufhören,aufhören,,verb,停止,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+84,Ausdruck,Ausdruck,der,noun,表現,,Ausdruck / Begriff などの区別が必要,medium,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+87,ausgehen,ausgehen,,verb,外出,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+95,aussehen,aussehen,,verb,見て,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+100,aussprechen,aussprechen,,verb,急行,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+101,aussteigen,aussteigen,,verb,出口,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+113,baden,baden,,verb,入浴,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+127,bedeuten,bedeuten,,verb,平均,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+128,Bedeutung,Bedeutung,die,noun,意味,意味、重要性,Bedeutung は意味と重要性の両方を持つ,medium,review-required,meaning_ja: Google Translate candidate
+129,Bedienung,Bedienung,die,noun,サービス,,Dienst / Bedienung などは文脈により接客・勤務・奉仕 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+131,befehlen,befehlen,,verb,指示,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+132,begegnen,begegnen,,verb,出会い,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+148,benutzen,benutzen,,verb,使用,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+158,besichtigen,besichtigen,,verb,ビュー,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+159,besitzen,besitzen,,verb,自分の,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+164,bestehen,bestehen,,verb,構成,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+165,bestellen,bestellen,,verb,注文,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+167,besuchen,besuchen,,verb,訪問,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+178,bilden,bilden,,verb,形状,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+183,bisschen,bisschen,,verb,少し,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+192,blicken,blicken,,verb,見て,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+203,braten,braten,,verb,稚魚,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+204,brauchen,brauchen,,verb,必要,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+210,brennen,brennen,,verb,やけど,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+247,danken,danken,,verb,感謝,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+255,dauern,dauern,,verb,最後,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+258,decken,decken,,verb,カバー,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+279,draußen,draußen,,verb,外,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+280,drinnen,drinnen,,verb,内部,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+281,drücken,drücken,,verb,プレス,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+291,duschen,duschen,,verb,シャワー,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+308,einkaufen,einkaufen,,verb,買い物,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+322,empfangen,empfangen,,verb,受け取った,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+326,enden,enden,,verb,終わり,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+335,entschlossen,entschlossen,,verb,決定した,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+336,entschuldigen,entschuldigen,,verb,言い訳,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+343,erfahren,erfahren,,verb,経験,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+348,erinnern,erinnern,,verb,覚えて,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+355,erledigen,erledigen,,verb,完了,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+363,erzählen,erzählen,,verb,教えて,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+387,fallen,fallen,,verb,秋,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+391,fangen,fangen,,verb,キャッチ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+403,fern,fern,,verb,リモート,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+404,fernsehen,fernsehen,,verb,テレビ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+420,fließen,fließen,,verb,流れ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+426,folgen,folgen,,verb,結果,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+427,fordern,fordern,,verb,要求,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+434,fotografieren,fotografieren,,verb,写真,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+436,fragen,fragen,,verb,質問,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+460,führen,führen,,verb,鉛,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+465,fürchten,fürchten,,verb,恐れ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+486,gefallen,gefallen,,verb,落ちた,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+488,gegen,gegen,,verb,に対して,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+497,gelangen,gelangen,,verb,到着,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+511,gern,gern,,verb,喜んで,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+523,gestern,gestern,,verb,昨日,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+540,golden,golden,,verb,ゴールデン,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+571,halten,halten,,verb,所有,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+575,handeln,handeln,,verb,活動,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+596,helfen,helfen,,verb,ヘルプ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+621,hoffen,hoffen,,verb,希望,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+624,holen,holen,,verb,フェッチ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+634,husten,husten,,verb,咳,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+636,Idee,Idee,die,noun,アイデア,,英語寄り・意味がずれている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+652,inzwischen,inzwischen,,verb,間に,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+664,jobben,jobben,,verb,仕事,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+676,kämpfen,kämpfen,,verb,戦い,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+710,klingeln,klingeln,,verb,指輪,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+711,klingen,klingen,,verb,音,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+712,klopfen,klopfen,,verb,ノック,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+717,Koch,Koch,der,noun,料理する,,名詞なのに日本語訳が動詞句になっている,medium,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+734,kosten,kosten,,verb,料金,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+757,kümmern,kümmern,,verb,気をつけて,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+764,küssen,küssen,,verb,キス,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+765,lächeln,lächeln,,verb,笑顔,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+770,landen,landen,,verb,土地,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+792,leid|tun,leid|tun,,verb,ごめん,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+802,lieben,lieben,,verb,愛,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+805,liefern,liefern,,verb,配達,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+807,Linie,Linie,die,noun,ライン,,Linie / Zeile などは線・行・路線の可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+813,loben,loben,,verb,賞賛,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+822,lügen,lügen,,verb,嘘,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+829,malen,malen,,verb,ペイント,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+859,merken,merken,,verb,覚えて,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+860,messen,messen,,verb,測定,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+864,mieten,mieten,,verb,家賃,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+877,mitten,mitten,,verb,真ん中,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+882,modern,modern,,verb,モダンな,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+921,neben,neben,,verb,の隣に,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+945,nützen,nützen,,verb,使用,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+948,oben,oben,,verb,上,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+972,packen,packen,,verb,パック,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+976,parken,parken,,verb,公園,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+980,passen,passen,,verb,フィット,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1019,prüfen,prüfen,,verb,チェック,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1026,putzen,putzen,,verb,クリーニング,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1036,raten,raten,,verb,推測,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1040,rauchen,rauchen,,verb,煙,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1055,regnen,regnen,,verb,雨,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1063,reisen,reisen,,verb,旅行,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1067,reparieren,reparieren,,verb,修理,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1071,retten,retten,,verb,保存,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1077,riechen,riechen,,verb,匂い,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1087,rufen,rufen,,verb,電話,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1120,schicken,schicken,,verb,送信,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1123,Schild,Schild,der,noun,サイン,,英語 sign 寄りの直訳で、Zeichen などは記号・印の可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+1130,schließen,schließen,,verb,近い,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1137,schmecken,schmecken,,verb,おいしい,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1143,schneiden,schneiden,,verb,カット,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1144,schneien,schneien,,verb,雪,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1150,schreien,schreien,,verb,悲鳴,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1161,schweigen,schweigen,,verb,黙ってください,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1168,schwitzen,schwitzen,,verb,汗,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1180,selten,selten,,verb,めったに,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1182,senden,senden,,verb,送信,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1188,silbern,silbern,,verb,銀,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1191,sinken,sinken,,verb,シンク,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1206,sondern,sondern,,verb,それよりも,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1215,sparen,sparen,,verb,保存,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1219,spazieren,spazieren,,verb,散歩,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1228,springen,springen,,verb,ジャンプ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1238,staunen,staunen,,verb,驚異,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1241,stehlen,stehlen,,verb,窃盗,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1251,Stimme,Stimme,die,noun,同意する,,名詞なのに日本語訳が動詞句になっている,medium,review-required,meaning_ja: Google Translate candidate
+1252,stimmen,stimmen,,verb,声,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1257,stoßen,stoßen,,verb,バンプ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1269,studieren,studieren,,verb,勉強,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1276,stürzen,stürzen,,verb,秋,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1289,tanzen,tanzen,,verb,ダンス,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1299,teilen,teilen,,verb,スプリット,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1324,trauen,trauen,,verb,信頼,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1326,träumen,träumen,,verb,夢,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1330,trennen,trennen,,verb,別,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1332,treten,treten,,verb,ステップ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1334,trocken,trocken,,verb,ドライ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1350,überlegen,überlegen,,verb,優れた,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1351,übermorgen,übermorgen,,verb,明後日,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1354,überraschen,überraschen,,verb,驚き,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1362,umsteigen,umsteigen,,verb,移行,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1373,unten,unten,,verb,下に,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1377,Unternehmen,Unternehmen,das,noun,追求する,,名詞なのに日本語訳が動詞句になっている,medium,review-required,meaning_ja: Google Translate candidate
+1381,unterschreiben,unterschreiben,,verb,サイン,,英語 sign 寄りの直訳で、Zeichen などは記号・印の可能性 / 動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1382,Unterschrift,Unterschrift,die,noun,サイン,,英語 sign 寄りの直訳で、Zeichen などは記号・印の可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1406,verlangen,verlangen,,verb,要求,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1415,versprechen,versprechen,,verb,約束,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1418,versuchen,versuchen,,verb,試み,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1421,Verwandte,Verwandte,die,noun,関連している,,名詞なのに日本語訳が動詞句になっている,medium,review-required,meaning_ja: Google Translate candidate
+1422,verzeihen,verzeihen,,verb,許し,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1431,vollkommen,vollkommen,,verb,完全に,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1437,vorgestern,vorgestern,,verb,一昨日,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1438,vorhaben,vorhaben,,verb,プラン,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1450,vorstellen,vorstellen,,verb,導入,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1465,wandern,wandern,,verb,ハイキング,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1469,warten,warten,,verb,待って,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1476,wechseln,wechseln,,verb,変化,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1477,wecken,wecken,,verb,起きろ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1481,wegen,wegen,,verb,のため,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1515,willkommen,willkommen,,verb,いらっしゃいませ,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1517,winken,winken,,verb,波,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1541,wundern,wundern,,verb,不思議,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1543,wünschen,wünschen,,verb,願い,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1550,Zeichen,Zeichen,das,noun,サイン,,英語 sign 寄りの直訳で、Zeichen などは記号・印の可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1552,Zeile,Zeile,die,noun,ライン,,Linie / Zeile などは線・行・路線の可能性 / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1568,Zoll,Zoll,der,noun,税関,税関、関税、インチ,Zoll は税関・関税・インチの多義語,medium,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+1569,Zone,Zone,die,noun,ゾーン,,Zone は領域・区域が自然な場合が多い / カタカナ直訳。false friend や文脈違いの可能性,medium,review-required,meaning_ja: Google Translate candidate
+1574,zufrieden,zufrieden,,verb,満足,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1580,zumachen,zumachen,,verb,近い,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1585,zusammen,zusammen,,verb,一緒に,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1586,Zustand,Zustand,der,noun,状態,,Bedingung / Zustand などの区別が必要,medium,review-required,meaning_ja: Google Translate candidate
+1590,zweifeln,zweifeln,,verb,疑い,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+1593,zwischen,zwischen,,verb,間,,動詞なのに日本語訳が名詞形・語幹訳に崩れている可能性,medium,review-required,meaning_ja: Google Translate candidate
+36,Angebot,Angebot,das,noun,オファー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+54,Anzug,Anzug,der,noun,メンズスーツ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+64,arm,arm,,adjective,アーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+79,Aufsatz,Aufsatz,der,noun,エッセイ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+110,Bäcker,Bäcker,der,noun,ベイカー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+111,Bäckerei,Bäckerei,die,noun,ベーカリー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+112,Bad,Bad,das,noun,バスルーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+116,Bahnsteig,Bahnsteig,der,noun,プラットフォーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+118,Balkon,Balkon,der,noun,バルコニー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+121,bar,bar,,adjective,クマ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+169,Bett,Bett,das,noun,ベッド,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+187,Blatt,Blatt,das,noun,シート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+191,Blick,Blick,der,noun,ビュー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+194,Blitz,Blitz,der,noun,フラッシュ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+195,blond,blond,,adjective,ブロンド,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+197,Bluse,Bluse,die,noun,ブラウス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+201,Boot,Boot,das,noun,ボート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+215,Brot,Brot,das,noun,パン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+216,Brötchen,Brötchen,das,noun,ロールパン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+224,bunt,bunt,,adjective,カラフル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+227,Büro,Büro,das,noun,オフィス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+228,Bus,Bus,der,noun,バス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+229,Butter,Butter,die,noun,バター,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+230,Café,Café,die,noun,カフェ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+231,Cent,Cent,der,noun,セント,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+232,Chance,Chance,die,noun,チャンス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+233,Charakter,Charakter,der,noun,キャラクター,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+234,Chef,Chef,der,noun,ボス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+243,Dame,Dame,die,noun,レディ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+257,Decke,Decke,die,noun,シーリング,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+275,doppelt,doppelt,,adverb,ダブル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+276,Doppelzimmer,Doppelzimmer,das,noun,ダブルルーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+282,dumm,dumm,,adjective,バカ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+290,Dusche,Dusche,die,noun,シャワー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+292,Dutzend,Dutzend,das,noun,ダース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+295,Ecke,Ecke,die,noun,コーナー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+315,Einzelzimmer,Einzelzimmer,das,noun,シングルルーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+349,Erinnerung,Erinnerung,die,noun,メモリ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+361,Erwachsene,Erwachsene,die,noun,アダルト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+369,Esszimmer,Esszimmer,das,noun,ダイニングルーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+372,Euro,Euro,der,noun,ユーロ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+373,Europa,Europa,die,noun,ヨーロッパ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+377,Examen,Examen,das,noun,テスト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+382,Fahrer,Fahrer,der,noun,ドライバ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+383,Fahrkarte,Fahrkarte,die,noun,チケット,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+385,Fahrt,Fahrt,die,noun,ドライブ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+401,Fenster,Fenster,das,noun,ウィンドウ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+416,Flasche,Flasche,die,noun,ボトル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+421,Flug,Flug,der,noun,フライト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+447,freundlich,freundlich,,adjective,フレンドリー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+453,Frucht,Frucht,die,noun,フルーツ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+467,Fußball,Fußball,der,noun,フットボール,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+469,Gabel,Gabel,die,noun,フォーク,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+472,Garage,Garage,die,noun,ガレージ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+474,Gast,Gast,der,noun,ゲスト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+478,Gebiet,Gebiet,das,noun,エリア,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+487,Gefühl,Gefühl,das,noun,フィーリング,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+489,Gegend,Gegend,die,noun,エリア,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+495,Geige,Geige,die,noun,バイオリン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+532,Glas,Glas,das,noun,ガラス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+538,glücklich,glücklich,,adjective,ハッピー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+543,Gramm,Gramm,das,noun,グラム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+546,grau,grau,,adjective,グレー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+549,Grippe,Grippe,die,noun,インフルエンザ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+551,Größe,Größe,die,noun,サイズ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+559,Gruppe,Gruppe,die,noun,グループ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+570,Hals,Hals,der,noun,ネック,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+576,Handtasche,Handtasche,die,noun,ハンドバッグ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+583,Hauptstraße,Hauptstraße,die,noun,メインストリート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+587,Heft,Heft,das,noun,ノート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+590,Heimat,Heimat,die,noun,ホームタウン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+598,Hemd,Hemd,das,noun,シャツ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+603,Herr,Herr,der,noun,ミスター,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+610,Hilfe,Hilfe,die,noun,ヘルプ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+618,Hochschule,Hochschule,die,noun,カレッジ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+627,Hose,Hose,die,noun,パンツ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+630,Huhn,Huhn,das,noun,チキン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+642,Ingenieur,Ingenieur,der,noun,エンジニア,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+643,Inhalt,Inhalt,der,noun,コンテンツ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+654,Jacke,Jacke,die,noun,ジャケット,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+658,Jazz,Jazz,der,noun,ジャズ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+665,Journalist,Journalist,der,noun,ジャーナリスト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+671,Kaffee,Kaffee,der,noun,コーヒー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+675,Kamerad,Kamerad,der,noun,メイト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+681,Käse,Käse,der,noun,チーズ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+682,Kasse,Kasse,die,noun,チェックアウト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+686,Kaufhaus,Kaufhaus,das,noun,デパート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+690,Kellner,Kellner,der,noun,ウェイター,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+695,Kern,Kern,der,noun,コア,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+696,Kerze,Kerze,die,noun,キャンドル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+700,Kino,Kino,das,noun,シネマ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+702,klar,klar,,adjective,クリア,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+703,Klasse,Klasse,die,noun,クラス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+704,klassisch,klassisch,,adjective,クラシック,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+706,Kleid,Kleid,das,noun,ドレス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+716,Knopf,Knopf,der,noun,ボタン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+719,Koffer,Koffer,der,noun,スーツケース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+720,Kohl,Kohl,der,noun,キャベツ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+728,Konto,Konto,das,noun,アカウント,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+729,Konzert,Konzert,das,noun,コンサート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+732,Korb,Korb,der,noun,バスケット,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+743,Krawatte,Krawatte,die,noun,ネクタイ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+744,Kreditkarte,Kreditkarte,die,noun,クレジットカード,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+750,Kuchen,Kuchen,der,noun,ケーキ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+751,Kugelschreiber,Kugelschreiber,der,noun,ボールペン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+760,Künstler,Künstler,der,noun,アーティスト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+761,Kurs,Kurs,der,noun,コース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+763,Kuss,Kuss,der,noun,キス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+768,Lampe,Lampe,die,noun,ランプ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+777,Lärm,Lärm,der,noun,ノイズ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+785,ledig,ledig,,adjective,シングル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+790,leicht,leicht,,adjective,ライト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+799,Licht,Licht,das,noun,ライト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+809,Liste,Liste,die,noun,リスト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+810,Liter,Liter,der,noun,リットル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+812,Lkw,Lkw,der,noun,トラック,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+815,Löffel,Löffel,der,noun,スプーン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+835,Mannschaft,Mannschaft,die,noun,チーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+836,Mantel,Mantel,der,noun,コート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+838,Mark,Mark,die,noun,マーク,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+855,Meister,Meister,der,noun,マスター,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+858,Menü,Menü,das,noun,メニュー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+861,Messer,Messer,das,noun,ナイフ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+881,Mode,Mode,die,noun,ファッション,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+890,Motorrad,Motorrad,das,noun,オートバイ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+895,Münze,Münze,die,noun,コイン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+898,Musiker,Musiker,der,noun,ミュージシャン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+907,Nachricht,Nachricht,die,noun,ニュース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+910,Nachtisch,Nachtisch,der,noun,デザート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+925,nett,nett,,adjective,ニース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+926,Netz,Netz,das,noun,ネットワーク,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+949,Ober,Ober,der,noun,オーバー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+950,Obst,Obst,das,noun,フルーツ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+961,Oper,Oper,die,noun,オペラ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+965,Orange,Orange,die,noun,オレンジ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+967,original,original,,adjective,オリジナル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+970,Ostern,Ostern,das,noun,イースター,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+971,paar,paar,,adjective,カップル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+973,Paket,Paket,das,noun,パッケージ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+977,Partei,Partei,die,noun,パーティー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+978,Party,Party,die,noun,パーティー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+979,Pass,Pass,der,noun,パスポート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+986,Pfanne,Pfanne,die,noun,パン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+991,Pfund,Pfund,das,noun,ポンド,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+994,Pilz,Pilz,der,noun,キノコ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+996,Plan,Plan,der,noun,プラン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1005,Postkarte,Postkarte,die,noun,ポストカード,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1016,Programm,Programm,das,noun,プログラム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1017,Prozent,Prozent,das,noun,パーセント,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1018,Prozess,Prozess,der,noun,プロセス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1020,Prüfung,Prüfung,die,noun,テスト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1022,Pullover,Pullover,der,noun,セーター,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1023,Punkt,Punkt,der,noun,ポイント,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1028,Quelle,Quelle,die,noun,ソース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1030,Quittung,Quittung,die,noun,レシート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1038,Rätsel,Rätsel,das,noun,パズル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1049,Regel,Regel,die,noun,ルール,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1052,Regenmantel,Regenmantel,der,noun,レインコート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1056,reich,reich,,adjective,リッチ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1080,Rock,Rock,der,noun,スカート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+1093,Saft,Saft,der,noun,ジュース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1095,Salat,Salat,der,noun,レタス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1102,sauber,sauber,,adjective,クリーン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1104,Schach,Schach,das,noun,チェス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1106,Schaden,Schaden,der,noun,ダメージ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1108,Schalter,Schalter,der,noun,スイッチ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1109,scharf,scharf,,adjective,シャープ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1114,Scheck,Scheck,der,noun,チェック,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1118,Schere,Schere,die,noun,ハサミ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1119,Scherz,Scherz,der,noun,ジョーク,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1124,Schinken,Schinken,der,noun,ハム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1128,schlank,schlank,,adjective,スリム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1134,Schluss,Schluss,der,noun,エンディング,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1140,Schmuck,Schmuck,der,noun,ジュエリー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1146,Schokolade,Schokolade,die,noun,チョコレート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1147,schön,schön,,adjective,ニース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1148,Schrank,Schrank,der,noun,ワードローブ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1152,Schriftsteller,Schriftsteller,der,noun,ライター,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1157,Schulter,Schulter,die,noun,ショルダー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1166,Schwimmbad,Schwimmbad,das,noun,スイミングプール,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1172,Sehenswürdigkeit,Sehenswürdigkeit,die,noun,アトラクション,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1176,Seite,Seite,die,noun,ページ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1183,Sessel,Sessel,der,noun,アームチェア,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1192,Sinn,Sinn,der,noun,センス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,noun candidate: Substantiv; noun candidate: Substantiv; noun candidate: Substantiv; meaning_ja: Google Translate candidate
+1193,Sitte,Sitte,die,noun,カスタム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1195,Sitzung,Sitzung,die,noun,ミーティング,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1196,Ski,Ski,der,noun,スキー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1198,Socken,Socken,der,noun,ソックス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1199,Sofa,Sofa,das,noun,ソファー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1211,Sorte,Sorte,die,noun,バラエティ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1212,Soße,Soße,die,noun,ソース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1221,Speisekarte,Speisekarte,die,noun,メニュー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1223,Spiel,Spiel,das,noun,ゲーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1248,Stiefel,Stiefel,der,noun,ブーツ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1249,Stil,Stil,der,noun,スタイル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1253,Stock,Stock,der,noun,ストック,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1258,Strafe,Strafe,die,noun,ペナルティ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1260,Straßenbahn,Straßenbahn,die,noun,トラム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1261,Strecke,Strecke,die,noun,ルート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1265,Strumpf,Strumpf,der,noun,ストッキング,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1266,Stück,Stück,das,noun,ピース,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1271,Stufe,Stufe,die,noun,レベル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1273,stumm,stumm,,adjective,ミュート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1279,Supermarkt,Supermarkt,der,noun,スーパーマーケット,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1280,Suppe,Suppe,die,noun,スープ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1282,Symbol,Symbol,das,noun,シンボル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1283,System,System,das,noun,システム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1290,Tasche,Tasche,die,noun,バッグ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1291,Tasse,Tasse,die,noun,カップ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1294,Technik,Technik,die,noun,テクノロジー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1296,Technologie,Technologie,die,noun,テクノロジー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1306,Teppich,Teppich,der,noun,カーペット,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1311,Tisch,Tisch,der,noun,テーブル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1314,Toilette,Toilette,die,noun,トイレ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1316,Tomate,Tomate,die,noun,トマト,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1318,Topf,Topf,der,noun,ポット,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1323,Traube,Traube,die,noun,グレープ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1341,Tür,Tür,die,noun,ドア,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1342,Turm,Turm,der,noun,タワー,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1343,Tüte,Tüte,die,noun,バッグ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1358,Übung,Übung,die,noun,エクササイズ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1359,Uhr,Uhr,die,noun,クロック,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1370,Uniform,Uniform,die,noun,ユニフォーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1376,Unterhaltung,Unterhaltung,die,noun,エンターテインメント,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1426,violett,violett,,adjective,バイオレット,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1427,Visum,Visum,das,noun,ビザ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1444,vorn,vorn,,adverb,フロント,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1445,Vorname,Vorname,der,noun,ファーストネーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1451,Vorteil,Vorteil,der,noun,アドバンテージ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1484,Weihnachten,Weihnachten,das,noun,クリスマス,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1486,Wein,Wein,der,noun,ワイン,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1525,Witz,Witz,der,noun,ジョーク,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1533,Wohnung,Wohnung,die,noun,アパート,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1534,Wohnzimmer,Wohnzimmer,das,noun,リビングルーム,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1544,Wurst,Wurst,die,noun,ソーセージ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1556,Zentimeter,Zentimeter,der,noun,センチメートル,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1562,Ziel,Ziel,das,noun,ゴール,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1564,Zigarette,Zigarette,die,noun,シガレット,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate
+1592,Zwiebel,Zwiebel,die,noun,タマネギ,,カタカナ直訳。false friend や文脈違いの可能性,low,review-required,meaning_ja: Google Translate candidate

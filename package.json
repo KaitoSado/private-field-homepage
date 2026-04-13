@@ -8,6 +8,7 @@
     "start": "next start",
     "test": "node --experimental-default-type=module --test tests/*.mjs",
     "preflight": "node scripts/preflight.mjs",
+    "audit:german-meanings": "node scripts/audit-german-meanings.mjs",
     "harness:preflight": "node scripts/harness/preflight.mjs",
     "harness:summary": "node scripts/harness/context-summary.mjs",
     "harness:classify": "node scripts/harness/task-classifier.mjs"
