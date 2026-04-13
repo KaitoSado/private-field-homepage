@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-13 | codex | german app ui | `/apps/german` で `語形` ラベルだけを消したまま、品詞・性・複数形の小さな変化情報チップを答え表示後に戻した | `npm run build` |
 | 2026-04-13 | codex | german app ui | `/apps/german` の名詞カードを `der Nachbar` 型で表示し、冠詞を `der=青`, `die=赤`, `das=黄` で色分け。答え下の重複ドイツ語表示と `語形` ブロックを削除 | `npm run build` |
 | 2026-04-13 | codex | german app data | ドイツ語 seed 1593 語に日本語訳 draft を全件補完し、名詞 843 語中 842 語に冠詞・性、790 語に複数形を反映。訳は `machine_translated` として後から校正できるようにした | `node scripts/import-german-noun-articles.mjs /tmp/german-nouns.csv`, `node scripts/import-german-meanings-google.mjs --apply --refresh`, `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-13 | codex | marketplace foundation | `/apps/roomshare` にルームシェアMVPを追加し、Supabase schema に `listings` / `room_details` / `applications` / `message_threads` / `messages` / `reviews` / `identity_verifications` / `admin_actions` / `payment_intents` などの共通マーケットプレイス基盤と `/apps/carshare`, `/apps/matching` の準備面を追加 | `npm test`, `npm run build` |

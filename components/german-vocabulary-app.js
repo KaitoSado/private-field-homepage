@@ -9,6 +9,7 @@ import {
   GERMAN_VOCABULARY_LIBRARY,
   compactGermanProgressMap,
   createEmptyGermanProgress,
+  getGermanPosLabel,
   getGermanProgressForId,
   getGermanRecommendedIds,
   getGermanReviewStepLabel,
@@ -34,6 +35,14 @@ function getGermanArticleTone(article) {
   if (article === "die") return "feminine";
   if (article === "das") return "neuter";
   return "unknown";
+}
+
+function getGermanGenderLabel(gender) {
+  if (gender === "masculine") return "男性";
+  if (gender === "feminine") return "女性";
+  if (gender === "neuter") return "中性";
+  if (gender === "plural") return "複数扱い";
+  return "";
 }
 
 export function GermanVocabularyApp() {
@@ -534,6 +543,29 @@ export function GermanVocabularyApp() {
 
                     <div className={`english-study-answer ${isAnswerVisible ? "is-visible" : "is-hidden"}`}>
                       <strong>{selectedEntry.meaning}</strong>
+                    </div>
+
+                    <div
+                      className={`english-family-strip german-form-strip ${isAnswerVisible ? "is-visible" : "is-hidden"}`}
+                      aria-label="ドイツ語の変化情報"
+                    >
+                      <div>
+                        <span className="english-family-chip german-form-chip">
+                          <strong>{getGermanPosLabel(selectedEntry.pos)}</strong>
+                        </span>
+                        {selectedEntry.gender ? (
+                          <span className="english-family-chip german-form-chip">
+                            <strong>{getGermanGenderLabel(selectedEntry.gender)}</strong>
+                            <small>性</small>
+                          </span>
+                        ) : null}
+                        {selectedEntry.plural ? (
+                          <span className="english-family-chip german-form-chip">
+                            <strong>{selectedEntry.plural}</strong>
+                            <small>複数形</small>
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
 
                     <div className="english-judge-row">

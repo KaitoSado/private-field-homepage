@@ -7969,6 +7969,42 @@ textarea {
   font-weight: 700;
 }
 
+.german-form-strip {
+  max-width: 38rem;
+  margin-top: -2px;
+}
+
+.german-form-strip.is-hidden {
+  visibility: hidden;
+}
+
+.german-form-strip.is-visible {
+  visibility: visible;
+}
+
+.german-form-chip {
+  cursor: default;
+  border-color: #e5e1da;
+  background: #f7f5f0;
+  padding: 4px 8px;
+}
+
+.german-form-chip:hover {
+  border-color: #d8d2c8;
+}
+
+.german-form-chip strong {
+  font-size: 0.82rem;
+}
+
+.german-form-chip small {
+  min-width: auto;
+  min-height: auto;
+  padding: 2px 4px;
+  background: transparent;
+  color: var(--muted);
+}
+
 .english-study-placeholder {
   margin: 0;
   color: var(--muted);
