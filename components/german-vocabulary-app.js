@@ -668,27 +668,41 @@ export function GermanVocabularyApp() {
               </div>
 
               <section className="english-about">
-                <h2 className="english-about-title">ドイツ語単語を<br />長期記憶へ送る</h2>
+                <h2 className="english-about-title">科学的に最適化できる<br />パーソナライズドイツ単語アプリ</h2>
                 <div className="english-about-grid">
                   <article className="english-about-item">
                     <span>1</span>
                     <div>
-                      <strong>単語を聞いて、即判定</strong>
-                      <p>ドイツ語音声を自動再生し、思い出せたら右、曖昧なら左。手を止めずに単語を回します。</p>
+                      <strong>忘却曲線による完全パーソナライズ</strong>
+                      <p>エビングハウスの忘却曲線に基づき、個々の定着度に合わせて「間違えた単語」を最適なタイミングで再出題。無駄な復習を削ぎ落とし、記憶の定着率を最大化します。</p>
                     </div>
                   </article>
                   <article className="english-about-item">
                     <span>2</span>
                     <div>
-                      <strong>間違えた語だけ復習へ</strong>
-                      <p>初回で正解した語は長期記憶へ除外。間違えた語は5ステージを抜けるまで残ります。</p>
+                      <strong>思考を介さない「フラッシュ式」学習</strong>
+                      <p>出題と回答を数秒間隔で自動切り替え。フラッシュカードのように次々と流れる単語を眺めるだけで、脳に直接インプットする受動的な学習スタイル。勉強を積極的にも惰性的にもできます。</p>
                     </div>
                   </article>
                   <article className="english-about-item">
                     <span>3</span>
                     <div>
-                      <strong>名詞の性も後から補える</strong>
-                      <p>seed の冠詞・性・複数形・日本語訳を埋めれば、そのまま学習カードに反映できます。</p>
+                      <strong>弱点の可視化と管理</strong>
+                      <p>苦手な単語のみを一覧化。自分の弱点を一目で把握でき、効率的な重点対策が可能です。</p>
+                    </div>
+                  </article>
+                  <article className="english-about-item">
+                    <span>4</span>
+                    <div>
+                      <strong>フィードバックによりモチベーション維持</strong>
+                      <p>今日の語数・連続日数・即答率をリアルタイムで表示。数値に追われず、自然に学習習慣が身につきます。</p>
+                    </div>
+                  </article>
+                  <article className="english-about-item">
+                    <span>5</span>
+                    <div>
+                      <strong>性の色つけ</strong>
+                      <p>名詞の性に色をつけて、イメージのチャンク付け記憶で性まで覚えやすいようにします。</p>
                     </div>
                   </article>
                 </div>

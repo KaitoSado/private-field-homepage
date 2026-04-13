@@ -2,7 +2,7 @@ import { GermanVocabularyApp } from "@/components/german-vocabulary-app";
 
 export const metadata = {
   title: "ドイツ語コンテンツ | Apps | Commune",
-  description: "ドイツ語単語をフラッシュ式に回し、正誤・見直し・長期記憶を管理する単語暗記アプリ。"
+  description: "忘却曲線、フラッシュ式学習、弱点管理、性の色つけで最適化するパーソナライズドイツ単語アプリ。"
 };
 
 export default function GermanPage() {
