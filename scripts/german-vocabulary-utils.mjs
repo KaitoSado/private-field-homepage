@@ -26,6 +26,7 @@ const KNOWN_RECORD_OVERRIDES = new Map([
   ["ferien", { article: "die", gender: "plural", plural: "Ferien", meaning_ja: "休暇" }],
   ["kopfschmerzen", { article: "die", gender: "plural", plural: "Kopfschmerzen" }],
   ["leute", { article: "die", gender: "plural", plural: "Leute" }],
+  ["meter", { meaning_ja: "メートル" }],
   ["schauen", { part_of_speech: "verb", article: "", gender: "", plural: "", meaning_ja: "見る" }],
   ["wagen", { part_of_speech: "verb", article: "", gender: "", plural: "", meaning_ja: "思い切ってする、あえてする" }]
 ]);

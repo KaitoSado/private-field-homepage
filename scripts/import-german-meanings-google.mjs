@@ -50,6 +50,7 @@ const MEANING_OVERRIDES = new Map([
   ["brechen", "壊す、折る"],
   ["politik", "政治"],
   ["rock", "スカート"],
+  ["meter", "メートル"],
   ["ferien", "休暇"],
   ["schauen", "見る"],
   ["wagen", "思い切ってする、あえてする"],
