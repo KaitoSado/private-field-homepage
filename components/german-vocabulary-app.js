@@ -268,6 +268,19 @@ export function GermanVocabularyApp() {
   const visibleLongTermWords = longTermWordList.slice(0, 36);
   const hiddenLongTermWords = longTermWordList.slice(36);
   const pendingFutureReviewCount = wrongWordList.filter((entry) => entry.nextReviewAt > Date.now()).length;
+  const dataCoverage = useMemo(() => {
+    const nouns = GERMAN_VOCABULARY_LIBRARY.filter((entry) => entry.pos === "noun");
+    const meaningCount = GERMAN_VOCABULARY_LIBRARY.filter((entry) => entry.meaning !== "意味未登録").length;
+    const nounGenderCount = nouns.filter((entry) => entry.article && entry.gender).length;
+    const nounPluralCount = nouns.filter((entry) => entry.plural).length;
+
+    return {
+      meaningCount,
+      nounCount: nouns.length,
+      nounGenderCount,
+      nounPluralCount
+    };
+  }, []);
 
   const studyStats = useMemo(() => {
     const now = Date.now();
@@ -703,6 +716,27 @@ export function GermanVocabularyApp() {
                 <small>即答 {studyStats.quickCount}/{studyStats.judgedCount}</small>
               </div>
             </div>
+          </section>
+
+          <section className="surface english-side-card">
+            <div className="english-section-head">
+              <h3>データ補完</h3>
+              <span>{dataCoverage.meaningCount}/{GERMAN_VOCABULARY_LIBRARY.length}</span>
+            </div>
+            <dl className="english-stat-list">
+              <div>
+                <dt>日本語訳</dt>
+                <dd>{dataCoverage.meaningCount}</dd>
+              </div>
+              <div>
+                <dt>名詞の冠詞/性</dt>
+                <dd>{dataCoverage.nounGenderCount}/{dataCoverage.nounCount}</dd>
+              </div>
+              <div>
+                <dt>複数形</dt>
+                <dd>{dataCoverage.nounPluralCount}</dd>
+              </div>
+            </dl>
           </section>
 
           <section className="surface english-side-card">

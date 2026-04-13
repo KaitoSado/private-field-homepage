@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { cleanText, normalizeGermanRecord, readGermanSeed } from "./german-vocabulary-utils.mjs";
 
-const sourcePath = resolve("ドイツ単語帳抜き出しフォルダ/ドイツ単語_app_seed.json");
 const outputPath = resolve("lib/german-vocabulary.js");
 
 const POS_LABELS = {
@@ -33,10 +33,6 @@ function mapStudyPos(pos) {
   return "other";
 }
 
-function cleanText(value) {
-  return String(value || "").trim();
-}
-
 function getGrammarNote(record, pos) {
   const parts = [`品詞: ${POS_LABELS[pos] || POS_LABELS.unknown}`];
 
@@ -49,34 +45,35 @@ function getGrammarNote(record, pos) {
 }
 
 function toEntry(record, index) {
-  const headword = cleanText(record.display_de) || cleanText(record.lemma_de) || `word-${index + 1}`;
-  const pos = normalizePos(record.part_of_speech);
-  const meaning = cleanText(record.meaning_ja);
-  const exampleDe = cleanText(record.example_de);
-  const exampleJa = cleanText(record.example_ja);
-  const article = cleanText(record.article);
-  const gender = cleanText(record.gender);
-  const plural = cleanText(record.plural);
-  const reviewStatus = cleanText(record.review_status);
+  const normalizedRecord = normalizeGermanRecord(record);
+  const headword = cleanText(normalizedRecord.display_de) || cleanText(normalizedRecord.lemma_de) || `word-${index + 1}`;
+  const pos = normalizePos(normalizedRecord.part_of_speech);
+  const meaning = cleanText(normalizedRecord.meaning_ja);
+  const exampleDe = cleanText(normalizedRecord.example_de);
+  const exampleJa = cleanText(normalizedRecord.example_ja);
+  const article = cleanText(normalizedRecord.article);
+  const gender = cleanText(normalizedRecord.gender);
+  const plural = cleanText(normalizedRecord.plural);
+  const reviewStatus = cleanText(normalizedRecord.review_status);
 
   return {
-    id: cleanText(record.id) || `de-${index + 1}`,
-    order: Number(record.order) || index + 1,
+    id: cleanText(normalizedRecord.id) || `de-${index + 1}`,
+    order: Number(normalizedRecord.order) || index + 1,
     headword,
-    lemma: cleanText(record.lemma_de) || headword,
-    normalizedKey: cleanText(record.normalized_key) || headword.toLocaleLowerCase("de-DE"),
+    lemma: cleanText(normalizedRecord.lemma_de) || headword,
+    normalizedKey: cleanText(normalizedRecord.normalized_key) || headword.toLocaleLowerCase("de-DE"),
     pos: mapStudyPos(pos),
     sourcePos: pos,
     article,
     gender,
     plural,
-    needsGender: Boolean(record.needs_gender),
+    needsGender: Boolean(normalizedRecord.needs_gender),
     coreChunk: article ? `${article} ${headword}` : headword,
     meaning: meaning || "意味未登録",
     nuance: meaning
       ? `${headword} の基本訳は「${meaning}」。例文や派生情報は後から追加できます。`
       : "日本語訳はまだ入っていません。seed の meaning_ja を埋めると、この答え欄に表示されます。",
-    grammarNote: getGrammarNote({ article, gender, plural, needs_gender: record.needs_gender }, pos),
+    grammarNote: getGrammarNote({ article, gender, plural, needs_gender: normalizedRecord.needs_gender }, pos),
     starterExamples: [
       {
         topic: "core",
@@ -86,12 +83,12 @@ function toEntry(record, index) {
       }
     ],
     shadowPrompts: [article ? `${article} ${headword}` : headword],
-    tags: cleanText(record.tags),
+    tags: cleanText(normalizedRecord.tags),
     reviewStatus: reviewStatus || "needs_enrichment"
   };
 }
 
-const source = JSON.parse(readFileSync(sourcePath, "utf8"));
+const source = readGermanSeed();
 const library = source
   .map(toEntry)
   .filter((entry) => entry.headword)

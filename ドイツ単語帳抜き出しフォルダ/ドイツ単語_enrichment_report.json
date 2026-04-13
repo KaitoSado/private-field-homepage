@@ -1,0 +1,16 @@
+{
+  "updatedFields": 0,
+  "enrichmentRows": 1593,
+  "createdTemplate": true,
+  "summary": {
+    "total": 1593,
+    "meaning_ja": 0,
+    "example_de": 0,
+    "example_ja": 0,
+    "nouns": 845,
+    "noun_article": 0,
+    "noun_gender": 0,
+    "noun_plural": 0,
+    "needs_gender": 845
+  }
+}
