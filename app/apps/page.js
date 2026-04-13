@@ -11,6 +11,7 @@ const plannedApps = [
   { name: "数学コンテンツ", href: "/apps/math", tag: "study" },
   { name: "物理コンテンツ", href: "/apps/physics", tag: "study" },
   { name: "英語コンテンツ", href: "/apps/english", tag: "study" },
+  { name: "ドイツ語コンテンツ", href: "/apps/german", tag: "study" },
   { name: "3Dモデル3Dグラフィック", href: "/apps/3d", tag: "create" },
   { name: "みんなで作るVR空間", href: "/apps/vr", tag: "create" },
   { name: "教員を裁け！地獄の裏シラバス", href: "/apps/classes", tag: "social" },

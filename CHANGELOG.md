@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-13 | codex | german app | `ドイツ単語帳抜き出しフォルダ/ドイツ単語_app_seed.json` から 1593 語の `lib/german-vocabulary.js` を生成し、`/apps/german` に英語 app 型の自動読み上げ・正誤判定・SRS・見直し/長期記憶リスト・Supabase `german_progress` 同期を追加 | `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-12 | codex | branding | Safari が `/favicon.ico` を優先しても新ロゴになるよう `app/favicon.ico` を追加し、metadata の icon 指定も ico + png の両方に更新 | `npm run build` |
 | 2026-04-12 | codex | branding | Safari / browser tab icon 用に `app/icon.png` と `app/apple-icon.png` を生成し、古い `app/icon.svg` を外して metadata icon をPNGに固定 | `npm run build` |
 | 2026-04-12 | codex | research progress ui | 研究進捗カードに内側余白を戻し、丸い枠やテーブル内ステータスチップの文字が左端で見切れないよう修正 | `npm run build` |

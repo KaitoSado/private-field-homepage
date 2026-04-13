@@ -98,6 +98,11 @@
     - 品詞フィルタで `名詞`, `動詞`, `形容詞`, `副詞`, `その他` に絞れる
     - UI 上の `長期記憶リスト` には通常キューから除外された正解済み単語を表示する
     - UI 上の `見直しリスト` は日時を見せず、間違えた単語一覧と現在ステージを中心に見直せる
+  - ドイツ語コンテンツ `/apps/german`
+    - `ドイツ単語帳抜き出しフォルダ/ドイツ単語_app_seed.json` を正本 seed とし、`scripts/build-german-vocabulary.mjs` で `lib/german-vocabulary.js` を生成して読む
+    - 現在のドイツ語 seed は 1593 語で、`meaning_ja`, `example_de`, `example_ja`, 名詞の性・冠詞・複数形は多くが未登録のため、アプリ側では「意味未登録」として表示する
+    - 英語コンテンツと同じく、自動読み上げ、左右判定、品詞フィルタ、表示時間設定、5ステージ復習間隔、見直しリスト、長期記憶リストを持つ
+    - 進捗はログイン時に Supabase `german_progress` と同期し、未ログイン時または live schema 未適用時は `localStorage` に退避する
   - リサーチプログレス `/apps/research-progress`
     - 招待制の研究会 / ゼミ / 小規模PJ向け研究ライン + 週次チェックイン面
     - グループ一覧 `/apps/research-progress`
@@ -114,7 +119,7 @@
   3. live 環境に再適用が必要な場合は明記
 - `if exists` / `drop policy if exists` 前提で、再実行可能な schema を維持する
 - `research_*` 系テーブルはリサーチプログレス用の正本で、`research_groups`, `research_group_members`, `research_updates`, `research_projects`, `research_project_members` を含む
-- `research_*` 系の変更と `english_progress` の追加は live 反映に Supabase への schema 再適用が必要
+- `research_*` 系の変更と `english_progress` / `german_progress` の追加は live 反映に Supabase への schema 再適用が必要
 
 ## 7. デザインと CSS の現状
 

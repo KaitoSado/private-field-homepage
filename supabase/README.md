@@ -40,6 +40,12 @@ schema を変える時は:
 - `english_progress_set_updated_at` trigger
 - `english_progress` の RLS policy / grant
 
+今回の `ドイツ語コンテンツ` 同期追加では以下が live 適用対象:
+
+- `german_progress`
+- `german_progress_set_updated_at` trigger
+- `german_progress` の RLS policy / grant
+
 ## 注意点
 
 - DB だけ更新してコードを更新しない、またはその逆は避ける
