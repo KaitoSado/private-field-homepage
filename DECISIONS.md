@@ -127,6 +127,6 @@
 - 依頼文は Prisma / TypeScript を想定していたが、この repo の正本は `JavaScript + Supabase Auth/RLS + supabase/schema.sql` であるため、既存構成を優先する
 - 共通部分は `listings`, `applications`, `message_threads`, `messages`, `reviews`, `reports`, `notifications`, `admin_actions`, `payment_intents` に置く
 - サービス固有情報は `room_details`, `car_details`, `dating_profiles` に分離し、`service_type` / `listing_type` で横展開する
-- カーシェア / マッチングアプリは専用MVP実装前の間、説明ページを挟まず `/apps/roomshare` へ直接流し、アプリ一覧からの操作ステップを増やさない
+- カーシェア / マッチングアプリは専用MVP実装前でもルームシェアへ流さず、それぞれのサービス固有の準備面を見せる
 - 自分の掲載のお気に入りは MVP では不可にして、通知や人気指標が自己操作で歪まないようにする
 - 本人確認書類の実データは MVP では保存せず、`identity_verifications` のステータスと metadata に運用状態だけ残す
