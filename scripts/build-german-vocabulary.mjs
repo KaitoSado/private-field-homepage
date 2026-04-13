@@ -7,9 +7,12 @@ const outputPath = resolve("lib/german-vocabulary.js");
 const POS_LABELS = {
   noun: "名詞",
   verb: "動詞",
+  auxiliary: "助動詞",
   adjective: "形容詞",
   adverb: "副詞",
   preposition: "前置詞",
+  conjunction: "接続詞",
+  pronoun: "代名詞",
   phrase: "句",
   unknown: "未分類"
 };
@@ -23,14 +26,31 @@ const GENDER_LABELS = {
 
 function normalizePos(value) {
   const pos = String(value || "unknown").trim().toLowerCase();
-  if (pos === "noun" || pos === "verb" || pos === "adjective" || pos === "adverb") return pos;
-  if (pos === "preposition") return "preposition";
+  if (
+    pos === "noun" ||
+    pos === "verb" ||
+    pos === "auxiliary" ||
+    pos === "adjective" ||
+    pos === "adverb" ||
+    pos === "preposition" ||
+    pos === "conjunction" ||
+    pos === "pronoun"
+  ) return pos;
   if (pos === "phrase") return "phrase";
   return "unknown";
 }
 
 function mapStudyPos(pos) {
-  if (pos === "noun" || pos === "verb" || pos === "adjective" || pos === "adverb") return pos;
+  if (
+    pos === "noun" ||
+    pos === "verb" ||
+    pos === "auxiliary" ||
+    pos === "adjective" ||
+    pos === "adverb" ||
+    pos === "preposition" ||
+    pos === "conjunction" ||
+    pos === "pronoun"
+  ) return pos;
   return "other";
 }
 

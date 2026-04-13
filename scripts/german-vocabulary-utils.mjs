@@ -29,6 +29,74 @@ const KNOWN_RECORD_OVERRIDES = new Map([
   ["wagen", { part_of_speech: "verb", article: "", gender: "", plural: "", meaning_ja: "思い切ってする、あえてする" }]
 ]);
 
+const AUXILIARY_WORDS = new Set([
+  "dürfen", "haben", "können", "möchte", "möchten", "mögen", "müssen", "sein", "sollen", "werden", "wollen"
+]);
+
+const CONJUNCTION_WORDS = new Set([
+  "aber", "als", "bevor", "da", "damit", "dass", "denn", "entweder", "indem", "jedoch", "nachdem",
+  "ob", "obwohl", "oder", "sowohl", "und", "weder", "weil", "wenn", "wie", "während", "zwar"
+]);
+
+const PREPOSITION_WORDS = new Set([
+  "ab", "auf", "aus", "außer", "außerhalb", "bei", "bis", "durch", "entlang", "für", "gegenüber",
+  "hinter", "innerhalb", "nach", "ohne", "pro", "seit", "statt", "trotz", "über", "um", "unter",
+  "von", "vor", "zu"
+]);
+
+const PRONOUN_WORDS = new Set([
+  "beide", "einander", "einige", "etwas", "jeder", "jemand", "man", "mehrere", "nichts", "niemand",
+  "sich", "viel", "was", "wer", "wie viel"
+]);
+
+const VERB_WORDS = new Set(["leid|tun", "tun", "wehtun"]);
+
+const ADVERB_WORDS = new Set([
+  "abends", "ach", "allein", "allerdings", "also", "auch", "außerdem", "bald", "beinahe", "besonders",
+  "besser", "da", "dabei", "damals", "dann", "darauf", "darüber", "darum", "dazu", "deshalb", "diesmal",
+  "direkt", "doch", "doppelt", "dort", "durchaus", "echt", "eher", "einfach", "einmal", "erst", "etwa",
+  "fast", "fort", "früher", "ganz", "gar", "genau", "genug", "gerade", "geradeaus", "gleichfalls", "her",
+  "heraus", "herein", "heute", "hier", "hin", "höchstens", "immer", "insgesamt", "ja", "jetzt", "kaum",
+  "lange", "leider", "links", "los", "mal", "manchmal", "mehr", "meist", "meistens", "miteinander",
+  "mittags", "morgens", "nachmittags", "nachts", "nein", "neuerdings", "nicht", "nie", "niemals", "noch",
+  "nun", "nur", "oft", "oh", "quer", "rechts", "rein", "schade", "sehr", "selbst", "so", "sofort",
+  "sogar", "sonst", "später", "trotzdem", "überall", "überhaupt", "übrigens", "unbedingt", "ungefähr",
+  "vielleicht", "voll", "voraus", "vorbei", "vorher", "vormittags", "vorn", "wann", "warum", "weiter",
+  "wenigstens", "wieder", "wieso", "wo", "woher", "wohin", "zuerst", "zugleich", "zuletzt", "zurück"
+]);
+
+const ADJECTIVE_WORDS = new Set([
+  "alt", "ander", "anders", "angenehm", "arbeitslos", "arm", "ausgezeichnet", "bekannt", "beliebt",
+  "bequem", "bereit", "berühmt", "beschäftigt", "besonder", "best", "bitter", "blau", "blind", "blond",
+  "böse", "braun", "breit", "bunt", "dick", "dumm", "dunkel", "dünn", "egal", "eng", "entfernt", "ernst",
+  "falsch", "faul", "fest", "fett", "frei", "fremd", "froh", "früh", "gelb", "gesund", "gleich", "grau",
+  "groß", "grün", "gut", "halb", "hart", "heiß", "heiter", "hell", "hoch", "hübsch", "interessant",
+  "international", "jung", "kalt", "kaputt", "klar", "klein", "klug", "kostenlos", "krank", "kühl",
+  "kühn", "kurz", "lang", "laut", "leer", "leicht", "leise", "letzt", "lieb", "lieber", "müde", "nächst",
+  "nackt", "nass", "national", "nett", "neu", "normal", "original", "paar", "preiswert", "prima",
+  "radioaktiv", "reich", "reif", "roh", "rot", "rund", "satt", "sauber", "sauer", "scharf", "schlank",
+  "schlecht", "schlimm", "schmal", "schnell", "schön", "schwach", "schwarz", "schwer", "sicher", "sozial",
+  "spät", "stark", "still", "stolz", "streng", "stumm", "süß", "teuer", "tief", "toll", "tot",
+  "verheiratet", "violett", "wach", "wahr", "warm", "weich", "weiß", "weit", "wild", "zart", "zentral",
+  "zweit"
+]);
+
+function matchesKnownWord(words, keys) {
+  return keys.some((key) => words.has(key));
+}
+
+function normalizePartOfSpeech(value, keys) {
+  const pos = cleanText(value || "unknown").toLowerCase();
+  if (matchesKnownWord(AUXILIARY_WORDS, keys)) return "auxiliary";
+  if (matchesKnownWord(VERB_WORDS, keys)) return "verb";
+  if (matchesKnownWord(CONJUNCTION_WORDS, keys)) return "conjunction";
+  if (matchesKnownWord(PREPOSITION_WORDS, keys)) return "preposition";
+  if (matchesKnownWord(PRONOUN_WORDS, keys)) return "pronoun";
+  if (matchesKnownWord(ADVERB_WORDS, keys)) return "adverb";
+  if (matchesKnownWord(ADJECTIVE_WORDS, keys)) return "adjective";
+  return pos;
+}
+
 export function cleanText(value) {
   return String(value ?? "").trim();
 }
@@ -71,7 +139,8 @@ export function normalizeGermanRecord(record) {
     ...record,
     ...(KNOWN_RECORD_OVERRIDES.get(key) || {})
   };
-  const partOfSpeech = cleanText(sourceRecord.part_of_speech || "unknown").toLowerCase();
+  const displayKey = normalizeGermanKey(sourceRecord.display_de || sourceRecord.lemma_de || key);
+  const partOfSpeech = normalizePartOfSpeech(sourceRecord.part_of_speech, [key, displayKey]);
   const article = normalizeArticle(sourceRecord.article);
   const gender = normalizeGender(sourceRecord.gender) || getGenderFromArticle(article);
   const inferredArticle = article || getArticleFromGender(gender);
