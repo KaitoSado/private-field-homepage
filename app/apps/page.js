@@ -15,6 +15,9 @@ const plannedApps = [
   { name: "3Dモデル3Dグラフィック", href: "/apps/3d", tag: "create" },
   { name: "みんなで作るVR空間", href: "/apps/vr", tag: "create" },
   { name: "教員を裁け！地獄の裏シラバス", href: "/apps/classes", tag: "social" },
+  { name: "ルームシェア", href: "/apps/roomshare", tag: "social" },
+  { name: "カーシェア", href: "/apps/carshare", tag: "social" },
+  { name: "マッチングアプリ", href: "/apps/matching", tag: "social" },
   { name: "エッジ情報", href: "/apps/edge", tag: "info" },
   { name: "助け合いボード", href: "/apps/help", tag: "social" },
   { name: "祈祷と呪詛", href: "/apps/ritual", tag: "social" }

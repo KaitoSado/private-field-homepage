@@ -19,6 +19,7 @@ export function HeaderNav() {
   const supabase = useMemo(() => (hasSupabaseConfig ? getSupabaseBrowserClient() : null), [hasSupabaseConfig]);
   const [session, setSession] = useState(null);
   const [profileMeta, setProfileMeta] = useState(defaultMeta);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
@@ -32,12 +33,17 @@ export function HeaderNav() {
 
       if (!nextSession?.user) {
         setProfileMeta(defaultMeta);
+        setUnreadCount(0);
         return;
       }
 
-      const nextMeta = await fetchOwnProfileMeta(supabase, nextSession.user);
+      const [nextMeta, notificationCount] = await Promise.all([
+        fetchOwnProfileMeta(supabase, nextSession.user),
+        fetchUnreadNotificationCount(supabase, nextSession.user.id)
+      ]);
       if (!mounted) return;
       setProfileMeta(typeof nextMeta === "string" ? defaultMeta : nextMeta);
+      setUnreadCount(notificationCount);
     }
 
     async function bootstrap() {
@@ -73,7 +79,7 @@ export function HeaderNav() {
     ? [
         { href: "/explore", label: "発見" },
         { href: "/apps", label: "アプリ" },
-        { href: "/notifications", label: "通知" },
+        { href: "/notifications", label: unreadCount ? `通知 ${unreadCount}` : "通知" },
         { href: profileMeta.path, label: "マイページ" }
       ]
     : [
@@ -151,4 +157,14 @@ export function HeaderNav() {
       </details>
     </>
   );
+}
+
+async function fetchUnreadNotificationCount(supabase, userId) {
+  const { count } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("recipient_id", userId)
+    .is("read_at", null);
+
+  return count || 0;
 }

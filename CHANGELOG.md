@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-13 | codex | marketplace foundation | `/apps/roomshare` にルームシェアMVPを追加し、Supabase schema に `listings` / `room_details` / `applications` / `message_threads` / `messages` / `reviews` / `identity_verifications` / `admin_actions` / `payment_intents` などの共通マーケットプレイス基盤と `/apps/carshare`, `/apps/matching` の準備面を追加 | `npm test`, `npm run build` |
 | 2026-04-13 | codex | german app | `ドイツ単語帳抜き出しフォルダ/ドイツ単語_app_seed.json` から 1593 語の `lib/german-vocabulary.js` を生成し、`/apps/german` に英語 app 型の自動読み上げ・正誤判定・SRS・見直し/長期記憶リスト・Supabase `german_progress` 同期を追加 | `node scripts/build-german-vocabulary.mjs`, `npm run build` |
 | 2026-04-12 | codex | branding | Safari が `/favicon.ico` を優先しても新ロゴになるよう `app/favicon.ico` を追加し、metadata の icon 指定も ico + png の両方に更新 | `npm run build` |
 | 2026-04-12 | codex | branding | Safari / browser tab icon 用に `app/icon.png` と `app/apple-icon.png` を生成し、古い `app/icon.svg` を外して metadata icon をPNGに固定 | `npm run build` |

@@ -23,6 +23,8 @@ create table if not exists public.profiles (
   role text not null default 'user',
   account_status text not null default 'active',
   discoverable boolean not null default true,
+  age_label text,
+  marketplace_preferences jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default timezone('utc'::text, now()),
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
@@ -42,6 +44,8 @@ alter table public.profiles add column if not exists keio_verified boolean not n
 alter table public.profiles add column if not exists role text not null default 'user';
 alter table public.profiles add column if not exists account_status text not null default 'active';
 alter table public.profiles add column if not exists discoverable boolean not null default true;
+alter table public.profiles add column if not exists age_label text;
+alter table public.profiles add column if not exists marketplace_preferences jsonb not null default '{}'::jsonb;
 alter table public.profiles alter column discoverable set default true;
 
 create table if not exists public.posts (
@@ -654,6 +658,269 @@ create table if not exists public.admin_alerts (
   created_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.listings (
+  id uuid primary key default gen_random_uuid(),
+  service_type text not null default 'roomshare',
+  listing_type text not null default 'room',
+  owner_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null,
+  description text not null default '',
+  location_text text not null default '',
+  price integer not null default 0,
+  currency text not null default 'JPY',
+  status text not null default 'draft',
+  images text[] not null default '{}',
+  metadata jsonb not null default '{}'::jsonb,
+  published_at timestamptz,
+  archived_at timestamptz,
+  deleted_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint listings_service_type_check check (service_type in ('roomshare', 'carshare', 'dating')),
+  constraint listings_listing_type_check check (listing_type in ('room', 'car', 'dating_profile')),
+  constraint listings_status_check check (status in ('draft', 'published', 'paused', 'archived', 'rejected')),
+  constraint listings_price_check check (price >= 0),
+  constraint listings_images_count_check check (array_length(images, 1) is null or array_length(images, 1) <= 8)
+);
+
+create table if not exists public.room_details (
+  listing_id uuid primary key references public.listings(id) on delete cascade,
+  rent integer not null default 0,
+  utilities integer not null default 0,
+  deposit integer not null default 0,
+  initial_cost integer not null default 0,
+  available_from date,
+  capacity integer not null default 1,
+  room_type text not null default 'private',
+  gender_preference text not null default 'any',
+  smoking_allowed boolean not null default false,
+  pets_allowed boolean not null default false,
+  nearest_station text not null default '',
+  house_rules text not null default '',
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint room_details_non_negative_money_check check (rent >= 0 and utilities >= 0 and deposit >= 0 and initial_cost >= 0),
+  constraint room_details_capacity_check check (capacity between 1 and 20),
+  constraint room_details_gender_preference_check check (gender_preference in ('any', 'female', 'male', 'non_binary', 'same_gender')),
+  constraint room_details_room_type_check check (room_type in ('private', 'shared', 'entire_home', 'dorm', 'other'))
+);
+
+create table if not exists public.car_details (
+  listing_id uuid primary key references public.listings(id) on delete cascade,
+  maker text not null default '',
+  model text not null default '',
+  model_year integer,
+  seats integer,
+  pickup_location text not null default '',
+  availability_note text not null default '',
+  license_required_status text not null default 'unverified',
+  insurance_note text not null default '',
+  cancellation_policy text not null default '',
+  pre_use_checklist jsonb not null default '[]'::jsonb,
+  post_use_checklist jsonb not null default '[]'::jsonb,
+  accident_report_flow text not null default '',
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint car_details_year_check check (model_year is null or model_year between 1980 and 2100),
+  constraint car_details_seats_check check (seats is null or seats between 1 and 12),
+  constraint car_details_license_status_check check (license_required_status in ('unverified', 'pending', 'verified', 'rejected'))
+);
+
+create table if not exists public.dating_profiles (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null unique references public.profiles(id) on delete cascade,
+  listing_id uuid unique references public.listings(id) on delete set null,
+  age integer,
+  gender text not null default '',
+  interests text[] not null default '{}',
+  purpose text not null default '',
+  living_area text not null default '',
+  photos text[] not null default '{}',
+  preference_json jsonb not null default '{}'::jsonb,
+  visibility text not null default 'draft',
+  deleted_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint dating_profiles_age_check check (age is null or age between 18 and 120),
+  constraint dating_profiles_visibility_check check (visibility in ('draft', 'published', 'paused', 'archived'))
+);
+
+create table if not exists public.favorites (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  listing_id uuid not null references public.listings(id) on delete cascade,
+  service_type text not null default 'roomshare',
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  unique (user_id, listing_id)
+);
+
+create table if not exists public.applications (
+  id uuid primary key default gen_random_uuid(),
+  service_type text not null default 'roomshare',
+  listing_id uuid not null references public.listings(id) on delete cascade,
+  applicant_id uuid not null references public.profiles(id) on delete cascade,
+  owner_id uuid not null references public.profiles(id) on delete cascade,
+  application_type text not null default 'inquiry',
+  message text not null default '',
+  status text not null default 'pending',
+  requested_start_on date,
+  requested_end_on date,
+  decided_at timestamptz,
+  cancelled_at timestamptz,
+  metadata jsonb not null default '{}'::jsonb,
+  deleted_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint applications_service_type_check check (service_type in ('roomshare', 'carshare', 'dating')),
+  constraint applications_type_check check (application_type in ('inquiry', 'reservation', 'join', 'like')),
+  constraint applications_status_check check (status in ('pending', 'accepted', 'rejected', 'cancelled', 'completed')),
+  constraint applications_participants_check check (applicant_id <> owner_id)
+);
+
+create table if not exists public.matches (
+  id uuid primary key default gen_random_uuid(),
+  service_type text not null default 'dating',
+  listing_id uuid references public.listings(id) on delete set null,
+  user_a_id uuid not null references public.profiles(id) on delete cascade,
+  user_b_id uuid not null references public.profiles(id) on delete cascade,
+  initiator_id uuid references public.profiles(id) on delete set null,
+  status text not null default 'pending',
+  matched_at timestamptz,
+  deleted_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint matches_participants_check check (user_a_id <> user_b_id),
+  constraint matches_status_check check (status in ('pending', 'active', 'unmatched', 'blocked'))
+);
+
+create table if not exists public.message_threads (
+  id uuid primary key default gen_random_uuid(),
+  service_type text not null default 'roomshare',
+  listing_id uuid references public.listings(id) on delete set null,
+  application_id uuid unique references public.applications(id) on delete cascade,
+  match_id uuid unique references public.matches(id) on delete cascade,
+  participant_a_id uuid not null references public.profiles(id) on delete cascade,
+  participant_b_id uuid not null references public.profiles(id) on delete cascade,
+  subject text not null default '',
+  status text not null default 'active',
+  last_message_at timestamptz,
+  deleted_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint message_threads_participants_check check (participant_a_id <> participant_b_id),
+  constraint message_threads_status_check check (status in ('active', 'closed', 'archived')),
+  constraint message_threads_source_check check (application_id is not null or match_id is not null)
+);
+
+create table if not exists public.messages (
+  id uuid primary key default gen_random_uuid(),
+  thread_id uuid not null references public.message_threads(id) on delete cascade,
+  sender_id uuid not null references public.profiles(id) on delete cascade,
+  body text not null,
+  message_type text not null default 'text',
+  metadata jsonb not null default '{}'::jsonb,
+  read_at timestamptz,
+  deleted_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  constraint messages_body_length_check check (char_length(body) between 1 and 3000),
+  constraint messages_type_check check (message_type in ('text', 'system'))
+);
+
+create table if not exists public.reviews (
+  id uuid primary key default gen_random_uuid(),
+  service_type text not null default 'roomshare',
+  reviewer_id uuid not null references public.profiles(id) on delete cascade,
+  reviewee_id uuid not null references public.profiles(id) on delete cascade,
+  target_type text not null,
+  target_id uuid not null,
+  listing_id uuid references public.listings(id) on delete set null,
+  application_id uuid references public.applications(id) on delete set null,
+  rating smallint not null,
+  comment text not null default '',
+  status text not null default 'published',
+  deleted_at timestamptz,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  unique (reviewer_id, reviewee_id, target_type, target_id),
+  constraint reviews_participants_check check (reviewer_id <> reviewee_id),
+  constraint reviews_rating_check check (rating between 1 and 5),
+  constraint reviews_target_type_check check (target_type in ('user', 'listing', 'application')),
+  constraint reviews_status_check check (status in ('published', 'hidden', 'deleted'))
+);
+
+create table if not exists public.identity_verifications (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  service_type text not null default 'roomshare',
+  verification_type text not null default 'identity',
+  status text not null default 'unverified',
+  provider text not null default '',
+  external_reference text not null default '',
+  submitted_at timestamptz,
+  reviewed_by uuid references public.profiles(id) on delete set null,
+  reviewed_at timestamptz,
+  expires_at timestamptz,
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint identity_verifications_status_check check (status in ('unverified', 'pending', 'verified', 'rejected')),
+  constraint identity_verifications_type_check check (verification_type in ('identity', 'driver_license', 'age', 'address'))
+);
+
+create table if not exists public.admin_actions (
+  id uuid primary key default gen_random_uuid(),
+  admin_id uuid not null references public.profiles(id) on delete cascade,
+  action_type text not null,
+  target_type text not null,
+  target_id uuid not null,
+  reason text not null default '',
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc'::text, now())
+);
+
+create table if not exists public.payment_intents (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles(id) on delete set null,
+  service_type text not null default 'roomshare',
+  target_type text not null,
+  target_id uuid,
+  amount integer not null default 0,
+  currency text not null default 'JPY',
+  status text not null default 'pending',
+  stripe_customer_id text not null default '',
+  stripe_payment_intent_id text not null default '',
+  stripe_subscription_id text not null default '',
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now()),
+  constraint payment_intents_amount_check check (amount >= 0),
+  constraint payment_intents_service_type_check check (service_type in ('roomshare', 'carshare', 'dating')),
+  constraint payment_intents_status_check check (status in ('pending', 'succeeded', 'failed', 'refunded', 'cancelled'))
+);
+
+alter table public.notifications add column if not exists listing_id uuid references public.listings(id) on delete cascade;
+alter table public.notifications add column if not exists application_id uuid references public.applications(id) on delete cascade;
+alter table public.notifications add column if not exists message_thread_id uuid references public.message_threads(id) on delete cascade;
+alter table public.notifications add column if not exists service_type text not null default 'core';
+alter table public.notifications add column if not exists title text not null default '';
+alter table public.notifications add column if not exists body text not null default '';
+alter table public.notifications add column if not exists action_url text not null default '';
+alter table public.notifications add column if not exists metadata jsonb not null default '{}'::jsonb;
+
+alter table public.reports add column if not exists target_listing_id uuid references public.listings(id) on delete cascade;
+alter table public.reports add column if not exists target_message_id uuid references public.messages(id) on delete cascade;
+alter table public.reports add column if not exists target_type text;
+alter table public.reports add column if not exists target_id uuid;
+alter table public.reports add column if not exists service_type text not null default 'core';
+alter table public.reports add column if not exists metadata jsonb not null default '{}'::jsonb;
+alter table public.reports alter column status set default 'open';
+alter table public.reports
+  drop constraint if exists reports_target_check,
+  add constraint reports_target_check check (
+    num_nonnulls(target_profile_id, target_post_id, target_listing_id, target_message_id) = 1
+    or (target_type is not null and target_id is not null)
+  );
+
 create index if not exists posts_author_id_idx on public.posts(author_id);
 create index if not exists posts_visibility_idx on public.posts(visibility, published_at desc);
 create index if not exists posts_tags_gin_idx on public.posts using gin(tags);
@@ -711,6 +978,39 @@ create index if not exists notifications_recipient_idx on public.notifications(r
 create index if not exists reports_status_idx on public.reports(status, created_at desc);
 create index if not exists reports_target_profile_idx on public.reports(target_profile_id);
 create index if not exists reports_target_post_idx on public.reports(target_post_id);
+create index if not exists listings_public_search_idx on public.listings(service_type, listing_type, status, deleted_at, created_at desc);
+create index if not exists listings_owner_idx on public.listings(owner_id, updated_at desc);
+create index if not exists listings_location_idx on public.listings(location_text);
+create index if not exists listings_price_idx on public.listings(price);
+create index if not exists listings_text_search_idx on public.listings using gin(to_tsvector('simple', coalesce(title, '') || ' ' || coalesce(description, '') || ' ' || coalesce(location_text, '')));
+create index if not exists room_details_rent_idx on public.room_details(rent);
+create index if not exists room_details_available_idx on public.room_details(available_from);
+create index if not exists room_details_preferences_idx on public.room_details(gender_preference, pets_allowed, smoking_allowed);
+create index if not exists car_details_pickup_idx on public.car_details(pickup_location);
+create index if not exists dating_profiles_user_idx on public.dating_profiles(user_id);
+create index if not exists favorites_user_idx on public.favorites(user_id, created_at desc);
+create index if not exists favorites_listing_idx on public.favorites(listing_id, created_at desc);
+create index if not exists applications_listing_idx on public.applications(listing_id, status, created_at desc);
+create index if not exists applications_applicant_idx on public.applications(applicant_id, status, created_at desc);
+create index if not exists applications_owner_idx on public.applications(owner_id, status, created_at desc);
+create index if not exists matches_user_a_idx on public.matches(user_a_id, status, created_at desc);
+create index if not exists matches_user_b_idx on public.matches(user_b_id, status, created_at desc);
+create index if not exists message_threads_participant_a_idx on public.message_threads(participant_a_id, last_message_at desc);
+create index if not exists message_threads_participant_b_idx on public.message_threads(participant_b_id, last_message_at desc);
+create index if not exists message_threads_listing_idx on public.message_threads(listing_id, updated_at desc);
+create index if not exists messages_thread_created_idx on public.messages(thread_id, created_at asc);
+create index if not exists messages_sender_idx on public.messages(sender_id, created_at desc);
+create index if not exists reviews_reviewee_idx on public.reviews(reviewee_id, created_at desc);
+create index if not exists reviews_target_idx on public.reviews(target_type, target_id, created_at desc);
+create index if not exists identity_verifications_user_idx on public.identity_verifications(user_id, service_type, created_at desc);
+create index if not exists admin_actions_target_idx on public.admin_actions(target_type, target_id, created_at desc);
+create index if not exists payment_intents_user_idx on public.payment_intents(user_id, created_at desc);
+create index if not exists payment_intents_target_idx on public.payment_intents(service_type, target_type, target_id);
+create index if not exists notifications_listing_idx on public.notifications(listing_id, created_at desc);
+create index if not exists notifications_application_idx on public.notifications(application_id, created_at desc);
+create index if not exists notifications_thread_idx on public.notifications(message_thread_id, created_at desc);
+create index if not exists reports_target_listing_idx on public.reports(target_listing_id);
+create index if not exists reports_target_message_idx on public.reports(target_message_id);
 create index if not exists telemetry_page_views_created_idx on public.telemetry_page_views(created_at desc);
 create index if not exists telemetry_errors_created_idx on public.telemetry_errors(created_at desc);
 create index if not exists abuse_events_created_idx on public.abuse_events(created_at desc);
@@ -736,6 +1036,8 @@ alter table public.profiles
   add constraint profiles_open_to_length_check check (open_to is null or char_length(open_to) <= 280),
   drop constraint if exists profiles_location_length_check,
   add constraint profiles_location_length_check check (location is null or char_length(location) <= 80),
+  drop constraint if exists profiles_age_label_length_check,
+  add constraint profiles_age_label_length_check check (age_label is null or char_length(age_label) <= 40),
   drop constraint if exists profiles_email_domain_length_check,
   add constraint profiles_email_domain_length_check check (char_length(email_domain) <= 120);
 
@@ -1680,6 +1982,56 @@ create trigger scene_objects_set_updated_at
 before update on public.scene_objects
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists listings_set_updated_at on public.listings;
+create trigger listings_set_updated_at
+before update on public.listings
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists room_details_set_updated_at on public.room_details;
+create trigger room_details_set_updated_at
+before update on public.room_details
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists car_details_set_updated_at on public.car_details;
+create trigger car_details_set_updated_at
+before update on public.car_details
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists dating_profiles_set_updated_at on public.dating_profiles;
+create trigger dating_profiles_set_updated_at
+before update on public.dating_profiles
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists applications_set_updated_at on public.applications;
+create trigger applications_set_updated_at
+before update on public.applications
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists matches_set_updated_at on public.matches;
+create trigger matches_set_updated_at
+before update on public.matches
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists message_threads_set_updated_at on public.message_threads;
+create trigger message_threads_set_updated_at
+before update on public.message_threads
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists reviews_set_updated_at on public.reviews;
+create trigger reviews_set_updated_at
+before update on public.reviews
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists identity_verifications_set_updated_at on public.identity_verifications;
+create trigger identity_verifications_set_updated_at
+before update on public.identity_verifications
+for each row execute procedure public.handle_updated_at();
+
+drop trigger if exists payment_intents_set_updated_at on public.payment_intents;
+create trigger payment_intents_set_updated_at
+before update on public.payment_intents
+for each row execute procedure public.handle_updated_at();
+
 create or replace view public.profile_stats as
 select
   p.id as profile_id,
@@ -1724,6 +2076,62 @@ where p.published = true
   and trim(tag_value) <> ''
 group by lower(trim(tag_value));
 
+create or replace function public.is_listing_visible_to_current_user(p_listing_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.listings l
+    join public.profiles owner_profile on owner_profile.id = l.owner_id
+    where l.id = p_listing_id
+      and l.deleted_at is null
+      and (
+        (l.status = 'published' and owner_profile.account_status = 'active')
+        or l.owner_id = auth.uid()
+        or public.is_admin()
+      )
+  );
+$$;
+
+create or replace function public.is_message_thread_participant(p_thread_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.message_threads t
+    where t.id = p_thread_id
+      and t.deleted_at is null
+      and (
+        t.participant_a_id = auth.uid()
+        or t.participant_b_id = auth.uid()
+        or public.is_admin()
+      )
+  );
+$$;
+
+create or replace function public.has_block_between(p_left_user_id uuid, p_right_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.blocks b
+    where (b.blocker_id = p_left_user_id and b.blocked_id = p_right_user_id)
+       or (b.blocker_id = p_right_user_id and b.blocked_id = p_left_user_id)
+  );
+$$;
+
 alter table public.profiles enable row level security;
 alter table public.posts enable row level security;
 alter table public.follows enable row level security;
@@ -1762,6 +2170,19 @@ alter table public.telemetry_page_views enable row level security;
 alter table public.telemetry_errors enable row level security;
 alter table public.abuse_events enable row level security;
 alter table public.admin_alerts enable row level security;
+alter table public.listings enable row level security;
+alter table public.room_details enable row level security;
+alter table public.car_details enable row level security;
+alter table public.dating_profiles enable row level security;
+alter table public.favorites enable row level security;
+alter table public.applications enable row level security;
+alter table public.matches enable row level security;
+alter table public.message_threads enable row level security;
+alter table public.messages enable row level security;
+alter table public.reviews enable row level security;
+alter table public.identity_verifications enable row level security;
+alter table public.admin_actions enable row level security;
+alter table public.payment_intents enable row level security;
 
 drop policy if exists "profiles are public readable" on public.profiles;
 create policy "profiles are public readable"
@@ -2193,6 +2614,13 @@ using (public.is_admin())
 with check (public.is_admin());
 
 grant usage on schema public to authenticated;
+grant usage on schema public to anon;
+grant select on public.listings, public.room_details, public.car_details, public.dating_profiles, public.reviews to anon;
+grant select, insert, update, delete on public.listings, public.room_details, public.car_details, public.dating_profiles, public.favorites, public.applications, public.matches, public.message_threads, public.messages, public.reviews, public.identity_verifications, public.payment_intents to authenticated;
+grant select, insert on public.admin_actions to authenticated;
+grant execute on function public.is_listing_visible_to_current_user(uuid) to authenticated, anon;
+grant execute on function public.is_message_thread_participant(uuid) to authenticated;
+grant execute on function public.has_block_between(uuid, uuid) to authenticated;
 grant select on public.economy_accounts to authenticated;
 grant select, insert, update, delete on public.english_progress to authenticated;
 grant select, insert, update, delete on public.german_progress to authenticated;
@@ -2444,7 +2872,7 @@ drop policy if exists "blocks are private" on public.blocks;
 create policy "blocks are private"
 on public.blocks
 for select
-using (auth.uid() = blocker_id);
+using (auth.uid() = blocker_id or public.is_admin());
 
 drop policy if exists "users can block" on public.blocks;
 create policy "users can block"
@@ -2525,6 +2953,335 @@ create policy "admins can delete reports"
 on public.reports
 for delete
 using (public.is_admin());
+
+drop policy if exists "marketplace listings readable" on public.listings;
+create policy "marketplace listings readable"
+on public.listings
+for select
+using (
+  deleted_at is null
+  and (
+    (
+      status = 'published'
+      and exists (
+        select 1 from public.profiles
+        where profiles.id = listings.owner_id
+          and profiles.account_status = 'active'
+      )
+    )
+    or owner_id = auth.uid()
+    or public.is_admin()
+  )
+);
+
+drop policy if exists "users can create marketplace listings" on public.listings;
+create policy "users can create marketplace listings"
+on public.listings
+for insert
+to authenticated
+with check (
+  auth.uid() = owner_id
+  and exists (
+    select 1 from public.profiles
+    where profiles.id = owner_id
+      and profiles.account_status = 'active'
+  )
+);
+
+drop policy if exists "owners and admins can update marketplace listings" on public.listings;
+create policy "owners and admins can update marketplace listings"
+on public.listings
+for update
+using (auth.uid() = owner_id or public.is_admin())
+with check (auth.uid() = owner_id or public.is_admin());
+
+drop policy if exists "owners and admins can delete marketplace listings" on public.listings;
+create policy "owners and admins can delete marketplace listings"
+on public.listings
+for delete
+using (auth.uid() = owner_id or public.is_admin());
+
+drop policy if exists "room details follow listing visibility" on public.room_details;
+create policy "room details follow listing visibility"
+on public.room_details
+for select
+using (public.is_listing_visible_to_current_user(listing_id));
+
+drop policy if exists "owners and admins can insert room details" on public.room_details;
+create policy "owners and admins can insert room details"
+on public.room_details
+for insert
+to authenticated
+with check (
+  exists (
+    select 1 from public.listings
+    where listings.id = room_details.listing_id
+      and (listings.owner_id = auth.uid() or public.is_admin())
+  )
+);
+
+drop policy if exists "owners and admins can update room details" on public.room_details;
+create policy "owners and admins can update room details"
+on public.room_details
+for update
+using (
+  exists (
+    select 1 from public.listings
+    where listings.id = room_details.listing_id
+      and (listings.owner_id = auth.uid() or public.is_admin())
+  )
+)
+with check (
+  exists (
+    select 1 from public.listings
+    where listings.id = room_details.listing_id
+      and (listings.owner_id = auth.uid() or public.is_admin())
+  )
+);
+
+drop policy if exists "car details follow listing visibility" on public.car_details;
+create policy "car details follow listing visibility"
+on public.car_details
+for select
+using (public.is_listing_visible_to_current_user(listing_id));
+
+drop policy if exists "owners and admins can manage car details" on public.car_details;
+create policy "owners and admins can manage car details"
+on public.car_details
+for all
+using (
+  exists (
+    select 1 from public.listings
+    where listings.id = car_details.listing_id
+      and (listings.owner_id = auth.uid() or public.is_admin())
+  )
+)
+with check (
+  exists (
+    select 1 from public.listings
+    where listings.id = car_details.listing_id
+      and (listings.owner_id = auth.uid() or public.is_admin())
+  )
+);
+
+drop policy if exists "dating profiles readable" on public.dating_profiles;
+create policy "dating profiles readable"
+on public.dating_profiles
+for select
+using (
+  deleted_at is null
+  and (
+    (visibility = 'published' and exists (
+      select 1 from public.profiles
+      where profiles.id = dating_profiles.user_id
+        and profiles.account_status = 'active'
+    ))
+    or user_id = auth.uid()
+    or public.is_admin()
+  )
+);
+
+drop policy if exists "users and admins can manage dating profiles" on public.dating_profiles;
+create policy "users and admins can manage dating profiles"
+on public.dating_profiles
+for all
+using (auth.uid() = user_id or public.is_admin())
+with check (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "users can read own favorites" on public.favorites;
+create policy "users can read own favorites"
+on public.favorites
+for select
+using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "users can favorite listings" on public.favorites;
+create policy "users can favorite listings"
+on public.favorites
+for insert
+to authenticated
+with check (auth.uid() = user_id and public.is_listing_visible_to_current_user(listing_id));
+
+drop policy if exists "users can remove own favorites" on public.favorites;
+create policy "users can remove own favorites"
+on public.favorites
+for delete
+using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "application participants can read" on public.applications;
+create policy "application participants can read"
+on public.applications
+for select
+using (auth.uid() = applicant_id or auth.uid() = owner_id or public.is_admin());
+
+drop policy if exists "users can create marketplace applications" on public.applications;
+create policy "users can create marketplace applications"
+on public.applications
+for insert
+to authenticated
+with check (
+  auth.uid() = applicant_id
+  and applicant_id <> owner_id
+  and exists (
+    select 1 from public.listings
+    where listings.id = applications.listing_id
+      and listings.owner_id = applications.owner_id
+      and listings.status = 'published'
+      and listings.deleted_at is null
+  )
+);
+
+drop policy if exists "application participants can update" on public.applications;
+create policy "application participants can update"
+on public.applications
+for update
+using (auth.uid() = applicant_id or auth.uid() = owner_id or public.is_admin())
+with check (auth.uid() = applicant_id or auth.uid() = owner_id or public.is_admin());
+
+drop policy if exists "match participants can read" on public.matches;
+create policy "match participants can read"
+on public.matches
+for select
+using (auth.uid() = user_a_id or auth.uid() = user_b_id or public.is_admin());
+
+drop policy if exists "authenticated users can create matches" on public.matches;
+create policy "authenticated users can create matches"
+on public.matches
+for insert
+to authenticated
+with check (auth.uid() = initiator_id and (auth.uid() = user_a_id or auth.uid() = user_b_id));
+
+drop policy if exists "match participants can update" on public.matches;
+create policy "match participants can update"
+on public.matches
+for update
+using (auth.uid() = user_a_id or auth.uid() = user_b_id or public.is_admin())
+with check (auth.uid() = user_a_id or auth.uid() = user_b_id or public.is_admin());
+
+drop policy if exists "thread participants can read" on public.message_threads;
+create policy "thread participants can read"
+on public.message_threads
+for select
+using (auth.uid() = participant_a_id or auth.uid() = participant_b_id or public.is_admin());
+
+drop policy if exists "participants can create threads" on public.message_threads;
+create policy "participants can create threads"
+on public.message_threads
+for insert
+to authenticated
+with check (
+  auth.uid() in (participant_a_id, participant_b_id)
+  and not public.has_block_between(participant_a_id, participant_b_id)
+);
+
+drop policy if exists "thread participants can update" on public.message_threads;
+create policy "thread participants can update"
+on public.message_threads
+for update
+using (auth.uid() = participant_a_id or auth.uid() = participant_b_id or public.is_admin())
+with check (auth.uid() = participant_a_id or auth.uid() = participant_b_id or public.is_admin());
+
+drop policy if exists "thread participants can read messages" on public.messages;
+create policy "thread participants can read messages"
+on public.messages
+for select
+using (deleted_at is null and public.is_message_thread_participant(thread_id));
+
+drop policy if exists "thread participants can send messages" on public.messages;
+create policy "thread participants can send messages"
+on public.messages
+for insert
+to authenticated
+with check (
+  auth.uid() = sender_id
+  and exists (
+    select 1 from public.message_threads
+    where message_threads.id = messages.thread_id
+      and message_threads.status = 'active'
+      and auth.uid() in (message_threads.participant_a_id, message_threads.participant_b_id)
+      and not public.has_block_between(message_threads.participant_a_id, message_threads.participant_b_id)
+  )
+);
+
+drop policy if exists "reviews readable" on public.reviews;
+create policy "reviews readable"
+on public.reviews
+for select
+using (
+  deleted_at is null
+  and (
+    status = 'published'
+    or auth.uid() = reviewer_id
+    or auth.uid() = reviewee_id
+    or public.is_admin()
+  )
+);
+
+drop policy if exists "users can create reviews" on public.reviews;
+create policy "users can create reviews"
+on public.reviews
+for insert
+to authenticated
+with check (auth.uid() = reviewer_id and reviewer_id <> reviewee_id);
+
+drop policy if exists "reviewers and admins can update reviews" on public.reviews;
+create policy "reviewers and admins can update reviews"
+on public.reviews
+for update
+using (auth.uid() = reviewer_id or public.is_admin())
+with check (auth.uid() = reviewer_id or public.is_admin());
+
+drop policy if exists "users can read own identity verification" on public.identity_verifications;
+create policy "users can read own identity verification"
+on public.identity_verifications
+for select
+using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "users can request identity verification" on public.identity_verifications;
+create policy "users can request identity verification"
+on public.identity_verifications
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+drop policy if exists "admins can update identity verification" on public.identity_verifications;
+create policy "admins can update identity verification"
+on public.identity_verifications
+for update
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "admins can read admin actions" on public.admin_actions;
+create policy "admins can read admin actions"
+on public.admin_actions
+for select
+using (public.is_admin());
+
+drop policy if exists "admins can create admin actions" on public.admin_actions;
+create policy "admins can create admin actions"
+on public.admin_actions
+for insert
+to authenticated
+with check (auth.uid() = admin_id and public.is_admin());
+
+drop policy if exists "users can read own payment intents" on public.payment_intents;
+create policy "users can read own payment intents"
+on public.payment_intents
+for select
+using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "users can create own payment intents" on public.payment_intents;
+create policy "users can create own payment intents"
+on public.payment_intents
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+drop policy if exists "admins can update payment intents" on public.payment_intents;
+create policy "admins can update payment intents"
+on public.payment_intents
+for update
+using (public.is_admin())
+with check (public.is_admin());
 
 drop policy if exists "admins can read telemetry page views" on public.telemetry_page_views;
 create policy "admins can read telemetry page views"

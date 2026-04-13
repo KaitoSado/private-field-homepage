@@ -1,0 +1,382 @@
+// Reference only.
+// This repository's DB source of truth is supabase/schema.sql.
+// Keep this file aligned when the marketplace schema changes and Prisma is introduced.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum ServiceType {
+  roomshare
+  carshare
+  dating
+}
+
+enum ListingType {
+  room
+  car
+  dating_profile
+}
+
+enum ListingStatus {
+  draft
+  published
+  paused
+  archived
+  rejected
+}
+
+enum ApplicationStatus {
+  pending
+  accepted
+  rejected
+  cancelled
+  completed
+}
+
+enum ReportStatus {
+  open
+  reviewing
+  resolved
+  dismissed
+}
+
+enum VerificationStatus {
+  unverified
+  pending
+  verified
+  rejected
+}
+
+enum PaymentStatus {
+  pending
+  succeeded
+  failed
+  refunded
+  cancelled
+}
+
+model User {
+  id        String   @id @db.Uuid
+  email     String?
+  createdAt DateTime @map("created_at")
+
+  profile Profile?
+
+  @@map("auth.users")
+}
+
+model Profile {
+  id                     String   @id @db.Uuid
+  username               String   @unique
+  displayName            String?  @map("display_name")
+  bio                    String?
+  ageLabel               String?  @map("age_label")
+  location               String?
+  avatarUrl              String?  @map("avatar_url")
+  role                   String   @default("user")
+  accountStatus          String   @default("active") @map("account_status")
+  marketplacePreferences Json     @default("{}") @map("marketplace_preferences")
+  createdAt              DateTime @default(now()) @map("created_at")
+  updatedAt              DateTime @updatedAt @map("updated_at")
+
+  listings              Listing[]
+  favorites             Favorite[]
+  applications          Application[] @relation("ApplicationApplicant")
+  ownedApplications     Application[] @relation("ApplicationOwner")
+  sentMessages          Message[]
+  identityVerifications IdentityVerification[]
+  adminActions          AdminAction[]
+
+  @@map("profiles")
+}
+
+model Listing {
+  id           String        @id @default(uuid()) @db.Uuid
+  serviceType  ServiceType   @default(roomshare) @map("service_type")
+  listingType  ListingType   @default(room) @map("listing_type")
+  ownerId      String        @db.Uuid @map("owner_id")
+  title        String
+  description  String        @default("")
+  locationText String        @default("") @map("location_text")
+  price        Int           @default(0)
+  currency     String        @default("JPY")
+  status       ListingStatus @default(draft)
+  images       String[]
+  metadata     Json          @default("{}")
+  publishedAt  DateTime?     @map("published_at")
+  archivedAt   DateTime?     @map("archived_at")
+  deletedAt    DateTime?     @map("deleted_at")
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  owner         Profile        @relation(fields: [ownerId], references: [id])
+  roomDetail    RoomDetail?
+  carDetail     CarDetail?
+  datingProfile DatingProfile?
+  favorites     Favorite[]
+  applications  Application[]
+  threads       MessageThread[]
+  reviews       Review[]
+
+  @@index([serviceType, listingType, status, deletedAt, createdAt])
+  @@index([ownerId, updatedAt])
+  @@map("listings")
+}
+
+model RoomDetail {
+  listingId        String   @id @db.Uuid @map("listing_id")
+  rent             Int      @default(0)
+  utilities        Int      @default(0)
+  deposit          Int      @default(0)
+  initialCost      Int      @default(0) @map("initial_cost")
+  availableFrom    DateTime? @map("available_from") @db.Date
+  capacity         Int      @default(1)
+  roomType         String   @default("private") @map("room_type")
+  genderPreference String   @default("any") @map("gender_preference")
+  smokingAllowed   Boolean  @default(false) @map("smoking_allowed")
+  petsAllowed      Boolean  @default(false) @map("pets_allowed")
+  nearestStation   String   @default("") @map("nearest_station")
+  houseRules       String   @default("") @map("house_rules")
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("room_details")
+}
+
+model CarDetail {
+  listingId             String @id @db.Uuid @map("listing_id")
+  maker                 String @default("")
+  model                 String @default("")
+  modelYear             Int?   @map("model_year")
+  seats                 Int?
+  pickupLocation        String @default("") @map("pickup_location")
+  availabilityNote      String @default("") @map("availability_note")
+  licenseRequiredStatus String @default("unverified") @map("license_required_status")
+  insuranceNote         String @default("") @map("insurance_note")
+  cancellationPolicy    String @default("") @map("cancellation_policy")
+  preUseChecklist       Json   @default("[]") @map("pre_use_checklist")
+  postUseChecklist      Json   @default("[]") @map("post_use_checklist")
+  accidentReportFlow    String @default("") @map("accident_report_flow")
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@map("car_details")
+}
+
+model DatingProfile {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @unique @db.Uuid @map("user_id")
+  listingId      String?  @unique @db.Uuid @map("listing_id")
+  age            Int?
+  gender         String   @default("")
+  interests      String[]
+  purpose        String   @default("")
+  livingArea     String   @default("") @map("living_area")
+  photos         String[]
+  preferenceJson Json     @default("{}") @map("preference_json")
+  visibility     String   @default("draft")
+  deletedAt      DateTime? @map("deleted_at")
+
+  user    Profile  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing? @relation(fields: [listingId], references: [id])
+
+  @@map("dating_profiles")
+}
+
+model Favorite {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String      @db.Uuid @map("user_id")
+  listingId   String      @db.Uuid @map("listing_id")
+  serviceType ServiceType @default(roomshare) @map("service_type")
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  user    Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@map("favorites")
+}
+
+model Application {
+  id              String            @id @default(uuid()) @db.Uuid
+  serviceType     ServiceType       @default(roomshare) @map("service_type")
+  listingId       String            @db.Uuid @map("listing_id")
+  applicantId     String            @db.Uuid @map("applicant_id")
+  ownerId         String            @db.Uuid @map("owner_id")
+  applicationType String            @default("inquiry") @map("application_type")
+  message         String            @default("")
+  status          ApplicationStatus @default(pending)
+  metadata        Json              @default("{}")
+  deletedAt       DateTime?         @map("deleted_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  listing   Listing         @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  applicant Profile         @relation("ApplicationApplicant", fields: [applicantId], references: [id])
+  owner     Profile         @relation("ApplicationOwner", fields: [ownerId], references: [id])
+  thread    MessageThread?
+  reviews   Review[]
+
+  @@index([listingId, status, createdAt])
+  @@index([applicantId, status, createdAt])
+  @@index([ownerId, status, createdAt])
+  @@map("applications")
+}
+
+model Match {
+  id          String   @id @default(uuid()) @db.Uuid
+  serviceType ServiceType @default(dating) @map("service_type")
+  listingId   String?  @db.Uuid @map("listing_id")
+  userAId     String   @db.Uuid @map("user_a_id")
+  userBId     String   @db.Uuid @map("user_b_id")
+  initiatorId String?  @db.Uuid @map("initiator_id")
+  status      String   @default("pending")
+  matchedAt   DateTime? @map("matched_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  thread MessageThread?
+
+  @@map("matches")
+}
+
+model MessageThread {
+  id             String   @id @default(uuid()) @db.Uuid
+  serviceType    ServiceType @default(roomshare) @map("service_type")
+  listingId      String?  @db.Uuid @map("listing_id")
+  applicationId  String?  @unique @db.Uuid @map("application_id")
+  matchId        String?  @unique @db.Uuid @map("match_id")
+  participantAId String   @db.Uuid @map("participant_a_id")
+  participantBId String   @db.Uuid @map("participant_b_id")
+  subject        String   @default("")
+  status         String   @default("active")
+  lastMessageAt  DateTime? @map("last_message_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  listing     Listing?     @relation(fields: [listingId], references: [id])
+  application Application? @relation(fields: [applicationId], references: [id])
+  match       Match?       @relation(fields: [matchId], references: [id])
+  messages    Message[]
+
+  @@map("message_threads")
+}
+
+model Message {
+  id          String   @id @default(uuid()) @db.Uuid
+  threadId    String   @db.Uuid @map("thread_id")
+  senderId    String   @db.Uuid @map("sender_id")
+  body        String
+  messageType String   @default("text") @map("message_type")
+  metadata    Json     @default("{}")
+  readAt      DateTime? @map("read_at")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  thread MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender Profile       @relation(fields: [senderId], references: [id])
+
+  @@index([threadId, createdAt])
+  @@map("messages")
+}
+
+model Review {
+  id            String   @id @default(uuid()) @db.Uuid
+  serviceType   ServiceType @default(roomshare) @map("service_type")
+  reviewerId    String   @db.Uuid @map("reviewer_id")
+  revieweeId    String   @db.Uuid @map("reviewee_id")
+  targetType    String   @map("target_type")
+  targetId      String   @db.Uuid @map("target_id")
+  listingId     String?  @db.Uuid @map("listing_id")
+  applicationId String?  @db.Uuid @map("application_id")
+  rating        Int
+  comment       String   @default("")
+  status        String   @default("published")
+  deletedAt     DateTime? @map("deleted_at")
+
+  listing     Listing?     @relation(fields: [listingId], references: [id])
+  application Application? @relation(fields: [applicationId], references: [id])
+
+  @@unique([reviewerId, revieweeId, targetType, targetId])
+  @@map("reviews")
+}
+
+model Report {
+  id        String       @id @default(uuid()) @db.Uuid
+  status    ReportStatus @default(open)
+  reason    String
+  details   String?
+  createdAt DateTime     @default(now()) @map("created_at")
+
+  @@map("reports")
+}
+
+model Block {
+  blockerId String @db.Uuid @map("blocker_id")
+  blockedId String @db.Uuid @map("blocked_id")
+
+  @@id([blockerId, blockedId])
+  @@map("blocks")
+}
+
+model Notification {
+  id              String   @id @default(uuid()) @db.Uuid
+  recipientId     String   @db.Uuid @map("recipient_id")
+  actorId         String   @db.Uuid @map("actor_id")
+  type            String
+  title           String   @default("")
+  body            String   @default("")
+  actionUrl       String   @default("") @map("action_url")
+  readAt          DateTime? @map("read_at")
+
+  @@map("notifications")
+}
+
+model IdentityVerification {
+  id               String             @id @default(uuid()) @db.Uuid
+  userId           String             @db.Uuid @map("user_id")
+  serviceType      ServiceType        @default(roomshare) @map("service_type")
+  verificationType String             @default("identity") @map("verification_type")
+  status           VerificationStatus @default(unverified)
+  metadata         Json               @default("{}")
+
+  user Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("identity_verifications")
+}
+
+model AdminAction {
+  id         String   @id @default(uuid()) @db.Uuid
+  adminId    String   @db.Uuid @map("admin_id")
+  actionType String   @map("action_type")
+  targetType String   @map("target_type")
+  targetId   String   @db.Uuid @map("target_id")
+  reason     String   @default("")
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  admin Profile @relation(fields: [adminId], references: [id])
+
+  @@map("admin_actions")
+}
+
+model PaymentIntent {
+  id                    String        @id @default(uuid()) @db.Uuid
+  userId                String?       @db.Uuid @map("user_id")
+  serviceType           ServiceType   @default(roomshare) @map("service_type")
+  targetType            String        @map("target_type")
+  targetId              String?       @db.Uuid @map("target_id")
+  amount                Int           @default(0)
+  currency              String        @default("JPY")
+  status                PaymentStatus @default(pending)
+  stripeCustomerId      String        @default("") @map("stripe_customer_id")
+  stripePaymentIntentId String        @default("") @map("stripe_payment_intent_id")
+  stripeSubscriptionId  String        @default("") @map("stripe_subscription_id")
+  metadata              Json          @default("{}")
+
+  @@map("payment_intents")
+}

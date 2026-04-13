@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --experimental-default-type=module --test tests/*.mjs",
     "preflight": "node scripts/preflight.mjs",
     "harness:preflight": "node scripts/harness/preflight.mjs",
     "harness:summary": "node scripts/harness/context-summary.mjs",
@@ -18,12 +19,13 @@
     "autoprefixer": "^10.4.27",
     "dexie": "^4.4.2",
     "matter-js": "^0.20.0",
-    "next": "latest",
+    "next": "^16.2.3",
     "postcss": "^8.5.8",
     "react": "latest",
     "react-dom": "latest",
     "tailwindcss": "^3.4.17",
     "three": "^0.183.2",
+    "zod": "^4.3.6",
     "zustand": "^5.0.12"
   }
 }

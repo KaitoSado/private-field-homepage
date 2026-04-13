@@ -1100,6 +1100,312 @@ textarea {
   color: #4a525d;
 }
 
+/* ── Marketplace foundation ── */
+
+.marketplace-shell {
+  display: grid;
+  gap: 18px;
+}
+
+.marketplace-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  padding: 28px 0 18px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.marketplace-hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 4.4rem);
+  line-height: 1;
+}
+
+.marketplace-hero p {
+  max-width: 64ch;
+  color: var(--muted);
+}
+
+.marketplace-hero-actions,
+.marketplace-card-actions,
+.marketplace-nav,
+.marketplace-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.marketplace-hero-actions {
+  justify-content: flex-end;
+}
+
+.marketplace-nav {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.marketplace-nav a {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.marketplace-status {
+  margin: 0;
+  color: var(--muted);
+}
+
+.marketplace-layout,
+.marketplace-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.34fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.marketplace-detail-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.32fr);
+}
+
+.marketplace-filter,
+.marketplace-edit-form,
+.marketplace-detail-main,
+.marketplace-owner-card,
+.marketplace-chat-panel {
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+}
+
+.marketplace-filter {
+  position: sticky;
+  top: 92px;
+}
+
+.marketplace-results,
+.marketplace-side-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.marketplace-listing-card,
+.marketplace-application-card,
+.marketplace-admin-row,
+.marketplace-notification,
+.marketplace-thread-row {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.marketplace-listing-card {
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.marketplace-card-body {
+  display: grid;
+  gap: 10px;
+}
+
+.marketplace-card-head,
+.marketplace-admin-row,
+.marketplace-notification,
+.marketplace-thread-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.marketplace-listing-card h2,
+.marketplace-application-card h2 {
+  margin: 0;
+  font-size: 1.18rem;
+  line-height: 1.28;
+}
+
+.marketplace-listing-image {
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  border-radius: 4px;
+  object-fit: cover;
+  background: #e8f0ec;
+  border: 1px solid var(--line);
+}
+
+.marketplace-listing-image.is-empty,
+.marketplace-photo-empty {
+  display: grid;
+  place-items: center;
+  color: #33545b;
+  font-weight: 700;
+}
+
+.marketplace-meta-row {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.marketplace-meta-row span,
+.marketplace-status-pill {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 8px;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.marketplace-status-pill {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.marketplace-status-pill.is-published,
+.marketplace-status-pill.is-accepted,
+.marketplace-status-pill.is-verified {
+  background: rgba(74, 154, 110, 0.12);
+  border-color: rgba(74, 154, 110, 0.28);
+}
+
+.marketplace-status-pill.is-pending,
+.marketplace-status-pill.is-reviewing {
+  background: rgba(212, 160, 48, 0.14);
+  border-color: rgba(212, 160, 48, 0.3);
+}
+
+.marketplace-status-pill.is-rejected,
+.marketplace-status-pill.is-archived,
+.marketplace-status-pill.is-suspended {
+  background: rgba(192, 96, 96, 0.12);
+  border-color: rgba(192, 96, 96, 0.3);
+}
+
+.marketplace-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.marketplace-photo-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.marketplace-photo-strip img,
+.marketplace-photo-empty {
+  width: 100%;
+  min-height: 190px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #eef2ed;
+}
+
+.marketplace-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.marketplace-spec-grid div {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.marketplace-spec-grid dt {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.marketplace-spec-grid dd {
+  margin: 4px 0 0;
+  font-weight: 700;
+}
+
+.marketplace-note {
+  padding: 14px;
+  border-left: 3px solid #1f6f78;
+  background: rgba(31, 111, 120, 0.08);
+}
+
+.marketplace-message-list {
+  display: grid;
+  gap: 10px;
+  max-height: 58vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.marketplace-message {
+  width: min(78%, 620px);
+  padding: 12px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  background: #fff;
+}
+
+.marketplace-message.is-own {
+  justify-self: end;
+  background: rgba(31, 111, 120, 0.1);
+}
+
+.marketplace-message p {
+  margin: 0 0 6px;
+  white-space: pre-wrap;
+}
+
+.marketplace-message span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.marketplace-message-form {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.marketplace-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.marketplace-stat {
+  padding: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.marketplace-stat span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.marketplace-stat strong {
+  font-size: 1.6rem;
+}
+
+.marketplace-notification.is-unread {
+  border-color: rgba(31, 111, 120, 0.36);
+}
+
 /* ── English Content: flat structured style ── */
 
 /* ── Research Progress: flat structured style ── */
@@ -6178,7 +6484,10 @@ textarea {
   .stats-grid,
   .class-board-main,
   .arcade-panel-grid,
-  .class-form-grid {
+  .class-form-grid,
+  .marketplace-layout,
+  .marketplace-detail-grid,
+  .marketplace-admin-grid {
     grid-template-columns: 1fr;
   }
 
@@ -6194,6 +6503,29 @@ textarea {
 
   .apps-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  .marketplace-hero,
+  .marketplace-card-head,
+  .marketplace-admin-row,
+  .marketplace-notification,
+  .marketplace-thread-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .marketplace-filter {
+    position: static;
+  }
+
+  .marketplace-listing-card,
+  .marketplace-form-grid,
+  .marketplace-spec-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .marketplace-message {
+    width: 100%;
   }
 
   .research-progress-groups-layout,

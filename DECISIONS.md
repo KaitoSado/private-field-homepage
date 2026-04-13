@@ -121,3 +121,11 @@
 - `/apps/german` は英語 app と同じく、単語表示、自動読み上げ、自己判定、見直しリスト、長期記憶リスト、5ステージ復習で回す
 - 現 seed は日本語訳・例文・名詞性別が未補完なので、UI は先に学習器として成立させつつ、`meaning_ja`, `example_de`, `article`, `gender`, `plural` を後から足せる構造にする
 - 進捗は `german_progress` へ同期し、live schema 未適用時は `localStorage` に退避して学習自体を止めない
+
+### 20. マーケットプレイス基盤は Supabase 正本で実装する
+
+- 依頼文は Prisma / TypeScript を想定していたが、この repo の正本は `JavaScript + Supabase Auth/RLS + supabase/schema.sql` であるため、既存構成を優先する
+- 共通部分は `listings`, `applications`, `message_threads`, `messages`, `reviews`, `reports`, `notifications`, `admin_actions`, `payment_intents` に置く
+- サービス固有情報は `room_details`, `car_details`, `dating_profiles` に分離し、`service_type` / `listing_type` で横展開する
+- 自分の掲載のお気に入りは MVP では不可にして、通知や人気指標が自己操作で歪まないようにする
+- 本人確認書類の実データは MVP では保存せず、`identity_verifications` のステータスと metadata に運用状態だけ残す

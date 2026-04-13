@@ -46,9 +46,30 @@ schema を変える時は:
 - `german_progress_set_updated_at` trigger
 - `german_progress` の RLS policy / grant
 
+今回の `ルームシェアMVP / マーケットプレイス基盤` 追加では以下が live 適用対象:
+
+- `profiles.age_label`, `profiles.marketplace_preferences`
+- `listings`
+- `room_details`
+- `car_details`
+- `dating_profiles`
+- `favorites`
+- `applications`
+- `matches`
+- `message_threads`
+- `messages`
+- `reviews`
+- `identity_verifications`
+- `admin_actions`
+- `payment_intents`
+- `notifications` の marketplace 用カラム
+- `reports` の marketplace 用カラムと target constraint
+- marketplace helper function / trigger / RLS policy / grant
+
 ## 注意点
 
 - DB だけ更新してコードを更新しない、またはその逆は避ける
 - `Could not find column in schema cache` が出たら、まず schema 適用漏れを疑う
 - `/apps/research-progress` が 403 / 500 になる時は、schema の live 適用漏れか profile 未作成を先に疑う
 - 研究ラインの create / update が失敗する時は、`research_projects` と `research_project_members` の live 適用漏れを先に疑う
+- `/apps/roomshare` が 400 / 500 になる時は、まず marketplace 系テーブルと `notifications` / `reports` の拡張カラムの live 適用漏れを疑う

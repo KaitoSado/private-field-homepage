@@ -108,6 +108,15 @@
     - グループ一覧 `/apps/research-progress`
     - グループ別ダッシュボード `/apps/research-progress/[slug]`
     - group owner が研究計画、研究費申請、ポスター、論文投稿までの案件パイプラインを管理できる
+  - ルームシェア `/apps/roomshare`
+    - 信頼が必要なマッチング型マーケットプレイス基盤の最初のMVP
+    - `Listing / Application / MessageThread / Message / Favorite / Review / Report / Block / Notification / IdentityVerification / AdminAction / PaymentIntent` を横展開前提で扱う
+    - ルーム固有情報は `room_details` に分離し、カーシェア用 `car_details` とマッチングアプリ用 `dating_profiles` も schema に用意している
+    - 主要導線は検索、掲載作成・編集、プロフィール、マイページ、お気に入り、問い合わせ、チャット、通知、管理画面
+  - カーシェア `/apps/carshare`
+    - `car_details` と `applications` を使う将来展開用の準備面
+  - マッチングアプリ `/apps/matching`
+    - `dating_profiles` と `matches` を使う将来展開用の準備面
   - アプリ一覧 `/apps` は公開中アプリと非公開アプリを分けて表示する
 
 ## 6. データベース運用ルール
@@ -120,6 +129,7 @@
 - `if exists` / `drop policy if exists` 前提で、再実行可能な schema を維持する
 - `research_*` 系テーブルはリサーチプログレス用の正本で、`research_groups`, `research_group_members`, `research_updates`, `research_projects`, `research_project_members` を含む
 - `research_*` 系の変更と `english_progress` / `german_progress` の追加は live 反映に Supabase への schema 再適用が必要
+- マーケットプレイス基盤の `listings`, `room_details`, `car_details`, `dating_profiles`, `favorites`, `applications`, `matches`, `message_threads`, `messages`, `reviews`, `identity_verifications`, `admin_actions`, `payment_intents` と、`profiles`, `reports`, `notifications`, `blocks` の拡張は live 反映に Supabase への schema 再適用が必要
 
 ## 7. デザインと CSS の現状
 
