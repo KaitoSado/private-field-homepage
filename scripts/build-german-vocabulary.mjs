@@ -60,6 +60,7 @@ function getGrammarNote(record, pos) {
   if (record.article) parts.push(`冠詞: ${record.article}`);
   if (record.gender) parts.push(`性: ${GENDER_LABELS[record.gender] || record.gender}`);
   if (record.plural) parts.push(`複数形: ${record.plural}`);
+  if (record.formNote) parts.push(record.formNote);
   if (record.needs_gender) parts.push("名詞の性は未確認");
 
   return parts.join(" / ");
@@ -75,6 +76,7 @@ function toEntry(record, index) {
   const article = cleanText(normalizedRecord.article);
   const gender = cleanText(normalizedRecord.gender);
   const plural = cleanText(normalizedRecord.plural);
+  const formNote = cleanText(normalizedRecord.form_note);
   const reviewStatus = cleanText(normalizedRecord.review_status);
 
   return {
@@ -88,13 +90,14 @@ function toEntry(record, index) {
     article,
     gender,
     plural,
+    ...(formNote ? { formNote } : {}),
     needsGender: Boolean(normalizedRecord.needs_gender),
     coreChunk: article ? `${article} ${headword}` : headword,
     meaning: meaning || "意味未登録",
     nuance: meaning
       ? `${headword} の基本訳は「${meaning}」。例文や派生情報は後から追加できます。`
       : "日本語訳はまだ入っていません。seed の meaning_ja を埋めると、この答え欄に表示されます。",
-    grammarNote: getGrammarNote({ article, gender, plural, needs_gender: normalizedRecord.needs_gender }, pos),
+    grammarNote: getGrammarNote({ article, gender, plural, formNote, needs_gender: normalizedRecord.needs_gender }, pos),
     starterExamples: [
       {
         topic: "core",

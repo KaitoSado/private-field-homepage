@@ -565,16 +565,23 @@ export function GermanVocabularyApp() {
                       <strong>{selectedEntry.meaning}</strong>
                     </div>
 
-                    {selectedEntry.plural ? (
+                    {selectedEntry.plural || selectedEntry.formNote ? (
                       <div
                         className={`english-family-strip german-form-strip ${isAnswerVisible ? "is-visible" : "is-hidden"}`}
-                        aria-label="ドイツ語の複数形"
+                        aria-label="ドイツ語の変化情報"
                       >
                         <div>
-                          <span className="english-family-chip german-form-chip">
-                            <strong>{selectedEntry.plural}</strong>
-                            <small>複数形</small>
-                          </span>
+                          {selectedEntry.plural ? (
+                            <span className="english-family-chip german-form-chip">
+                              <strong>{selectedEntry.plural}</strong>
+                              <small>複数形</small>
+                            </span>
+                          ) : null}
+                          {selectedEntry.formNote ? (
+                            <span className="english-family-chip german-form-chip">
+                              <strong>{selectedEntry.formNote}</strong>
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                     ) : null}

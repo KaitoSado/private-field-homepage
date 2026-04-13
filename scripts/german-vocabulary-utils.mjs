@@ -21,6 +21,7 @@ const GENDER_TO_ARTICLE = {
 };
 
 const KNOWN_RECORD_OVERRIDES = new Map([
+  ["beamte", { display_de: "Beamte", article: "der", gender: "masculine", plural: "Beamten", meaning_ja: "公務員", form_note: "形容詞変化" }],
   ["eltern", { article: "die", gender: "plural", plural: "Eltern" }],
   ["ferien", { article: "die", gender: "plural", plural: "Ferien", meaning_ja: "休暇" }],
   ["kopfschmerzen", { article: "die", gender: "plural", plural: "Kopfschmerzen" }],
@@ -164,6 +165,7 @@ export function normalizeGermanRecord(record) {
     meaning_ja: cleanText(sourceRecord.meaning_ja),
     example_de: cleanText(sourceRecord.example_de),
     example_ja: cleanText(sourceRecord.example_ja),
+    form_note: cleanText(sourceRecord.form_note),
     tags: cleanText(sourceRecord.tags),
     notes: cleanText(sourceRecord.notes),
     needs_gender: needsGender,
