@@ -21,9 +21,7 @@ const INITIAL_SETTINGS = {
 const galleryItems = [
   {
     id: "spiral-polygon",
-    chapter: "Ch16",
-    title: "Spiral Polygon",
-    line: "Processing render / Canvas preview"
+    title: "Spiral Polygon"
   }
 ];
 
@@ -351,11 +349,8 @@ export function GenerativeArtWithMathGallery() {
     <section className="gen-art-shell">
       <header className="gen-art-hero">
         <div>
-          <p className="gen-art-kicker">GenerativeArtWithMath</p>
-          <h1>数学で線を育てるギャラリー</h1>
-          <p className="gen-art-lead">Processing で作品を書き出し、Web では出力と live preview を並べる。</p>
+          <h1>GenerativeArtWithMath</h1>
         </div>
-        <span className="gen-art-route-pill">Processing {"->"} Web Gallery</span>
       </header>
 
       <div className="gen-art-layout">
@@ -367,9 +362,7 @@ export function GenerativeArtWithMathGallery() {
                 <span />
               </span>
               <span className="gen-art-piece-copy">
-                <small>{item.chapter}</small>
                 <strong>{item.title}</strong>
-                <em>{item.line}</em>
               </span>
             </button>
           ))}
