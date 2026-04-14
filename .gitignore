@@ -6,3 +6,35 @@ node_modules/
 .env.local
 logs/*
 !logs/.gitkeep
+
+# Local agent/worktree scratch
+.claude/worktrees/
+.codex-deploy/
+
+# Root-level dropped media should be moved into public/ before tracking
+/Grok Image*.png
+/IMG_*.JPG
+/IMG_*.HEIC
+
+# Vocabulary extraction scratch files. Keep curated seed/generated app files tracked.
+*単語帳抜き出し*/*.pdf
+*単語帳抜き出し*/*_ocr*.txt
+*単語帳抜き出し*/*_raw.txt
+*単語帳抜き出し*/*raw.txt
+*単語帳抜き出し*/*_words*.txt
+*単語帳抜き出し*/*_index*.tsv
+*単語帳抜き出し*/*_統合リスト.*
+*単語帳抜き出し*/ワードドイツ*
+*単語帳抜き出し*/比較_*.txt
+*単語帳抜き出し*/スキャン*.txt
+*単語帳抜き出し*/*.py
+*単語帳抜き出し*/*.swift
+*単語帳抜き出し*/*_translation_cache.json
+*単語帳抜き出し*/*_app_seed.csv
+
+# Local English vocabulary preprocessing cache/test files
+英単語/normalize_vocab.py
+英単語/*_test.*
+英単語/*_issues_test.txt
+英単語/pos_cache.json
+英単語/translation_cache.json

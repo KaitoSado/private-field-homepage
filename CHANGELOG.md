@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-15 | codex | git hygiene | ローカルの agent worktree、deploy scratch、語彙抽出中間物、翻訳 cache / test file を `.gitignore` に追加し、`der Rock = スカート` の名詞性チェックCSVを seed と整合させた | `npm run build` |
 | 2026-04-15 | codex | signature profile schedule | マイページ / signature プロフィールの月間カレンダーで、日付クリック後の 00:00-23:00 予定を「時間 / 予定」の表として表示・編集できるように変更 | `npm run build` |
 | 2026-04-15 | codex | signature profile schedule | マイページ / signature プロフィールの月間カレンダーを、日付クリックで選択日の 00:00-23:00 予定を表示し、編集時に時間別予定と日メモを編集できる形に変更 | `npm run build` |
 | 2026-04-15 | codex | generative art app | `/apps/generative-art-with-math` の `Spiral Polygon` に作者・MIT License 元サンプル・書籍 inspiration のクレジット表記を追加 | `npm run build` |
