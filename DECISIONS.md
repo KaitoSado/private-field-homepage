@@ -142,3 +142,8 @@
 - 作品制作は Processing sketch を通し、生成済み output を `public/` に置いて gallery に表示する
 - `/apps/generative-art-with-math` は作品ごとの gallery とし、最初は `Spiral Polygon` を大きな作業面として見せる
 - Web 上では PDE を直接実行しないため、React Canvas 版はパラメータ遊び用の live preview として併置する
+
+### 23. signature カレンダーは日付セルを詳細表示の入口にする
+
+- 月間カレンダーの各セルへ直接長文入力を詰め込まず、クリックした日付の 24 時間予定を右側の詳細パネルで扱う
+- 既存の日付メモは `note` として残し、新しい時間別予定は `hours` に分けて保存する

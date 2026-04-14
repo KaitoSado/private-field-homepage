@@ -45,6 +45,10 @@ const SCHEDULE_PERIODS = [
   { key: "period4", label: "4限", time: "14:45 - 16:15" },
   { key: "period5", label: "5限", time: "16:30 - 18:00" }
 ];
+const DAY_HOURS = Array.from({ length: 24 }, (_, hour) => {
+  const key = `${hour}`.padStart(2, "0");
+  return { key, label: `${key}:00` };
+});
 
 export function SignatureProfilePage({ profile, posts }) {
   const router = useRouter();
@@ -60,6 +64,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const [expandedRecordItems, setExpandedRecordItems] = useState({});
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth() + 1);
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState(() => new Date().getDate());
   const [showAllCurrentEntries, setShowAllCurrentEntries] = useState(false);
   const [postCreateSignal, setPostCreateSignal] = useState(0);
   const [postManagerOpen, setPostManagerOpen] = useState(false);
@@ -203,6 +208,9 @@ export function SignatureProfilePage({ profile, posts }) {
   const weeklySchedule = mergeWeeklySchedule(draft.weekly_schedule);
   const monthlyCalendar = mergeMonthlyCalendar(draft.monthly_calendar);
   const calendarYear = new Date().getFullYear();
+  const selectedMonthDayCount = new Date(calendarYear, selectedMonth, 0).getDate();
+  const activeCalendarDay = Math.min(selectedCalendarDay, selectedMonthDayCount);
+  const activeCalendarEntry = getCalendarDayEntry(monthlyCalendar, selectedMonth, activeCalendarDay);
   const recordItems = mergeRecordItems(draft.record_items, buildDefaultRecordItems());
   const defaultLeadCopy = "なんか書ける";
 
@@ -368,14 +376,44 @@ export function SignatureProfilePage({ profile, posts }) {
     });
   }
 
-  function updateCalendarDay(month, day, value) {
+  function updateCalendarDayNote(month, day, value) {
     setDraft((current) => {
       const nextCalendar = mergeMonthlyCalendar(current.monthly_calendar);
+      const currentEntry = getCalendarDayEntry(nextCalendar, month, day);
       return {
         ...current,
         monthly_calendar: {
           ...nextCalendar,
-          [month]: { ...nextCalendar[month], [day]: value }
+          [month]: {
+            ...nextCalendar[month],
+            [day]: {
+              ...currentEntry,
+              note: value
+            }
+          }
+        }
+      };
+    });
+  }
+
+  function updateCalendarDayHour(month, day, hourKey, value) {
+    setDraft((current) => {
+      const nextCalendar = mergeMonthlyCalendar(current.monthly_calendar);
+      const currentEntry = getCalendarDayEntry(nextCalendar, month, day);
+      return {
+        ...current,
+        monthly_calendar: {
+          ...nextCalendar,
+          [month]: {
+            ...nextCalendar[month],
+            [day]: {
+              ...currentEntry,
+              hours: {
+                ...currentEntry.hours,
+                [hourKey]: value
+              }
+            }
+          }
         }
       };
     });
@@ -950,33 +988,92 @@ export function SignatureProfilePage({ profile, posts }) {
                   ))}
                 </div>
                 <p className="signature-calendar-year">{calendarYear}年 {selectedMonth}月</p>
-                <div className="signature-calendar-grid">
-                  <div className="signature-calendar-weekdays">
-                    {["月", "火", "水", "木", "金", "土", "日"].map((d) => (
-                      <span key={d} className="signature-calendar-weekday">{d}</span>
-                    ))}
+                <div className="signature-calendar-detail-grid">
+                  <div className="signature-calendar-grid">
+                    <div className="signature-calendar-weekdays">
+                      {["月", "火", "水", "木", "金", "土", "日"].map((d) => (
+                        <span key={d} className="signature-calendar-weekday">{d}</span>
+                      ))}
+                    </div>
+                    <div className="signature-calendar-days">
+                      {buildCalendarCells(selectedMonth, calendarYear).map((cell, i) => {
+                        if (cell.empty) {
+                          return <div key={`empty-${i}`} className="signature-calendar-day empty" />;
+                        }
+
+                        const dayEntry = getCalendarDayEntry(monthlyCalendar, selectedMonth, cell.day);
+                        const preview = getCalendarDayPreview(dayEntry);
+                        const isSelectedDay = cell.day === activeCalendarDay;
+
+                        return (
+                          <button
+                            key={cell.day}
+                            type="button"
+                            className={`signature-calendar-day${calendarEntryHasContent(dayEntry) ? " has-entry" : ""}${isSelectedDay ? " is-selected" : ""}`}
+                            onClick={() => setSelectedCalendarDay(cell.day)}
+                          >
+                            <span className="signature-calendar-day-num">{cell.day}</span>
+                            {preview ? (
+                              <span className="signature-calendar-day-text">{preview}</span>
+                            ) : (
+                              <span className="signature-calendar-day-empty">予定を見る</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <div className="signature-calendar-days">
-                    {buildCalendarCells(selectedMonth, calendarYear).map((cell, i) =>
-                      cell.empty ? (
-                        <div key={`empty-${i}`} className="signature-calendar-day empty" />
+
+                  <div className="signature-day-panel">
+                    <div className="signature-day-panel-head">
+                      <div>
+                        <p className="signature-schedule-note-label">24 hour</p>
+                        <h4>{selectedMonth}月{activeCalendarDay}日</h4>
+                      </div>
+                      {calendarEntryHasContent(activeCalendarEntry) ? (
+                        <span className="signature-status-chip">予定あり</span>
                       ) : (
-                        <div key={cell.day} className={`signature-calendar-day${monthlyCalendar[selectedMonth]?.[cell.day] ? " has-entry" : ""}`}>
-                          <span className="signature-calendar-day-num">{cell.day}</span>
-                          {isEditing ? (
-                            <textarea
-                              rows="1"
-                              value={monthlyCalendar[selectedMonth]?.[cell.day] || ""}
-                              onChange={(e) => updateCalendarDay(selectedMonth, cell.day, e.target.value)}
-                              maxLength={80}
-                              placeholder=""
-                            />
-                          ) : monthlyCalendar[selectedMonth]?.[cell.day] ? (
-                            <span className="signature-calendar-day-text">{monthlyCalendar[selectedMonth][cell.day]}</span>
-                          ) : null}
-                        </div>
-                      )
-                    )}
+                        <span className="signature-status-chip is-muted">空き</span>
+                      )}
+                    </div>
+
+                    <label className="signature-day-note">
+                      <span>日メモ</span>
+                      {isEditing ? (
+                        <textarea
+                          rows="2"
+                          value={activeCalendarEntry.note}
+                          onChange={(event) => updateCalendarDayNote(selectedMonth, activeCalendarDay, event.target.value)}
+                          maxLength={160}
+                          placeholder="この日の補足"
+                        />
+                      ) : activeCalendarEntry.note ? (
+                        <p>{activeCalendarEntry.note}</p>
+                      ) : (
+                        <p className="signature-schedule-note-empty">メモなし</p>
+                      )}
+                    </label>
+
+                    <div className="signature-day-hours">
+                      {DAY_HOURS.map((hour) => {
+                        const value = activeCalendarEntry.hours[hour.key] || "";
+                        return (
+                          <div key={hour.key} className={`signature-day-hour${value ? " has-entry" : ""}`}>
+                            <span className="signature-day-hour-time">{hour.label}</span>
+                            {isEditing ? (
+                              <input
+                                value={value}
+                                onChange={(event) => updateCalendarDayHour(selectedMonth, activeCalendarDay, hour.key, event.target.value)}
+                                maxLength={80}
+                                placeholder="予定"
+                              />
+                            ) : (
+                              <p>{value || "空き"}</p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1401,9 +1498,47 @@ function mergeWeeklySchedule(weeklySchedule) {
 function mergeMonthlyCalendar(monthlyCalendar) {
   const merged = {};
   for (let m = 1; m <= 12; m++) {
-    merged[m] = { ...(monthlyCalendar?.[m] || {}) };
+    const rawMonth = monthlyCalendar?.[m];
+    const sourceMonth = rawMonth && typeof rawMonth === "object" && !Array.isArray(rawMonth) ? rawMonth : {};
+    merged[m] = Object.fromEntries(
+      Object.entries(sourceMonth).map(([day, entry]) => [day, normalizeCalendarDayEntry(entry)])
+    );
   }
   return merged;
+}
+
+function normalizeCalendarDayEntry(entry) {
+  if (entry && typeof entry === "object" && !Array.isArray(entry)) {
+    const rawHours = entry.hours && typeof entry.hours === "object" ? entry.hours : entry;
+    return {
+      note: `${entry.note ?? entry.text ?? ""}`,
+      hours: Object.fromEntries(DAY_HOURS.map((hour) => [hour.key, `${rawHours?.[hour.key] ?? ""}`]))
+    };
+  }
+
+  return {
+    note: `${entry ?? ""}`,
+    hours: Object.fromEntries(DAY_HOURS.map((hour) => [hour.key, ""]))
+  };
+}
+
+function getCalendarDayEntry(calendar, month, day) {
+  return normalizeCalendarDayEntry(calendar?.[month]?.[day]);
+}
+
+function calendarEntryHasContent(entry) {
+  const normalized = normalizeCalendarDayEntry(entry);
+  return Boolean(
+    normalized.note.trim() ||
+      DAY_HOURS.some((hour) => `${normalized.hours[hour.key] || ""}`.trim())
+  );
+}
+
+function getCalendarDayPreview(entry) {
+  const normalized = normalizeCalendarDayEntry(entry);
+  const firstHour = DAY_HOURS.find((hour) => `${normalized.hours[hour.key] || ""}`.trim());
+  if (firstHour) return `${firstHour.label} ${normalized.hours[firstHour.key]}`;
+  return normalized.note.trim();
 }
 
 function buildCalendarCells(month, year) {
@@ -1557,7 +1692,17 @@ function packSignatureAffiliation(affiliation, heading, currentEntries, weeklySc
   for (let m = 1; m <= 12; m++) {
     const days = {};
     for (const [d, v] of Object.entries(packedCalendar[m] || {})) {
-      if (`${v || ""}`.trim()) days[d] = `${v}`.trim();
+      const entry = normalizeCalendarDayEntry(v);
+      const note = entry.note.trim();
+      const hours = Object.fromEntries(
+        DAY_HOURS.map((hour) => [hour.key, `${entry.hours[hour.key] || ""}`.trim()]).filter(([, value]) => value)
+      );
+      if (note || Object.keys(hours).length) {
+        days[d] = {
+          ...(note ? { note } : {}),
+          ...(Object.keys(hours).length ? { hours } : {})
+        };
+      }
     }
     if (Object.keys(days).length) sparseCalendar[m] = days;
   }
