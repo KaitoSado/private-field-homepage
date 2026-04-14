@@ -23,7 +23,7 @@ const galleryItems = [
     id: "spiral-polygon",
     chapter: "Ch16",
     title: "Spiral Polygon",
-    line: "Fermat spiral / Higher Bezier"
+    line: "Processing render / Canvas preview"
   }
 ];
 
@@ -347,9 +347,9 @@ export function GenerativeArtWithMathGallery() {
         <div>
           <p className="gen-art-kicker">GenerativeArtWithMath</p>
           <h1>数学で線を育てるギャラリー</h1>
-          <p className="gen-art-lead">フェルマーらせん、制御点、高次ベジェ。ひとつの式から回転する線の束へ。</p>
+          <p className="gen-art-lead">Processing で作品を書き出し、Web では出力と live preview を並べる。</p>
         </div>
-        <span className="gen-art-route-pill">Ch16 / Spiral Polygon</span>
+        <span className="gen-art-route-pill">Processing {"->"} Web Gallery</span>
       </header>
 
       <div className="gen-art-layout">
@@ -369,11 +369,11 @@ export function GenerativeArtWithMathGallery() {
           ))}
         </aside>
 
-        <article className="gen-art-stage" aria-label="Spiral Polygon canvas">
+        <article className="gen-art-stage" aria-label="Spiral Polygon Processing output and canvas preview">
           <div className="gen-art-stage-head">
             <div>
-              <p>Spiral Polygon</p>
-              <h2>Fermat spiral axis + rotational HigherBezier</h2>
+              <p>Processing Output</p>
+              <h2>SpiralPolygonRender.pde</h2>
             </div>
             <div className="gen-art-action-row">
               <button type="button" className="button button-secondary gen-art-button" onClick={() => setIsPlaying((current) => !current)}>
@@ -383,11 +383,25 @@ export function GenerativeArtWithMathGallery() {
                 Reset
               </button>
               <button type="button" className="button button-primary gen-art-button" onClick={exportArtwork}>
-                Export PNG
+                Export Live PNG
               </button>
             </div>
           </div>
 
+          <figure className="gen-art-processing-output">
+            <img
+              src="/generative-art-with-math/spiral-polygon/spiral-polygon-processing.png"
+              alt="Processing render of Spiral Polygon"
+            />
+            <figcaption>
+              Generated with Processing CLI from scripts/processing/SpiralPolygonRender.
+            </figcaption>
+          </figure>
+
+          <div className="gen-art-live-head">
+            <p>Live Preview</p>
+            <span>Canvas 2D port for parameter play</span>
+          </div>
           <div ref={stageRef} className="gen-art-canvas-wrap">
             <canvas ref={canvasRef} className="gen-art-canvas" aria-label="Animated Spiral Polygon artwork" />
           </div>
@@ -395,8 +409,13 @@ export function GenerativeArtWithMathGallery() {
 
         <aside className="gen-art-controls" aria-label="Spiral Polygon controls">
           <div className="gen-art-controls-head">
-            <p>Work Parameters</p>
+            <p>Processing Source</p>
             <h2>Spiral Polygon</h2>
+          </div>
+
+          <div className="gen-art-source-card">
+            <span>Sketch</span>
+            <strong>scripts/processing/SpiralPolygonRender</strong>
           </div>
 
           <label className="gen-art-slider">
@@ -444,8 +463,8 @@ export function GenerativeArtWithMathGallery() {
 
           <div className="gen-art-stat-grid">
             <div>
-              <span>Axis</span>
-              <strong>Fermat</strong>
+              <span>Runtime</span>
+              <strong>Processing 4</strong>
             </div>
             <div>
               <span>Curve</span>

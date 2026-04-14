@@ -4,7 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
-| 2026-04-15 | codex | generative art app | `/apps/generative-art-with-math` に GenerativeArtWithMath gallery を追加し、`Spiral Polygon` を self-contained Canvas 作品として実装。アプリ一覧とホームの Apps 導線にも追加 | `npm run build`, `curl -I http://127.0.0.1:3000/apps/generative-art-with-math` |
+| 2026-04-15 | codex | generative art app | `/apps/generative-art-with-math` に GenerativeArtWithMath gallery を追加し、`Spiral Polygon` を Processing CLI で PNG 出力する sketch と Canvas live preview つきで実装。アプリ一覧とホームの Apps 導線にも追加 | `Processing cli --run`, `npm run build`, `curl -I http://127.0.0.1:3000/apps/generative-art-with-math` |
 | 2026-04-14 | codex | german app data | ドイツ語 seed に `See`, `Leiter`, `Band`, `Bank`, `Gehalt`, `Erbe`, `Kiefer`, `Schloss` の同音異義情報を追加・補正し、答え表示時だけ冠詞違い/同冠詞の別義を `同音異義` として出すようにした。seed は 1604 語、訳確認候補は 436 件に更新 | `node scripts/build-german-vocabulary.mjs`, `npm run audit:german-meanings`, `npm run build` |
 | 2026-04-14 | codex | german app data | ドイツ語訳のAI補助確認用に `npm run audit:german-meanings` を追加し、1593語から訳確認候補438件、高確度自動修正候補16件をCSV/JSONへ出力できるようにした | `npm run audit:german-meanings`, `npm run build` |
 | 2026-04-14 | codex | german app data | `einsteigen` の訳を機械翻訳由来の `入れ` から `乗り込む、乗車する` に補正し、翻訳補正ルールにも追加 | `node scripts/build-german-vocabulary.mjs`, `npm run build` |

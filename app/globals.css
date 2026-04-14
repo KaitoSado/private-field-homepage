@@ -6871,6 +6871,47 @@ textarea {
   font-size: 0.82rem;
 }
 
+.gen-art-processing-output {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.gen-art-processing-output img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(17, 19, 15, 0.22);
+  border-radius: 6px;
+  background: #fbfcf8;
+  box-shadow: 0 24px 54px rgba(17, 19, 15, 0.1);
+}
+
+.gen-art-processing-output figcaption,
+.gen-art-live-head span {
+  color: #5d665f;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0;
+}
+
+.gen-art-live-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(17, 19, 15, 0.12);
+}
+
+.gen-art-live-head p {
+  margin: 0;
+  color: #171913;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .gen-art-canvas-wrap {
   width: 100%;
   height: 620px;
@@ -6893,6 +6934,29 @@ textarea {
   border: 1px solid rgba(17, 19, 15, 0.18);
   border-radius: 6px;
   background: #ffffff;
+}
+
+.gen-art-source-card {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid rgba(17, 19, 15, 0.14);
+  border-radius: 6px;
+  background: #f8faf7;
+}
+
+.gen-art-source-card span {
+  color: #5d665f;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0;
+}
+
+.gen-art-source-card strong {
+  overflow-wrap: anywhere;
+  color: #171913;
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .gen-art-slider {
