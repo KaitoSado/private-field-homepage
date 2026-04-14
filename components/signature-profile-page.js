@@ -1054,25 +1054,37 @@ export function SignatureProfilePage({ profile, posts }) {
                       )}
                     </label>
 
-                    <div className="signature-day-hours">
-                      {DAY_HOURS.map((hour) => {
-                        const value = activeCalendarEntry.hours[hour.key] || "";
-                        return (
-                          <div key={hour.key} className={`signature-day-hour${value ? " has-entry" : ""}`}>
-                            <span className="signature-day-hour-time">{hour.label}</span>
-                            {isEditing ? (
-                              <input
-                                value={value}
-                                onChange={(event) => updateCalendarDayHour(selectedMonth, activeCalendarDay, hour.key, event.target.value)}
-                                maxLength={80}
-                                placeholder="予定"
-                              />
-                            ) : (
-                              <p>{value || "空き"}</p>
-                            )}
-                          </div>
-                        );
-                      })}
+                    <div className="signature-day-table-wrap">
+                      <table className="signature-day-table">
+                        <thead>
+                          <tr>
+                            <th scope="col">時間</th>
+                            <th scope="col">予定</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {DAY_HOURS.map((hour) => {
+                            const value = activeCalendarEntry.hours[hour.key] || "";
+                            return (
+                              <tr key={hour.key} className={value ? "has-entry" : ""}>
+                                <th scope="row">{hour.label}</th>
+                                <td>
+                                  {isEditing ? (
+                                    <input
+                                      value={value}
+                                      onChange={(event) => updateCalendarDayHour(selectedMonth, activeCalendarDay, hour.key, event.target.value)}
+                                      maxLength={80}
+                                      placeholder="予定"
+                                    />
+                                  ) : (
+                                    <p>{value || "空き"}</p>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 </div>

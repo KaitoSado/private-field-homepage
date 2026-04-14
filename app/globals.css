@@ -5506,10 +5506,10 @@ textarea {
 }
 
 .signature-day-note span,
-.signature-day-hour-time {
+.signature-day-table th {
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.7rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   color: #7b725d;
 }
 
@@ -5531,44 +5531,60 @@ textarea {
   line-height: 1.5;
 }
 
-.signature-day-hours {
-  display: grid;
+.signature-day-table-wrap {
   max-height: 520px;
   overflow: auto;
   border: 1px solid rgba(184, 154, 93, 0.12);
   background: rgba(255, 255, 255, 0.42);
 }
 
-.signature-day-hour {
-  display: grid;
-  grid-template-columns: 62px minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
+.signature-day-table {
+  width: 100%;
+  min-width: 340px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.signature-day-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(184, 154, 93, 0.14);
+  background: rgba(244, 239, 228, 0.96);
+  text-align: left;
+  color: #7b725d;
+}
+
+.signature-day-table th:first-child {
+  width: 72px;
+}
+
+.signature-day-table tbody th,
+.signature-day-table td {
   min-height: 42px;
-  padding: 6px 10px;
+  padding: 7px 10px;
   border-top: 1px solid rgba(184, 154, 93, 0.1);
+  vertical-align: middle;
 }
 
-.signature-day-hour:first-child {
-  border-top: 0;
-}
-
-.signature-day-hour.has-entry {
+.signature-day-table tbody tr.has-entry {
   background: rgba(31, 111, 120, 0.07);
 }
 
-.signature-day-hour p {
+.signature-day-table p {
   margin: 0;
   color: #22313a;
   line-height: 1.45;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.signature-day-hour:not(.has-entry) p {
+.signature-day-table tbody tr:not(.has-entry) p {
   color: #9a978f;
 }
 
-.signature-day-hour input {
+.signature-day-table input {
   width: 100%;
   min-height: 30px;
   border: 0;
@@ -5581,7 +5597,7 @@ textarea {
   padding: 0;
 }
 
-.signature-day-hour input:focus,
+.signature-day-table input:focus,
 .signature-day-note textarea:focus {
   outline: none;
   border-color: rgba(31, 111, 120, 0.44);
