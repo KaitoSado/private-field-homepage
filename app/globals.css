@@ -6895,6 +6895,17 @@ textarea {
   letter-spacing: 0;
 }
 
+.gen-art-processing-output figcaption,
+.gen-art-credit {
+  display: grid;
+  gap: 4px;
+}
+
+.gen-art-credit {
+  padding-top: 2px;
+  color: #343b36;
+}
+
 .gen-art-live-head {
   display: flex;
   flex-wrap: wrap;
@@ -6957,6 +6968,14 @@ textarea {
   color: #171913;
   font-size: 0.8rem;
   line-height: 1.35;
+}
+
+.gen-art-credit-card {
+  border-left: 4px solid #e2b642;
+}
+
+.gen-art-credit-card strong {
+  font-size: 0.74rem;
 }
 
 .gen-art-slider {

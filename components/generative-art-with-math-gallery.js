@@ -27,6 +27,12 @@ const galleryItems = [
   }
 ];
 
+const spiralPolygonCredits = [
+  "Created by Kaito Sado.",
+  "Based on GenerativeArtWithMath-p5.js Samples by Tetsunori NAKAYAMA, MIT License.",
+  'Inspired by "Generative Art with Math" by Tatsuki HAYAMA.'
+];
+
 function pointOnFermat(angle, width, height, scale) {
   const radius = 20 * Math.sqrt(Math.max(0, angle)) * scale;
 
@@ -394,7 +400,12 @@ export function GenerativeArtWithMathGallery() {
               alt="Processing render of Spiral Polygon"
             />
             <figcaption>
-              Generated with Processing CLI from scripts/processing/SpiralPolygonRender.
+              <span>Generated with Processing CLI from scripts/processing/SpiralPolygonRender.</span>
+              <span className="gen-art-credit">
+                {spiralPolygonCredits.map((credit) => (
+                  <span key={credit}>{credit}</span>
+                ))}
+              </span>
             </figcaption>
           </figure>
 
@@ -416,6 +427,13 @@ export function GenerativeArtWithMathGallery() {
           <div className="gen-art-source-card">
             <span>Sketch</span>
             <strong>scripts/processing/SpiralPolygonRender</strong>
+          </div>
+
+          <div className="gen-art-source-card gen-art-credit-card">
+            <span>Credits</span>
+            {spiralPolygonCredits.map((credit) => (
+              <strong key={credit}>{credit}</strong>
+            ))}
           </div>
 
           <label className="gen-art-slider">

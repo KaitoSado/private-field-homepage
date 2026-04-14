@@ -86,6 +86,7 @@
   - GenerativeArtWithMath `/apps/generative-art-with-math`
     - `GenerativeArtWithMath/` フォルダを参照元に、数学ベースの生成作品を並べる gallery として実装する
     - 初期作品は `Spiral Polygon` で、`scripts/processing/SpiralPolygonRender/SpiralPolygonRender.pde` を Processing CLI で PNG 出力し、Web では Processing output と Canvas live preview を並べる
+    - `Spiral Polygon` は `Created by Kaito Sado.` / `Based on GenerativeArtWithMath-p5.js Samples by Tetsunori NAKAYAMA, MIT License.` / `Inspired by "Generative Art with Math" by Tatsuki HAYAMA.` のクレジットを表示する
   - 英語コンテンツ `/apps/english`
     - `English Chunks Lab` として、単語暗記カードを主役にしつつ、チャンク中心、高制約文脈、シャドーイング、多文脈レビューを持つ client-side 英語学習 app
     - 進捗はログイン時に Supabase `english_progress` と同期し、未ログイン時または live schema 未適用時は `localStorage` に退避する
