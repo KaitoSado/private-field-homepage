@@ -65,6 +65,14 @@ const appCards = [
     tags: ["賽の河原", "テトリス", "ブロック崩し"]
   },
   {
+    title: "GenerativeArtWithMath",
+    body: "フェルマーらせん、ベジェ、対称性で育つ数学ジェネラティブアート。",
+    href: "/apps/generative-art-with-math",
+    emoji: "🌀",
+    accent: "is-sky",
+    tags: ["Spiral Polygon", "Fermat", "Bezier"]
+  },
+  {
     title: "物理コンテンツ",
     body: "放物、衝突、単振動、理想気体、波、相対論、量子までを、現象 -> 式 -> 理論で往復する Physics Playground。",
     href: "/apps/physics",

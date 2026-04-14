@@ -136,3 +136,9 @@
 - `der See` と `die See` のように冠詞で意味が分かれる語は、同じ見出しでも seed 上は別 entry として持つ
 - `die Bank / Bänke` と `die Bank / Banken` や `das Schloss` のように冠詞だけでは区別できない語は、答え表示時に `冠詞同じ` の注意を出す
 - 暗記画面はシンプルに保ち、同音異義の注意は答え表示後だけ見せる
+
+### 22. GenerativeArtWithMath は self-contained canvas へ移植する
+
+- 参照元フォルダの p5.js sketches は CDN 依存を含むため、公開 app 側では外部 script を読まず React client component + Canvas 2D で移植する
+- `/apps/generative-art-with-math` は作品ごとの gallery とし、最初は `Spiral Polygon` を大きな作業面として見せる
+- 元 sketch の数理構造は残しつつ、New Commune の Apps 導線に合わせて pause / reset / export / parameter controls を持つ

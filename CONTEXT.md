@@ -83,6 +83,9 @@
     - `Physics Playground` として、操作・可視化・数式・理論マップを往復する client-side 物理 app
     - `Sandbox / Guided Lab / Math Link / Theory Map` を上位モードに持つ
     - 現在は `放物運動`, `衝突と運動量保存`, `単振動`, `理想気体`, `波の反射・屈折`, `ローレンツ変換`, `1D量子井戸` の 7 scene を実装
+  - GenerativeArtWithMath `/apps/generative-art-with-math`
+    - `GenerativeArtWithMath/` フォルダを参照元に、数学ベースの生成作品を並べる client-side canvas gallery として実装する
+    - 初期作品は `Spiral Polygon` で、Ch16 SpiralPolygon と ProcessingSketches の SpiralPolygonBezierLite をもとに、フェルマーらせん軸と回転対称の高次ベジェ曲線を描く
   - 英語コンテンツ `/apps/english`
     - `English Chunks Lab` として、単語暗記カードを主役にしつつ、チャンク中心、高制約文脈、シャドーイング、多文脈レビューを持つ client-side 英語学習 app
     - 進捗はログイン時に Supabase `english_progress` と同期し、未ログイン時または live schema 未適用時は `localStorage` に退避する

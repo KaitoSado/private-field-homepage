@@ -9,6 +9,7 @@ const plannedApps = [
   { name: "深夜徘徊界隈", href: "/apps/night", tag: "social" },
   { name: "Games", href: "/apps/games", tag: "play" },
   { name: "数学コンテンツ", href: "/apps/math", tag: "study" },
+  { name: "GenerativeArtWithMath", href: "/apps/generative-art-with-math", tag: "create" },
   { name: "物理コンテンツ", href: "/apps/physics", tag: "study" },
   { name: "英語コンテンツ", href: "/apps/english", tag: "study" },
   { name: "ドイツ語コンテンツ", href: "/apps/german", tag: "study" },
