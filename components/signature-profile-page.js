@@ -63,6 +63,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const [expandedCurrentEntries, setExpandedCurrentEntries] = useState({});
   const [expandedRecordItems, setExpandedRecordItems] = useState({});
   const [showCalendar, setShowCalendar] = useState(false);
+  const [calendarMode, setCalendarMode] = useState("month");
   const [selectedMonth, setSelectedMonth] = useState(() => new Date().getMonth() + 1);
   const [selectedCalendarDay, setSelectedCalendarDay] = useState(() => new Date().getDate());
   const [showAllCurrentEntries, setShowAllCurrentEntries] = useState(false);
@@ -209,6 +210,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const monthlyCalendar = mergeMonthlyCalendar(draft.monthly_calendar);
   const calendarYear = new Date().getFullYear();
   const selectedMonthDayCount = new Date(calendarYear, selectedMonth, 0).getDate();
+  const selectedMonthDays = Array.from({ length: selectedMonthDayCount }, (_, i) => i + 1);
   const activeCalendarDay = Math.min(selectedCalendarDay, selectedMonthDayCount);
   const activeCalendarEntry = getCalendarDayEntry(monthlyCalendar, selectedMonth, activeCalendarDay);
   const recordItems = mergeRecordItems(draft.record_items, buildDefaultRecordItems());
@@ -949,7 +951,14 @@ export function SignatureProfilePage({ profile, posts }) {
                 <button
                   type="button"
                   className="signature-calendar-toggle"
-                  onClick={() => setShowCalendar((c) => !c)}
+                  onClick={() => {
+                    if (showCalendar) {
+                      setShowCalendar(false);
+                    } else {
+                      setShowCalendar(true);
+                      setCalendarMode("month");
+                    }
+                  }}
                 >
                   {showCalendar ? "週間に戻す" : "カレンダー"}
                 </button>
@@ -981,14 +990,18 @@ export function SignatureProfilePage({ profile, posts }) {
                       key={m}
                       type="button"
                       className={`signature-calendar-month-chip${selectedMonth === m ? " active" : ""}`}
-                      onClick={() => setSelectedMonth(m)}
+                      onClick={() => {
+                        setSelectedMonth(m);
+                        setSelectedCalendarDay((day) => Math.min(day, new Date(calendarYear, m, 0).getDate()));
+                      }}
                     >
                       {m}月
                     </button>
                   ))}
                 </div>
-                <p className="signature-calendar-year">{calendarYear}年 {selectedMonth}月</p>
-                <div className="signature-calendar-detail-grid">
+                {calendarMode === "month" ? (
+                  <>
+                    <p className="signature-calendar-year">{calendarYear}年 {selectedMonth}月</p>
                   <div className="signature-calendar-grid">
                     <div className="signature-calendar-weekdays">
                       {["月", "火", "水", "木", "金", "土", "日"].map((d) => (
@@ -1010,7 +1023,10 @@ export function SignatureProfilePage({ profile, posts }) {
                             key={cell.day}
                             type="button"
                             className={`signature-calendar-day${calendarEntryHasContent(dayEntry) ? " has-entry" : ""}${isSelectedDay ? " is-selected" : ""}`}
-                            onClick={() => setSelectedCalendarDay(cell.day)}
+                            onClick={() => {
+                              setSelectedCalendarDay(cell.day);
+                              setCalendarMode("day");
+                            }}
                           >
                             <span className="signature-calendar-day-num">{cell.day}</span>
                             {preview ? (
@@ -1023,9 +1039,17 @@ export function SignatureProfilePage({ profile, posts }) {
                       })}
                     </div>
                   </div>
-
-                  <div className="signature-day-panel">
+                  </>
+                ) : (
+                  <div className="signature-day-view">
                     <div className="signature-day-panel-head">
+                      <button
+                        type="button"
+                        className="signature-calendar-back"
+                        onClick={() => setCalendarMode("month")}
+                      >
+                        カレンダー
+                      </button>
                       <div>
                         <p className="signature-schedule-note-label">24 hour</p>
                         <h4>{selectedMonth}月{activeCalendarDay}日</h4>
@@ -1037,6 +1061,24 @@ export function SignatureProfilePage({ profile, posts }) {
                       )}
                     </div>
 
+                    <div className="signature-day-strip" aria-label={`${selectedMonth}月の日付`}>
+                      {selectedMonthDays.map((day) => {
+                        const dayEntry = getCalendarDayEntry(monthlyCalendar, selectedMonth, day);
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            className={`signature-day-strip-chip${day === activeCalendarDay ? " active" : ""}${calendarEntryHasContent(dayEntry) ? " has-entry" : ""}`}
+                            onClick={() => setSelectedCalendarDay(day)}
+                          >
+                            <span>{day}</span>
+                            <small>日</small>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="signature-day-panel">
                     <label className="signature-day-note">
                       <span>日メモ</span>
                       {isEditing ? (
@@ -1088,6 +1130,7 @@ export function SignatureProfilePage({ profile, posts }) {
                     </div>
                   </div>
                 </div>
+                )}
               </div>
             ) : (
               <div className="signature-schedule-wrap">

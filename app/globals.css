@@ -5360,13 +5360,6 @@ textarea {
   gap: 0;
 }
 
-.signature-calendar-detail-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.42fr);
-  gap: 14px;
-  align-items: start;
-}
-
 .signature-calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
@@ -5459,6 +5452,11 @@ textarea {
   outline: none;
 }
 
+.signature-day-view {
+  display: grid;
+  gap: 12px;
+}
+
 .signature-day-panel {
   display: grid;
   gap: 12px;
@@ -5468,16 +5466,36 @@ textarea {
 }
 
 .signature-day-panel-head {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 12px;
-  align-items: start;
+  align-items: center;
 }
 
 .signature-day-panel-head h4 {
   margin: 2px 0 0;
   font-size: 1.2rem;
   line-height: 1.12;
+}
+
+.signature-calendar-back {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border: 1px solid rgba(34, 49, 58, 0.2);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #22313a;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.signature-calendar-back:hover {
+  border-color: #22313a;
 }
 
 .signature-status-chip {
@@ -5498,6 +5516,60 @@ textarea {
   border-color: rgba(184, 154, 93, 0.14);
   background: rgba(255, 255, 255, 0.54);
   color: #7b725d;
+}
+
+.signature-day-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 2px 0 8px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.signature-day-strip-chip {
+  position: relative;
+  flex: 0 0 52px;
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  gap: 1px;
+  border: 1px solid rgba(184, 154, 93, 0.16);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.62);
+  color: #657075;
+  font: inherit;
+  cursor: pointer;
+  scroll-snap-align: start;
+}
+
+.signature-day-strip-chip span {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.88rem;
+  line-height: 1;
+}
+
+.signature-day-strip-chip small {
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.signature-day-strip-chip.has-entry::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #1f6f78;
+}
+
+.signature-day-strip-chip:hover,
+.signature-day-strip-chip.active {
+  border-color: #22313a;
+  background: #22313a;
+  color: #fff;
 }
 
 .signature-day-note {
@@ -5604,12 +5676,16 @@ textarea {
 }
 
 @media (max-width: 900px) {
-  .signature-calendar-detail-grid {
-    grid-template-columns: 1fr;
-  }
   .signature-calendar-days,
   .signature-calendar-weekdays {
     grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+  .signature-day-panel-head {
+    grid-template-columns: 1fr auto;
+  }
+  .signature-calendar-back {
+    grid-column: 1 / -1;
+    justify-self: start;
   }
   .signature-calendar-day {
     min-height: 52px;
