@@ -18,13 +18,6 @@ const INITIAL_SETTINGS = {
   tempo: 1
 };
 
-const galleryItems = [
-  {
-    id: "spiral-polygon",
-    title: "Spiral Polygon"
-  }
-];
-
 const spiralPolygonCredits = [
   "Created by Kaito Sado.",
   "Based on GenerativeArtWithMath-p5.js Samples by Tetsunori NAKAYAMA, MIT License.",
@@ -349,31 +342,14 @@ export function GenerativeArtWithMathGallery() {
     <section className="gen-art-shell">
       <header className="gen-art-hero">
         <div>
-          <h1>GenerativeArtWithMath</h1>
+          <h1>Spiral Polygon</h1>
+          <p className="gen-art-hero-sub">Fermat spiral × rotational symmetry</p>
         </div>
       </header>
 
       <div className="gen-art-layout">
-        <aside className="gen-art-gallery" aria-label="GenerativeArtWithMath gallery">
-          <p className="gen-art-section-label">Gallery</p>
-          {galleryItems.map((item) => (
-            <button key={item.id} type="button" className="gen-art-piece is-active">
-              <span className="gen-art-piece-thumb" aria-hidden="true">
-                <span />
-              </span>
-              <span className="gen-art-piece-copy">
-                <strong>{item.title}</strong>
-              </span>
-            </button>
-          ))}
-        </aside>
-
-        <article className="gen-art-stage" aria-label="Spiral Polygon Processing output and canvas preview">
+        <article className="gen-art-stage" aria-label="Spiral Polygon interactive canvas">
           <div className="gen-art-stage-head">
-            <div>
-              <p>Processing Output</p>
-              <h2>SpiralPolygonRender.pde</h2>
-            </div>
             <div className="gen-art-action-row">
               <button type="button" className="button button-secondary gen-art-button" onClick={() => setIsPlaying((current) => !current)}>
                 {isPlaying ? "Pause" : "Play"}
@@ -382,53 +358,17 @@ export function GenerativeArtWithMathGallery() {
                 Reset
               </button>
               <button type="button" className="button button-primary gen-art-button" onClick={exportArtwork}>
-                Export Live PNG
+                Export PNG
               </button>
             </div>
           </div>
 
-          <figure className="gen-art-processing-output">
-            <img
-              src="/generative-art-with-math/spiral-polygon/spiral-polygon-processing.png"
-              alt="Processing render of Spiral Polygon"
-            />
-            <figcaption>
-              <span>Generated with Processing CLI from scripts/processing/SpiralPolygonRender.</span>
-              <span className="gen-art-credit">
-                {spiralPolygonCredits.map((credit) => (
-                  <span key={credit}>{credit}</span>
-                ))}
-              </span>
-            </figcaption>
-          </figure>
-
-          <div className="gen-art-live-head">
-            <p>Live Preview</p>
-            <span>Canvas 2D port for parameter play</span>
-          </div>
           <div ref={stageRef} className="gen-art-canvas-wrap">
             <canvas ref={canvasRef} className="gen-art-canvas" aria-label="Animated Spiral Polygon artwork" />
           </div>
         </article>
 
         <aside className="gen-art-controls" aria-label="Spiral Polygon controls">
-          <div className="gen-art-controls-head">
-            <p>Processing Source</p>
-            <h2>Spiral Polygon</h2>
-          </div>
-
-          <div className="gen-art-source-card">
-            <span>Sketch</span>
-            <strong>scripts/processing/SpiralPolygonRender</strong>
-          </div>
-
-          <div className="gen-art-source-card gen-art-credit-card">
-            <span>Credits</span>
-            {spiralPolygonCredits.map((credit) => (
-              <strong key={credit}>{credit}</strong>
-            ))}
-          </div>
-
           <label className="gen-art-slider">
             <span>
               Symmetry
@@ -472,24 +412,11 @@ export function GenerativeArtWithMathGallery() {
             />
           </label>
 
-          <div className="gen-art-stat-grid">
-            <div>
-              <span>Runtime</span>
-              <strong>Processing 4</strong>
-            </div>
-            <div>
-              <span>Curve</span>
-              <strong>Bezier</strong>
-            </div>
-            <div>
-              <span>Points</span>
-              <strong>{CONTROL_POINT_NUM}</strong>
-            </div>
-            <div>
-              <span>Segments</span>
-              <strong>{BEZIER_SEGMENTS}</strong>
-            </div>
-          </div>
+          <p className="gen-art-credits-line">
+            {spiralPolygonCredits.map((credit, i) => (
+              <span key={i}>{credit}</span>
+            ))}
+          </p>
         </aside>
       </div>
     </section>
