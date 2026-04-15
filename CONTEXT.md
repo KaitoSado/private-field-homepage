@@ -108,7 +108,9 @@
     - UI 上の `見直しリスト` は日時を見せず、間違えた単語一覧と現在ステージを中心に見直せる
     - 語彙セット切り替えとして `大学受験みそ` と `英単語ガチ勢界隈` を持つ
     - `英単語ガチ勢界隈` は `scripts/build-english-hardcore-vocabulary.mjs` で `ukaru-eigo.com` と `ejquotes.com` の指定ページをスクレイピングし、`英単語/hardcore_scraped_normalized.tsv` と `lib/english-hardcore.js` に正規化する
-    - `英単語ガチ勢界隈` は 9 つの単語帳/熟語帳ページから 16386 行を取り込み、同じ見出し語・熟語の重複をまとめた 9179 出題カードとして扱う。意味差分は同じカードの意味へ追記する
+    - `英単語ガチ勢界隈` は 9 つの単語帳/熟語帳ページから 16386 行を取り込み、同じ見出し語・熟語の重複をまとめた 9179 出題カードとして扱う
+    - `英単語ガチ勢界隈` のカード表面に出す `meaning` は 1 語 1 主訳を優先し、`/` や `・` を極力出さない。元の複数訳は `meaningRaw`、補足訳は `meaningAlternates`、語感メモは `nuance` に退避する
+    - `英単語/hardcore_meaning_overrides.tsv` で `reception` などの多義語の主訳を手動補正し、`npm run audit:english-hardcore-meanings` で低信頼・多義語を `英単語/hardcore_meaning_review_candidates.csv` に抽出できる
   - ドイツ語コンテンツ `/apps/german`
     - `ドイツ単語帳抜き出しフォルダ/ドイツ単語_app_seed.json` を正本 seed とし、`scripts/build-german-vocabulary.mjs` で `lib/german-vocabulary.js` を生成して読む
     - 現在のドイツ語 seed は 1604 語で、`meaning_ja` は全件 machine translated draft または手動補正として補完済み。例文はまだ未登録

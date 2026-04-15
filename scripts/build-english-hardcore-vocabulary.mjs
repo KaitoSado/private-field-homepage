@@ -89,12 +89,57 @@ const explicitPosPattern = /(?:[\[［【](名|自|他|動|形|副|前|接|代|�
 
 const outputPath = resolve("lib/english-hardcore.js");
 const tsvOutputPath = resolve("英単語/hardcore_scraped_normalized.tsv");
+const meaningOverridePath = resolve("英単語/hardcore_meaning_overrides.tsv");
 const cacheDir = getArgValue("--cache-dir");
+const VERB_ENDING_PATTERN = /(?:する|される|させる|できる|なる|ある|いる|う|く|ぐ|す|つ|ぬ|ぶ|む|る|れる|える|ける|げる|める)$/;
 
 function getArgValue(name) {
   const index = process.argv.indexOf(name);
   if (index === -1) return "";
   return process.argv[index + 1] || "";
+}
+
+function getOverrideKey(word, pos = "") {
+  return `${normalizeWordKey(word)}::${String(pos || "").trim()}`;
+}
+
+function splitOverrideList(value) {
+  return String(value || "")
+    .split(/\s*(?:\/|\|)\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function readMeaningOverrides() {
+  if (!existsSync(meaningOverridePath)) return new Map();
+
+  const text = readFileSync(meaningOverridePath, "utf8").trim();
+  if (!text) return new Map();
+
+  const [headerLine, ...lines] = text.split(/\r?\n/).filter(Boolean);
+  const headers = headerLine.split("\t").map((header) => header.trim());
+  const overrides = new Map();
+
+  for (const line of lines) {
+    const columns = line.split("\t");
+    const row = Object.fromEntries(headers.map((header, index) => [header, String(columns[index] || "").trim()]));
+    if (!row.word || !row.meaning) continue;
+
+    overrides.set(getOverrideKey(row.word, row.pos), {
+      word: normalizeWord(row.word),
+      pos: row.pos,
+      meaning: row.meaning,
+      altMeanings: splitOverrideList(row.altMeanings),
+      core: row.core,
+      note: row.note
+    });
+  }
+
+  return overrides;
+}
+
+function findMeaningOverride(overrides, word, pos) {
+  return overrides.get(getOverrideKey(word, pos)) || overrides.get(getOverrideKey(word));
 }
 
 async function readSourceHtml(source) {
@@ -285,7 +330,250 @@ function mergeMeaningSet(parts) {
   return merged.join(" / ");
 }
 
-function toEntry(record, order, usedSlugs) {
+function normalizeMeaningKey(value) {
+  return value
+    .replace(/[、，,・/／\s]/g, "")
+    .replace(/[（）()［］\[\]〔〕]/g, "")
+    .replace(/[〜～~…]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function splitMeaningSegments(part) {
+  return part
+    .replace(/[（(][^）)]*[）)]/g, " ")
+    .replace(/[［【\[][^\]］】]*[\]］】]/g, " ")
+    .replace(/[／]/g, "/")
+    .replace(/[；;]/g, "/")
+    .replace(/([）)])\s+(?=[（(])/g, "$1 / ")
+    .replace(/\s{2,}/g, " / ")
+    .split(/\s*\/\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function splitSegmentByCommasAndSpaces(segment) {
+  const sanitized = segment
+    .replace(/[（(][^）)]*[）)]/g, " ")
+    .replace(/[［【\[][^\]］】]*[\]］】]/g, " ");
+
+  return sanitized
+    .split(/\s*[、，,]\s*/)
+    .flatMap((item) => {
+      const trimmed = item.trim();
+      if (!trimmed) return [];
+      const words = trimmed.split(/\s+/).filter(Boolean);
+      return words.length >= 2 && words.length <= 4 ? words : [trimmed];
+    })
+    .filter(Boolean);
+}
+
+function simplifyMeaningCandidate(segment, pos) {
+  let candidate = segment
+    .replace(/〔[^〕]*〕/g, " ")
+    .replace(/[〈〉《》]/g, " ")
+    .replace(/[［【\[][^\]］】]*[\]］】]/g, " ")
+    .replace(/[（(][^）)]*[）)]/g, " ")
+    .replace(/\b(?:for|with|in|on|as|to|about|against|of|into|from|be|one's|oneself|someone|something|A|B)\b/gi, " ")
+    .replace(/[~〜～…]/g, " ")
+    .replace(/^(?:主に|特に|一般に|単に|主として)/, "")
+    .replace(/(?:の)?(?:状態|状況)$/g, "")
+    .replace(/^[\-・]+|[\-・]+$/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  candidate = candidate
+    .replace(/^(?:を|に|が|と|へ|で|から|より|まで|として|について|に対して|にとって)+/g, "")
+    .replace(/^(?:～|〜|~|…)+/g, "")
+    .replace(/^[・、，,]+|[・、，,]+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return candidate.trim();
+}
+
+function isValidMeaningCandidate(candidate, pos) {
+  if (!candidate) return false;
+  if (candidate.length > 18) return false;
+  if (/[A-Za-z0-9]/.test(candidate)) return false;
+  if (/^(?:こと|もの|人|状態|状況|など|主に|特に)$/.test(candidate)) return false;
+
+  if (pos === "noun" && VERB_ENDING_PATTERN.test(candidate)) return false;
+  if ((pos === "verb" || pos === "phrase") && !VERB_ENDING_PATTERN.test(candidate)) return false;
+
+  return true;
+}
+
+function scoreMeaningCandidate(stat, pos) {
+  let score = stat.count * 12;
+
+  if (stat.meaning.length <= 6) score += 6;
+  else if (stat.meaning.length <= 10) score += 2;
+  else score -= 2;
+
+  if (/[・、，,/\s]/.test(stat.meaning)) score -= 4;
+  if (/^(?:こと|もの|人)/.test(stat.meaning)) score -= 8;
+  if (/(?:状態|状況|重要性)$/.test(stat.meaning)) score -= 4;
+  if (pos === "verb" && /する$/.test(stat.meaning)) score += 2;
+  if (pos === "noun" && !VERB_ENDING_PATTERN.test(stat.meaning)) score += 2;
+
+  score -= stat.firstSeen * 0.01;
+  return score;
+}
+
+function collectMeaningCandidates(parts, pos) {
+  const stats = new Map();
+  let serial = 0;
+
+  for (const part of parts) {
+    const localSeen = new Set();
+
+    for (const segment of splitMeaningSegments(part)) {
+      for (const item of splitSegmentByCommasAndSpaces(segment)) {
+        const candidate = simplifyMeaningCandidate(item, pos);
+        const key = normalizeMeaningKey(candidate);
+
+        if (!candidate || localSeen.has(key) || !isValidMeaningCandidate(candidate, pos)) continue;
+        localSeen.add(key);
+
+        const current = stats.get(key) || {
+          meaning: candidate,
+          count: 0,
+          firstSeen: serial
+        };
+
+        current.count += 1;
+        stats.set(key, current);
+        serial += 1;
+      }
+    }
+  }
+
+  return [...stats.values()]
+    .map((stat) => ({ ...stat, score: scoreMeaningCandidate(stat, pos) }))
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score;
+      if (right.count !== left.count) return right.count - left.count;
+      if (left.firstSeen !== right.firstSeen) return left.firstSeen - right.firstSeen;
+      return left.meaning.length - right.meaning.length;
+    });
+}
+
+function clamp01(value) {
+  return Math.max(0, Math.min(1, value));
+}
+
+function fallbackPrimaryMeaning(rawMeaning, pos) {
+  const firstSegment = splitMeaningSegments(rawMeaning)[0] || rawMeaning;
+  const firstCandidate = splitSegmentByCommasAndSpaces(firstSegment)[0] || firstSegment;
+  const simplified = simplifyMeaningCandidate(firstCandidate, pos);
+  return simplified || cleanMeaning(firstSegment) || rawMeaning;
+}
+
+function buildMeaningSummary(record, pos, overrides) {
+  const rawMeaning = mergeMeaningSet(record.meaningParts);
+  const override = findMeaningOverride(overrides, record.word, pos);
+
+  if (override) {
+    return {
+      meaning: override.meaning,
+      altMeanings: override.altMeanings,
+      coreMeaning: override.core,
+      note: override.note,
+      rawMeaning,
+      confidence: 1,
+      source: "override",
+      topScore: 999,
+      candidateCount: 1
+    };
+  }
+
+  const candidates = collectMeaningCandidates(record.meaningParts, pos);
+  if (!candidates.length) {
+    return {
+      meaning: fallbackPrimaryMeaning(rawMeaning, pos),
+      altMeanings: [],
+      coreMeaning: "",
+      note: "",
+      rawMeaning,
+      confidence: 0.2,
+      source: "fallback",
+      topScore: 0,
+      candidateCount: 0
+    };
+  }
+
+  const primary = candidates[0];
+  const secondary = candidates
+    .slice(1)
+    .filter((candidate) => candidate.score >= 8)
+    .map((candidate) => candidate.meaning)
+    .filter((meaning, index, list) => list.indexOf(meaning) === index)
+    .slice(0, 3);
+
+  const separation = primary.score - (candidates[1]?.score || 0);
+  const confidence = clamp01(0.35 + primary.count * 0.1 + separation * 0.03 - Math.max(0, secondary.length - 1) * 0.05);
+
+  return {
+    meaning: primary.meaning,
+    altMeanings: secondary,
+    coreMeaning: "",
+    note: "",
+    rawMeaning,
+    confidence,
+    source: "heuristic",
+    topScore: primary.score,
+    candidateCount: candidates.length
+  };
+}
+
+function maybeResolveBetterPos(record, resolvedPos, currentSummary, overrides) {
+  const posCandidates = ["verb", "noun", "adjective", "adverb", "phrase", "other"];
+  const shouldInspectAlternatives =
+    currentSummary.source === "fallback" ||
+    (!record.explicitPosVotes.size && currentSummary.topScore < 12);
+
+  if (!shouldInspectAlternatives) {
+    return { pos: resolvedPos, summary: currentSummary };
+  }
+
+  let best = { pos: resolvedPos, summary: currentSummary };
+
+  for (const pos of posCandidates) {
+    if (pos === resolvedPos) continue;
+    const summary = buildMeaningSummary(record, pos, overrides);
+
+    if (summary.topScore > best.summary.topScore + 4) {
+      best = { pos, summary };
+    }
+  }
+
+  return best;
+}
+
+function buildNuanceText(word, summary) {
+  const parts = [];
+
+  if (summary.coreMeaning) parts.push(`核: ${summary.coreMeaning}`);
+  if (summary.altMeanings.length) parts.push(`別義: ${summary.altMeanings.join(" / ")}`);
+  if (summary.note) parts.push(summary.note);
+
+  return parts.join(" / ") || `${word} は「${summary.meaning}」。`;
+}
+
+function buildGrammarNote(pos, sourceLabels, summary) {
+  const parts = [`品詞: ${posLabel(pos)}`, `出典: ${sourceLabels.join(", ")}`];
+
+  if (summary.source === "override") {
+    parts.push("訳: curated");
+  } else if (summary.altMeanings.length) {
+    parts.push(`別義: ${summary.altMeanings.join(" / ")}`);
+  }
+
+  return parts.join(" / ");
+}
+
+function toEntry(record, order, usedSlugs, overrides) {
   const slugBase = slugify(record.word) || `entry-${order}`;
   let slug = slugBase;
   let counter = 2;
@@ -295,24 +583,30 @@ function toEntry(record, order, usedSlugs) {
   }
   usedSlugs.add(slug);
 
-  const pos = resolvePos(record.explicitPosVotes, record.posVotes);
-  const meaning = mergeMeaningSet(record.meaningParts);
+  const resolvedPos = resolvePos(record.explicitPosVotes, record.posVotes);
+  const initialSummary = buildMeaningSummary(record, resolvedPos, overrides);
+  const { pos, summary: meaningSummary } = maybeResolveBetterPos(record, resolvedPos, initialSummary, overrides);
   const sourceLabels = [...record.sources].map((sourceId) => SOURCES.find((source) => source.id === sourceId)?.label || sourceId);
 
   return {
     id: `hardcore-${slug}`,
     headword: record.word,
     coreChunk: record.word,
-    meaning,
-    nuance: `${record.word} は「${meaning}」。`,
-    grammarNote: `品詞: ${posLabel(pos)} / 出典: ${sourceLabels.join(", ")}`,
+    meaning: meaningSummary.meaning,
+    meaningAlternates: meaningSummary.altMeanings,
+    meaningRaw: meaningSummary.rawMeaning,
+    meaningCore: meaningSummary.coreMeaning,
+    meaningConfidence: meaningSummary.confidence,
+    meaningSource: meaningSummary.source,
+    nuance: buildNuanceText(record.word, meaningSummary),
+    grammarNote: buildGrammarNote(pos, sourceLabels, meaningSummary),
     relatedChunks: [],
     starterExamples: [
       {
         topic: "all",
         text: record.word,
         cloze: record.word,
-        ja: meaning
+        ja: meaningSummary.meaning
       }
     ],
     diverseExamples: [],
@@ -326,11 +620,14 @@ function toEntry(record, order, usedSlugs) {
 }
 
 function toTsv(entries) {
-  const header = ["id", "word", "answerJa", "family", "pos", "unit", "order", "sources"];
+  const header = ["id", "word", "answerJa", "altMeanings", "rawMeaning", "confidence", "family", "pos", "unit", "order", "sources"];
   const rows = entries.map((entry) => [
     entry.id,
     entry.headword,
     entry.meaning,
+    entry.meaningAlternates.join(" / "),
+    entry.meaningRaw,
+    String(entry.meaningConfidence),
     entry.family,
     entry.pos,
     entry.unit,
@@ -344,6 +641,7 @@ function toTsv(entries) {
 async function main() {
   const byWord = new Map();
   let rawCount = 0;
+  const overrides = readMeaningOverrides();
 
   for (const source of SOURCES) {
     const html = await readSourceHtml(source);
@@ -381,7 +679,7 @@ async function main() {
   }
 
   const usedSlugs = new Set();
-  const entries = [...byWord.values()].map((record, index) => toEntry(record, index + 1, usedSlugs));
+  const entries = [...byWord.values()].map((record, index) => toEntry(record, index + 1, usedSlugs, overrides));
 
   writeFileSync(tsvOutputPath, toTsv(entries), "utf8");
   writeFileSync(

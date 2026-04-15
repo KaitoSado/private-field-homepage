@@ -8,6 +8,7 @@
     "start": "next start",
     "test": "node --experimental-default-type=module --test tests/*.mjs",
     "build:english-hardcore": "node scripts/build-english-hardcore-vocabulary.mjs",
+    "audit:english-hardcore-meanings": "node scripts/audit-english-hardcore-meanings.mjs",
     "preflight": "node scripts/preflight.mjs",
     "audit:german-meanings": "node scripts/audit-german-meanings.mjs",
     "harness:preflight": "node scripts/harness/preflight.mjs",

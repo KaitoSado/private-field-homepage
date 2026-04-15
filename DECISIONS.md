@@ -166,3 +166,10 @@
 - `GenerativeArtWithMath/` のような外部サンプル全体や、単独試作フォルダは local/reference source tree として扱う
 - repo に入れる時は、必要な成果物だけを `app/`, `components/`, `public/`, `scripts/`, `docs/` など既存の責務ディレクトリへ昇格させる
 - 設計メモとして継続利用するものは、`docs/` または専用の tracked 文書ディレクトリに整理してから残す
+
+### 26. 英単語ガチ勢界隈の主訳は 1 カード 1 表示に寄せる
+
+- 多義語をそのまま `/` や `・` で並べると暗記カードの視認性が崩れるため、カード表面の `meaning` は原則 1 つの主訳に絞る
+- 意味が遠い別義や文脈依存の訳は `meaningAlternates` と `nuance` に逃がし、スクレイプ元の生訳は `meaningRaw` に残して失わない
+- 一括ヒューリスティックで荒く整えつつ、`reception` のような重要な多義語は `英単語/hardcore_meaning_overrides.tsv` で手動補正する
+- 綺麗な 1 対 1 表示を保ちながら、監査用には `npm run audit:english-hardcore-meanings` で低信頼候補を継続抽出する
