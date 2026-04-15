@@ -15,7 +15,7 @@ const plannedApps = [
   { name: "ドイツ語コンテンツ", href: "/apps/german", tag: "study" },
   { name: "3Dモデル3Dグラフィック", href: "/apps/3d", tag: "create" },
   { name: "みんなで作るVR空間", href: "/apps/vr", tag: "create" },
-  { name: "教員を裁け！地獄の裏シラバス", href: "/apps/classes", tag: "social" },
+  { name: "教員裁判！地獄の裏シラバス", href: "/apps/classes", tag: "social" },
   { name: "ルームシェア", href: "/apps/roomshare", tag: "social" },
   { name: "カーシェア", href: "/apps/carshare", tag: "social" },
   { name: "マッチングアプリ", href: "/apps/matching", tag: "social" },

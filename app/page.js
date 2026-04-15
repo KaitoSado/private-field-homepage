@@ -24,7 +24,7 @@ const featureCards = [
 
 const appCards = [
   {
-    title: "教員を裁け！地獄の裏シラバス",
+    title: "教員裁判！地獄の裏シラバス",
     body: "授業レビュー、各種評価、判決メモ。",
     href: "/apps/classes",
     emoji: "⚖️",

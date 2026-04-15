@@ -398,7 +398,7 @@ export function ClassBoardPanel({ initialItems, initialCampuses, initialTerms })
     <div className="dashboard-layout">
       <section className="section-grid section-head class-board-hero">
         <div className="section-copy">
-          <h1 className="page-title">教員を裁け！地獄の裏シラバス</h1>
+          <h1 className="page-title">教員裁判！地獄の裏シラバス</h1>
         </div>
 
         <div className="class-board-hero-stats" aria-label="授業情報の集計">

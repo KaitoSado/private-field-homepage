@@ -2,7 +2,7 @@ import { ClassBoardPanel } from "@/components/class-board-panel";
 import { getClassBoardData } from "@/lib/data";
 
 export const metadata = {
-  title: "教員を裁け！地獄の裏シラバス | Apps | Commune",
+  title: "教員裁判！地獄の裏シラバス | Apps | Commune",
   description: "学部・大学院を問わず、授業ごとに反応を積み上げて教員を評価していく裏シラバス。"
 };
 
