@@ -13,6 +13,7 @@ import {
   createEmptyEnglishProgress,
   getEnglishProgressForId,
   getEnglishDisplayVariant,
+  getEnglishChunksForDeck,
   getEnglishFamilyMembers,
   getEnglishRecommendedChunkIds,
   getExamplesForFocus,
@@ -30,6 +31,7 @@ const ACTIVE_MODE_IDS = new Set(ENGLISH_MODE_TABS.map((tab) => tab.id));
 const ACTIVE_POS_IDS = new Set(ENGLISH_POS_OPTIONS.map((option) => option.id));
 const ACTIVE_DECK_IDS = new Set(ENGLISH_DECK_OPTIONS.filter((deck) => deck.status === "active").map((deck) => deck.id));
 const DEFAULT_DECK_ID = ENGLISH_DECK_OPTIONS.find((deck) => deck.status === "active")?.id || "basic";
+const DEFAULT_CHUNK_ID = getEnglishChunksForDeck(DEFAULT_DECK_ID)[0]?.id || ENGLISH_CHUNK_LIBRARY[0].id;
 const DEFAULT_QUESTION_SECONDS = 4;
 const DEFAULT_ANSWER_SECONDS = 5;
 const ENGLISH_REVIEW_PRESETS = [
@@ -58,7 +60,7 @@ export function EnglishChunksApp() {
   const [studyTimerPhase, setStudyTimerPhase] = useState("question");
   const [syncStatus, setSyncStatus] = useState("local");
   const [syncError, setSyncError] = useState("");
-  const [selectedChunkId, setSelectedChunkId] = useState(ENGLISH_CHUNK_LIBRARY[0].id);
+  const [selectedChunkId, setSelectedChunkId] = useState(DEFAULT_CHUNK_ID);
   const [sessionStep, setSessionStep] = useState(1);
   const [queueSeed, setQueueSeed] = useState(0);
   const [shadowPromptIndex, setShadowPromptIndex] = useState(0);
@@ -88,6 +90,8 @@ export function EnglishChunksApp() {
     () => ENGLISH_DECK_OPTIONS.find((deck) => deck.id === deckId) || ENGLISH_DECK_OPTIONS[0],
     [deckId]
   );
+  const activeDeckChunks = useMemo(() => getEnglishChunksForDeck(deckId), [deckId]);
+  const activeDeckChunkIds = useMemo(() => new Set(activeDeckChunks.map((chunk) => chunk.id)), [activeDeckChunks]);
   const storageKey = storageOwnerId ? `${STORAGE_BASE_KEY}:${storageOwnerId}` : "";
 
   useEffect(() => {
@@ -159,11 +163,11 @@ export function EnglishChunksApp() {
   useEffect(() => {
     if (hydrated && queueSeed === 0) {
       const nextSeed = Date.now();
-      const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { posFilter, seed: nextSeed });
+      const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId, posFilter, seed: nextSeed });
       setQueueSeed(nextSeed);
-      if (nextIds.length) setSelectedChunkId(nextIds[0]);
+      setSelectedChunkId(nextIds[0] || activeDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
     }
-  }, [focusTopic, hydrated, posFilter, progressMap, queueSeed]);
+  }, [activeDeckChunks, deckId, focusTopic, hydrated, posFilter, progressMap, queueSeed]);
 
   useEffect(() => {
     if (!hydrated || typeof window === "undefined" || !storageKey) return;
@@ -219,15 +223,17 @@ export function EnglishChunksApp() {
   }, []);
 
   const recommendedIds = useMemo(
-    () => getEnglishRecommendedChunkIds(progressMap, focusTopic, { posFilter, seed: queueSeed }),
-    [focusTopic, posFilter, progressMap, queueSeed]
+    () => getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId, posFilter, seed: queueSeed }),
+    [deckId, focusTopic, posFilter, progressMap, queueSeed]
   );
 
   useEffect(() => {
-    if (mode === "study" && recommendedIds.length && !recommendedIds.includes(selectedChunkId)) {
+    if (mode === "study" && !activeDeckChunkIds.has(selectedChunkId)) {
+      setSelectedChunkId(recommendedIds[0] || activeDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
+    } else if (mode === "study" && recommendedIds.length && !recommendedIds.includes(selectedChunkId)) {
       setSelectedChunkId(recommendedIds[0]);
     }
-  }, [mode, recommendedIds, selectedChunkId]);
+  }, [activeDeckChunkIds, activeDeckChunks, mode, recommendedIds, selectedChunkId]);
 
   useEffect(() => {
     setStudyTimerPhase("question");
@@ -255,7 +261,7 @@ export function EnglishChunksApp() {
     return () => window.clearTimeout(timer);
   }, [answerSeconds, hydrated, mode, questionSeconds, recommendedIds.length, studyTimerPhase]);
 
-  const selectedChunk = chunkMap[selectedChunkId] || ENGLISH_CHUNK_LIBRARY[0];
+  const selectedChunk = chunkMap[selectedChunkId] || activeDeckChunks[0] || ENGLISH_CHUNK_LIBRARY[0];
   const selectedProgress = getEnglishProgressForId(progressMap, selectedChunk.id);
   const isSelectedLongTerm = isEnglishLongTermProgress(selectedProgress);
   const displayedStudyChunk = useMemo(
@@ -283,7 +289,7 @@ export function EnglishChunksApp() {
   const safeStudyPosition = Math.max(0, studyPosition);
   const sessionTotal = recommendedIds.length;
   const longTermWordList = useMemo(() => {
-    return ENGLISH_CHUNK_LIBRARY
+    return activeDeckChunks
       .map((chunk) => {
         const progress = getEnglishProgressForId(progressMap, chunk.id);
         return {
@@ -297,14 +303,14 @@ export function EnglishChunksApp() {
       })
       .filter((entry) => entry.isLongTerm)
       .sort((left, right) => right.longTermAt - left.longTermAt);
-  }, [progressMap]);
+  }, [activeDeckChunks, progressMap]);
   const longTermCount = longTermWordList.length;
-  const progressRatio = ENGLISH_CHUNK_LIBRARY.length ? longTermCount / ENGLISH_CHUNK_LIBRARY.length : 0;
+  const progressRatio = activeDeckChunks.length ? longTermCount / activeDeckChunks.length : 0;
   const historyForChunk = attemptHistory.filter((entry) => entry.chunkId === selectedChunk.id);
   const wrongWordList = useMemo(() => {
     const now = Date.now();
 
-    return ENGLISH_CHUNK_LIBRARY
+    return activeDeckChunks
       .map((chunk) => {
         const progress = getEnglishProgressForId(progressMap, chunk.id);
         return {
@@ -324,7 +330,7 @@ export function EnglishChunksApp() {
         if (left.reviewStep !== right.reviewStep) return left.reviewStep - right.reviewStep;
         return right.lastAnsweredAt - left.lastAnsweredAt;
       });
-  }, [progressMap]);
+  }, [activeDeckChunks, progressMap]);
   const mainVisibleWrongWords = wrongWordList.slice(0, 24);
   const mainHiddenWrongWords = wrongWordList.slice(24);
   const pendingFutureReviewCount = wrongWordList.filter((entry) => entry.nextReviewAt > Date.now()).length;
@@ -339,11 +345,12 @@ export function EnglishChunksApp() {
     todayStart.setHours(0, 0, 0, 0);
     const todayMs = todayStart.getTime();
 
-    const todayAttempts = attemptHistory.filter((a) => a.answeredAt >= todayMs && a.result !== "skip");
+    const deckAttempts = attemptHistory.filter((attempt) => activeDeckChunkIds.has(attempt.chunkId));
+    const todayAttempts = deckAttempts.filter((a) => a.answeredAt >= todayMs && a.result !== "skip");
     const todayWords = new Set(todayAttempts.map((a) => a.chunkId)).size;
 
     const daySet = new Set();
-    for (const a of attemptHistory) {
+    for (const a of deckAttempts) {
       if (a.result === "skip") continue;
       const d = new Date(a.answeredAt);
       daySet.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
@@ -367,7 +374,7 @@ export function EnglishChunksApp() {
       const wStart = todayMs - (w + 1) * weekMs;
       const wEnd = todayMs - w * weekMs;
       let count = 0;
-      for (const chunk of ENGLISH_CHUNK_LIBRARY) {
+      for (const chunk of activeDeckChunks) {
         const p = getEnglishProgressForId(progressMap, chunk.id);
         const lt = p.longTermAt || p.memorizedAt || 0;
         if (lt >= wStart && lt < wEnd) count++;
@@ -381,7 +388,7 @@ export function EnglishChunksApp() {
     const quickRatio = judgedAttempts.length > 0 ? quickCount / judgedAttempts.length : 0;
 
     return { todayWords, streak, weeklyMastered, quickRatio, quickCount, judgedCount: judgedAttempts.length };
-  }, [attemptHistory, progressMap]);
+  }, [activeDeckChunkIds, activeDeckChunks, attemptHistory, progressMap]);
 
   const handleSelectChunk = (chunkId) => {
     setSelectedChunkId(chunkId);
@@ -398,22 +405,23 @@ export function EnglishChunksApp() {
     if (!nextDeck || nextDeck.status !== "active" || nextDeck.id === deckId) return;
 
     const nextSeed = Date.now();
-    const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { posFilter, seed: nextSeed });
+    const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId: nextDeck.id, posFilter, seed: nextSeed });
+    const nextDeckChunks = getEnglishChunksForDeck(nextDeck.id);
     setDeckId(nextDeck.id);
     setMode("study");
     setSessionStep(1);
     setQueueSeed(nextSeed);
-    if (nextIds.length) setSelectedChunkId(nextIds[0]);
+    setSelectedChunkId(nextIds[0] || nextDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
   };
 
   const handlePosFilterChange = (nextPosFilter) => {
     const nextSeed = Date.now();
-    const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { posFilter: nextPosFilter, seed: nextSeed });
+    const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId, posFilter: nextPosFilter, seed: nextSeed });
 
     setPosFilter(nextPosFilter);
     setSessionStep(1);
     setQueueSeed(nextSeed);
-    if (nextIds.length) setSelectedChunkId(nextIds[0]);
+    setSelectedChunkId(nextIds[0] || activeDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
   };
 
   const handleQuestionSecondsChange = (event) => {
@@ -450,10 +458,10 @@ export function EnglishChunksApp() {
 
     if (nextIndex === 0) {
       const nextSeed = Date.now();
-      const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { posFilter, seed: nextSeed });
+      const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId, posFilter, seed: nextSeed });
       setSessionStep(1);
       setQueueSeed(nextSeed);
-      if (nextIds.length) setSelectedChunkId(nextIds[0]);
+      setSelectedChunkId(nextIds[0] || activeDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
     } else {
       setSessionStep((current) => Math.min(current + 1, sessionTotal));
     }
@@ -477,6 +485,7 @@ export function EnglishChunksApp() {
         chunkId: selectedChunk.id,
         variantId: displayedStudyChunk.variantId,
         headword: displayedStudyChunk.headword,
+        deckId,
         result: wasCorrect ? "correct" : "wrong",
         topic: studyExample.topic,
         answeredAt: now,
@@ -510,6 +519,7 @@ export function EnglishChunksApp() {
         chunkId: selectedChunk.id,
         variantId: displayedStudyChunk.variantId,
         headword: displayedStudyChunk.headword,
+        deckId,
         result: "skip",
         topic: studyExample.topic,
         answeredAt: now,
@@ -658,7 +668,10 @@ export function EnglishChunksApp() {
     setAnswerSeconds(settings.answerSeconds);
     setReviewDayOffsets(settings.reviewDayOffsets);
     setIsAutoSpeakEnabled(settings.isAutoSpeakEnabled);
-    setSelectedChunkId(chunkMap[settings.selectedChunkId] ? settings.selectedChunkId : ENGLISH_CHUNK_LIBRARY[0].id);
+    const snapshotDeckChunks = getEnglishChunksForDeck(settings.deckId);
+    setSelectedChunkId(snapshotDeckChunks.some((chunk) => chunk.id === settings.selectedChunkId)
+      ? settings.selectedChunkId
+      : snapshotDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
     setStudyTimerPhase("question");
   }
 
@@ -1495,7 +1508,7 @@ function getPosLabel(pos) {
     case "preposition":
       return "前";
     case "phrase":
-      return "句";
+      return "熟";
     default:
       return "他";
   }
