@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-15 | codex | workflow | 公開URL向けの実装・修正を `build -> commit -> 作業ブランチ push -> origin/main 反映 -> 対象URL確認` まで一連で行うルールに更新し、`public-site` はデフォルト本番反映先ではないことを明記 | `npm run build` |
 | 2026-04-15 | codex | english app ui | `/apps/english` の学習カード下ボタン列に `⇦ミス ↑スルー ⇨クリア` の小さな操作説明を追加 | `npm run build` |
 | 2026-04-15 | codex | english app ui | `/apps/english` の右サイドバー上部に語彙セット切り替えを追加し、`大学受験みそ` を active、`英単語ガチ勢界隈` を語彙投入前の準備中入口として表示。`mode` とは別に `deckId` を保存する形へ準備 | `npm run build` |
 | 2026-04-15 | codex | git hygiene | root 直下の外部サンプル/単独試作ディレクトリを `.gitignore` に追加し、既に一部 tracked だった `経済設計/` の README 群を追跡対象に整理 | `npm run build` |

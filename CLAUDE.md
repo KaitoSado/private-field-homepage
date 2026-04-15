@@ -31,9 +31,10 @@
 ## Git ルール
 
 - Claude 側ブランチは `claude/<task>` を使う
-- 直接 `main` を編集しない
+- 直接 `main` を編集しない。ただし、確認済みの作業ブランチ commit を本番反映する時は `origin/main` へ push する
 - commit 前に `npm run build` を通す
-- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> push` まで一連で行う
+- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> 作業ブランチへ push -> origin/main へ本番反映 -> 対象URL確認` まで一連で行う
+- `https://archteia.com/...` の話をしている時は、ローカル確認や作業ブランチ push だけで完了扱いにしない
 - build 失敗、未確認の無関係差分、schema の live 適用判断、衝突リスクがある場合は commit / push せず報告する
 
 ## Claude 固有メモ

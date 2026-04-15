@@ -55,9 +55,11 @@
 
 - Codex: `codex/<task>`
 - Claude: `claude/<task>`
-- 安定運用ブランチ: `public-site`
+- 本番反映先: `origin/main`
+- `public-site` は過去の安定運用ブランチとして残っているが、現状のデフォルト本番反映先ではない。ユーザーが明示した場合か、Vercel 設定を確認した場合だけ触る
 - push 前に `npm run build`
-- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> push` まで一連で行う
+- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> 作業ブランチへ push -> origin/main へ本番反映 -> 対象URL確認` まで一連で行う
+- `https://archteia.com/...` の話をしている時は、ローカル確認や作業ブランチ push だけで完了扱いにしない
 - build 失敗、未確認の無関係差分、schema の live 適用判断、衝突リスクがある場合は commit / push せず報告する
 
 ## 編集時の注意点

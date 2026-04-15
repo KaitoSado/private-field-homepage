@@ -156,15 +156,17 @@
 
 ## 8. Git / ブランチ運用
 
-- 安定反映の基点: `public-site`
-- push 先: `origin main`
+- 本番反映先: `origin/main`
+- `public-site` は過去の安定運用ブランチとして残っているが、現状のデフォルト本番反映先ではない
+- Vercel の production は `origin/main` への push 後に `https://archteia.com/...` へ反映される運用として扱う。設定変更が分かった場合はこの節を更新する
 - 機能開発ブランチ:
   - `codex/<task>`
   - `claude/<task>`
 - 原則:
   - 1タスク = 1ブランチ = 1担当AI
   - 同じファイルを 2 つの AI が同時に編集しない
-  - 実装・修正依頼は、ユーザーが明示的に止めない限り `npm run build` 後に関連差分だけ commit し、push まで行う
+  - 実装・修正依頼は、ユーザーが明示的に止めない限り `npm run build` 後に関連差分だけ commit し、作業ブランチへ push した上で `origin/main` へ本番反映し、対象 URL を確認する
+  - `https://archteia.com/...` の話題では、ローカル確認や作業ブランチ push だけで完了扱いにしない
   - build 失敗、無関係差分混入、schema live 適用判断、衝突リスクがある場合は commit / push せず報告する
 
 ## 9. AI 協調の基本ルール

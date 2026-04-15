@@ -62,6 +62,7 @@ repo 内では、次の情報を確認できます。
 - production branch の設定
 - 環境変数
 - build log
+- 現状の本番反映先は `origin/main` として扱う。`public-site` へは設定確認なしに push しない
 
 ### Supabase
 
@@ -110,6 +111,7 @@ repo 内では、次の情報を確認できます。
 - Vercel の最新 deploy 成功
 - Supabase schema の適用状況
 - 実画面の主要導線
+- 公開URL向けの変更では、作業ブランチ push だけでなく `origin/main` 反映後の対象URL確認まで行う
 
 ## 7. 最低限の確認コマンド
 

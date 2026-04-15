@@ -16,6 +16,7 @@
 - `app/globals.css` は対象セクションだけ触る
 - schema 変更時は `supabase/schema.sql`, `supabase/README.md`, `CHANGELOG.md` を同期する
 - 変更後は原則 `npm run build`
+- 公開URL向けの実装は作業ブランチ push で止めず、`origin/main` 反映と対象URL確認まで行う
 
 ## 完了時
 
