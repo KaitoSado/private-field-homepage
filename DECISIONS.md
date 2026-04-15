@@ -173,3 +173,10 @@
 - 意味が遠い別義や文脈依存の訳は `meaningAlternates` と `nuance` に逃がし、スクレイプ元の生訳は `meaningRaw` に残して失わない
 - 一括ヒューリスティックで荒く整えつつ、`reception` のような重要な多義語は `英単語/hardcore_meaning_overrides.tsv` で手動補正する
 - 綺麗な 1 対 1 表示を保ちながら、監査用には `npm run audit:english-hardcore-meanings` で低信頼候補を継続抽出する
+
+### 27. 英語 app の巨大 deck は public JSON と遅延読込で扱う
+
+- `use client` の学習 UI へ巨大語彙配列を直 import すると、文言変更だけでも Next build が重くなるため、runtime では `public/english-decks/*.json` を fetch する
+- 初期表示では `basic` だけ読み込み、`hardcore` は deck 切り替え時に遅延読込する
+- deck 件数や先頭 chunk id のような軽い情報だけを `lib/english-deck-manifest.json` に置き、client bundle には巨大語彙本体を入れない
+- 語彙の正本や生成スクリプトは維持しつつ、配信経路だけを `lib/*.js` 直 import から static JSON 配信へ切り替える

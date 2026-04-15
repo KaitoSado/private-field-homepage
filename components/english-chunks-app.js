@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import {
   DEFAULT_ENGLISH_REVIEW_DAY_OFFSETS,
-  ENGLISH_CHUNK_LIBRARY,
+  EMPTY_ENGLISH_CHUNK,
+  ENGLISH_DEFAULT_CHUNK_ID,
+  ENGLISH_DEFAULT_DECK_ID,
   ENGLISH_DECK_OPTIONS,
   ENGLISH_MODE_TABS,
   ENGLISH_POS_OPTIONS,
   ENGLISH_TOPIC_OPTIONS,
+  buildEnglishChunkMap,
+  buildEnglishVariantToChunkIdMap,
   compactEnglishProgressMap,
   createEmptyEnglishProgress,
   getEnglishProgressForId,
@@ -19,19 +23,20 @@ import {
   getExamplesForFocus,
   getEnglishReviewStepLabel,
   isEnglishLongTermProgress,
+  loadEnglishDeckLibrary,
   mergeEnglishSyncedProgressMaps,
   normalizeEnglishReviewDayOffsets,
   recordStudyAttempt,
   markShadowComplete
-} from "@/lib/english-content";
+} from "@/lib/english-study";
 
 const STORAGE_BASE_KEY = "new-commune:english-chunks:v3";
 const LEGACY_STORAGE_KEY = "new-commune:english-chunks:v2";
 const ACTIVE_MODE_IDS = new Set(ENGLISH_MODE_TABS.map((tab) => tab.id));
 const ACTIVE_POS_IDS = new Set(ENGLISH_POS_OPTIONS.map((option) => option.id));
 const ACTIVE_DECK_IDS = new Set(ENGLISH_DECK_OPTIONS.filter((deck) => deck.status === "active").map((deck) => deck.id));
-const DEFAULT_DECK_ID = ENGLISH_DECK_OPTIONS.find((deck) => deck.status === "active")?.id || "basic";
-const DEFAULT_CHUNK_ID = getEnglishChunksForDeck(DEFAULT_DECK_ID)[0]?.id || ENGLISH_CHUNK_LIBRARY[0].id;
+const DEFAULT_DECK_ID = ENGLISH_DEFAULT_DECK_ID;
+const DEFAULT_CHUNK_ID = ENGLISH_DEFAULT_CHUNK_ID;
 const DEFAULT_QUESTION_SECONDS = 4;
 const DEFAULT_ANSWER_SECONDS = 5;
 const ENGLISH_REVIEW_PRESETS = [
@@ -45,6 +50,9 @@ export function EnglishChunksApp() {
   const [hydrated, setHydrated] = useState(false);
   const [session, setSession] = useState(null);
   const [storageOwnerId, setStorageOwnerId] = useState("");
+  const [deckLibraries, setDeckLibraries] = useState({});
+  const [deckLoadError, setDeckLoadError] = useState("");
+  const [loadingDeckId, setLoadingDeckId] = useState(DEFAULT_DECK_ID);
   const [progressMap, setProgressMap] = useState(() => createEmptyEnglishProgress());
   const [attemptHistory, setAttemptHistory] = useState([]);
   const [deckId, setDeckId] = useState(DEFAULT_DECK_ID);
@@ -81,18 +89,56 @@ export function EnglishChunksApp() {
   const streamRef = useRef(null);
   const audioChunksRef = useRef([]);
   const recordStartedAtRef = useRef(0);
+  const loadingDecksRef = useRef(new Map());
 
-  const chunkMap = useMemo(
-    () => Object.fromEntries(ENGLISH_CHUNK_LIBRARY.map((chunk) => [chunk.id, chunk])),
-    []
-  );
+  const ensureDeckLoaded = useCallback(async (nextDeckId) => {
+    if (!ACTIVE_DECK_IDS.has(nextDeckId)) return [];
+    if (deckLibraries[nextDeckId]?.length) return deckLibraries[nextDeckId];
+
+    if (loadingDecksRef.current.has(nextDeckId)) {
+      return loadingDecksRef.current.get(nextDeckId);
+    }
+
+    setLoadingDeckId(nextDeckId);
+    setDeckLoadError("");
+
+    const pendingDeck = loadEnglishDeckLibrary(nextDeckId)
+      .then((nextDeckLibrary) => {
+        setDeckLibraries((current) => {
+          if (current[nextDeckId]?.length) return current;
+          return {
+            ...current,
+            [nextDeckId]: nextDeckLibrary
+          };
+        });
+        return nextDeckLibrary;
+      })
+      .catch((error) => {
+        const message = error instanceof Error ? error.message : "語彙データの読み込みに失敗しました。";
+        setDeckLoadError(message);
+        return [];
+      })
+      .finally(() => {
+        loadingDecksRef.current.delete(nextDeckId);
+        setLoadingDeckId((current) => (current === nextDeckId ? "" : current));
+      });
+
+    loadingDecksRef.current.set(nextDeckId, pendingDeck);
+    return pendingDeck;
+  }, [deckLibraries]);
+
+  const loadedChunkLibrary = useMemo(() => Object.values(deckLibraries).flat(), [deckLibraries]);
+  const chunkMap = useMemo(() => buildEnglishChunkMap(loadedChunkLibrary), [loadedChunkLibrary]);
+  const variantToChunkIdMap = useMemo(() => buildEnglishVariantToChunkIdMap(loadedChunkLibrary), [loadedChunkLibrary]);
   const activeDeck = useMemo(
     () => ENGLISH_DECK_OPTIONS.find((deck) => deck.id === deckId) || ENGLISH_DECK_OPTIONS[0],
     [deckId]
   );
-  const activeDeckChunks = useMemo(() => getEnglishChunksForDeck(deckId), [deckId]);
+  const activeDeckChunks = useMemo(() => getEnglishChunksForDeck(deckLibraries, deckId), [deckLibraries, deckId]);
   const activeDeckChunkIds = useMemo(() => new Set(activeDeckChunks.map((chunk) => chunk.id)), [activeDeckChunks]);
   const storageKey = storageOwnerId ? `${STORAGE_BASE_KEY}:${storageOwnerId}` : "";
+  const isBasicDeckReady = Boolean(deckLibraries[DEFAULT_DECK_ID]?.length);
+  const isActiveDeckReady = Boolean(activeDeckChunks.length);
 
   useEffect(() => {
     let mounted = true;
@@ -123,7 +169,17 @@ export function EnglishChunksApp() {
   }, [supabase]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !storageKey) return;
+    ensureDeckLoaded(DEFAULT_DECK_ID);
+  }, [ensureDeckLoaded]);
+
+  useEffect(() => {
+    if (deckId !== DEFAULT_DECK_ID) {
+      ensureDeckLoaded(deckId);
+    }
+  }, [deckId, ensureDeckLoaded]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !storageKey || !isBasicDeckReady) return;
 
     let cancelled = false;
     setHydrated(false);
@@ -136,7 +192,7 @@ export function EnglishChunksApp() {
 
       if (cancelled) return;
 
-      const mergedSnapshot = mergeEnglishSnapshots(localSnapshot, remoteResult.snapshot);
+      const mergedSnapshot = mergeEnglishSnapshots(localSnapshot, remoteResult.snapshot, variantToChunkIdMap);
       applyEnglishSnapshot(mergedSnapshot);
 
       if (session?.user?.id && !remoteResult.error) {
@@ -158,22 +214,31 @@ export function EnglishChunksApp() {
     return () => {
       cancelled = true;
     };
-  }, [chunkMap, session?.user?.id, storageKey, supabase]);
+  }, [isBasicDeckReady, session?.user?.id, storageKey, supabase]);
 
   useEffect(() => {
-    if (hydrated && queueSeed === 0) {
+    if (!hydrated || !variantToChunkIdMap.size) return;
+    setProgressMap((current) => compactEnglishProgressMap(current, variantToChunkIdMap));
+  }, [hydrated, variantToChunkIdMap]);
+
+  useEffect(() => {
+    if (hydrated && activeDeckChunks.length && queueSeed === 0) {
       const nextSeed = Date.now();
-      const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId, posFilter, seed: nextSeed });
+      const nextIds = getEnglishRecommendedChunkIds(progressMap, activeDeckChunks, focusTopic, {
+        posFilter,
+        seed: nextSeed
+      });
       setQueueSeed(nextSeed);
       setSelectedChunkId(nextIds[0] || activeDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
     }
-  }, [activeDeckChunks, deckId, focusTopic, hydrated, posFilter, progressMap, queueSeed]);
+  }, [activeDeckChunks, focusTopic, hydrated, posFilter, progressMap, queueSeed]);
 
   useEffect(() => {
     if (!hydrated || typeof window === "undefined" || !storageKey) return;
     const snapshot = buildEnglishSnapshot({
       progressMap,
       attemptHistory,
+      variantToChunkIdMap,
       settings: {
         mode,
         deckId,
@@ -211,7 +276,7 @@ export function EnglishChunksApp() {
     }, 900);
 
     return () => window.clearTimeout(syncTimer);
-  }, [answerSeconds, attemptHistory, deckId, detailMode, focusTopic, hydrated, isAutoSpeakEnabled, mode, posFilter, progressMap, questionSeconds, reviewDayOffsets, selectedChunkId, session?.user?.id, storageKey, supabase, supportMode]);
+  }, [answerSeconds, attemptHistory, deckId, detailMode, focusTopic, hydrated, isAutoSpeakEnabled, mode, posFilter, progressMap, questionSeconds, reviewDayOffsets, selectedChunkId, session?.user?.id, storageKey, supabase, supportMode, variantToChunkIdMap]);
 
   useEffect(() => {
     return () => {
@@ -223,8 +288,11 @@ export function EnglishChunksApp() {
   }, []);
 
   const recommendedIds = useMemo(
-    () => getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId, posFilter, seed: queueSeed }),
-    [deckId, focusTopic, posFilter, progressMap, queueSeed]
+    () => getEnglishRecommendedChunkIds(progressMap, activeDeckChunks, focusTopic, {
+      posFilter,
+      seed: queueSeed
+    }),
+    [activeDeckChunks, focusTopic, posFilter, progressMap, queueSeed]
   );
 
   useEffect(() => {
@@ -261,7 +329,7 @@ export function EnglishChunksApp() {
     return () => window.clearTimeout(timer);
   }, [answerSeconds, hydrated, mode, questionSeconds, recommendedIds.length, studyTimerPhase]);
 
-  const selectedChunk = chunkMap[selectedChunkId] || activeDeckChunks[0] || ENGLISH_CHUNK_LIBRARY[0];
+  const selectedChunk = chunkMap[selectedChunkId] || activeDeckChunks[0] || EMPTY_ENGLISH_CHUNK;
   const selectedProgress = getEnglishProgressForId(progressMap, selectedChunk.id);
   const isSelectedLongTerm = isEnglishLongTermProgress(selectedProgress);
   const displayedStudyChunk = useMemo(
@@ -273,13 +341,13 @@ export function EnglishChunksApp() {
   );
   const selectedFamilyMembers = useMemo(
     () => shuffleItemsBySeed(
-      getEnglishFamilyMembers(selectedChunk.id, {
+      getEnglishFamilyMembers(chunkMap, selectedChunk.id, {
         includeSelf: true,
         currentVariantId: displayedStudyChunk.variantId
       }).filter((member) => member.id !== displayedStudyChunk.variantId),
       `${queueSeed}:${sessionStep}:${selectedChunk.id}`
     ),
-    [displayedStudyChunk.variantId, queueSeed, selectedChunk.id, sessionStep]
+    [chunkMap, displayedStudyChunk.variantId, queueSeed, selectedChunk.id, sessionStep]
   );
   const diverseExamples = getExamplesForFocus(displayedStudyChunk, focusTopic);
   const allExamples = [...displayedStudyChunk.starterExamples, ...diverseExamples];
@@ -400,13 +468,16 @@ export function EnglishChunksApp() {
     setMode("memory");
   };
 
-  const handleDeckChange = (nextDeckId) => {
+  const handleDeckChange = async (nextDeckId) => {
     const nextDeck = ENGLISH_DECK_OPTIONS.find((deck) => deck.id === nextDeckId);
     if (!nextDeck || nextDeck.status !== "active" || nextDeck.id === deckId) return;
 
+    const nextDeckChunks = await ensureDeckLoaded(nextDeck.id);
     const nextSeed = Date.now();
-    const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId: nextDeck.id, posFilter, seed: nextSeed });
-    const nextDeckChunks = getEnglishChunksForDeck(nextDeck.id);
+    const nextIds = getEnglishRecommendedChunkIds(progressMap, nextDeckChunks, focusTopic, {
+      posFilter,
+      seed: nextSeed
+    });
     setDeckId(nextDeck.id);
     setMode("study");
     setSessionStep(1);
@@ -416,7 +487,10 @@ export function EnglishChunksApp() {
 
   const handlePosFilterChange = (nextPosFilter) => {
     const nextSeed = Date.now();
-    const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId, posFilter: nextPosFilter, seed: nextSeed });
+    const nextIds = getEnglishRecommendedChunkIds(progressMap, activeDeckChunks, focusTopic, {
+      posFilter: nextPosFilter,
+      seed: nextSeed
+    });
 
     setPosFilter(nextPosFilter);
     setSessionStep(1);
@@ -458,7 +532,10 @@ export function EnglishChunksApp() {
 
     if (nextIndex === 0) {
       const nextSeed = Date.now();
-      const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { deckId, posFilter, seed: nextSeed });
+      const nextIds = getEnglishRecommendedChunkIds(progressMap, activeDeckChunks, focusTopic, {
+        posFilter,
+        seed: nextSeed
+      });
       setSessionStep(1);
       setQueueSeed(nextSeed);
       setSelectedChunkId(nextIds[0] || activeDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
@@ -656,7 +733,7 @@ export function EnglishChunksApp() {
   function applyEnglishSnapshot(snapshot) {
     const settings = normalizeEnglishSnapshotSettings(snapshot.settings || {});
 
-    setProgressMap(compactEnglishProgressMap(snapshot.progressMap || {}));
+    setProgressMap(compactEnglishProgressMap(snapshot.progressMap || {}, variantToChunkIdMap));
     setAttemptHistory(Array.isArray(snapshot.attemptHistory) ? snapshot.attemptHistory : []);
     setDeckId(settings.deckId);
     setMode(settings.mode);
@@ -668,10 +745,10 @@ export function EnglishChunksApp() {
     setAnswerSeconds(settings.answerSeconds);
     setReviewDayOffsets(settings.reviewDayOffsets);
     setIsAutoSpeakEnabled(settings.isAutoSpeakEnabled);
-    const snapshotDeckChunks = getEnglishChunksForDeck(settings.deckId);
+    const snapshotDeckChunks = getEnglishChunksForDeck(deckLibraries, settings.deckId);
     setSelectedChunkId(snapshotDeckChunks.some((chunk) => chunk.id === settings.selectedChunkId)
       ? settings.selectedChunkId
-      : snapshotDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
+      : settings.selectedChunkId || snapshotDeckChunks[0]?.id || DEFAULT_CHUNK_ID);
     setStudyTimerPhase("question");
   }
 
@@ -685,7 +762,16 @@ export function EnglishChunksApp() {
                 <span>残り {sessionTotal}</span>
               </div>
 
-              {recommendedIds.length ? (
+              {!isActiveDeckReady ? (
+                <section className="english-study-card">
+                  <div className="english-study-sheet">
+                    <p className="english-feedback-text">
+                      {loadingDeckId === deckId ? "単語を読み込み中..." : "このデッキを準備しています。"}
+                    </p>
+                    {deckLoadError ? <p className="english-error-text">{deckLoadError}</p> : null}
+                  </div>
+                </section>
+              ) : recommendedIds.length ? (
                 <section className="english-study-card">
                   <div className="english-study-sheet">
                     <p className="english-study-word">{displayedStudyChunk.headword}</p>
@@ -1348,11 +1434,11 @@ function getStageLabel(stage) {
   }
 }
 
-function buildEnglishSnapshot({ progressMap, attemptHistory, settings }) {
+function buildEnglishSnapshot({ progressMap, attemptHistory, settings, variantToChunkIdMap }) {
   const savedAt = Date.now();
 
   return {
-    progressMap: compactEnglishProgressMap(progressMap),
+    progressMap: compactEnglishProgressMap(progressMap, variantToChunkIdMap),
     attemptHistory: Array.isArray(attemptHistory) ? attemptHistory : [],
     settings: normalizeEnglishSnapshotSettings(settings),
     savedAt
@@ -1426,13 +1512,13 @@ async function saveRemoteEnglishSnapshot(supabase, userId, snapshot) {
   }
 }
 
-function mergeEnglishSnapshots(localSnapshot, remoteSnapshot) {
-  const local = normalizeEnglishSnapshot(localSnapshot);
-  const remote = normalizeEnglishSnapshot(remoteSnapshot);
+function mergeEnglishSnapshots(localSnapshot, remoteSnapshot, variantToChunkIdMap = new Map()) {
+  const local = normalizeEnglishSnapshot(localSnapshot, variantToChunkIdMap);
+  const remote = normalizeEnglishSnapshot(remoteSnapshot, variantToChunkIdMap);
   const localIsNewer = (local.savedAt || 0) >= (remote.savedAt || 0);
 
   return {
-    progressMap: mergeEnglishSyncedProgressMaps(remote.progressMap, local.progressMap),
+    progressMap: mergeEnglishSyncedProgressMaps(variantToChunkIdMap, remote.progressMap, local.progressMap),
     attemptHistory: mergeAttemptHistory(remote.attemptHistory, local.attemptHistory),
     settings: localIsNewer
       ? { ...remote.settings, ...local.settings }
@@ -1441,11 +1527,11 @@ function mergeEnglishSnapshots(localSnapshot, remoteSnapshot) {
   };
 }
 
-function normalizeEnglishSnapshot(snapshot) {
+function normalizeEnglishSnapshot(snapshot, variantToChunkIdMap = new Map()) {
   if (!snapshot) return createEmptyEnglishSnapshot();
 
   return {
-    progressMap: compactEnglishProgressMap(snapshot.progressMap || {}),
+    progressMap: compactEnglishProgressMap(snapshot.progressMap || {}, variantToChunkIdMap),
     attemptHistory: Array.isArray(snapshot.attemptHistory) ? snapshot.attemptHistory : [],
     settings: normalizeEnglishSnapshotSettings(snapshot.settings || snapshot),
     savedAt: Number(snapshot.savedAt) || 0
@@ -1462,9 +1548,9 @@ function createEmptyEnglishSnapshot() {
 }
 
 function normalizeEnglishSnapshotSettings(settings) {
-  const selectedChunkId = settings.selectedChunkId && ENGLISH_CHUNK_LIBRARY.some((chunk) => chunk.id === settings.selectedChunkId)
+  const selectedChunkId = typeof settings.selectedChunkId === "string" && settings.selectedChunkId
     ? settings.selectedChunkId
-    : ENGLISH_CHUNK_LIBRARY[0].id;
+    : DEFAULT_CHUNK_ID;
 
   return {
     mode: settings.mode && ACTIVE_MODE_IDS.has(settings.mode) ? settings.mode : "study",

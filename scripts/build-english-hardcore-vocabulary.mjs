@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { writeEnglishDeckArtifacts } from "./lib/english-deck-artifacts.mjs";
 
 const SOURCES = [
   {
@@ -680,6 +681,10 @@ async function main() {
 
   const usedSlugs = new Set();
   const entries = [...byWord.values()].map((record, index) => toEntry(record, index + 1, usedSlugs, overrides));
+  const { chunkLibrary, outputPath: deckOutputPath, manifestPath } = writeEnglishDeckArtifacts({
+    deckId: "hardcore",
+    entries
+  });
 
   writeFileSync(tsvOutputPath, toTsv(entries), "utf8");
   writeFileSync(
@@ -691,6 +696,8 @@ async function main() {
   console.log(`Merged ${rawCount} scraped rows into ${entries.length} hardcore vocabulary entries.`);
   console.log(`Generated ${outputPath}`);
   console.log(`Generated ${tsvOutputPath}`);
+  console.log(`Generated ${chunkLibrary.length} hardcore English chunks -> ${deckOutputPath}`);
+  console.log(`Updated deck manifest -> ${manifestPath}`);
 }
 
 main().catch((error) => {

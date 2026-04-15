@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-04-15T16:13:42.116Z",
+  "decks": {
+    "basic": {
+      "count": 2686,
+      "firstChunkId": "account",
+      "path": "/english-decks/basic.json"
+    },
+    "hardcore": {
+      "count": 9179,
+      "firstChunkId": "hardcore-vital",
+      "path": "/english-decks/hardcore.json"
+    }
+  }
+}

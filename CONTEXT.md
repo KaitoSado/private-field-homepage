@@ -95,7 +95,7 @@
     - 進捗はログイン時に Supabase `english_progress` と同期し、未ログイン時または live schema 未適用時は `localStorage` に退避する
     - 現在は `単語` と `見直しリスト` を主導線にし、英単語を自動読み上げして `←/×` または `→/○` で自己判定すると次単語へ進む暗記導線を持つ
     - 単語面では自動読み上げの ON/OFF と停止、出題表示時間、答え表示時間、5ステージ復習間隔をユーザーが変更でき、設定は進捗と一緒に保存される
-    - 語彙データの正本は `英単語/target1900_normalized.tsv` で、`scripts/build-english-vocabulary.mjs` により `lib/english-target1900.js` を生成して読み込む
+    - 語彙データの正本は `英単語/target1900_normalized.tsv` で、`scripts/build-english-vocabulary.mjs` により `lib/english-target1900.js` を生成しつつ、runtime 用には `public/english-decks/basic.json` と `lib/english-deck-manifest.json` を更新する
     - 現在の英単語データは 3441 語を `family` で束ねた 2686 出題グループで、進捗保存は全件ではなく学習済み差分だけ `localStorage` に保持する
     - `family` が同じ語は1つの出題グループとして扱い、実際に大きく表示される派生語は出題ごとにランダムに選ぶ。現データを `family` で畳むと 2686 グループで、原本の 1900 見出し語とはまだ一致しない
     - 正誤ログは各出題グループごとに日時つきで `localStorage` に保持し、復習は `当日 -> 3日後 -> 7日後 -> 14日後 -> 30日後` の固定 5 段階で回す
@@ -107,10 +107,11 @@
     - UI 上の `長期記憶リスト` には通常キューから除外された正解済み単語を表示する
     - UI 上の `見直しリスト` は日時を見せず、間違えた単語一覧と現在ステージを中心に見直せる
     - 語彙セット切り替えとして `必須単語` と `単語ガチ勢` を持つ
-    - `単語ガチ勢` は `scripts/build-english-hardcore-vocabulary.mjs` で `ukaru-eigo.com` と `ejquotes.com` の指定ページをスクレイピングし、`英単語/hardcore_scraped_normalized.tsv` と `lib/english-hardcore.js` に正規化する
+    - `単語ガチ勢` は `scripts/build-english-hardcore-vocabulary.mjs` で `ukaru-eigo.com` と `ejquotes.com` の指定ページをスクレイピングし、`英単語/hardcore_scraped_normalized.tsv` と `lib/english-hardcore.js` に正規化しつつ、runtime 用には `public/english-decks/hardcore.json` と `lib/english-deck-manifest.json` を更新する
     - `単語ガチ勢` は 9 つの単語帳/熟語帳ページから 16386 行を取り込み、同じ見出し語・熟語の重複をまとめた 9179 出題カードとして扱う
     - `単語ガチ勢` のカード表面に出す `meaning` は 1 語 1 主訳を優先し、`/` や `・` を極力出さない。元の複数訳は `meaningRaw`、補足訳は `meaningAlternates`、語感メモは `nuance` に退避する
     - `英単語/hardcore_meaning_overrides.tsv` で `reception` などの多義語の主訳を手動補正し、`npm run audit:english-hardcore-meanings` で低信頼・多義語を `英単語/hardcore_meaning_review_candidates.csv` に抽出できる
+    - `/apps/english` の runtime は巨大語彙を client bundle に直 import せず、`lib/english-deck-manifest.json` を読む軽量 helper と `public/english-decks/*.json` の deck 別 lazy load で動かす
   - ドイツ語コンテンツ `/apps/german`
     - `ドイツ単語帳抜き出しフォルダ/ドイツ単語_app_seed.json` を正本 seed とし、`scripts/build-german-vocabulary.mjs` で `lib/german-vocabulary.js` を生成して読む
     - 現在のドイツ語 seed は 1604 語で、`meaning_ja` は全件 machine translated draft または手動補正として補完済み。例文はまだ未登録
