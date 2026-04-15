@@ -1029,11 +1029,7 @@ export function SignatureProfilePage({ profile, posts }) {
                             }}
                           >
                             <span className="signature-calendar-day-num">{cell.day}</span>
-                            {preview ? (
-                              <span className="signature-calendar-day-text">{preview}</span>
-                            ) : (
-                              <span className="signature-calendar-day-empty">予定を見る</span>
-                            )}
+                            {preview ? <span className="signature-calendar-day-text">{preview}</span> : null}
                           </button>
                         );
                       })}
@@ -1054,11 +1050,6 @@ export function SignatureProfilePage({ profile, posts }) {
                         <p className="signature-schedule-note-label">24 hour</p>
                         <h4>{selectedMonth}月{activeCalendarDay}日</h4>
                       </div>
-                      {calendarEntryHasContent(activeCalendarEntry) ? (
-                        <span className="signature-status-chip">予定あり</span>
-                      ) : (
-                        <span className="signature-status-chip is-muted">空き</span>
-                      )}
                     </div>
 
                     <div className="signature-day-strip" aria-label={`${selectedMonth}月の日付`}>
@@ -1119,7 +1110,7 @@ export function SignatureProfilePage({ profile, posts }) {
                                       placeholder="予定"
                                     />
                                   ) : (
-                                    <p>{value || "空き"}</p>
+                                    <p>{value}</p>
                                   )}
                                 </td>
                               </tr>
@@ -1164,7 +1155,7 @@ export function SignatureProfilePage({ profile, posts }) {
                                 placeholder="授業 / 制作 / 移動"
                               />
                             ) : (
-                              <span>{weeklySchedule[day.key]?.[period.key] || "空き"}</span>
+                              <span>{weeklySchedule[day.key]?.[period.key] || ""}</span>
                             )}
                           </td>
                         ))}
@@ -1494,14 +1485,19 @@ function buildDefaultCurrentEntries() {
 
 function buildDefaultWeeklySchedule() {
   return {
-    mon: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
-    tue: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
-    wed: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
-    thu: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
-    fri: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
-    sat: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" },
-    sun: { period1: "空き", period2: "空き", period3: "空き", period4: "空き", period5: "空き" }
+    mon: { period1: "", period2: "", period3: "", period4: "", period5: "" },
+    tue: { period1: "", period2: "", period3: "", period4: "", period5: "" },
+    wed: { period1: "", period2: "", period3: "", period4: "", period5: "" },
+    thu: { period1: "", period2: "", period3: "", period4: "", period5: "" },
+    fri: { period1: "", period2: "", period3: "", period4: "", period5: "" },
+    sat: { period1: "", period2: "", period3: "", period4: "", period5: "" },
+    sun: { period1: "", period2: "", period3: "", period4: "", period5: "" }
   };
+}
+
+function normalizeScheduleCellValue(value) {
+  const normalized = `${value ?? ""}`.trim();
+  return normalized === "空き" ? "" : normalized;
 }
 
 function buildDefaultRecordItems() {
@@ -1543,7 +1539,7 @@ function mergeWeeklySchedule(weeklySchedule) {
       Object.fromEntries(
         SCHEDULE_PERIODS.map((period) => [
           period.key,
-          `${weeklySchedule?.[day.key]?.[period.key] ?? defaults[day.key][period.key] ?? ""}`
+          normalizeScheduleCellValue(weeklySchedule?.[day.key]?.[period.key] ?? defaults[day.key][period.key] ?? "")
         ])
       )
     ])
