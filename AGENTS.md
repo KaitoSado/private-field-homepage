@@ -58,8 +58,9 @@
 - 本番反映先: `origin/main`
 - `public-site` は過去の安定運用ブランチとして残っているが、現状のデフォルト本番反映先ではない。ユーザーが明示した場合か、Vercel 設定を確認した場合だけ触る
 - 2026-04-15 時点では `origin/main` だけで `https://archteia.com/...` が更新されないケースがあり、`origin/codex/resolve-untracked-files` を同じ commit に fast-forward した時点で本番反映された。Vercel production branch を確認・修正するまでは、公開URL向け変更は `origin/main` と `origin/codex/resolve-untracked-files` の両方を同じ commit にそろえる
+- Vercel は同じ SHA を最初に受けた branch の deployment status を使うことがあるため、公開URL向け変更では作業ブランチより先に `origin/main` へ push し、その後 `origin/codex/resolve-untracked-files` と作業ブランチを同じ commit にそろえる
 - push 前に `npm run build`
-- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> 作業ブランチへ push -> origin/main へ本番反映 -> 対象URL確認` まで一連で行う
+- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> origin/main へ本番反映 -> 暫定 production branch と作業ブランチへ push -> 対象URL確認` まで一連で行う
 - `https://archteia.com/...` の話をしている時は、ローカル確認や作業ブランチ push だけで完了扱いにしない
 - build 失敗、未確認の無関係差分、schema の live 適用判断、衝突リスクがある場合は commit / push せず報告する
 

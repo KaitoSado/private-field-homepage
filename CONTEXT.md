@@ -163,13 +163,14 @@
 - `public-site` は過去の安定運用ブランチとして残っているが、現状のデフォルト本番反映先ではない
 - Vercel の production は `origin/main` への push 後に `https://archteia.com/...` へ反映される運用として扱う。設定変更が分かった場合はこの節を更新する
 - ただし 2026-04-15 の `/apps/english` 反映では `origin/main` push 後も本番が古い prerender を返し、`origin/codex/resolve-untracked-files` を同じ commit に fast-forward した時点で `https://archteia.com/apps/english` が更新された。Vercel production branch を確認・修正するまでは、公開URL向け変更は `origin/main` と `origin/codex/resolve-untracked-files` の両方へ同じ commit を届ける
+- 同じ SHA を先に作業ブランチへ push すると Vercel が preview deployment status をその SHA に結び、あとから `origin/main` へ同じ SHA を push しても production domain が差し替わらない場合がある。公開URL向け変更は commit 後、まず `origin/main`、次に `origin/codex/resolve-untracked-files`、最後に作業ブランチへ push する
 - 機能開発ブランチ:
   - `codex/<task>`
   - `claude/<task>`
 - 原則:
   - 1タスク = 1ブランチ = 1担当AI
   - 同じファイルを 2 つの AI が同時に編集しない
-  - 実装・修正依頼は、ユーザーが明示的に止めない限り `npm run build` 後に関連差分だけ commit し、作業ブランチへ push した上で `origin/main` と暫定 production branch へ本番反映し、対象 URL を確認する
+  - 実装・修正依頼は、ユーザーが明示的に止めない限り `npm run build` 後に関連差分だけ commit し、まず `origin/main` へ push した上で `origin/codex/resolve-untracked-files` と作業ブランチへ同じ commit を届け、対象 URL を確認する
   - `https://archteia.com/...` の話題では、ローカル確認や作業ブランチ push だけで完了扱いにしない
   - build 失敗、無関係差分混入、schema live 適用判断、衝突リスクがある場合は commit / push せず報告する
 

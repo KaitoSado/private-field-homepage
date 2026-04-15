@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-15 | codex | workflow | Vercel が同一SHAを先に作業ブランチpreviewへ結び、後続の `origin/main` push で production domain が差し替わらない場合があるため、公開URL向け変更は `origin/main` を先に push する運用へ修正 | `curl -L https://archteia.com/apps/english`, Vercel commit status |
 | 2026-04-15 | codex | english app data | `英単語ガチ勢界隈` に EJQuotes の英検1級5000語3ページを追加。9ページ合計16386行を重複統合し、9179カードへ再生成。丸括弧の品詞表記 `(動)` なども分類対象に追加 | `npm run build:english-hardcore -- --cache-dir /tmp`, `npm run build` |
 | 2026-04-15 | codex | workflow | `/apps/english` 本番反映で `origin/main` だけでは更新されず、`origin/codex/resolve-untracked-files` fast-forward 後に `https://archteia.com/apps/english` が更新されたため、Vercel production branch 確認まで両方へ同じ commit を届ける暫定ルールを追記 | `curl -L https://archteia.com/apps/english` |
 | 2026-04-15 | codex | english app data | `/apps/english` の `英単語ガチ勢界隈` deck を有効化。指定された6ページをスクレイピングする `scripts/build-english-hardcore-vocabulary.mjs` を追加し、11386行を重複統合した5230カードを `lib/english-hardcore.js` と `英単語/hardcore_scraped_normalized.tsv` に生成。品詞フィルタに `熟語` を追加 | `node scripts/build-english-hardcore-vocabulary.mjs --cache-dir /tmp`, `npm run build` |
