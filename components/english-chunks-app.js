@@ -5,6 +5,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import {
   DEFAULT_ENGLISH_REVIEW_DAY_OFFSETS,
   ENGLISH_CHUNK_LIBRARY,
+  ENGLISH_DECK_OPTIONS,
   ENGLISH_MODE_TABS,
   ENGLISH_POS_OPTIONS,
   ENGLISH_TOPIC_OPTIONS,
@@ -27,6 +28,8 @@ const STORAGE_BASE_KEY = "new-commune:english-chunks:v3";
 const LEGACY_STORAGE_KEY = "new-commune:english-chunks:v2";
 const ACTIVE_MODE_IDS = new Set(ENGLISH_MODE_TABS.map((tab) => tab.id));
 const ACTIVE_POS_IDS = new Set(ENGLISH_POS_OPTIONS.map((option) => option.id));
+const ACTIVE_DECK_IDS = new Set(ENGLISH_DECK_OPTIONS.filter((deck) => deck.status === "active").map((deck) => deck.id));
+const DEFAULT_DECK_ID = ENGLISH_DECK_OPTIONS.find((deck) => deck.status === "active")?.id || "basic";
 const DEFAULT_QUESTION_SECONDS = 4;
 const DEFAULT_ANSWER_SECONDS = 5;
 const ENGLISH_REVIEW_PRESETS = [
@@ -42,6 +45,7 @@ export function EnglishChunksApp() {
   const [storageOwnerId, setStorageOwnerId] = useState("");
   const [progressMap, setProgressMap] = useState(() => createEmptyEnglishProgress());
   const [attemptHistory, setAttemptHistory] = useState([]);
+  const [deckId, setDeckId] = useState(DEFAULT_DECK_ID);
   const [mode, setMode] = useState("study");
   const [focusTopic, setFocusTopic] = useState("all");
   const [posFilter, setPosFilter] = useState("all");
@@ -79,6 +83,10 @@ export function EnglishChunksApp() {
   const chunkMap = useMemo(
     () => Object.fromEntries(ENGLISH_CHUNK_LIBRARY.map((chunk) => [chunk.id, chunk])),
     []
+  );
+  const activeDeck = useMemo(
+    () => ENGLISH_DECK_OPTIONS.find((deck) => deck.id === deckId) || ENGLISH_DECK_OPTIONS[0],
+    [deckId]
   );
   const storageKey = storageOwnerId ? `${STORAGE_BASE_KEY}:${storageOwnerId}` : "";
 
@@ -164,6 +172,7 @@ export function EnglishChunksApp() {
       attemptHistory,
       settings: {
         mode,
+        deckId,
         focusTopic,
         posFilter,
         detailMode,
@@ -198,7 +207,7 @@ export function EnglishChunksApp() {
     }, 900);
 
     return () => window.clearTimeout(syncTimer);
-  }, [answerSeconds, attemptHistory, detailMode, focusTopic, hydrated, isAutoSpeakEnabled, mode, posFilter, progressMap, questionSeconds, reviewDayOffsets, selectedChunkId, session?.user?.id, storageKey, supabase, supportMode]);
+  }, [answerSeconds, attemptHistory, deckId, detailMode, focusTopic, hydrated, isAutoSpeakEnabled, mode, posFilter, progressMap, questionSeconds, reviewDayOffsets, selectedChunkId, session?.user?.id, storageKey, supabase, supportMode]);
 
   useEffect(() => {
     return () => {
@@ -382,6 +391,19 @@ export function EnglishChunksApp() {
   const handleSelectMemoryChunk = (chunkId) => {
     setSelectedChunkId(chunkId);
     setMode("memory");
+  };
+
+  const handleDeckChange = (nextDeckId) => {
+    const nextDeck = ENGLISH_DECK_OPTIONS.find((deck) => deck.id === nextDeckId);
+    if (!nextDeck || nextDeck.status !== "active" || nextDeck.id === deckId) return;
+
+    const nextSeed = Date.now();
+    const nextIds = getEnglishRecommendedChunkIds(progressMap, focusTopic, { posFilter, seed: nextSeed });
+    setDeckId(nextDeck.id);
+    setMode("study");
+    setSessionStep(1);
+    setQueueSeed(nextSeed);
+    if (nextIds.length) setSelectedChunkId(nextIds[0]);
   };
 
   const handlePosFilterChange = (nextPosFilter) => {
@@ -626,6 +648,7 @@ export function EnglishChunksApp() {
 
     setProgressMap(compactEnglishProgressMap(snapshot.progressMap || {}));
     setAttemptHistory(Array.isArray(snapshot.attemptHistory) ? snapshot.attemptHistory : []);
+    setDeckId(settings.deckId);
     setMode(settings.mode);
     setFocusTopic(settings.focusTopic);
     setPosFilter(settings.posFilter);
@@ -647,6 +670,7 @@ export function EnglishChunksApp() {
             <div className="english-pane-stack">
               <div className="english-study-topline">
                 <span>残り {sessionTotal}</span>
+                <span>{activeDeck.label}</span>
               </div>
 
               {recommendedIds.length ? (
@@ -958,6 +982,35 @@ export function EnglishChunksApp() {
         </section>
 
         <aside className="english-side-stack">
+          <section className="surface english-side-card english-deck-card">
+            <div className="english-section-head">
+              <h3>語彙セット</h3>
+              <span>{activeDeck.summary}</span>
+            </div>
+            <div className="english-deck-row" role="tablist" aria-label="語彙セット">
+              {ENGLISH_DECK_OPTIONS.map((deck) => {
+                const isActive = deckId === deck.id;
+                const isReady = deck.status === "active";
+
+                return (
+                  <button
+                    key={deck.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-disabled={!isReady}
+                    disabled={!isReady}
+                    className={`english-deck-chip ${isActive ? "is-active" : ""}${isReady ? "" : " is-pending"}`}
+                    onClick={() => handleDeckChange(deck.id)}
+                  >
+                    <strong>{deck.shortLabel}</strong>
+                    <small>{deck.summary}</small>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           <section className="surface english-side-card">
             <div className="english-mode-row" role="tablist" aria-label="English content modes">
               {ENGLISH_MODE_TABS.map((tab) => (
@@ -1402,6 +1455,7 @@ function normalizeEnglishSnapshotSettings(settings) {
 
   return {
     mode: settings.mode && ACTIVE_MODE_IDS.has(settings.mode) ? settings.mode : "study",
+    deckId: settings.deckId && ACTIVE_DECK_IDS.has(settings.deckId) ? settings.deckId : DEFAULT_DECK_ID,
     focusTopic: settings.focusTopic || "all",
     posFilter: settings.posFilter && ACTIVE_POS_IDS.has(settings.posFilter) ? settings.posFilter : "all",
     detailMode: settings.detailMode || "gentle",
