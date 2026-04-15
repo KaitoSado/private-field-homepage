@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-15 | codex | english app ui | `/apps/english` の右サイドバー上部に語彙セット切り替えを追加し、`大学受験みそ` を active、`英単語ガチ勢界隈` を語彙投入前の準備中入口として表示。`mode` とは別に `deckId` を保存する形へ準備 | `npm run build` |
 | 2026-04-15 | codex | signature profile schedule | マイページ / signature プロフィールのカレンダーを月間/1日表示の切り替えに変更。日付クリックで1日予定表へ移り、横スクロールの日付バーで月内の日別予定を移動できるようにした | `npm run build` |
 | 2026-04-15 | codex | git hygiene | ローカルの agent worktree、deploy scratch、語彙抽出中間物、翻訳 cache / test file を `.gitignore` に追加し、`der Rock = スカート` の名詞性チェックCSVを seed と整合させた | `npm run build` |
 | 2026-04-15 | codex | signature profile schedule | マイページ / signature プロフィールの月間カレンダーで、日付クリック後の 00:00-23:00 予定を「時間 / 予定」の表として表示・編集できるように変更 | `npm run build` |

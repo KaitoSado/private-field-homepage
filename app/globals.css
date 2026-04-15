@@ -8350,6 +8350,7 @@ textarea {
 }
 
 .english-mode-row,
+.english-deck-row,
 .english-topic-row,
 .english-toggle-row,
 .english-action-row,
@@ -8358,6 +8359,62 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.english-deck-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.english-deck-chip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 46px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: #faf9f7;
+  color: var(--ink);
+  text-align: left;
+  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+}
+
+.english-deck-chip strong,
+.english-deck-chip small {
+  min-width: 0;
+}
+
+.english-deck-chip strong {
+  font-size: 0.92rem;
+}
+
+.english-deck-chip small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.english-deck-chip:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.english-deck-chip.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.english-deck-chip.is-active small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.english-deck-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.66;
 }
 
 .english-mode-chip,
