@@ -802,7 +802,7 @@ export function EnglishChunksApp() {
                 <button type="button" className="button button-secondary" onClick={() => setMode("history")}>
                   見直しリスト
                 </button>
-                <span className="english-action-hint">⇦ミス ↑スルー ⇨クリア</span>
+                <span className="english-action-hint">↑スルー　←ミス　↑クリア</span>
               </div>
 
               <section className="english-about">

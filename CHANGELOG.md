@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-15 | codex | english app ui | `/apps/english` の操作説明を `↑スルー　←ミス　↑クリア` に変更 | `npm run build` |
 | 2026-04-15 | codex | english app copy | `英単語ガチ勢界隈` の説明を、英検1級語彙も含む横断デッキであることが分かる文言に更新 | `npm run build` |
 | 2026-04-15 | codex | workflow | Vercel が同一SHAを先に作業ブランチpreviewへ結び、後続の `origin/main` push で production domain が差し替わらない場合があるため、公開URL向け変更は `origin/main` を先に push する運用へ修正 | `curl -L https://archteia.com/apps/english`, Vercel commit status |
 | 2026-04-15 | codex | english app data | `英単語ガチ勢界隈` に EJQuotes の英検1級5000語3ページを追加。9ページ合計16386行を重複統合し、9179カードへ再生成。丸括弧の品詞表記 `(動)` なども分類対象に追加 | `npm run build:english-hardcore -- --cache-dir /tmp`, `npm run build` |
