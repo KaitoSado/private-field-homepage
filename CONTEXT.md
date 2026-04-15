@@ -44,6 +44,8 @@
   - アバターや静的アセット
 - `docs/`
   - プロジェクト文書
+- `経済設計/`
+  - ポイント経済、サブスク経済、仮想通貨経済など、このサービスの経済圏設計メモ
 - `skills/`
   - Codex / 他エージェント向けの project-local skill
   - 実運用する skill の正本は repo 内 `skills/` に置き、`scripts/sync-skill-to-codex.sh` で `~/.codex/skills/` に同期する

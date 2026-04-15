@@ -11,6 +11,12 @@ logs/*
 .claude/worktrees/
 .codex-deploy/
 
+# Local/reference source trees. Promote selected assets into app/, components/,
+# public/, scripts/, or docs/ before tracking.
+/GenerativeArtWithMath/
+/深夜徘徊界隈/
+/エージェント/
+
 # Root-level dropped media should be moved into public/ before tracking
 /Grok Image*.png
 /IMG_*.JPG
