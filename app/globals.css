@@ -8361,6 +8361,16 @@ textarea {
   gap: 6px;
 }
 
+.english-action-hint {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .english-deck-row {
   display: grid;
   grid-template-columns: 1fr;
@@ -9593,6 +9603,11 @@ textarea {
   }
 
   .english-action-row .button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .english-action-hint {
     width: 100%;
     justify-content: center;
   }
