@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-16 | codex | english app ui | `/apps/english` の語彙セット表示名を `必須単語` / `単語ガチ勢` に変更し、学習カード上部の現在デッキ名テキストを削除 | `npm run build` |
 | 2026-04-15 | codex | english app data | `英単語ガチ勢界隈` の主訳表示を 1 語 1 訳へ寄せ、`/` と `・` をカード表面から外した。`hardcore_meaning_overrides.tsv` で多義語を手動補正し、raw/alternate meanings は保持したまま `npm run audit:english-hardcore-meanings` で確認候補CSVを出せるようにした | `npm run build:english-hardcore -- --cache-dir /tmp`, `npm run audit:english-hardcore-meanings`, `npm run build` |
 | 2026-04-15 | codex | english app ui | `/apps/english` の操作説明を `↑スルー　←ミス　↑クリア` に変更 | `npm run build` |
 | 2026-04-15 | codex | english app copy | `英単語ガチ勢界隈` の説明を、英検1級語彙も含む横断デッキであることが分かる文言に更新 | `npm run build` |

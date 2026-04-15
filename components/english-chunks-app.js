@@ -683,7 +683,6 @@ export function EnglishChunksApp() {
             <div className="english-pane-stack">
               <div className="english-study-topline">
                 <span>残り {sessionTotal}</span>
-                <span>{activeDeck.label}</span>
               </div>
 
               {recommendedIds.length ? (
