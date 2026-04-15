@@ -114,6 +114,7 @@
 
 - 公開サイト運用では「修正済みだが本番未反映」の状態が混乱を生むため、ユーザーが止めない限り実装・修正依頼は `build -> commit -> 作業ブランチ push -> origin/main 反映 -> 対象URL確認` まで進める
 - `push` は作業ブランチへの退避だけを意味しない。`https://archteia.com/...` が対象の時は、本番反映先である `origin/main` まで届ける
+- 2026-04-15 時点では `origin/main` だけでは本番URLが更新されず、`origin/codex/resolve-untracked-files` fast-forward 後に反映されたため、Vercel production branch を確認・修正するまでは両方へ同じ commit を届ける
 - `public-site` は過去の運用名が残っているだけなので、デフォルトでは触らない。Vercel production branch が変わったと確認できた時だけ、`CONTEXT.md` とこの判断を更新する
 - ただし、build 失敗、未確認の無関係差分、schema の live 適用判断、別AIとの衝突リスクがある場合は commit / push せず、人間判断へ戻す
 - stage は関連差分だけを明示し、既存の未追跡ファイルや他作業の差分は巻き込まない

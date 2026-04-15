@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-15 | codex | workflow | `/apps/english` 本番反映で `origin/main` だけでは更新されず、`origin/codex/resolve-untracked-files` fast-forward 後に `https://archteia.com/apps/english` が更新されたため、Vercel production branch 確認まで両方へ同じ commit を届ける暫定ルールを追記 | `curl -L https://archteia.com/apps/english` |
 | 2026-04-15 | codex | english app data | `/apps/english` の `英単語ガチ勢界隈` deck を有効化。指定された6ページをスクレイピングする `scripts/build-english-hardcore-vocabulary.mjs` を追加し、11386行を重複統合した5230カードを `lib/english-hardcore.js` と `英単語/hardcore_scraped_normalized.tsv` に生成。品詞フィルタに `熟語` を追加 | `node scripts/build-english-hardcore-vocabulary.mjs --cache-dir /tmp`, `npm run build` |
 | 2026-04-15 | codex | workflow | 公開URL向けの実装・修正を `build -> commit -> 作業ブランチ push -> origin/main 反映 -> 対象URL確認` まで一連で行うルールに更新し、`public-site` はデフォルト本番反映先ではないことを明記 | `npm run build` |
 | 2026-04-15 | codex | english app ui | `/apps/english` の学習カード下ボタン列に `⇦ミス ↑スルー ⇨クリア` の小さな操作説明を追加 | `npm run build` |

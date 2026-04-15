@@ -63,6 +63,7 @@ repo 内では、次の情報を確認できます。
 - 環境変数
 - build log
 - 現状の本番反映先は `origin/main` として扱う。`public-site` へは設定確認なしに push しない
+- 2026-04-15 の確認では `origin/codex/resolve-untracked-files` を同じ commit に進めた時点で `https://archteia.com/apps/english` が更新された。Vercel production branch の設定を確認するまで、公開URL向け変更は `origin/main` とこの暫定 branch の両方を確認する
 
 ### Supabase
 
@@ -112,6 +113,7 @@ repo 内では、次の情報を確認できます。
 - Supabase schema の適用状況
 - 実画面の主要導線
 - 公開URL向けの変更では、作業ブランチ push だけでなく `origin/main` 反映後の対象URL確認まで行う
+- `origin/main` 反映後に対象URLが古いままなら、Vercel status と production branch を確認し、暫定的には `origin/codex/resolve-untracked-files` も同じ commit に fast-forward する
 
 ## 7. 最低限の確認コマンド
 
