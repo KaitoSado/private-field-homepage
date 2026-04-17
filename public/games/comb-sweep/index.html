@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>くしさばき</title>
+    <meta
+      name="description"
+      content="落ちてくる毛をくしでさらい、口へ入る前にさばき続ける縦長ブラウザゲーム。"
+    />
+    <link rel="stylesheet" href="/games/comb-sweep/style.css" />
+  </head>
+  <body>
+    <div class="comb-app">
+      <header class="comb-hud" id="hud" hidden>
+        <div class="comb-hud-cluster">
+          <div class="comb-hud-tile">
+            <span class="comb-label">救出</span>
+            <strong id="rescuedValue">0</strong>
+          </div>
+          <div class="comb-hud-tile">
+            <span class="comb-label">飲み込まれ</span>
+            <strong id="slippedValue">0 / 6</strong>
+          </div>
+          <div class="comb-hud-tile">
+            <span class="comb-label">連続</span>
+            <strong id="streakValue">0</strong>
+          </div>
+          <div class="comb-hud-tile">
+            <span class="comb-label">最良</span>
+            <strong id="bestValue">0</strong>
+          </div>
+        </div>
+        <button type="button" class="comb-button comb-button-ghost" id="restartButton">やり直す</button>
+      </header>
+
+      <main class="comb-stage">
+        <section class="comb-phone-shell">
+          <canvas id="gameCanvas" width="430" height="760" aria-label="くしさばきのゲーム画面"></canvas>
+
+          <div class="comb-overlay" id="titleScreen">
+            <div class="comb-panel">
+              <p class="comb-eyebrow">Comb rescue game</p>
+              <h1>くしさばき</h1>
+              <p class="comb-lead">
+                落ちてくる毛を、口へ入る前にくしでさらう。速くなるほど、中心へ引かれていきます。
+              </p>
+
+              <div class="comb-rules">
+                <p>マウスや指でくしを動かします。</p>
+                <p>毛が口へ入ると 1 つ失います。</p>
+                <p>6 回で終わり。長くさばくほど密度が上がります。</p>
+              </div>
+
+              <div class="comb-actions">
+                <button type="button" class="comb-button comb-button-primary" id="startButton">はじめる</button>
+              </div>
+
+              <div class="comb-controls">
+                <div><strong>移動</strong><span>マウス / タッチ / 矢印</span></div>
+                <div><strong>再開</strong><span>Enter</span></div>
+                <div><strong>やり直し</strong><span>R</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="comb-overlay" id="resultScreen" hidden>
+            <div class="comb-panel comb-panel-result">
+              <p class="comb-eyebrow">Run over</p>
+              <h2>飲み込まれました</h2>
+
+              <div class="comb-result-grid">
+                <div class="comb-result-tile">
+                  <span>救出</span>
+                  <strong id="resultRescued">0</strong>
+                </div>
+                <div class="comb-result-tile">
+                  <span>連続</span>
+                  <strong id="resultStreak">0</strong>
+                </div>
+                <div class="comb-result-tile">
+                  <span>最良</span>
+                  <strong id="resultBest">0</strong>
+                </div>
+              </div>
+
+              <p class="comb-result-note" id="resultNote">あとひとすくい、が一番むずかしい。</p>
+
+              <div class="comb-actions">
+                <button type="button" class="comb-button comb-button-primary" id="retryButton">もう一度</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="comb-footer-card">
+          <p class="comb-label">気配</p>
+          <div class="comb-footer-grid">
+            <div><span>密度</span><strong id="paceValue">x1.0</strong></div>
+            <div><span>流れ</span><strong id="statusValue">静か</strong></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/games/comb-sweep/script.js"></script>
+  </body>
+</html>

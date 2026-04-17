@@ -80,11 +80,12 @@
   - 助け合いボード `/apps/help`
   - 祈祷と呪詛 `/apps/ritual`
   - Games `/apps/games`
-    - `賽の河原` を `/games/sainokawara/` の static HTML/CSS/JS として実装
+    - `賽の河原` を `/games/sainokawara/index.html` の static HTML/CSS/JS として実装
     - `/apps/games` から iframe と単独起動リンクで遊べる
     - Matter.js ベースの石積み、危険度メーター、微弱な風、次石プレビュー、best score 保存を持つ
     - 置き方はドラッグ主体で、石がどれかひとつでも台から落ちたら即 game over
     - Matter.js は CDN ではなく `public/games/sainokawara/vendor/matter.min.js` を読む
+    - `くしさばき` を `/games/comb-sweep/index.html` の static HTML/CSS/JS として追加し、縦長 canvas 上で落ちてくる毛を口へ入る前にくしでさらうゲームとして `/apps/games` から埋め込みと単独起動ができる
   - 物理コンテンツ `/apps/physics`
     - `Physics Playground` として、操作・可視化・数式・理論マップを往復する client-side 物理 app
     - `Sandbox / Guided Lab / Math Link / Theory Map` を上位モードに持つ

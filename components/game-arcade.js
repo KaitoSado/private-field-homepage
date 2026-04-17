@@ -8,6 +8,7 @@ import { TowerDefenseGame } from "@/components/tower-defense-game";
 
 const tabs = [
   { id: "sainokawara", label: "賽の河原" },
+  { id: "comb", label: "くしさばき" },
   { id: "defense", label: "Tower Defense" },
   { id: "duck", label: "Duck Run" },
   { id: "breakout", label: "Breakout" },
@@ -112,6 +113,7 @@ export function GameArcade() {
         </div>
 
         {activeTab === "sainokawara" ? <SaikawaraGame /> : null}
+        {activeTab === "comb" ? <CombSweepGame /> : null}
         {activeTab === "defense" ? <TowerDefenseGame /> : null}
         {activeTab === "duck" ? <DuckPlatformerGame /> : null}
         {activeTab === "breakout" ? <BreakoutGame /> : null}
@@ -139,7 +141,7 @@ function SaikawaraGame() {
         <div className="arcade-feature-layout">
           <div className="arcade-feature-frame-wrap">
             <iframe
-              src="/games/sainokawara/"
+              src="/games/sainokawara/index.html"
               title="賽の河原"
               className="arcade-feature-frame"
               loading="lazy"
@@ -164,7 +166,58 @@ function SaikawaraGame() {
             </div>
 
             <div className="hero-actions">
-              <Link href="/games/sainokawara/" className="button button-secondary" target="_blank">
+              <Link href="/games/sainokawara/index.html" className="button button-secondary" target="_blank">
+                単独で開く
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CombSweepGame() {
+  return (
+    <div className="arcade-panel-grid arcade-panel-grid-wide">
+      <div className="surface arcade-game-card arcade-feature-game">
+        <div className="section-copy">
+          <p className="eyebrow">Comb rescue game</p>
+          <h2>くしさばき</h2>
+          <p>
+            落ちてくる毛をくしでさらい、口へ入る前にさばき続けるゲームです。後半ほど中心へ吸われやすくなり、浅い位置で拾うほうが安定します。
+          </p>
+        </div>
+
+        <div className="arcade-feature-layout">
+          <div className="arcade-feature-frame-wrap">
+            <iframe
+              src="/games/comb-sweep/index.html"
+              title="くしさばき"
+              className="arcade-feature-frame"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="surface arcade-side-card arcade-feature-side">
+            <div className="stats-grid">
+              <div className="stat-tile">
+                <strong>浅く拾う</strong>
+                <span>下へ引かれる前が楽です</span>
+              </div>
+              <div className="stat-tile">
+                <strong>終盤は密になる</strong>
+                <span>同時に落ちる本数が増えます</span>
+              </div>
+            </div>
+
+            <div className="arcade-feature-copy">
+              <p className="eyebrow">Controls</p>
+              <p>マウス / タッチ / 矢印で移動。Enter で開始、R でやり直し。</p>
+            </div>
+
+            <div className="hero-actions">
+              <Link href="/games/comb-sweep/index.html" className="button button-secondary" target="_blank">
                 単独で開く
               </Link>
             </div>
