@@ -110,14 +110,15 @@
 - モデル設定そのものを常に変えられない環境でも、読む範囲・検証量・計画の厚さを変えることで token 消費を抑える
 - 判断基準は `skills/reasoning-effort-router/` に置き、CLI で確認したい時は `npm run harness:classify -- "task text"` を使う
 
-### 18. 実装依頼は commit / push まで一連で完了させる
+### 18. 実装依頼は commit / push / 必要な live DB 反映まで一連で完了させる
 
-- 公開サイト運用では「修正済みだが本番未反映」の状態が混乱を生むため、ユーザーが止めない限り実装・修正依頼は `build -> commit -> origin/main 反映 -> 暫定 production branch と作業ブランチ push -> 対象URL確認` まで進める
+- 公開サイト運用では「修正済みだが本番未反映」や「コードだけ入ったが DB が古い」の状態が混乱を生むため、ユーザーが止めない限り実装・修正依頼は `build -> commit -> 必要な live schema / data 反映 -> origin/main 反映 -> 暫定 production branch と作業ブランチ push -> 対象URL / API確認` まで進める
 - `push` は作業ブランチへの退避だけを意味しない。`https://archteia.com/...` が対象の時は、本番反映先である `origin/main` まで届ける
+- schema / seed / live data の反映が依頼達成に必要なら、それも「実装の一部」として扱い、別タスクに逃がさない
 - 2026-04-15 時点では `origin/main` だけでは本番URLが更新されず、`origin/codex/resolve-untracked-files` fast-forward 後に反映されたため、Vercel production branch を確認・修正するまでは両方へ同じ commit を届ける
 - 同じ SHA を作業ブランチへ先に push すると Vercel が preview deployment status をその SHA に結び、あとから `origin/main` へ同じ SHA を push しても production domain が差し替わらない場合があるため、公開URL向け変更は `origin/main` への push を最初に行う
 - `public-site` は過去の運用名が残っているだけなので、デフォルトでは触らない。Vercel production branch が変わったと確認できた時だけ、`CONTEXT.md` とこの判断を更新する
-- ただし、build 失敗、未確認の無関係差分、schema の live 適用判断、別AIとの衝突リスクがある場合は commit / push せず、人間判断へ戻す
+- ただし、build 失敗、未確認の無関係差分、schema の live 適用判断、live credential 不足、別AIとの衝突リスクがある場合は commit / push / DB反映をせず、人間判断へ戻す
 - stage は関連差分だけを明示し、既存の未追跡ファイルや他作業の差分は巻き込まない
 
 ### 19. ドイツ語 app は英語 app の学習導線を踏襲し、訳データ補完を前提にする

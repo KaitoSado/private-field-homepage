@@ -60,9 +60,10 @@
 - 2026-04-15 時点では `origin/main` だけで `https://archteia.com/...` が更新されないケースがあり、`origin/codex/resolve-untracked-files` を同じ commit に fast-forward した時点で本番反映された。Vercel production branch を確認・修正するまでは、公開URL向け変更は `origin/main` と `origin/codex/resolve-untracked-files` の両方を同じ commit にそろえる
 - Vercel は同じ SHA を最初に受けた branch の deployment status を使うことがあるため、公開URL向け変更では作業ブランチより先に `origin/main` へ push し、その後 `origin/codex/resolve-untracked-files` と作業ブランチを同じ commit にそろえる
 - push 前に `npm run build`
-- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> origin/main へ本番反映 -> 暫定 production branch と作業ブランチへ push -> 対象URL確認` まで一連で行う
+- ユーザーが実装・修正を依頼した場合は、明示的に止められない限り `build -> 関連差分だけ commit -> 必要なら live schema / data 反映 -> origin/main へ本番反映 -> 暫定 production branch と作業ブランチへ push -> 対象URL / API確認` まで一連で行う
 - `https://archteia.com/...` の話をしている時は、ローカル確認や作業ブランチ push だけで完了扱いにしない
-- build 失敗、未確認の無関係差分、schema の live 適用判断、衝突リスクがある場合は commit / push せず報告する
+- schema / seed / live data の反映が依頼達成に必要な時は、それも実装の完了条件に含める。別タスク扱いで残さない
+- build 失敗、未確認の無関係差分、schema の live 適用判断、live credential 不足、衝突リスクがある場合は commit / push / DB反映を進めず報告する
 
 ## 編集時の注意点
 

@@ -177,9 +177,10 @@
 - 原則:
   - 1タスク = 1ブランチ = 1担当AI
   - 同じファイルを 2 つの AI が同時に編集しない
-  - 実装・修正依頼は、ユーザーが明示的に止めない限り `npm run build` 後に関連差分だけ commit し、まず `origin/main` へ push した上で `origin/codex/resolve-untracked-files` と作業ブランチへ同じ commit を届け、対象 URL を確認する
+  - 実装・修正依頼は、ユーザーが明示的に止めない限り `npm run build` 後に関連差分だけ commit し、依頼達成に live schema / data 反映が必要ならそこまで進めた上で、まず `origin/main` へ push し、次に `origin/codex/resolve-untracked-files` と作業ブランチへ同じ commit を届け、対象 URL / API を確認する
   - `https://archteia.com/...` の話題では、ローカル確認や作業ブランチ push だけで完了扱いにしない
-  - build 失敗、無関係差分混入、schema live 適用判断、衝突リスクがある場合は commit / push せず報告する
+  - schema / seed / live data の反映が依頼達成に必要な時は、それも完了条件に含める
+  - build 失敗、無関係差分混入、schema live 適用判断、live credential 不足、衝突リスクがある場合は commit / push / DB反映をせず報告する
 
 ## 9. AI 協調の基本ルール
 

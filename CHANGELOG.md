@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-18 | codex | workflow | 実装依頼は `build -> commit -> 必要な live schema / data 反映 -> origin/main -> 暫定 production branch / 作業ブランチ -> 対象URL / API確認` までを完了条件とする運用に明文化し、DB が必要な変更を後工程に残さないルールへ更新 | `sed -n '56,68p' AGENTS.md`, `sed -n '178,184p' CONTEXT.md`, `sed -n '113,121p' DECISIONS.md` |
 | 2026-04-18 | codex | games | `/games/comb-sweep/` に縦長の standalone ゲーム `くしさばき` を追加し、落ちてくる毛を口へ入る前にくしでさらう canvas game を `/apps/games` から埋め込み・単独起動できるようにした | `node --check public/games/comb-sweep/script.js`, `npm run build` |
 | 2026-04-18 | codex | frontend structure | `app/english-vocabulary.css` の読み込みを root layout から `/apps/english`, `/apps/german` の route へ移し、学習 UI の feature sheet を全ページへ配らないようにした | `npm run build` |
 | 2026-04-18 | codex | frontend structure | 英語/ドイツ語の学習画面スタイルを `app/globals.css` から `app/english-vocabulary.css` へ切り出し、`.ignore` も追加して探索系ツールの default ignore をそろえた | `npm run build` |
