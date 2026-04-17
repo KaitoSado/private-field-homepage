@@ -138,6 +138,12 @@
 ### 21. ドイツ語の同音異義語は別カード + 答え時注意で扱う
 
 - `der See` と `die See` のように冠詞で意味が分かれる語は、同じ見出しでも seed 上は別 entry として持つ
+
+### 22. default search は生成物より実装本体を優先する
+
+- Codex / Claude が普段使う `rg` の default search では、`.codex-deploy/`、`public/english-decks/`、`lib/german-vocabulary.js` のような巨大生成物や複製物を `.rgignore` で外す
+- 生成データが必要な時は ignore を外して広く検索するのではなく、対象ファイルの path を明示して直接開く
+- 英語 app はすでに `public/english-decks/*.json` を runtime 正本として使っているため、repo 内の巨大 JS dump は残さず、編集時の token 消費と accidental search hit を減らす
 - `die Bank / Bänke` と `die Bank / Banken` や `das Schloss` のように冠詞だけでは区別できない語は、答え表示時に `冠詞同じ` の注意を出す
 - 暗記画面はシンプルに保ち、同音異義の注意は答え表示後だけ見せる
 
