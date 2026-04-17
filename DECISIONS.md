@@ -147,9 +147,9 @@
 
 ### 23. prefix が明確な UI は feature sheet へ切り出す
 
-- `english-*` / `german-*` のように prefix がまとまっていて surface も限定されるスタイルは、`app/globals.css` に居続けさせず root layout から読む feature sheet へ分離する
+- `english-*` / `german-*` のように prefix がまとまっていて surface も限定されるスタイルは、`app/globals.css` に居続けさせず feature sheet へ分離する
 - まずは英語/ドイツ語の学習画面スタイルを `app/english-vocabulary.css` へ出し、巨大 global CSS を少しずつ薄くする
-- 既存 cascade を壊さないため、feature sheet は root layout で `globals.css` の直後に読む
+- feature sheet は可能な限り nearest route から読む。今回の `app/english-vocabulary.css` は `/apps/english` と `/apps/german` だけで読む
 - `die Bank / Bänke` と `die Bank / Banken` や `das Schloss` のように冠詞だけでは区別できない語は、答え表示時に `冠詞同じ` の注意を出す
 - 暗記画面はシンプルに保ち、同音異義の注意は答え表示後だけ見せる
 

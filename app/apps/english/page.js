@@ -1,3 +1,4 @@
+import "@/app/english-vocabulary.css";
 import { EnglishChunksApp } from "@/components/english-chunks-app";
 
 export const metadata = {

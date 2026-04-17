@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-18 | codex | frontend structure | `app/english-vocabulary.css` の読み込みを root layout から `/apps/english`, `/apps/german` の route へ移し、学習 UI の feature sheet を全ページへ配らないようにした | `npm run build` |
 | 2026-04-18 | codex | frontend structure | 英語/ドイツ語の学習画面スタイルを `app/globals.css` から `app/english-vocabulary.css` へ切り出し、`.ignore` も追加して探索系ツールの default ignore をそろえた | `npm run build` |
 | 2026-04-18 | codex | repo token efficiency | root に `.rgignore` を追加して deploy 複製・巨大生成語彙・vendor script を default search から外し、英語 deck の未使用生成物 `lib/english-target1900.js`, `lib/english-hardcore.js`, `lib/english-content.js` を撤去。英語 build script は `public/english-decks/*.json` と manifest だけを更新するよう整理 | `node scripts/build-english-vocabulary.mjs`, `npm run build:english-hardcore -- --cache-dir /tmp`, `npm run build` |
 | 2026-04-16 | codex | signature profile schedule ui | 予定表の空欄セルに出していた `空き` / `予定を見る` / `予定あり` の補助テキストを外し、旧保存値の `空き` も表示時に空欄として扱うようにした | `npm run build` |

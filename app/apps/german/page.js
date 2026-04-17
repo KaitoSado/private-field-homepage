@@ -1,3 +1,4 @@
+import "@/app/english-vocabulary.css";
 import { GermanVocabularyApp } from "@/components/german-vocabulary-app";
 
 export const metadata = {
