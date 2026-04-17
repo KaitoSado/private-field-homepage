@@ -34,6 +34,7 @@
 
 - `app/`
   - ルーティングとページ
+  - root layout から読む feature sheet として `app/english-vocabulary.css` を持ち、英語/ドイツ語の学習画面スタイルを `app/globals.css` から分離している
 - `components/`
   - UI とアプリ機能の本体
 - `lib/`
@@ -59,8 +60,8 @@
   - harness や試作のローカル実行ログ置き場。`.gitkeep` 以外は commit しない
 - `.claude/worktrees/`
   - Claude 側の試作・分岐用
-- `.rgignore`
-  - default の `rg` / `rg --files` から deploy 複製、巨大生成語彙、vendor script を外し、必要な時だけ明示パスで開く
+- `.rgignore`, `.ignore`
+  - default の探索から deploy 複製、巨大生成語彙、vendor script を外し、必要な時だけ明示パスで開く
 
 ## 5. 実装済みの主要面
 

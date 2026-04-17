@@ -1,0 +1,10 @@
+.codex-deploy/
+.next/
+node_modules/
+logs/
+package-lock.json
+public/english-decks/
+public/games/sainokawara/vendor/
+lib/german-vocabulary.js
+英単語/hardcore_scraped_normalized.tsv
+英単語/hardcore_meaning_review_candidates.csv

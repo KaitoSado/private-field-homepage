@@ -141,9 +141,15 @@
 
 ### 22. default search は生成物より実装本体を優先する
 
-- Codex / Claude が普段使う `rg` の default search では、`.codex-deploy/`、`public/english-decks/`、`lib/german-vocabulary.js` のような巨大生成物や複製物を `.rgignore` で外す
+- Codex / Claude が普段使う default search では、`.codex-deploy/`、`public/english-decks/`、`lib/german-vocabulary.js` のような巨大生成物や複製物を `.rgignore` / `.ignore` で外す
 - 生成データが必要な時は ignore を外して広く検索するのではなく、対象ファイルの path を明示して直接開く
 - 英語 app はすでに `public/english-decks/*.json` を runtime 正本として使っているため、repo 内の巨大 JS dump は残さず、編集時の token 消費と accidental search hit を減らす
+
+### 23. prefix が明確な UI は feature sheet へ切り出す
+
+- `english-*` / `german-*` のように prefix がまとまっていて surface も限定されるスタイルは、`app/globals.css` に居続けさせず root layout から読む feature sheet へ分離する
+- まずは英語/ドイツ語の学習画面スタイルを `app/english-vocabulary.css` へ出し、巨大 global CSS を少しずつ薄くする
+- 既存 cascade を壊さないため、feature sheet は root layout で `globals.css` の直後に読む
 - `die Bank / Bänke` と `die Bank / Banken` や `das Schloss` のように冠詞だけでは区別できない語は、答え表示時に `冠詞同じ` の注意を出す
 - 暗記画面はシンプルに保ち、同音異義の注意は答え表示後だけ見せる
 

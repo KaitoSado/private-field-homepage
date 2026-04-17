@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./english-vocabulary.css";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FeedVisibilityHydrator } from "@/components/feed-visibility-hydrator";
