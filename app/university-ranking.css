@@ -1,0 +1,221 @@
+.university-ranking-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 42px 0 80px;
+  color: #18202a;
+}
+
+.university-ranking-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: end;
+  padding: 28px 0 22px;
+  border-bottom: 2px solid #18202a;
+}
+
+.university-ranking-hero h1 {
+  margin: 6px 0 10px;
+  font-family: "Fraunces", "Yu Mincho", serif;
+  font-size: 4.6rem;
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.university-ranking-hero p {
+  max-width: 620px;
+  margin: 0;
+  color: #5c6b78;
+  line-height: 1.8;
+}
+
+.university-ranking-stats {
+  min-width: 150px;
+  padding: 18px;
+  border: 1px solid #d6dee5;
+  background: #fff;
+  display: grid;
+  gap: 2px;
+}
+
+.university-ranking-stats span,
+.university-ranking-section-head span,
+.university-ranking-option span,
+.university-ranking-result-copy span {
+  color: #5c6b78;
+  font-size: 0.78rem;
+}
+
+.university-ranking-stats strong {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.university-ranking-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.92fr) minmax(0, 1.08fr);
+  gap: 18px;
+  margin-top: 18px;
+  align-items: start;
+}
+
+.university-ranking-vote-panel,
+.university-ranking-board {
+  border: 1px solid #d6dee5;
+  background: #fff;
+  padding: 20px;
+}
+
+.university-ranking-section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.university-ranking-section-head h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.university-ranking-login {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid #d6dee5;
+  background: #f6f8fa;
+}
+
+.university-ranking-login p,
+.university-ranking-status {
+  margin: 0;
+  color: #5c6b78;
+  line-height: 1.7;
+}
+
+.university-ranking-form {
+  display: grid;
+  gap: 14px;
+}
+
+.university-ranking-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.university-ranking-form label span {
+  font-size: 0.78rem;
+  color: #5c6b78;
+}
+
+.university-ranking-option-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 460px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.university-ranking-option {
+  min-height: 72px;
+  display: grid;
+  gap: 4px;
+  align-content: center;
+  padding: 12px;
+  border: 1px solid #d6dee5;
+  border-left: 3px solid transparent;
+  background: #fff;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+.university-ranking-option:hover,
+.university-ranking-option.is-selected {
+  border-color: #18202a;
+  border-left-color: #2470a6;
+}
+
+.university-ranking-option:disabled {
+  cursor: default;
+  opacity: 0.62;
+}
+
+.university-ranking-list {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+}
+
+.university-ranking-list li {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 48px;
+  gap: 12px;
+  align-items: center;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid #d6dee5;
+  background: #fff;
+}
+
+.university-ranking-list li.is-empty {
+  opacity: 0.54;
+}
+
+.university-ranking-rank,
+.university-ranking-votes {
+  font-family: "IBM Plex Mono", monospace;
+  font-weight: 700;
+}
+
+.university-ranking-rank {
+  color: #2470a6;
+}
+
+.university-ranking-votes {
+  text-align: right;
+}
+
+.university-ranking-result-main,
+.university-ranking-result-copy {
+  display: grid;
+  gap: 6px;
+}
+
+.university-ranking-bar {
+  height: 7px;
+  background: #e8edf2;
+  overflow: hidden;
+}
+
+.university-ranking-bar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #2470a6, #2f8f62);
+}
+
+.university-ranking-form .full-width {
+  width: 100%;
+  justify-content: center;
+}
+
+@media (max-width: 860px) {
+  .university-ranking-hero,
+  .university-ranking-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .university-ranking-option-grid {
+    grid-template-columns: 1fr;
+    max-height: 360px;
+  }
+
+  .university-ranking-hero h1 {
+    font-size: 2.9rem;
+  }
+}

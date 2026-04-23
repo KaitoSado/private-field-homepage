@@ -210,6 +210,13 @@ create table if not exists public.german_progress (
   updated_at timestamptz not null default timezone('utc'::text, now())
 );
 
+create table if not exists public.university_ranking_votes (
+  user_id uuid primary key references public.profiles(id) on delete cascade,
+  university_key text not null,
+  created_at timestamptz not null default timezone('utc'::text, now()),
+  updated_at timestamptz not null default timezone('utc'::text, now())
+);
+
 create table if not exists public.point_transactions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
@@ -463,6 +470,10 @@ alter table public.german_progress add column if not exists attempt_history json
 alter table public.german_progress add column if not exists settings jsonb not null default '{}'::jsonb;
 alter table public.german_progress add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
 alter table public.german_progress add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
+
+alter table public.university_ranking_votes add column if not exists university_key text not null default '';
+alter table public.university_ranking_votes add column if not exists created_at timestamptz not null default timezone('utc'::text, now());
+alter table public.university_ranking_votes add column if not exists updated_at timestamptz not null default timezone('utc'::text, now());
 
 alter table public.point_transactions add column if not exists counterparty_user_id uuid references public.profiles(id) on delete set null;
 alter table public.point_transactions add column if not exists direction text;
@@ -941,6 +952,8 @@ create index if not exists edge_tips_category_idx on public.edge_tips(category, 
 create index if not exists economy_accounts_balance_idx on public.economy_accounts(point_balance desc);
 create index if not exists english_progress_updated_idx on public.english_progress(updated_at desc);
 create index if not exists german_progress_updated_idx on public.german_progress(updated_at desc);
+create index if not exists university_ranking_votes_university_idx on public.university_ranking_votes(university_key, created_at desc);
+create index if not exists university_ranking_votes_updated_idx on public.university_ranking_votes(updated_at desc);
 create index if not exists point_transactions_user_idx on public.point_transactions(user_id, created_at desc);
 create index if not exists point_transactions_kind_idx on public.point_transactions(kind, created_at desc);
 create index if not exists helpful_votes_target_idx on public.helpful_votes(target_type, target_id, created_at desc);
@@ -1134,6 +1147,13 @@ alter table public.point_transactions
   add constraint point_transactions_amount_check check (amount > 0),
   drop constraint if exists point_transactions_kind_length_check,
   add constraint point_transactions_kind_length_check check (char_length(kind) between 1 and 60);
+
+alter table public.university_ranking_votes
+  drop constraint if exists university_ranking_votes_key_check,
+  add constraint university_ranking_votes_key_check check (
+    char_length(university_key) between 1 and 80
+    and university_key ~ '^[a-z0-9-]+$'
+  );
 
 alter table public.helpful_votes
   drop constraint if exists helpful_votes_target_type_check,
@@ -1937,6 +1957,11 @@ create trigger german_progress_set_updated_at
 before update on public.german_progress
 for each row execute procedure public.handle_updated_at();
 
+drop trigger if exists university_ranking_votes_set_updated_at on public.university_ranking_votes;
+create trigger university_ranking_votes_set_updated_at
+before update on public.university_ranking_votes
+for each row execute procedure public.handle_updated_at();
+
 drop trigger if exists help_requests_set_updated_at on public.help_requests;
 create trigger help_requests_set_updated_at
 before update on public.help_requests
@@ -2148,6 +2173,7 @@ alter table public.edge_tips enable row level security;
 alter table public.economy_accounts enable row level security;
 alter table public.english_progress enable row level security;
 alter table public.german_progress enable row level security;
+alter table public.university_ranking_votes enable row level security;
 alter table public.point_transactions enable row level security;
 alter table public.helpful_votes enable row level security;
 alter table public.help_requests enable row level security;
@@ -2580,6 +2606,34 @@ for all
 using (public.is_admin())
 with check (public.is_admin());
 
+drop policy if exists "users can read own university ranking vote" on public.university_ranking_votes;
+create policy "users can read own university ranking vote"
+on public.university_ranking_votes
+for select
+using (auth.uid() = user_id or public.is_admin());
+
+drop policy if exists "users can insert own university ranking vote" on public.university_ranking_votes;
+create policy "users can insert own university ranking vote"
+on public.university_ranking_votes
+for insert
+to authenticated
+with check (
+  auth.uid() = user_id
+  and exists (
+    select 1
+    from public.profiles
+    where profiles.id = university_ranking_votes.user_id
+      and profiles.account_status = 'active'
+  )
+);
+
+drop policy if exists "admins can manage university ranking votes" on public.university_ranking_votes;
+create policy "admins can manage university ranking votes"
+on public.university_ranking_votes
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
 drop policy if exists "users can read own point transactions" on public.point_transactions;
 create policy "users can read own point transactions"
 on public.point_transactions
@@ -2624,6 +2678,7 @@ grant execute on function public.has_block_between(uuid, uuid) to authenticated;
 grant select on public.economy_accounts to authenticated;
 grant select, insert, update, delete on public.english_progress to authenticated;
 grant select, insert, update, delete on public.german_progress to authenticated;
+grant select, insert on public.university_ranking_votes to authenticated;
 grant select on public.point_transactions to authenticated;
 grant select, insert on public.helpful_votes to authenticated;
 grant select on public.help_request_feedback to authenticated;

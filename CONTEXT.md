@@ -125,6 +125,10 @@
     - 品詞フィルタは `名詞`, `動詞`, `助動詞`, `形容詞`, `副詞`, `前置詞`, `接続詞`, `代名詞`, `間投詞` を持つ
     - `npm run audit:german-meanings` で訳の怪しい候補を `ドイツ単語帳抜き出しフォルダ/ドイツ単語_訳確認リスト.csv` に出力し、high confidence の自動修正候補と review-required 候補を分けられる。現在は 1604 語から 436 候補、high 13 件
     - 進捗はログイン時に Supabase `german_progress` と同期し、未ログイン時または live schema 未適用時は `localStorage` に退避する
+  - 日本版・世界大学ランキング `/apps/university-ranking`
+    - まずは大学候補から「一番いい」と思う大学を選んで投票する単純なランキング app として実装する
+    - 投票はログイン必須で、Supabase `university_ranking_votes` の `user_id` primary key により一アカウント一回に制限する
+    - 公開面では総投票数と大学別ランキングを表示し、ログイン済みユーザーには自分の投票済み大学を表示する
   - リサーチプログレス `/apps/research-progress`
     - 招待制の研究会 / ゼミ / 小規模PJ向け研究ライン + 週次チェックイン面
     - グループ一覧 `/apps/research-progress`
@@ -158,6 +162,7 @@
 - `if exists` / `drop policy if exists` 前提で、再実行可能な schema を維持する
 - `research_*` 系テーブルはリサーチプログレス用の正本で、`research_groups`, `research_group_members`, `research_updates`, `research_projects`, `research_project_members` を含む
 - `research_*` 系の変更と `english_progress` / `german_progress` の追加は live 反映に Supabase への schema 再適用が必要
+- `university_ranking_votes` は日本版・世界大学ランキングの一アカウント一回投票用テーブルで、追加・変更時は live 反映に Supabase への schema 再適用が必要
 - マーケットプレイス基盤の `listings`, `room_details`, `car_details`, `dating_profiles`, `favorites`, `applications`, `matches`, `message_threads`, `messages`, `reviews`, `identity_verifications`, `admin_actions`, `payment_intents` と、`profiles`, `reports`, `notifications`, `blocks` の拡張は live 反映に Supabase への schema 再適用が必要
 
 ## 7. デザインと CSS の現状

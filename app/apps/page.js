@@ -13,6 +13,7 @@ const plannedApps = [
   { name: "物理コンテンツ", href: "/apps/physics", tag: "study" },
   { name: "英語コンテンツ", href: "/apps/english", tag: "study" },
   { name: "ドイツ語コンテンツ", href: "/apps/german", tag: "study" },
+  { name: "日本版・世界大学ランキング", href: "/apps/university-ranking", tag: "social" },
   { name: "株式投資アプリ", tag: "info", status: "coming soon" },
   { name: "研究室市場（Labfolio）", tag: "social", status: "coming soon" },
   { name: "Research Progress", tag: "study", status: "coming soon" },

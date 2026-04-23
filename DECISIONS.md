@@ -193,3 +193,9 @@
 - 初期表示では `basic` だけ読み込み、`hardcore` は deck 切り替え時に遅延読込する
 - deck 件数や先頭 chunk id のような軽い情報だけを `lib/english-deck-manifest.json` に置き、client bundle には巨大語彙本体を入れない
 - 語彙の正本や生成スクリプトは維持しつつ、配信経路だけを `lib/*.js` 直 import から static JSON 配信へ切り替える
+
+### 28. 日本版・世界大学ランキングは単純投票 MVP から始める
+
+- 初版では複雑な評価軸、ペアワイズ比較、学部別ランキングを入れず、「どの大学が一番いいか」を一票で選ぶ
+- 集計は大学別の総票数に絞り、`university_ranking_votes.user_id` を primary key にして一アカウント一回を保証する
+- 不正対策や詳細ランキング制度は、実際の利用と荒れ方を見てから追加する
