@@ -130,6 +130,11 @@
     - グループ一覧 `/apps/research-progress`
     - グループ別ダッシュボード `/apps/research-progress/[slug]`
     - group owner が研究計画、研究費申請、ポスター、論文投稿までの案件パイプラインを管理できる
+    - `/apps` の公開一覧では `coming soon` として案内する
+  - 株式投資アプリ
+    - `/apps` の公開一覧では `coming soon` として案内する
+  - 研究室市場（Labfolio）
+    - `/apps` の公開一覧では `coming soon` として案内する
   - ルームシェア `/apps/roomshare`
     - 信頼が必要なマッチング型マーケットプレイス基盤の最初のMVP
     - `Listing / Application / MessageThread / Message / Favorite / Review / Report / Block / Notification / IdentityVerification / AdminAction / PaymentIntent` を横展開前提で扱う
@@ -141,7 +146,7 @@
   - マッチングアプリ `/apps/matching`
     - `dating_profiles` と `matches` を使う将来展開用の準備面
     - 相互いいね、Match、マッチ後チャット、通報、ブロックのマッチングアプリ用導線を表示する
-  - アプリ一覧 `/apps` は公開中アプリと非公開アプリを分けて表示する
+  - アプリ一覧 `/apps` は公開中 / 準備中アプリと非公開アプリを分けて表示する
 
 ## 6. データベース運用ルール
 

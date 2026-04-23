@@ -13,6 +13,9 @@ const plannedApps = [
   { name: "物理コンテンツ", href: "/apps/physics", tag: "study" },
   { name: "英語コンテンツ", href: "/apps/english", tag: "study" },
   { name: "ドイツ語コンテンツ", href: "/apps/german", tag: "study" },
+  { name: "株式投資アプリ", tag: "info", status: "coming soon" },
+  { name: "研究室市場（Labfolio）", tag: "social", status: "coming soon" },
+  { name: "Research Progress", tag: "study", status: "coming soon" },
   { name: "3Dモデル3Dグラフィック", href: "/apps/3d", tag: "create" },
   { name: "みんなで作るVR空間", href: "/apps/vr", tag: "create" },
   { name: "教員裁判！地獄の裏シラバス", href: "/apps/classes", tag: "social" },
@@ -25,11 +28,42 @@ const plannedApps = [
 ];
 
 const privateApps = [
-  { name: "Research Progress", href: "/apps/research-progress", status: "招待制" },
   { name: "管理画面", href: "/admin", status: "管理者専用" },
   { name: "運用状況", href: "/ops", status: "運営用" },
   { name: "共同ワールド管理室", href: "/apps/vr", status: "招待制" }
 ];
+
+function AppsCard({ app, privateCard = false }) {
+  const cardClassName = [
+    "apps-card",
+    privateCard ? "is-private" : `is-${app.tag}`,
+    app.status === "coming soon" ? "is-coming-soon" : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const content = (
+    <>
+      {app.tag ? <span className="apps-tag">{app.tag}</span> : null}
+      {app.status ? <span className="apps-status">{app.status}</span> : null}
+      <h2>{app.name}</h2>
+    </>
+  );
+
+  if (!app.href || app.status === "coming soon") {
+    return (
+      <article className={cardClassName} aria-disabled="true">
+        {content}
+      </article>
+    );
+  }
+
+  return (
+    <Link href={app.href} className={cardClassName}>
+      {content}
+    </Link>
+  );
+}
 
 export default function AppsPage() {
   return (
@@ -40,10 +74,7 @@ export default function AppsPage() {
 
       <section className="apps-grid">
         {plannedApps.map((app) => (
-          <Link key={app.name} href={app.href} className={`apps-card is-${app.tag}`}>
-            <span className="apps-tag">{app.tag}</span>
-            <h2>{app.name}</h2>
-          </Link>
+          <AppsCard key={app.name} app={app} />
         ))}
       </section>
 
@@ -53,10 +84,7 @@ export default function AppsPage() {
         </div>
         <div className="apps-grid">
           {privateApps.map((app) => (
-            <Link key={app.name} href={app.href} className="apps-card is-private">
-              <span className="apps-status">{app.status}</span>
-              <h2>{app.name}</h2>
-            </Link>
+            <AppsCard key={app.name} app={app} privateCard />
           ))}
         </div>
       </section>
