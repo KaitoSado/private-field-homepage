@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-24 | codex | apps listing design | `/apps` の `coming soon` カードを、公開前かつ今後公開予定であることが分かる点線枠・準備中コピー・進行バーつきの表示に変更 | `npm run build` |
 | 2026-04-24 | codex | university ranking app | `/apps/university-ranking` に日本版・世界大学ランキングの単純投票 MVP を追加し、`/apps` に導線を追加。Supabase `university_ranking_votes` で一アカウント一回投票に制限する schema を追加 | `npm run build` |
 | 2026-04-24 | codex | apps listing | `/apps` の公開一覧に `株式投資アプリ`、`研究室市場（Labfolio）`、`Research Progress` を `coming soon` 表示で追加し、Research Progress は非公開一覧から公開一覧側へ移した | `npm run build` |
 | 2026-04-18 | codex | workflow | 実装依頼は `build -> commit -> 必要な live schema / data 反映 -> origin/main -> 暫定 production branch / 作業ブランチ -> 対象URL / API確認` までを完了条件とする運用に明文化し、DB が必要な変更を後工程に残さないルールへ更新 | `sed -n '56,68p' AGENTS.md`, `sed -n '178,184p' CONTEXT.md`, `sed -n '113,121p' DECISIONS.md` |

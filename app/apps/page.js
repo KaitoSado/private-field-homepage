@@ -35,10 +35,11 @@ const privateApps = [
 ];
 
 function AppsCard({ app, privateCard = false }) {
+  const isComingSoon = app.status === "coming soon";
   const cardClassName = [
     "apps-card",
     privateCard ? "is-private" : `is-${app.tag}`,
-    app.status === "coming soon" ? "is-coming-soon" : ""
+    isComingSoon ? "is-coming-soon" : ""
   ]
     .filter(Boolean)
     .join(" ");
@@ -48,10 +49,19 @@ function AppsCard({ app, privateCard = false }) {
       {app.tag ? <span className="apps-tag">{app.tag}</span> : null}
       {app.status ? <span className="apps-status">{app.status}</span> : null}
       <h2>{app.name}</h2>
+      {isComingSoon ? (
+        <div className="apps-coming-soon-meta">
+          <p>公開前 / 準備中</p>
+          <span className="apps-coming-soon-track" aria-hidden="true">
+            <span />
+          </span>
+          <small>準備が整い次第、ここが入口になります。</small>
+        </div>
+      ) : null}
     </>
   );
 
-  if (!app.href || app.status === "coming soon") {
+  if (!app.href || isComingSoon) {
     return (
       <article className={cardClassName} aria-disabled="true">
         {content}
