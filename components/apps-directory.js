@@ -16,17 +16,17 @@ const statusGroups = [
   {
     key: "live",
     label: "公開中",
-    description: "今すぐ使える道具。学内の生活や学習の入口になるもの。"
+    description: "使えるもの。"
   },
   {
     key: "soon",
     label: "準備中",
-    description: "これから入口が開くもの。公開前の研究メモとして置いています。"
+    description: "未公開。"
   },
   {
     key: "preview",
     label: "準備室",
-    description: "画面は見られるが、まだ本運用前のもの。"
+    description: "試運転。"
   }
 ];
 
@@ -75,7 +75,7 @@ export function AppsDirectory({ apps, operations }) {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="英語、研究、投票、住まい..."
+            placeholder="英語 / 研究 / 投票"
           />
         </label>
         <div className="apps-directory-filters" aria-label="カテゴリ">
@@ -107,7 +107,7 @@ export function AppsDirectory({ apps, operations }) {
 
         <div className="apps-shelves">
           <div className="apps-results-head">
-            <h2>道具の棚</h2>
+            <h2>Apps</h2>
             <p>{filteredApps.length}件</p>
           </div>
 
@@ -129,15 +129,15 @@ export function AppsDirectory({ apps, operations }) {
 
           {!filteredApps.length ? (
             <div className="apps-empty-state">
-              <h3>見つかりませんでした</h3>
-              <p>検索語を短くするか、カテゴリを「すべて」に戻してください。</p>
+              <h3>該当なし</h3>
+              <p>検索を変える。</p>
             </div>
           ) : null}
 
           <section className="apps-shelf-section is-ops">
             <div className="apps-shelf-head">
               <h3>運営用</h3>
-              <p>公開アプリとは分けて、管理や点検の入口だけを淡々と置いています。</p>
+              <p>管理・点検。</p>
             </div>
             <div className="apps-ops-list">
               {operations.map((app) => (
@@ -165,7 +165,7 @@ function AppShelfItem({ app, compact = false }) {
         <strong>{app.formalName || app.name}</strong>
         <span>{app.summary}</span>
       </span>
-      <span className="apps-app-action">{app.href ? "開く" : "待機中"}</span>
+      <span className="apps-app-action">{app.href ? "開く" : "準備中"}</span>
     </>
   );
 

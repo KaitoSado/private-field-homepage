@@ -87,7 +87,7 @@ export default function RootLayout({ children }) {
           <div className="site-footer-inner">
             <div className="footer-note">
               <p className="eyebrow">{BRAND_NAME}</p>
-              <p className="footer-copy">学生の公開ページ、研究ログ、学内アプリ棚。</p>
+              <p className="footer-copy">公開ページ / 記録 / Apps</p>
               {supportEmail ? <p className="muted">Support: {supportEmail}</p> : null}
             </div>
             <div className="footer-map">
@@ -98,7 +98,7 @@ export default function RootLayout({ children }) {
                 <Link href="/apps">アプリ</Link>
               </div>
               <div>
-                <strong>自分の場所</strong>
+                <strong>アカウント</strong>
                 <Link href="/auth">認証</Link>
                 <Link href="/notifications">通知</Link>
                 <Link href="/settings">設定</Link>

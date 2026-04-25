@@ -86,18 +86,17 @@ export function SignaturePostShelf({ username, posts }) {
               <div className="signature-post-copy">
                 <h3>特別記事</h3>
                 <p className="signature-post-preview">
-                  通常の記事とは別に、深くまとめた長文や限定公開の読みものを置くための入口です。
+                  長文と限定公開。
                 </p>
               </div>
               <div className="signature-special-cta">
-                <span>特別記事を見る</span>
+                <span>開く</span>
               </div>
             </Link>
           </>
         ) : (
           <div className="signature-post-card empty-state">
-            <h3>一致する記事がありません</h3>
-            <p>別のタグに切り替えると、他の公開記事が表示されます。</p>
+            <h3>該当なし</h3>
           </div>
         )}
       </div>
@@ -109,7 +108,7 @@ export function SignaturePostShelf({ username, posts }) {
             className="signature-inline-toggle signature-archive-toggle"
             onClick={() => setArchiveOpen((current) => !current)}
           >
-            {archiveOpen ? "アーカイブをたたむ" : `過去の記事をもっと見る (${archivedPosts.length})`}
+            {archiveOpen ? "たたむ" : `過去 ${archivedPosts.length}`}
           </button>
 
           {archiveOpen ? (
@@ -149,7 +148,7 @@ function formatDate(value) {
 function getPostPreview(post, limit = 120) {
   const source = `${post.excerpt || post.body || ""}`.trim();
   if (!source) {
-    return "制作の意図や問いを添えると、ここに表示されます。";
+    return "メモなし";
   }
 
   if (source.length <= limit) {

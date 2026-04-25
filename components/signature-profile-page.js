@@ -25,8 +25,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { getAvatarBucket, uploadPublicFile } from "@/lib/storage";
 import { sanitizeExternalUrl, sanitizeHttpUrl } from "@/lib/url";
 
-const DEFAULT_IDENTITY_HEADING = "なんか書ける";
-const DEFAULT_RECORD_HEADING = "記録したいこと";
+const DEFAULT_IDENTITY_HEADING = "プロフィール";
+const DEFAULT_RECORD_HEADING = "ログ";
 const SIGNATURE_META_MARKER = "[[signature-meta::";
 const IDENTITY_MARKER = "[[identity-heading::";
 const SCHEDULE_DAYS = [
@@ -173,10 +173,10 @@ export function SignatureProfilePage({ profile, posts }) {
   const recentPosts = postItems.slice(0, 4);
   const latestPost = recentPosts[0] || null;
   const fixedLinkFields = getFixedLinkFields();
-  const leadCopy = draft.headline || "なんか書ける";
+  const leadCopy = draft.headline || "未設定";
   const identityBody =
     draft.bio ||
-    "知覚、身体、記録、インターフェース。そのあいだを研究と実装の両方から往復しながら、触れる思考と残る体験をつくっています。";
+    "未記入";
   const customLinks = inflateCustomLinks(draft.custom_links);
   const links = buildRenderedProfileLinks(draft);
   const infoCards = [
@@ -214,7 +214,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const activeCalendarDay = Math.min(selectedCalendarDay, selectedMonthDayCount);
   const activeCalendarEntry = getCalendarDayEntry(monthlyCalendar, selectedMonth, activeCalendarDay);
   const recordItems = mergeRecordItems(draft.record_items, buildDefaultRecordItems());
-  const defaultLeadCopy = "なんか書ける";
+  const defaultLeadCopy = "未設定";
 
   async function saveProfile() {
     if (!canEdit) return;
@@ -621,11 +621,11 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <nav className="signature-local-nav" aria-label="Profile sections">
         <div className="signature-local-nav-links">
-          <a href="#signature-identity">自己紹介</a>
+          <a href="#signature-identity">プロフィール</a>
           <a href="#signature-current">いま</a>
-          <a href="#signature-works">作品棚</a>
+          <a href="#signature-works">作品</a>
           <a href="#signature-thinking">記録</a>
-          <a href="#signature-contact">できること</a>
+          <a href="#signature-contact">連絡</a>
         </div>
         {canEdit ? (
           <div className="signature-local-nav-actions">
@@ -692,7 +692,7 @@ export function SignatureProfilePage({ profile, posts }) {
                   value={draft.headline || ""}
                   onChange={(event) => updateField("headline", event.target.value)}
                   maxLength={PROFILE_HEADLINE_LIMIT}
-                  placeholder="なんか書ける"
+                  placeholder="肩書き / ひとこと"
                 />
               </label>
               <label className="signature-edit-inline">
@@ -718,13 +718,13 @@ export function SignatureProfilePage({ profile, posts }) {
 
           <div className="hero-actions signature-hero-actions">
             <a className="button button-primary" href="#signature-works">
-              作品棚を見る
+              作品
             </a>
             <a className="button button-secondary" href="#signature-thinking">
-              記録を見る
+              記録
             </a>
             <a className="button button-ghost" href="#signature-contact">
-              できること
+              連絡
             </a>
           </div>
 
@@ -783,7 +783,7 @@ export function SignatureProfilePage({ profile, posts }) {
         </div>
 
         <aside className="signature-panel">
-          <p className="eyebrow">現在地メモ</p>
+          <p className="eyebrow">現在地</p>
           <dl className="signature-coordinates">
             <div>
               <dt>名前</dt>
@@ -794,12 +794,12 @@ export function SignatureProfilePage({ profile, posts }) {
               <dd>{draft.location || "Tokyo / Remote"}</dd>
             </div>
             <div>
-              <dt>公開</dt>
+              <dt>記事</dt>
               <dd>{postItems.length}件</dd>
             </div>
             <div>
-              <dt>最近</dt>
-              <dd>{latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "静かに更新中"}</dd>
+              <dt>更新</dt>
+              <dd>{latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "なし"}</dd>
             </div>
             <div>
               <dt>リンク</dt>
@@ -818,7 +818,7 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <SignatureInteractiveSection id="signature-identity">
         <div className="signature-section-head">
-          <p className="eyebrow">自己紹介</p>
+          <p className="eyebrow">プロフィール</p>
           {isEditing ? (
             <textarea
               className="signature-edit-title-block"
@@ -858,8 +858,8 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-current">
         <div className="signature-section-head">
           <div>
-            <p className="eyebrow">いま</p>
-            <h2>近況ログ</h2>
+            <p className="eyebrow">ログ</p>
+            <h2>いま</h2>
           </div>
           {canEdit ? (
             <button
@@ -920,7 +920,7 @@ export function SignatureProfilePage({ profile, posts }) {
                   />
                 ) : (
                   <div className="signature-current-body">
-                    <p>{getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).text || "ここに近況を書けます。"}</p>
+                    <p>{getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).text || "未記入"}</p>
                   </div>
                 )}
                 {!isEditing && getCollapsibleText(entry.body, expandedCurrentEntries[index], 150).truncated ? (
@@ -946,7 +946,7 @@ export function SignatureProfilePage({ profile, posts }) {
                 className="signature-section-expand"
                 onClick={() => setShowAllCurrentEntries((current) => !current)}
               >
-                {showAllCurrentEntries ? "最近の記録だけ表示" : `過去の記録をもっと見る (${hiddenCurrentEntryCount})`}
+                {showAllCurrentEntries ? "最近だけ" : `過去 ${hiddenCurrentEntryCount}`}
               </button>
             ) : null}
           </div>
@@ -968,7 +968,7 @@ export function SignatureProfilePage({ profile, posts }) {
                 >
                   {showCalendar ? "週間に戻す" : "カレンダー"}
                 </button>
-                <h3>生活の予定</h3>
+                <h3>予定</h3>
               </div>
               <div className="signature-schedule-note">
                 <p className="signature-schedule-note-label">メモ</p>
@@ -978,12 +978,12 @@ export function SignatureProfilePage({ profile, posts }) {
                     value={draft.schedule_note || ""}
                     onChange={(event) => updateField("schedule_note", event.target.value)}
                     maxLength={PROFILE_BIO_LIMIT}
-                    placeholder="補足、ゆるい目標、今週の注意点"
+                    placeholder="メモ"
                   />
                 ) : draft.schedule_note ? (
                   <p>{draft.schedule_note}</p>
                 ) : (
-                  <p className="signature-schedule-note-empty">補足メモ</p>
+                  <p className="signature-schedule-note-empty">メモなし</p>
                 )}
               </div>
             </div>
@@ -1084,7 +1084,7 @@ export function SignatureProfilePage({ profile, posts }) {
                           value={activeCalendarEntry.note}
                           onChange={(event) => updateCalendarDayNote(selectedMonth, activeCalendarDay, event.target.value)}
                           maxLength={160}
-                          placeholder="この日の補足"
+                          placeholder="メモ"
                         />
                       ) : activeCalendarEntry.note ? (
                         <p>{activeCalendarEntry.note}</p>
@@ -1158,7 +1158,7 @@ export function SignatureProfilePage({ profile, posts }) {
                                 value={weeklySchedule[day.key]?.[period.key] || ""}
                                 onChange={(event) => updateScheduleCell(day.key, period.key, event.target.value)}
                                 maxLength={PROFILE_HEADLINE_LIMIT}
-                                placeholder="授業 / 制作 / 移動"
+                                placeholder="授業 / 制作"
                               />
                             ) : (
                               <span>{weeklySchedule[day.key]?.[period.key] || ""}</span>
@@ -1178,8 +1178,8 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-works">
         <div className="signature-section-head">
           <div>
-            <p className="eyebrow">作品棚</p>
-            <h2>書いたもの・作ったもの</h2>
+            <p className="eyebrow">作品</p>
+            <h2>Works</h2>
           </div>
           {canEdit ? (
             <button type="button" className="button button-secondary button-small" onClick={openPostComposer}>
@@ -1202,8 +1202,7 @@ export function SignatureProfilePage({ profile, posts }) {
           <SignaturePostShelf username={draft.username} posts={postItems} />
         ) : (
           <div className="signature-post-card empty-state">
-            <h3>まだ記事がありません</h3>
-            <p>最初の公開記事を追加するとここに出ます。</p>
+            <h3>なし</h3>
           </div>
         )}
       </SignatureInteractiveSection>
@@ -1212,7 +1211,7 @@ export function SignatureProfilePage({ profile, posts }) {
         <SignatureInteractiveSection id="signature-links">
           <div className="signature-section-head">
             <p className="eyebrow">リンク</p>
-            <h2>外に置いている場所</h2>
+            <h2>Links</h2>
           </div>
           <div className="signature-link-shelf">
             {isEditing ? (
@@ -1263,7 +1262,7 @@ export function SignatureProfilePage({ profile, posts }) {
                   href={link.href}
                   className={`signature-link-shelf-item${index === 0 ? " is-primary" : ""}`}
                 >
-                  <span>{index === 0 ? "主な入口" : `リンク ${index + 1}`}</span>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
                   <strong>{link.label}</strong>
                 </ExternalLink>
               ))
@@ -1332,7 +1331,7 @@ export function SignatureProfilePage({ profile, posts }) {
             ) : (
               <>
                 <h3>{item.title}</h3>
-                <p>{getCollapsibleText(item.body, expandedRecordItems[index], 140).text || "ここに記録を書けます。"}</p>
+                <p>{getCollapsibleText(item.body, expandedRecordItems[index], 140).text || "未記入"}</p>
                 {getCollapsibleText(item.body, expandedRecordItems[index], 140).truncated ? (
                   <button
                     type="button"
@@ -1356,8 +1355,8 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <SignatureInteractiveSection id="signature-contact">
         <div className="signature-section-head">
-          <p className="eyebrow">できること</p>
-          <h2>一緒にできそうなこと</h2>
+          <p className="eyebrow">連絡</p>
+          <h2>相談</h2>
         </div>
         <div className="signature-contact-layout">
           <div className="signature-contact-card">
@@ -1372,19 +1371,19 @@ export function SignatureProfilePage({ profile, posts }) {
             ) : (
               <p>
                 {draft.open_to ||
-                  "研究プロトタイプ、実験用UI、文化系プロジェクト、個人開発の技術相談などを受けています。"}
+                  "研究プロトタイプ / 実験UI / 個人開発"}
               </p>
             )}
             <div className="link-list">
               {links.length ? (
                 links.map((link) => (
                   <ExternalLink key={link.label} href={link.href} className="button button-primary">
-                    {link.label}へ
+                    {link.label}
                   </ExternalLink>
                 ))
               ) : (
                 <Link href="/settings" className="button button-secondary">
-                  リンクを設定する
+                  リンク設定
                 </Link>
               )}
             </div>
@@ -1393,8 +1392,8 @@ export function SignatureProfilePage({ profile, posts }) {
           <aside className="signature-question-card">
             <div className="signature-question-head">
               <div>
-                <p className="eyebrow">匿名質問</p>
-                <h3>匿名質問箱</h3>
+                <p className="eyebrow">質問</p>
+                <h3>匿名</h3>
               </div>
               <span className="signature-question-count">{questionItems.length}</span>
             </div>
@@ -1405,10 +1404,10 @@ export function SignatureProfilePage({ profile, posts }) {
                 value={questionInput}
                 onChange={(event) => setQuestionInput(event.target.value)}
                 maxLength={280}
-                placeholder="匿名で質問を送る"
+                placeholder="質問を書く"
               />
               <button type="submit" className="button button-primary" disabled={submittingQuestion}>
-                {submittingQuestion ? "送信中..." : "質問を送る"}
+                {submittingQuestion ? "送信中..." : "送る"}
               </button>
             </form>
 
@@ -1437,7 +1436,7 @@ export function SignatureProfilePage({ profile, posts }) {
                               [item.id]: event.target.value
                             }))
                           }
-                          placeholder="ここに回答を書く"
+                          placeholder="回答"
                         />
                         <div className="signature-question-actions">
                           <button
