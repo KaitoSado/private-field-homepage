@@ -173,7 +173,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const recentPosts = postItems.slice(0, 4);
   const latestPost = recentPosts[0] || null;
   const fixedLinkFields = getFixedLinkFields();
-  const leadCopy = draft.headline || "未設定";
+  const leadCopy = `${draft.headline || ""}`.trim();
   const identityBody =
     draft.bio ||
     "未記入";
@@ -214,7 +214,7 @@ export function SignatureProfilePage({ profile, posts }) {
   const activeCalendarDay = Math.min(selectedCalendarDay, selectedMonthDayCount);
   const activeCalendarEntry = getCalendarDayEntry(monthlyCalendar, selectedMonth, activeCalendarDay);
   const recordItems = mergeRecordItems(draft.record_items, buildDefaultRecordItems());
-  const defaultLeadCopy = "未設定";
+  const defaultLeadCopy = "";
 
   async function saveProfile() {
     if (!canEdit) return;
@@ -695,24 +695,13 @@ export function SignatureProfilePage({ profile, posts }) {
                   placeholder="肩書き / ひとこと"
                 />
               </label>
-              <label className="signature-edit-inline">
-                <span className="sr-only">自己紹介</span>
-                <textarea
-                  rows="5"
-                  value={draft.bio || ""}
-                  onChange={(event) => updateField("bio", event.target.value)}
-                  maxLength={PROFILE_BIO_LIMIT}
-                  placeholder="自己紹介"
-                />
-              </label>
             </>
           ) : (
             <>
               <p className="signature-eyebrow">@{draft.username}</p>
               <h1>{draft.display_name || draft.username}</h1>
               <KeioBadge profile={draft} />
-              <p className="signature-lead">{leadCopy}</p>
-              <p className="signature-body">{identityBody}</p>
+              {leadCopy ? <p className="signature-lead">{leadCopy}</p> : null}
             </>
           )}
 
@@ -832,7 +821,18 @@ export function SignatureProfilePage({ profile, posts }) {
         </div>
         <div className="signature-identity-layout">
           <article className="signature-identity-statement">
-            <p>{identityBody}</p>
+            {isEditing ? (
+              <textarea
+                className="signature-edit-block"
+                rows="6"
+                value={draft.bio || ""}
+                onChange={(event) => updateField("bio", event.target.value)}
+                maxLength={PROFILE_BIO_LIMIT}
+                placeholder="自己紹介"
+              />
+            ) : (
+              <p>{identityBody}</p>
+            )}
           </article>
           <dl className="signature-identity-notes">
             {infoCards.map((card) => (

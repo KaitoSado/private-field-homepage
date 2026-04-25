@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-26 | codex | signature profile ia | signature プロフィールの hero から自己紹介本文を外し、bio の表示・編集を下の `プロフィール` セクションへ集約。hero は名前・handle・短い headline の名札に整理 | `npm run build` |
 | 2026-04-25 | codex | ui copy | `/apps` と signature プロフィールの説明的なコピーを削り、実在サイトを参考に短い棚札・状態・1行メモ中心の文言へ調整 | `npm run build` |
 | 2026-04-25 | codex | information architecture ui | New Commune の UI を「きれいなSaaS」ではなく学生の公開プロフィール・研究ログ・学内アプリ棚へ寄せ、`/apps` を検索/カテゴリ/状態つきの棚に再設計。signature プロフィールは過剰なグローや英語ラベルを減らし、現在地メモ・自己紹介・近況ログ・作品棚・リンク棚・できることへ整理 | `next build`, `curl -I http://127.0.0.1:3010/apps`, `curl -I http://127.0.0.1:3010/@sadokaito` |
 | 2026-04-24 | codex | apps listing design | `/apps` の `coming soon` カードを、公開前かつ今後公開予定であることが分かる点線枠・準備中コピー・進行バーつきの表示に変更 | `npm run build` |

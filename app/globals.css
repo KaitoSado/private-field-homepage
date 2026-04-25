@@ -5170,6 +5170,12 @@ textarea {
   white-space: pre-wrap;
 }
 
+.signature-identity-statement .signature-edit-block {
+  min-height: 180px;
+  font-size: 1.18rem;
+  line-height: 1.7;
+}
+
 .signature-identity-notes {
   display: grid;
   gap: 0;
