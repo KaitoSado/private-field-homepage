@@ -85,25 +85,37 @@ export default function RootLayout({ children }) {
 
         <footer className="site-footer">
           <div className="site-footer-inner">
-            <div>
+            <div className="footer-note">
               <p className="eyebrow">{BRAND_NAME}</p>
-              <p className="footer-copy">{BRAND_DESCRIPTION}</p>
+              <p className="footer-copy">学生の公開ページ、研究ログ、学内アプリ棚。</p>
               {supportEmail ? <p className="muted">Support: {supportEmail}</p> : null}
             </div>
-            <div className="footer-links">
-              <Link href="/">トップ</Link>
-              <Link href="/explore">発見</Link>
-              <Link href="/apps">アプリ</Link>
-              <Link href="/auth">認証</Link>
-              <Link href="/notifications">通知</Link>
-              <Link href="/settings">設定</Link>
-              <Link href="/admin">管理</Link>
-              <Link href="/ops">運用</Link>
-              <Link href="/terms">利用規約</Link>
-              <Link href="/privacy">プライバシー</Link>
-              <Link href="/retention">保持方針</Link>
-              <Link href="/contact">問い合わせ</Link>
-              <Link href="/changelog">更新履歴</Link>
+            <div className="footer-map">
+              <div>
+                <strong>見る</strong>
+                <Link href="/">トップ</Link>
+                <Link href="/explore">発見</Link>
+                <Link href="/apps">アプリ</Link>
+              </div>
+              <div>
+                <strong>自分の場所</strong>
+                <Link href="/auth">認証</Link>
+                <Link href="/notifications">通知</Link>
+                <Link href="/settings">設定</Link>
+              </div>
+              <div>
+                <strong>運営</strong>
+                <Link href="/admin">管理</Link>
+                <Link href="/ops">運用</Link>
+                <Link href="/changelog">更新履歴</Link>
+              </div>
+              <div>
+                <strong>文書</strong>
+                <Link href="/terms">利用規約</Link>
+                <Link href="/privacy">プライバシー</Link>
+                <Link href="/retention">保持方針</Link>
+                <Link href="/contact">問い合わせ</Link>
+              </div>
             </div>
           </div>
         </footer>

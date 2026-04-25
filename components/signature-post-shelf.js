@@ -38,7 +38,7 @@ export function SignaturePostShelf({ username, posts }) {
               className={`signature-filter-chip ${activeFilter === filter ? "is-active" : ""}`}
               onClick={() => setActiveFilter(filter)}
             >
-              {filter === "all" ? "All" : `#${filter}`}
+              {filter === "all" ? "すべて" : `#${filter}`}
             </button>
           ))}
         </div>
@@ -53,7 +53,7 @@ export function SignaturePostShelf({ username, posts }) {
                 <Link key={post.id} href={`/@${username}/${post.slug}`} className="signature-post-card">
                   <div className="post-card-head">
                     <span>{formatDate(post.published_at || post.updated_at)}</span>
-                    <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
+                    <span>{post.tags[0] ? `#${post.tags[0]}` : "制作メモ"}</span>
                   </div>
                   <div className={`signature-post-body ${thumbnail ? "has-thumb" : ""}`}>
                     <div className="signature-post-copy">
@@ -80,8 +80,8 @@ export function SignaturePostShelf({ username, posts }) {
             })}
             <Link href={`/@${username}/special-articles`} className="signature-post-card signature-post-card-special">
               <div className="post-card-head">
-                <span>Long-form</span>
-                <span>Collection</span>
+                <span>長文</span>
+                <span>まとめ</span>
               </div>
               <div className="signature-post-copy">
                 <h3>特別記事</h3>
@@ -123,7 +123,7 @@ export function SignaturePostShelf({ username, posts }) {
                   ) : null}
                   <div className="signature-post-archive-meta">
                     <span>{formatDate(post.published_at || post.updated_at)}</span>
-                    <span>{post.tags[0] ? `#${post.tags[0]}` : "Field note"}</span>
+                    <span>{post.tags[0] ? `#${post.tags[0]}` : "制作メモ"}</span>
                   </div>
                   <strong>{post.title}</strong>
                   <p>{getPostPreview(post, 96)}</p>
@@ -138,7 +138,7 @@ export function SignaturePostShelf({ username, posts }) {
 }
 
 function formatDate(value) {
-  if (!value) return "Draft";
+  if (!value) return "下書き";
   return new Intl.DateTimeFormat("ja-JP", {
     year: "numeric",
     month: "long",

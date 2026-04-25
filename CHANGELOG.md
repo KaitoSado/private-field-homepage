@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-25 | codex | information architecture ui | New Commune の UI を「きれいなSaaS」ではなく学生の公開プロフィール・研究ログ・学内アプリ棚へ寄せ、`/apps` を検索/カテゴリ/状態つきの棚に再設計。signature プロフィールは過剰なグローや英語ラベルを減らし、現在地メモ・自己紹介・近況ログ・作品棚・リンク棚・できることへ整理 | `next build`, `curl -I http://127.0.0.1:3010/apps`, `curl -I http://127.0.0.1:3010/@sadokaito` |
 | 2026-04-24 | codex | apps listing design | `/apps` の `coming soon` カードを、公開前かつ今後公開予定であることが分かる点線枠・準備中コピー・進行バーつきの表示に変更 | `npm run build` |
 | 2026-04-24 | codex | university ranking app | `/apps/university-ranking` に日本版・世界大学ランキングの単純投票 MVP を追加し、`/apps` に導線を追加。Supabase `university_ranking_votes` で一アカウント一回投票に制限する schema を追加 | `npm run build` |
 | 2026-04-24 | codex | apps listing | `/apps` の公開一覧に `株式投資アプリ`、`研究室市場（Labfolio）`、`Research Progress` を `coming soon` 表示で追加し、Research Progress は非公開一覧から公開一覧側へ移した | `npm run build` |

@@ -104,6 +104,10 @@ export function HeaderNav() {
   return (
     <>
       <div className="site-nav-desktop">
+        <Link href="/explore" className="site-command-entry">
+          <span>探す</span>
+          <kbd>/</kbd>
+        </Link>
         <nav className="site-nav">
           {mainLinks.map((link) => (
             <Link

@@ -181,19 +181,19 @@ export function SignatureProfilePage({ profile, posts }) {
   const links = buildRenderedProfileLinks(draft);
   const infoCards = [
     {
-      eyebrow: "Affiliation",
+      eyebrow: "所属",
       key: "affiliation",
       title: draft.affiliation || "Independent / research-linked",
       body: ""
     },
     {
-      eyebrow: "Focus",
+      eyebrow: "関心",
       key: "focus_area",
       title: draft.focus_area || "HCI / Prototyping / Experimental Web",
       body: ""
     },
     {
-      eyebrow: "Base",
+      eyebrow: "拠点",
       key: "location",
       title: draft.location || "Tokyo / Remote",
       body: ""
@@ -621,11 +621,11 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <nav className="signature-local-nav" aria-label="Profile sections">
         <div className="signature-local-nav-links">
-          <a href="#signature-identity">Identity</a>
-          <a href="#signature-current">Current</a>
-          <a href="#signature-works">Works</a>
-          <a href="#signature-thinking">Records</a>
-          <a href="#signature-contact">Contact</a>
+          <a href="#signature-identity">自己紹介</a>
+          <a href="#signature-current">いま</a>
+          <a href="#signature-works">作品棚</a>
+          <a href="#signature-thinking">記録</a>
+          <a href="#signature-contact">できること</a>
         </div>
         {canEdit ? (
           <div className="signature-local-nav-actions">
@@ -718,13 +718,13 @@ export function SignatureProfilePage({ profile, posts }) {
 
           <div className="hero-actions signature-hero-actions">
             <a className="button button-primary" href="#signature-works">
-              記事
+              作品棚を見る
             </a>
             <a className="button button-secondary" href="#signature-thinking">
-              記録したいこと
+              記録を見る
             </a>
             <a className="button button-ghost" href="#signature-contact">
-              連絡する
+              できること
             </a>
           </div>
 
@@ -783,27 +783,27 @@ export function SignatureProfilePage({ profile, posts }) {
         </div>
 
         <aside className="signature-panel">
-          <p className="eyebrow">Current Coordinates</p>
+          <p className="eyebrow">現在地メモ</p>
           <dl className="signature-coordinates">
             <div>
-              <dt>Handle</dt>
+              <dt>名前</dt>
               <dd>@{draft.username}</dd>
             </div>
             <div>
-              <dt>Base</dt>
+              <dt>拠点</dt>
               <dd>{draft.location || "Tokyo / Remote"}</dd>
             </div>
             <div>
-              <dt>Published</dt>
-              <dd>{postItems.length} posts</dd>
+              <dt>公開</dt>
+              <dd>{postItems.length}件</dd>
             </div>
             <div>
-              <dt>Latest</dt>
-              <dd>{latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "Updating quietly"}</dd>
+              <dt>最近</dt>
+              <dd>{latestPost ? formatDate(latestPost.published_at || latestPost.updated_at) : "静かに更新中"}</dd>
             </div>
             <div>
-              <dt>Links</dt>
-              <dd>{links.length ? `${links.length} destinations` : "No external links yet"}</dd>
+              <dt>リンク</dt>
+              <dd>{links.length ? `${links.length}件` : "未設定"}</dd>
             </div>
           </dl>
         </aside>
@@ -818,7 +818,7 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <SignatureInteractiveSection id="signature-identity">
         <div className="signature-section-head">
-          <p className="eyebrow">Identity</p>
+          <p className="eyebrow">自己紹介</p>
           {isEditing ? (
             <textarea
               className="signature-edit-title-block"
@@ -830,30 +830,36 @@ export function SignatureProfilePage({ profile, posts }) {
             <h2>{draft.identity_heading || DEFAULT_IDENTITY_HEADING}</h2>
           )}
         </div>
-        <div className="signature-about-grid">
-          {infoCards.map((card) => (
-            <article key={card.eyebrow} className="signature-info-card">
-              <p className="eyebrow">{card.eyebrow}</p>
-              {isEditing ? (
-                <textarea
-                  rows="2"
-                  value={draft[card.key] || ""}
-                  onChange={(event) => updateField(card.key, event.target.value)}
-                />
-              ) : (
-                <h3>{card.title}</h3>
-              )}
-              {card.body ? <p>{card.body}</p> : null}
-            </article>
-          ))}
+        <div className="signature-identity-layout">
+          <article className="signature-identity-statement">
+            <p>{identityBody}</p>
+          </article>
+          <dl className="signature-identity-notes">
+            {infoCards.map((card) => (
+              <div key={card.eyebrow}>
+                <dt>{card.eyebrow}</dt>
+                <dd>
+                  {isEditing ? (
+                    <textarea
+                      rows="2"
+                      value={draft[card.key] || ""}
+                      onChange={(event) => updateField(card.key, event.target.value)}
+                    />
+                  ) : (
+                    card.title
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </SignatureInteractiveSection>
 
       <SignatureInteractiveSection id="signature-current">
         <div className="signature-section-head">
           <div>
-            <p className="eyebrow">Current</p>
-            <h2>何してる？</h2>
+            <p className="eyebrow">いま</p>
+            <h2>近況ログ</h2>
           </div>
           {canEdit ? (
             <button
@@ -871,7 +877,7 @@ export function SignatureProfilePage({ profile, posts }) {
               const index = isEditing ? visibleIndex : currentEntries.length - visibleCurrentEntries.length + visibleIndex;
 
               return (
-              <article key={`current-entry-${index}`} className="signature-current-card">
+              <article key={`current-entry-${index}`} className="signature-current-card signature-current-log-item">
                 {isEditing ? (
                   <div className="signature-current-edit-row">
                     <div className="signature-current-edit-head">
@@ -962,7 +968,7 @@ export function SignatureProfilePage({ profile, posts }) {
                 >
                   {showCalendar ? "週間に戻す" : "カレンダー"}
                 </button>
-                <h3>デフォルト予定</h3>
+                <h3>生活の予定</h3>
               </div>
               <div className="signature-schedule-note">
                 <p className="signature-schedule-note-label">メモ</p>
@@ -1172,8 +1178,8 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-works">
         <div className="signature-section-head">
           <div>
-            <p className="eyebrow">Works</p>
-            <h2>記事</h2>
+            <p className="eyebrow">作品棚</p>
+            <h2>書いたもの・作ったもの</h2>
           </div>
           {canEdit ? (
             <button type="button" className="button button-secondary button-small" onClick={openPostComposer}>
@@ -1205,10 +1211,10 @@ export function SignatureProfilePage({ profile, posts }) {
       {links.length || isEditing ? (
         <SignatureInteractiveSection id="signature-links">
           <div className="signature-section-head">
-            <p className="eyebrow">Links</p>
-            <h2>Outside the page</h2>
+            <p className="eyebrow">リンク</p>
+            <h2>外に置いている場所</h2>
           </div>
-          <div className="link-list">
+          <div className="signature-link-shelf">
             {isEditing ? (
               <div className="link-editor-stack">
                 {fixedLinkFields.map((field) => (
@@ -1251,9 +1257,14 @@ export function SignatureProfilePage({ profile, posts }) {
                 </div>
               </div>
             ) : (
-              links.map((link) => (
-                <ExternalLink key={link.key} href={link.href} className="button button-secondary">
-                  {link.label}
+              links.map((link, index) => (
+                <ExternalLink
+                  key={link.key}
+                  href={link.href}
+                  className={`signature-link-shelf-item${index === 0 ? " is-primary" : ""}`}
+                >
+                  <span>{index === 0 ? "主な入口" : `リンク ${index + 1}`}</span>
+                  <strong>{link.label}</strong>
                 </ExternalLink>
               ))
             )}
@@ -1264,7 +1275,7 @@ export function SignatureProfilePage({ profile, posts }) {
       <SignatureInteractiveSection id="signature-thinking">
         <div className="signature-section-head">
           <div>
-            <p className="eyebrow">Records</p>
+            <p className="eyebrow">記録</p>
             {isEditing ? (
               <textarea
                 className="signature-edit-section-title"
@@ -1345,8 +1356,8 @@ export function SignatureProfilePage({ profile, posts }) {
 
       <SignatureInteractiveSection id="signature-contact">
         <div className="signature-section-head">
-          <p className="eyebrow">Collaboration</p>
-          <h2>チャット・トーク</h2>
+          <p className="eyebrow">できること</p>
+          <h2>一緒にできそうなこと</h2>
         </div>
         <div className="signature-contact-layout">
           <div className="signature-contact-card">
@@ -1368,7 +1379,7 @@ export function SignatureProfilePage({ profile, posts }) {
               {links.length ? (
                 links.map((link) => (
                   <ExternalLink key={link.label} href={link.href} className="button button-primary">
-                    {link.label}
+                    {link.label}へ
                   </ExternalLink>
                 ))
               ) : (
@@ -1382,7 +1393,7 @@ export function SignatureProfilePage({ profile, posts }) {
           <aside className="signature-question-card">
             <div className="signature-question-head">
               <div>
-                <p className="eyebrow">Marshmallow</p>
+                <p className="eyebrow">匿名質問</p>
                 <h3>匿名質問箱</h3>
               </div>
               <span className="signature-question-count">{questionItems.length}</span>
