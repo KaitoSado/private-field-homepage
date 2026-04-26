@@ -218,3 +218,11 @@
 - hero は名前、handle、短い headline だけを置く名札として扱う
 - 自己紹介本文は `プロフィール` セクションだけに置き、同じ bio を上下で繰り返さない
 - 編集時の bio 入力も `プロフィール` セクション側に置き、読む場所と書く場所をそろえる
+
+### 32. 生成PNG素材は薄い紙片として使う
+
+- `素材pngのコピー/` の代表10枚を `public/textures/new-commune/` に置き、配信可能な英数字パスで扱う
+- 背景画像を主役にせず、Apps / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath に薄い紙片として重ねる
+- 画像レイヤーは `pointer-events: none` と低 opacity を前提にし、リンク、フォーム、表、カレンダー操作を塞がない
+- モバイルでは装飾画像を非表示にし、狭い画面で本文や操作を邪魔しない
+- Next の巨大CSS chunk が同じURLで残る場合に備え、texture 用の静的CSSを `public/textures/new-commune/site-textures.css` として分けて layout から読む

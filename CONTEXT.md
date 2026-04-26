@@ -172,6 +172,7 @@
 - 2026-04-25 時点の公開UI方針は「学生の公開プロフィール・研究ログ・学内アプリ棚」を主軸にし、`/apps` は検索/カテゴリ/状態つきのアプリ棚、signature プロフィールは名刺的な現在地メモ + 自己紹介 + 近況ログ + 作品棚として見せる
 - 2026-04-25 時点の公開UIコピー方針は、説明文で使い方を補うのではなく、Are.na / Cargo / Raycast Store のように短い棚札、状態、作者/件数、1行メモで意味を出す
 - signature プロフィールの hero は名前・handle・短い headline の名札にとどめ、自己紹介本文は下の `プロフィール` セクションだけが持つ
+- `public/textures/new-commune/` に生成PNG素材を置き、Apps / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath で薄い装飾レイヤーとして使う。装飾は `pointer-events: none` で機能面を塞がない。反映安定のため layout から `/textures/new-commune/site-textures.css?v=20260427` も読む
 - 触る際は:
   - どの面を変えるかを明確にする
   - 無関係なセクションをまとめて触らない

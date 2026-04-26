@@ -1051,6 +1051,27 @@ textarea {
 .apps-library-shell {
   display: grid;
   gap: 24px;
+  position: relative;
+  isolation: isolate;
+}
+
+.apps-library-shell::before {
+  content: "";
+  position: absolute;
+  top: 18px;
+  right: max(-42px, -3vw);
+  z-index: 0;
+  width: min(294px, 28vw);
+  aspect-ratio: 294 / 495;
+  pointer-events: none;
+  background: url("/textures/new-commune/06_grid_paint_texture.png") center / cover no-repeat;
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+}
+
+.apps-library-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .apps-library-hero {
@@ -1694,6 +1715,51 @@ textarea {
   display: grid;
   gap: 24px;
   overflow: visible;
+  position: relative;
+  isolation: isolate;
+}
+
+.research-progress-shell::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  right: max(-54px, -4vw);
+  z-index: 0;
+  width: min(286px, 28vw);
+  aspect-ratio: 294 / 495;
+  pointer-events: none;
+  background: url("/textures/new-commune/08_archival_paper_note.png") center / cover no-repeat;
+  opacity: 0.13;
+  mix-blend-mode: multiply;
+}
+
+.research-progress-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+.generative-art-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.generative-art-shell::before {
+  content: "";
+  position: absolute;
+  top: 24px;
+  right: max(-46px, -4vw);
+  z-index: 0;
+  width: min(252px, 24vw);
+  aspect-ratio: 294 / 495;
+  pointer-events: none;
+  background: url("/textures/new-commune/09_monet_harbor_card.png") center / cover no-repeat;
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+}
+
+.generative-art-shell > * {
+  position: relative;
+  z-index: 1;
 }
 
 .research-progress-hero,
@@ -4443,6 +4509,36 @@ textarea {
   position: relative;
 }
 
+.signature-page::before,
+.signature-page::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  mix-blend-mode: multiply;
+}
+
+.signature-page::before {
+  top: 86px;
+  right: max(-68px, -5vw);
+  width: min(294px, 26vw);
+  aspect-ratio: 294 / 495;
+  background-image: url("/textures/new-commune/08_archival_paper_note.png");
+  opacity: 0.15;
+}
+
+.signature-page::after {
+  top: 610px;
+  left: max(-76px, -6vw);
+  width: min(240px, 22vw);
+  aspect-ratio: 294 / 495;
+  background-image: url("/textures/new-commune/02_map_coordinates.png");
+  opacity: 0.1;
+}
+
 .signature-page-shell {
   isolation: isolate;
   overflow: clip;
@@ -4988,6 +5084,45 @@ textarea {
   transform: none;
   transform-origin: 50% 24%;
   transition: none;
+}
+
+.signature-interactive-section::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  mix-blend-mode: multiply;
+  opacity: 0;
+}
+
+#signature-current::before {
+  top: 32px;
+  right: -30px;
+  width: 170px;
+  aspect-ratio: 294 / 495;
+  background-image: url("/textures/new-commune/02_map_coordinates.png");
+  opacity: 0.1;
+}
+
+#signature-works::before {
+  top: 6px;
+  right: 8%;
+  width: 156px;
+  aspect-ratio: 294 / 495;
+  background-image: url("/textures/new-commune/03_watercolor_city_noise.png");
+  opacity: 0.1;
+}
+
+#signature-contact::before {
+  top: 20px;
+  left: -26px;
+  width: 150px;
+  aspect-ratio: 294 / 495;
+  background-image: url("/textures/new-commune/07_flower_diagram_margin.png");
+  opacity: 0.11;
 }
 
 .signature-interactive-section.is-visible {
@@ -6453,6 +6588,30 @@ textarea {
 
 .night-walk-main {
   align-items: start;
+}
+
+.night-walk-hero {
+  position: relative;
+  isolation: isolate;
+}
+
+.night-walk-hero::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  right: max(-36px, -3vw);
+  z-index: 0;
+  width: min(230px, 25vw);
+  aspect-ratio: 294 / 495;
+  pointer-events: none;
+  background: url("/textures/new-commune/05_moon_night_paper.png") center / cover no-repeat;
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+}
+
+.night-walk-hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .night-walk-column {
@@ -8628,6 +8787,16 @@ textarea {
 }
 
 @media (max-width: 760px) {
+  .apps-library-shell::before,
+  .research-progress-shell::before,
+  .generative-art-shell::before,
+  .night-walk-hero::before,
+  .signature-page::before,
+  .signature-page::after,
+  .signature-interactive-section::before {
+    display: none;
+  }
+
   .math-mini-grid,
   .math-mini-grid-wide,
   .math-kpi-grid,

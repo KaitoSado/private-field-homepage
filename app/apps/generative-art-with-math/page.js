@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function GenerativeArtWithMathPage() {
   return (
-    <main className="shell">
+    <main className="shell generative-art-shell">
       <GenerativeArtWithMathGallery />
     </main>
   );
