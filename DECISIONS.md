@@ -224,5 +224,5 @@
 - `素材pngのコピー/` の代表10枚を `public/textures/new-commune/` に置き、配信可能な英数字パスで扱う
 - 背景画像を主役にせず、Apps / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath に薄い紙片として重ねる
 - 画像レイヤーは `pointer-events: none` と低 opacity を前提にし、リンク、フォーム、表、カレンダー操作を塞がない
-- モバイルでは装飾画像を非表示にし、狭い画面で本文や操作を邪魔しない
+- モバイルでは装飾画像を小さく薄くし、狭い画面でも存在は分かるが本文や操作を邪魔しない
 - Next の巨大CSS chunk が同じURLで残る場合に備え、texture 用の静的CSSを `public/textures/new-commune/site-textures.css` として分けて layout から読む

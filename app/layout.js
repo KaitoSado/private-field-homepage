@@ -67,7 +67,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ja">
       <head>
-        <link rel="stylesheet" href="/textures/new-commune/site-textures.css?v=20260427" />
+        <link rel="stylesheet" href="/textures/new-commune/site-textures.css?v=20260427b" />
       </head>
       <body>
         <Suspense fallback={null}>
