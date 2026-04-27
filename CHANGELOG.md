@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-27 | codex | signature background | signature 背景の白ベールを薄くし、彩度とコントラストを少し上げて紙素材の色が出るよう調整。静的CSSは `site-textures-20260427g.css` に切り替え | `next build` via bundled node |
 | 2026-04-27 | codex | signature background | signature 背景の低解像度素材を巨大に引き伸ばすのをやめ、紙面テクスチャの繰り返し + 原寸に近い断片配置へ変更。静的CSSは `site-textures-20260427f.css` に切り替え | `next build` via bundled node |
 | 2026-04-27 | codex | profile edit ui | 通常プロフィールと signature プロフィールの `このページを編集` だけを固定表示に移し、スクロール中の位置からそのまま編集開始できるようにした | `next build` via bundled node |
 | 2026-04-27 | codex | visual underlay | signature と Apps の画像レイヤーを小さな紙片装飾から、ページ全体の下敷きになる大きな机上面へ変更。静的CSSは `site-textures-20260427e.css` に切り替え | `npm run build` |

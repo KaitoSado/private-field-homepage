@@ -230,4 +230,4 @@
 - 画像レイヤーは `pointer-events: none` と低 opacity を前提にし、リンク、フォーム、表、カレンダー操作を塞がない
 - 予定表・カレンダー・入力欄では、素材が情報の上に乗ると道具感ではなく事故に見えるため、装飾レイヤーは背面へ固定し、表面は不透明な紙面にする
 - モバイルでは装飾画像を小さく薄くし、狭い画面でも存在は分かるが本文や操作を邪魔しない
-- Next の巨大CSS chunk が同じURLで残る場合に備え、texture 用の静的CSSを `public/textures/new-commune/site-textures-20260427f.css` として分けて layout から読む
+- Next の巨大CSS chunk が同じURLで残る場合に備え、texture 用の静的CSSを `public/textures/new-commune/site-textures-20260427g.css` として分けて layout から読む
