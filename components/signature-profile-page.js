@@ -476,6 +476,15 @@ export function SignatureProfilePage({ profile, posts }) {
     setIsEditing(true);
   }
 
+  function startEditingFromViewport() {
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    startEditing();
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ left: scrollX, top: scrollY, behavior: "auto" });
+    });
+  }
+
   function startEditingWithNewRecord() {
     setDraft((current) => ({
       ...current,
@@ -627,7 +636,7 @@ export function SignatureProfilePage({ profile, posts }) {
           <a href="#signature-thinking">記録</a>
           <a href="#signature-contact">連絡</a>
         </div>
-        {canEdit ? (
+        {canEdit && (isEditing || status) ? (
           <div className="signature-local-nav-actions">
             {status ? <span className="signature-local-nav-status">{status}</span> : null}
             {isEditing ? (
@@ -649,14 +658,18 @@ export function SignatureProfilePage({ profile, posts }) {
                   キャンセル
                 </button>
               </>
-            ) : (
-              <button type="button" className="button button-primary button-small" onClick={startEditing}>
-                このページを編集
-              </button>
-            )}
+            ) : null}
           </div>
         ) : null}
       </nav>
+
+      {canEdit && !isEditing ? (
+        <div className="profile-floating-edit-action">
+          <button type="button" className="button button-primary button-small" onClick={startEditingFromViewport}>
+            このページを編集
+          </button>
+        </div>
+      ) : null}
 
       <SignatureHeroStage>
         <SignatureHeroShader />

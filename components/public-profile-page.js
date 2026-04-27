@@ -80,6 +80,15 @@ export function PublicProfilePage({ profile, posts }) {
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
+  function startEditingFromViewport() {
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    setIsEditing(true);
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ left: scrollX, top: scrollY, behavior: "auto" });
+    });
+  }
+
   async function saveProfile() {
     if (!canEdit) return;
 
@@ -186,7 +195,7 @@ export function PublicProfilePage({ profile, posts }) {
         ← ホームへ戻る
       </Link>
 
-      {canEdit ? (
+      {canEdit && (isEditing || status) ? (
         <div className="signature-owner-toolbar">
           <div className="signature-owner-toolbar-head">
             <strong>Owner mode</strong>
@@ -210,12 +219,16 @@ export function PublicProfilePage({ profile, posts }) {
                   キャンセル
                 </button>
               </>
-            ) : (
-              <button type="button" className="button button-primary" onClick={() => setIsEditing(true)}>
-                このページを編集
-              </button>
-            )}
+            ) : null}
           </div>
+        </div>
+      ) : null}
+
+      {canEdit && !isEditing ? (
+        <div className="profile-floating-edit-action">
+          <button type="button" className="button button-primary" onClick={startEditingFromViewport}>
+            このページを編集
+          </button>
         </div>
       ) : null}
 
