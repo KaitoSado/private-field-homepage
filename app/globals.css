@@ -4670,13 +4670,14 @@ textarea {
   margin: 0 auto;
   padding: 34px 0 110px;
   position: relative;
+  isolation: isolate;
 }
 
 .signature-page::before,
 .signature-page::after {
   content: "";
   position: absolute;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   background-position: center;
   background-size: cover;
@@ -5267,7 +5268,7 @@ textarea {
 .signature-interactive-section::before {
   content: "";
   position: absolute;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   background-position: center;
   background-size: cover;
@@ -5277,12 +5278,12 @@ textarea {
 }
 
 #signature-current::before {
-  top: 22px;
-  right: -42px;
-  width: 230px;
+  top: -18px;
+  right: 2%;
+  width: 180px;
   aspect-ratio: 360 / 231;
   background-image: url("/textures/new-commune/archteia-site-assets/03_current_calendar_paper.png");
-  opacity: 0.24;
+  opacity: 0.12;
 }
 
 #signature-works::before {
@@ -5790,10 +5791,13 @@ textarea {
 }
 
 .signature-schedule-card {
+  position: relative;
+  z-index: 2;
   display: grid;
   gap: 18px;
   padding: 22px;
   background: #fffefa;
+  overflow: hidden;
 }
 
 .signature-schedule-head {
@@ -5873,7 +5877,7 @@ textarea {
 }
 
 .signature-schedule-table thead th {
-  background: rgba(244, 239, 228, 0.82);
+  background: #f4efe4;
   padding: 14px 12px;
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.76rem;
@@ -5898,7 +5902,7 @@ textarea {
 .signature-schedule-table tbody th {
   width: 112px;
   padding: 14px 12px;
-  background: rgba(248, 245, 238, 0.9);
+  background: #f8f5ee;
   text-align: left;
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.76rem;
@@ -5907,7 +5911,7 @@ textarea {
 
 .signature-schedule-table td {
   padding: 12px;
-  background: rgba(255, 255, 255, 0.5);
+  background: #fffefa;
 }
 
 .signature-schedule-table td span {

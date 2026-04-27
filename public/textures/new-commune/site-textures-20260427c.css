@@ -19,7 +19,7 @@
 .signature-interactive-section::before {
   content: "";
   position: absolute;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   background-position: center;
   background-size: cover;
@@ -235,12 +235,12 @@
 }
 
 #signature-current::before {
-  top: 22px;
-  right: -42px;
-  width: 230px;
+  top: -18px;
+  right: 2%;
+  width: 180px;
   aspect-ratio: 360 / 231;
   background-image: url("/textures/new-commune/archteia-site-assets/03_current_calendar_paper.png");
-  opacity: 0.24;
+  opacity: 0.12;
 }
 
 #signature-works::before {
