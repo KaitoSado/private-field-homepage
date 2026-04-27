@@ -222,8 +222,9 @@
 ### 32. 生成PNG素材は薄い紙片として使う
 
 - `素材pngのコピー/` の代表10枚を `public/textures/new-commune/` に置き、配信可能な英数字パスで扱う
+- `素材pngのコピー/archteia_site_assets/` の横長素材は `public/textures/new-commune/archteia-site-assets/` に置き、用途別に Apps / `/me` / signature / Research / Works / Links へ割り当てる
 - 背景画像を主役にせず、Apps / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath に紙片として重ねる
 - 紙片は1箇所だけに置くと素材が貼られている意味が弱いため、ページの上・中段・下へ複数枚を分散させる
 - 画像レイヤーは `pointer-events: none` と低 opacity を前提にし、リンク、フォーム、表、カレンダー操作を塞がない
 - モバイルでは装飾画像を小さく薄くし、狭い画面でも存在は分かるが本文や操作を邪魔しない
-- Next の巨大CSS chunk が同じURLで残る場合に備え、texture 用の静的CSSを `public/textures/new-commune/site-textures-20260427b.css` として分けて layout から読む
+- Next の巨大CSS chunk が同じURLで残る場合に備え、texture 用の静的CSSを `public/textures/new-commune/site-textures-20260427c.css` として分けて layout から読む

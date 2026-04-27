@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-27 | codex | visual site assets | `素材pngのコピー/archteia_site_assets/` の横長PNG素材16枚を `public/textures/new-commune/archteia-site-assets/` に追加し、Apps / `/me` / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath へ用途別に反映。`/me` には拠点ページ全体、ポイント欄、ナビカード、履歴欄の紙片レイヤーを追加 | `npm run build` |
 | 2026-04-27 | codex | visual texture density | 生成PNG素材が薄く局所的だったため、Apps / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath の紙片レイヤーを複数配置にし、opacity・彩度・サイズを上げて存在感を強めた | `npm run build` |
 | 2026-04-27 | codex | visual texture visibility | 生成PNG素材の反映が見えにくかったため、装飾レイヤーの opacity を少し上げ、モバイルでは完全非表示ではなく小さく薄く表示するよう調整。静的CSSは新しいファイル名 `site-textures-20260427b.css` で読む | `npm run build` |
 | 2026-04-27 | codex | visual texture assets | `素材pngのコピー/` の代表10枚を `public/textures/new-commune/` に追加し、Apps / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath に低 opacity の装飾紙片として実装。専用CSS `/textures/new-commune/site-textures.css` も layout から読み、クリック阻害を避けるため `pointer-events: none`、モバイルでは非表示にした | `npm run build` |

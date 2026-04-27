@@ -6,7 +6,7 @@ export const metadata = {
 
 export default function MePage() {
   return (
-    <main className="shell">
+    <main className="shell me-hub-shell">
       <MeRedirectPanel />
     </main>
   );
