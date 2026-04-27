@@ -173,7 +173,7 @@
 - 2026-04-25 時点の公開UIコピー方針は、説明文で使い方を補うのではなく、Are.na / Cargo / Raycast Store のように短い棚札、状態、作者/件数、1行メモで意味を出す
 - signature プロフィールの hero は名前・handle・短い headline の名札にとどめ、自己紹介本文は下の `プロフィール` セクションだけが持つ
 - signature プロフィールでは、閲覧中にヘッダーとプロフィール内ナビが二重に固定されないよう、グローバルヘッダーと `signature-local-nav` は固定表示しない
-- `public/textures/new-commune/` に生成PNG素材を置き、Apps / `/me` / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath で装飾レイヤーとして使う。`archteia-site-assets/` には横長の実物断片素材16枚を置き、アプリ棚、プロフィール、CURRENT、WORKS、Research、Links に振り分ける。signature と Apps では紙片を小さな飾りではなく、ページ全体の下敷きになる大きな机上面として敷く。装飾は `pointer-events: none` で機能面を塞がず、予定表や入力面の上には重ねない。反映安定のため layout から `/textures/new-commune/site-textures-20260427e.css` も読む
+- `public/textures/new-commune/` に生成PNG素材を置き、Apps / `/me` / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath で装飾レイヤーとして使う。`archteia-site-assets/` には横長の実物断片素材16枚を置き、アプリ棚、プロフィール、CURRENT、WORKS、Research、Links に振り分ける。signature と Apps では紙片を小さな飾りではなく、ページ全体の下敷きになる大きな机上面として敷く。ただし 360px 素材を全画面まで拡大するとぼけるため、signature では紙面テクスチャをタイル状に敷き、断片素材は原寸に近いサイズで配置する。装飾は `pointer-events: none` で機能面を塞がず、予定表や入力面の上には重ねない。反映安定のため layout から `/textures/new-commune/site-textures-20260427f.css` も読む
 - 触る際は:
   - どの面を変えるかを明確にする
   - 無関係なセクションをまとめて触らない

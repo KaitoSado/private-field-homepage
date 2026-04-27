@@ -4746,6 +4746,7 @@ textarea {
   background-size: cover;
   background-repeat: no-repeat;
   mix-blend-mode: multiply;
+  image-rendering: auto;
 }
 
 .signature-page::before {
@@ -4755,25 +4756,35 @@ textarea {
   width: 100vw;
   transform: translateX(-50%);
   background-image:
-    linear-gradient(90deg, rgba(245, 241, 232, 0.58), rgba(245, 241, 232, 0.28) 42%, rgba(245, 241, 232, 0.56)),
+    linear-gradient(90deg, rgba(246, 243, 236, 0.84), rgba(246, 243, 236, 0.62) 42%, rgba(246, 243, 236, 0.82)),
+    url("/textures/new-commune/06_grid_paint_texture.png"),
     url("/textures/new-commune/archteia-site-assets/02_profile_research_notebook.png"),
     url("/textures/new-commune/archteia-site-assets/06_profile_desk_research_photo.png"),
     url("/textures/new-commune/archteia-site-assets/10_research_notes_sketch_papers.png"),
     url("/textures/new-commune/archteia-site-assets/03_current_calendar_paper.png");
   background-position:
     center,
-    right -7vw top 34px,
-    left -9vw top 28%,
-    right -4vw top 58%,
-    left 12vw bottom 40px;
+    left top,
+    right 4vw top 56px,
+    left 7vw top 30%,
+    right 8vw top 59%,
+    left 14vw bottom 56px;
   background-size:
     100% 100%,
-    min(920px, 78vw) auto,
-    min(740px, 64vw) auto,
-    min(680px, 58vw) auto,
-    min(620px, 54vw) auto;
-  opacity: 0.58;
-  filter: saturate(1.12) contrast(1.03);
+    294px 495px,
+    min(430px, 34vw) auto,
+    min(400px, 32vw) auto,
+    min(390px, 31vw) auto,
+    min(380px, 30vw) auto;
+  background-repeat:
+    no-repeat,
+    repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat,
+    no-repeat;
+  opacity: 0.72;
+  filter: saturate(1.08) contrast(1.06);
 }
 
 .signature-page::after {
@@ -4787,15 +4798,15 @@ textarea {
     url("/textures/new-commune/archteia-site-assets/16_links_index_cards_set.png"),
     url("/textures/new-commune/archteia-site-assets/04_works_blue_diagram_art.png");
   background-position:
-    left -5vw bottom 18%,
-    right -6vw top 30%,
-    left 18vw top 58%;
+    left 5vw bottom 18%,
+    right 6vw top 30%,
+    left 20vw top 58%;
   background-size:
-    min(620px, 52vw) auto,
-    min(560px, 48vw) auto,
-    min(520px, 44vw) auto;
-  opacity: 0.32;
-  filter: saturate(1.12) contrast(1.04);
+    min(390px, 31vw) auto,
+    min(380px, 30vw) auto,
+    min(360px, 29vw) auto;
+  opacity: 0.42;
+  filter: saturate(1.08) contrast(1.06);
 }
 
 .signature-page-shell {
@@ -9118,23 +9129,33 @@ textarea {
 
   .signature-page::before {
     background-image:
-      linear-gradient(rgba(245, 241, 232, 0.56), rgba(245, 241, 232, 0.44)),
+      linear-gradient(rgba(246, 243, 236, 0.82), rgba(246, 243, 236, 0.68)),
+      url("/textures/new-commune/06_grid_paint_texture.png"),
       url("/textures/new-commune/archteia-site-assets/02_profile_research_notebook.png"),
       url("/textures/new-commune/archteia-site-assets/06_profile_desk_research_photo.png"),
       url("/textures/new-commune/archteia-site-assets/03_current_calendar_paper.png"),
       url("/textures/new-commune/archteia-site-assets/10_research_notes_sketch_papers.png");
     background-position:
       center,
-      right -18vw top 22px,
-      left -16vw top 34%,
-      right -18vw top 62%,
-      left -10vw bottom 18px;
+      left top,
+      right -28px top 28px,
+      left -22px top 35%,
+      right -26px top 62%,
+      left -18px bottom 22px;
     background-size:
       100% 100%,
-      132vw auto,
-      108vw auto,
-      116vw auto,
-      102vw auto;
+      294px 495px,
+      360px auto,
+      340px auto,
+      350px auto,
+      330px auto;
+    background-repeat:
+      no-repeat,
+      repeat,
+      no-repeat,
+      no-repeat,
+      no-repeat,
+      no-repeat;
   }
 
   .me-hub-shell::after,
