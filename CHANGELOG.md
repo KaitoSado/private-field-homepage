@@ -4,6 +4,8 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-27 | codex | profile edit ui | 通常プロフィールと signature プロフィールの `このページを編集` だけを固定表示に移し、スクロール中の位置からそのまま編集開始できるようにした | `next build` via bundled node |
+| 2026-04-27 | codex | visual underlay | signature と Apps の画像レイヤーを小さな紙片装飾から、ページ全体の下敷きになる大きな机上面へ変更。静的CSSは `site-textures-20260427e.css` に切り替え | `npm run build` |
 | 2026-04-27 | codex | signature profile nav | signature プロフィール閲覧中に上部ヘッダーとページ内ナビが二重に固定されないよう、公開プロフィール上ではグローバルヘッダーを非固定・小型化し、`signature-local-nav` も通常配置に変更 | `npm run build` |
 | 2026-04-27 | codex | signature textures | signature の予定表に紙片素材が重ならないよう、ページ/セクション装飾を背面化し、予定表のセル背景を不透明化。静的CSSは `site-textures-20260427d.css` に切り替え | `npm run build` |
 | 2026-04-27 | codex | visual site assets | `素材pngのコピー/archteia_site_assets/` の横長PNG素材16枚を `public/textures/new-commune/archteia-site-assets/` に追加し、Apps / `/me` / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath へ用途別に反映。`/me` には拠点ページ全体、ポイント欄、ナビカード、履歴欄の紙片レイヤーを追加 | `npm run build` |

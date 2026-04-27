@@ -29,11 +29,13 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: clip;
   color: var(--ink);
   background:
     linear-gradient(rgba(29, 33, 31, 0.025) 1px, transparent 1px),
@@ -62,6 +64,11 @@ body:has(.signature-page) .site-header {
   z-index: 10;
   backdrop-filter: none;
   background: rgba(245, 241, 232, 0.72);
+}
+
+body:has(.apps-library-shell),
+body:has(.signature-page) {
+  overflow-x: clip;
 }
 
 .site-header-inner,
@@ -1038,6 +1045,27 @@ textarea {
   border-color: var(--line);
 }
 
+.profile-floating-edit-action {
+  position: fixed;
+  right: max(16px, calc((100vw - 1180px) / 2 + 16px));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 40;
+  pointer-events: none;
+}
+
+.profile-floating-edit-action .button {
+  min-height: 42px;
+  border-color: rgba(255, 254, 249, 0.72);
+  box-shadow:
+    0 16px 28px rgba(23, 29, 36, 0.2),
+    0 0 0 1px rgba(255, 254, 249, 0.52);
+  pointer-events: auto;
+}
+
+.profile-floating-edit-action .button:hover {
+  transform: translateY(-1px);
+}
+
 .full-width {
   width: 100%;
 }
@@ -1086,24 +1114,31 @@ textarea {
 .apps-library-shell::before {
   content: "";
   position: absolute;
-  inset: -18px -72px -96px -56px;
+  top: -44px;
+  bottom: -132px;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
   z-index: 0;
   pointer-events: none;
   background-image:
+    linear-gradient(90deg, rgba(245, 241, 232, 0.54), rgba(245, 241, 232, 0.38)),
     url("/textures/new-commune/archteia-site-assets/01_apps_dashboard_fragment.png"),
     url("/textures/new-commune/archteia-site-assets/05_apps_card_grid_fragment.png"),
     url("/textures/new-commune/archteia-site-assets/09_apps_form_dashboard_fragment.png");
   background-position:
-    right 0 top 4px,
-    left 8px top 36%,
-    right 14% bottom 4px;
+    center,
+    right -8vw top 8px,
+    left -8vw top 34%,
+    right 10vw bottom 0;
   background-size:
-    min(360px, 32vw) auto,
-    min(210px, 22vw) auto,
-    min(250px, 24vw) auto;
+    100% 100%,
+    min(840px, 70vw) auto,
+    min(600px, 54vw) auto,
+    min(680px, 58vw) auto;
   background-repeat: no-repeat;
-  opacity: 0.44;
-  filter: saturate(1.18) contrast(1.06);
+  opacity: 0.56;
+  filter: saturate(1.14) contrast(1.03);
   mix-blend-mode: multiply;
 }
 
@@ -4714,41 +4749,58 @@ textarea {
 }
 
 .signature-page::before {
-  inset: 24px -72px 40px -62px;
+  top: -58px;
+  bottom: -180px;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
   background-image:
+    linear-gradient(90deg, rgba(245, 241, 232, 0.58), rgba(245, 241, 232, 0.28) 42%, rgba(245, 241, 232, 0.56)),
     url("/textures/new-commune/archteia-site-assets/02_profile_research_notebook.png"),
     url("/textures/new-commune/archteia-site-assets/06_profile_desk_research_photo.png"),
-    url("/textures/new-commune/archteia-site-assets/10_research_notes_sketch_papers.png");
+    url("/textures/new-commune/archteia-site-assets/10_research_notes_sketch_papers.png"),
+    url("/textures/new-commune/archteia-site-assets/03_current_calendar_paper.png");
   background-position:
-    right 0 top 30px,
-    left 0 top 520px,
-    right 22% bottom 18%;
+    center,
+    right -7vw top 34px,
+    left -9vw top 28%,
+    right -4vw top 58%,
+    left 12vw bottom 40px;
   background-size:
-    min(330px, 30vw) auto,
-    min(240px, 22vw) auto,
-    min(230px, 21vw) auto;
-  opacity: 0.42;
-  filter: saturate(1.16) contrast(1.05);
+    100% 100%,
+    min(920px, 78vw) auto,
+    min(740px, 64vw) auto,
+    min(680px, 58vw) auto,
+    min(620px, 54vw) auto;
+  opacity: 0.58;
+  filter: saturate(1.12) contrast(1.03);
 }
 
 .signature-page::after {
-  inset: 260px -60px 120px -70px;
+  top: 180px;
+  bottom: -110px;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
   background-image:
     url("/textures/new-commune/archteia-site-assets/14_links_collaboration_blank_tag.png"),
-    url("/textures/new-commune/archteia-site-assets/16_links_index_cards_set.png");
+    url("/textures/new-commune/archteia-site-assets/16_links_index_cards_set.png"),
+    url("/textures/new-commune/archteia-site-assets/04_works_blue_diagram_art.png");
   background-position:
-    left 2% bottom 16%,
-    right 6% top 36%;
+    left -5vw bottom 18%,
+    right -6vw top 30%,
+    left 18vw top 58%;
   background-size:
-    min(230px, 22vw) auto,
-    min(210px, 20vw) auto;
-  opacity: 0.26;
-  filter: saturate(1.16) contrast(1.05);
+    min(620px, 52vw) auto,
+    min(560px, 48vw) auto,
+    min(520px, 44vw) auto;
+  opacity: 0.32;
+  filter: saturate(1.12) contrast(1.04);
 }
 
 .signature-page-shell {
   isolation: isolate;
-  overflow: clip;
+  overflow: visible;
 }
 
 .signature-page-depth-glow {
@@ -7573,6 +7625,16 @@ textarea {
     padding-top: 18px;
   }
 
+  .profile-floating-edit-action {
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .profile-floating-edit-action .button {
+    min-height: 40px;
+    padding: 0 13px;
+  }
+
   .research-progress-summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -9010,16 +9072,32 @@ textarea {
   .night-walk-hero::before,
   .signature-page::before {
     display: block;
-    inset: 18px -44px auto auto;
-    width: min(220px, 54vw);
-    aspect-ratio: 360 / 231;
+    top: -38px;
+    right: auto;
+    bottom: -160px;
+    left: 50%;
+    width: 136vw;
+    height: auto;
+    aspect-ratio: auto;
+    transform: translateX(-50%);
     background-position: center;
     background-size: cover;
-    opacity: 0.24;
+    opacity: 0.42;
   }
 
   .apps-library-shell::before {
-    background-image: url("/textures/new-commune/archteia-site-assets/01_apps_dashboard_fragment.png");
+    background-image:
+      linear-gradient(rgba(245, 241, 232, 0.5), rgba(245, 241, 232, 0.42)),
+      url("/textures/new-commune/archteia-site-assets/01_apps_dashboard_fragment.png"),
+      url("/textures/new-commune/archteia-site-assets/05_apps_card_grid_fragment.png");
+    background-position:
+      center,
+      right -30vw top 18px,
+      left -26vw bottom 40px;
+    background-size:
+      100% 100%,
+      118vw auto,
+      92vw auto;
   }
 
   .me-hub-shell::before {
@@ -9039,7 +9117,24 @@ textarea {
   }
 
   .signature-page::before {
-    background-image: url("/textures/new-commune/archteia-site-assets/02_profile_research_notebook.png");
+    background-image:
+      linear-gradient(rgba(245, 241, 232, 0.56), rgba(245, 241, 232, 0.44)),
+      url("/textures/new-commune/archteia-site-assets/02_profile_research_notebook.png"),
+      url("/textures/new-commune/archteia-site-assets/06_profile_desk_research_photo.png"),
+      url("/textures/new-commune/archteia-site-assets/03_current_calendar_paper.png"),
+      url("/textures/new-commune/archteia-site-assets/10_research_notes_sketch_papers.png");
+    background-position:
+      center,
+      right -18vw top 22px,
+      left -16vw top 34%,
+      right -18vw top 62%,
+      left -10vw bottom 18px;
+    background-size:
+      100% 100%,
+      132vw auto,
+      108vw auto,
+      116vw auto,
+      102vw auto;
   }
 
   .me-hub-shell::after,
