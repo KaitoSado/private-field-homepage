@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-30 | codex | signature background | signature 背景の方眼紙テクスチャ敷き詰めをやめ、CURRENT 周辺で壁紙ノイズに見えないよう断片素材だけを薄く端へ残した。静的CSSは `site-textures-20260430a.css` に切り替え | `next build` via bundled node |
 | 2026-04-30 | codex | profile chrome | signature プロフィールと `/me` 表示時のヘッダー/フッターを不透明な紙面にし、ナビ文字と検索入口のコントラストを上げた | `next build` via bundled node |
 | 2026-04-29 | codex | profile chrome | signature プロフィールと `/me` 表示時のヘッダー/フッターを濃い紙面にし、背景素材に負けて薄く見えないよう調整 | `next build` via bundled node |
 | 2026-04-27 | codex | signature background | signature 背景の白ベールを薄くし、彩度とコントラストを少し上げて紙素材の色が出るよう調整。静的CSSは `site-textures-20260427g.css` に切り替え | `next build` via bundled node |

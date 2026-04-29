@@ -4801,34 +4801,30 @@ textarea {
   transform: translateX(-50%);
   background-image:
     linear-gradient(90deg, rgba(250, 238, 218, 0.72), rgba(231, 242, 235, 0.44) 42%, rgba(248, 229, 214, 0.68)),
-    url("/textures/new-commune/06_grid_paint_texture.png"),
     url("/textures/new-commune/archteia-site-assets/02_profile_research_notebook.png"),
     url("/textures/new-commune/archteia-site-assets/06_profile_desk_research_photo.png"),
     url("/textures/new-commune/archteia-site-assets/10_research_notes_sketch_papers.png"),
     url("/textures/new-commune/archteia-site-assets/03_current_calendar_paper.png");
   background-position:
     center,
-    left top,
     right 4vw top 56px,
     left 7vw top 30%,
     right 8vw top 59%,
     left 14vw bottom 56px;
   background-size:
     100% 100%,
-    294px 495px,
     min(430px, 34vw) auto,
     min(400px, 32vw) auto,
     min(390px, 31vw) auto,
     min(380px, 30vw) auto;
   background-repeat:
     no-repeat,
-    repeat,
     no-repeat,
     no-repeat,
     no-repeat,
     no-repeat;
-  opacity: 0.82;
-  filter: saturate(1.24) contrast(1.1);
+  opacity: 0.62;
+  filter: saturate(1.14) contrast(1.06);
 }
 
 .signature-page::after {
@@ -9174,34 +9170,30 @@ textarea {
   .signature-page::before {
     background-image:
       linear-gradient(rgba(250, 238, 218, 0.72), rgba(231, 242, 235, 0.54)),
-      url("/textures/new-commune/06_grid_paint_texture.png"),
       url("/textures/new-commune/archteia-site-assets/02_profile_research_notebook.png"),
       url("/textures/new-commune/archteia-site-assets/06_profile_desk_research_photo.png"),
       url("/textures/new-commune/archteia-site-assets/03_current_calendar_paper.png"),
       url("/textures/new-commune/archteia-site-assets/10_research_notes_sketch_papers.png");
     background-position:
       center,
-      left top,
       right -28px top 28px,
       left -22px top 35%,
       right -26px top 62%,
       left -18px bottom 22px;
     background-size:
       100% 100%,
-      294px 495px,
       360px auto,
       340px auto,
       350px auto,
       330px auto;
     background-repeat:
       no-repeat,
-      repeat,
       no-repeat,
       no-repeat,
       no-repeat,
       no-repeat;
-    opacity: 0.5;
-    filter: saturate(1.22) contrast(1.08);
+    opacity: 0.38;
+    filter: saturate(1.12) contrast(1.04);
   }
 
   .me-hub-shell::after,
