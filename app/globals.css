@@ -63,7 +63,30 @@ body:has(.signature-page) .site-header {
   position: static;
   z-index: 10;
   backdrop-filter: none;
-  background: rgba(245, 241, 232, 0.72);
+  background: rgba(247, 242, 232, 0.94);
+  border-bottom-color: rgba(29, 33, 31, 0.18);
+  box-shadow: 0 1px 0 rgba(255, 254, 249, 0.52) inset;
+}
+
+body:has(.me-hub-shell) .site-header {
+  background: rgba(247, 242, 232, 0.94);
+  border-bottom-color: rgba(29, 33, 31, 0.18);
+}
+
+body:has(.signature-page) .site-footer,
+body:has(.me-hub-shell) .site-footer {
+  position: relative;
+  z-index: 2;
+  background: rgba(247, 242, 232, 0.92);
+  border-top-color: rgba(29, 33, 31, 0.18);
+  box-shadow: 0 -12px 34px rgba(31, 35, 32, 0.05);
+}
+
+body:has(.signature-page) .footer-copy,
+body:has(.signature-page) .footer-map a,
+body:has(.me-hub-shell) .footer-copy,
+body:has(.me-hub-shell) .footer-map a {
+  color: #4d5752;
 }
 
 body:has(.apps-library-shell),
