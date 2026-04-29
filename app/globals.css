@@ -60,26 +60,47 @@ body {
 }
 
 body:has(.signature-page) .site-header {
-  position: static;
-  z-index: 10;
+  position: relative;
+  z-index: 40;
   backdrop-filter: none;
-  background: rgba(247, 242, 232, 0.94);
-  border-bottom-color: rgba(29, 33, 31, 0.18);
-  box-shadow: 0 1px 0 rgba(255, 254, 249, 0.52) inset;
+  background: #f7f2e8;
+  border-bottom-color: rgba(29, 33, 31, 0.26);
+  box-shadow:
+    0 1px 0 rgba(255, 254, 249, 0.72) inset,
+    0 14px 30px rgba(31, 35, 32, 0.06);
 }
 
 body:has(.me-hub-shell) .site-header {
-  background: rgba(247, 242, 232, 0.94);
-  border-bottom-color: rgba(29, 33, 31, 0.18);
+  background: #f7f2e8;
+  border-bottom-color: rgba(29, 33, 31, 0.26);
+  box-shadow:
+    0 1px 0 rgba(255, 254, 249, 0.72) inset,
+    0 14px 30px rgba(31, 35, 32, 0.06);
 }
 
 body:has(.signature-page) .site-footer,
 body:has(.me-hub-shell) .site-footer {
   position: relative;
   z-index: 2;
-  background: rgba(247, 242, 232, 0.92);
-  border-top-color: rgba(29, 33, 31, 0.18);
-  box-shadow: 0 -12px 34px rgba(31, 35, 32, 0.05);
+  background: #f7f2e8;
+  border-top-color: rgba(29, 33, 31, 0.26);
+  box-shadow: 0 -16px 36px rgba(31, 35, 32, 0.08);
+}
+
+body:has(.signature-page) .brand-lockup,
+body:has(.signature-page) .site-nav-link,
+body:has(.signature-page) .mobile-nav summary,
+body:has(.me-hub-shell) .brand-lockup,
+body:has(.me-hub-shell) .site-nav-link,
+body:has(.me-hub-shell) .mobile-nav summary {
+  color: #1d211f;
+}
+
+body:has(.signature-page) .site-command-entry,
+body:has(.me-hub-shell) .site-command-entry {
+  background: #fffefa;
+  border-color: rgba(29, 33, 31, 0.24);
+  color: #2d352f;
 }
 
 body:has(.signature-page) .footer-copy,
