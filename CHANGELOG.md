@@ -4,6 +4,7 @@
 
 | date | agent | area | summary | verify |
 | --- | --- | --- | --- | --- |
+| 2026-04-30 | codex | apps copy/background | `/apps` の見出しを `アプリ一覧` に戻し、アプリ一覧背景を拡大した断片画像から `08_archival_paper_note.png` の原寸タイル敷きへ変更。静的CSSは `site-textures-20260430c.css` に切り替え | `next build` via bundled node |
 | 2026-04-30 | codex | signature background | signature 背景を同じ紙面柄のタイル敷きに戻し、断片素材の重ね貼りを外して均一な壁紙として見せるよう調整。静的CSSは `site-textures-20260430b.css` に切り替え | `next build` via bundled node |
 | 2026-04-30 | codex | signature background | signature 背景の方眼紙テクスチャ敷き詰めをやめ、CURRENT 周辺で壁紙ノイズに見えないよう断片素材だけを薄く端へ残した。静的CSSは `site-textures-20260430a.css` に切り替え | `next build` via bundled node |
 | 2026-04-30 | codex | profile chrome | signature プロフィールと `/me` 表示時のヘッダー/フッターを不透明な紙面にし、ナビ文字と検索入口のコントラストを上げた | `next build` via bundled node |

@@ -205,7 +205,7 @@ export default function AppsPage() {
       <section className="apps-library-hero">
         <div>
           <p className="apps-library-kicker">Apps</p>
-          <h1>学内アプリ棚</h1>
+          <h1>アプリ一覧</h1>
           <p>公開中、準備中、運営用。</p>
         </div>
         <aside className="apps-library-index" aria-label="アプリの状態">

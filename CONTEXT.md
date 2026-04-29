@@ -169,11 +169,11 @@
 
 - 現状のグローバル CSS は `app/globals.css` に集約されている
 - まだ機能単位分割は未完了
-- 2026-04-25 時点の公開UI方針は「学生の公開プロフィール・研究ログ・学内アプリ棚」を主軸にし、`/apps` は検索/カテゴリ/状態つきのアプリ棚、signature プロフィールは名刺的な現在地メモ + 自己紹介 + 近況ログ + 作品棚として見せる
+- 2026-04-25 時点の公開UI方針は「学生の公開プロフィール・研究ログ・アプリ一覧」を主軸にし、`/apps` は検索/カテゴリ/状態つきのアプリ一覧、signature プロフィールは名刺的な現在地メモ + 自己紹介 + 近況ログ + 作品棚として見せる
 - 2026-04-25 時点の公開UIコピー方針は、説明文で使い方を補うのではなく、Are.na / Cargo / Raycast Store のように短い棚札、状態、作者/件数、1行メモで意味を出す
 - signature プロフィールの hero は名前・handle・短い headline の名札にとどめ、自己紹介本文は下の `プロフィール` セクションだけが持つ
 - signature プロフィールでは、閲覧中にヘッダーとプロフィール内ナビが二重に固定されないよう、グローバルヘッダーと `signature-local-nav` は固定表示しない
-- `public/textures/new-commune/` に生成PNG素材を置き、Apps / `/me` / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath で装飾レイヤーとして使う。`archteia-site-assets/` には横長の実物断片素材16枚を置き、アプリ棚、プロフィール、CURRENT、WORKS、Research、Links に振り分ける。signature と Apps では紙片を小さな飾りではなく、ページ全体の下敷きになる大きな机上面として敷く。ただし 360px 素材を全画面まで拡大するとぼけるため、signature では同じ紙面テクスチャ1枚をタイル表示し、断片素材の重ね貼りは避ける。装飾は `pointer-events: none` で機能面を塞がず、予定表や入力面の上には重ねない。反映安定のため layout から `/textures/new-commune/site-textures-20260430b.css` も読む
+- `public/textures/new-commune/` に生成PNG素材を置き、Apps / `/me` / signature / Research Progress / 深夜徘徊 / GenerativeArtWithMath で装飾レイヤーとして使う。`archteia-site-assets/` には横長の実物断片素材16枚を置き、プロフィール、CURRENT、WORKS、Research、Links に振り分ける。Apps と signature では紙片を小さな飾りではなく、ページ全体の下敷きになる大きな机上面として敷く。ただし 360px 素材を全画面まで拡大するとぼけるため、Apps は `08_archival_paper_note.png`、signature は `06_grid_paint_texture.png` を原寸タイル表示し、断片素材の重ね貼りは避ける。装飾は `pointer-events: none` で機能面を塞がず、予定表や入力面の上には重ねない。反映安定のため layout から `/textures/new-commune/site-textures-20260430c.css` も読む
 - 触る際は:
   - どの面を変えるかを明確にする
   - 無関係なセクションをまとめて触らない

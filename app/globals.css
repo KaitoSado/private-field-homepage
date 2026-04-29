@@ -1166,23 +1166,19 @@ textarea {
   z-index: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(90deg, rgba(245, 241, 232, 0.54), rgba(245, 241, 232, 0.38)),
-    url("/textures/new-commune/archteia-site-assets/01_apps_dashboard_fragment.png"),
-    url("/textures/new-commune/archteia-site-assets/05_apps_card_grid_fragment.png"),
-    url("/textures/new-commune/archteia-site-assets/09_apps_form_dashboard_fragment.png");
+    linear-gradient(90deg, rgba(246, 242, 233, 0.58), rgba(244, 239, 227, 0.44)),
+    url("/textures/new-commune/08_archival_paper_note.png");
   background-position:
     center,
-    right -8vw top 8px,
-    left -8vw top 34%,
-    right 10vw bottom 0;
+    left top;
   background-size:
     100% 100%,
-    min(840px, 70vw) auto,
-    min(600px, 54vw) auto,
-    min(680px, 58vw) auto;
-  background-repeat: no-repeat;
-  opacity: 0.56;
-  filter: saturate(1.14) contrast(1.03);
+    294px 495px;
+  background-repeat:
+    no-repeat,
+    repeat;
+  opacity: 0.48;
+  filter: saturate(1.08) contrast(1.06);
   mix-blend-mode: multiply;
 }
 
@@ -9127,17 +9123,18 @@ textarea {
 
   .apps-library-shell::before {
     background-image:
-      linear-gradient(rgba(245, 241, 232, 0.5), rgba(245, 241, 232, 0.42)),
-      url("/textures/new-commune/archteia-site-assets/01_apps_dashboard_fragment.png"),
-      url("/textures/new-commune/archteia-site-assets/05_apps_card_grid_fragment.png");
+      linear-gradient(rgba(246, 242, 233, 0.58), rgba(244, 239, 227, 0.48)),
+      url("/textures/new-commune/08_archival_paper_note.png");
     background-position:
       center,
-      right -30vw top 18px,
-      left -26vw bottom 40px;
+      left top;
     background-size:
       100% 100%,
-      118vw auto,
-      92vw auto;
+      294px 495px;
+    background-repeat:
+      no-repeat,
+      repeat;
+    opacity: 0.4;
   }
 
   .me-hub-shell::before {
