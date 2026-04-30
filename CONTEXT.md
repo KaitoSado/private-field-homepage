@@ -80,6 +80,7 @@
   - 助け合いボード `/apps/help`
   - 祈祷と呪詛 `/apps/ritual`
   - Games `/apps/games`
+    - `はね玉アリーナ` を `/games/bounce-arena/index.html` の static HTML/CSS/JS として追加し、4色のボールが自動で跳ねる試合の勝者を予想する観戦型ゲームとして `/apps/games` から埋め込みと単独起動ができる
     - `賽の河原` を `/games/sainokawara/index.html` の static HTML/CSS/JS として実装
     - `/apps/games` から iframe と単独起動リンクで遊べる
     - Matter.js ベースの石積み、危険度メーター、微弱な風、次石プレビュー、best score 保存を持つ

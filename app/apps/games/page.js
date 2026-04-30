@@ -2,7 +2,7 @@ import { GameArcade } from "@/components/game-arcade";
 
 export const metadata = {
   title: "Games | Apps | Commune",
-  description: "賽の河原を含む、Apps の中でそのまま遊べるミニゲーム集。"
+  description: "はね玉アリーナ、賽の河原を含む、Apps の中でそのまま遊べるミニゲーム集。"
 };
 
 export default function GamesPage() {

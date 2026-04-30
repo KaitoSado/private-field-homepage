@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>はね玉アリーナ</title>
+    <meta
+      name="description"
+      content="4色のボールが跳ね回り、最後の1体を予想する観戦型ブラウザゲーム。"
+    />
+    <link rel="stylesheet" href="/games/bounce-arena/style.css" />
+  </head>
+  <body>
+    <div class="arena-app">
+      <header class="arena-hud" id="hud">
+        <div class="arena-hud-grid">
+          <div class="arena-hud-tile">
+            <span>予想</span>
+            <strong id="pickValue">青</strong>
+          </div>
+          <div class="arena-hud-tile">
+            <span>スコア</span>
+            <strong id="scoreValue">0</strong>
+          </div>
+          <div class="arena-hud-tile">
+            <span>連勝</span>
+            <strong id="streakValue">0</strong>
+          </div>
+          <div class="arena-hud-tile">
+            <span>最良</span>
+            <strong id="bestValue">0</strong>
+          </div>
+        </div>
+        <button type="button" class="arena-button arena-button-ghost" id="restartButton">次の試合</button>
+      </header>
+
+      <main class="arena-stage">
+        <section class="arena-phone">
+          <div class="arena-health" aria-label="各ボールの体力">
+            <div class="arena-health-row" data-team="blue">
+              <span><i></i>青</span>
+              <div id="hpBlue" class="arena-pips"></div>
+            </div>
+            <div class="arena-health-row" data-team="green">
+              <span><i></i>緑</span>
+              <div id="hpGreen" class="arena-pips"></div>
+            </div>
+            <div class="arena-health-row" data-team="yellow">
+              <span><i></i>黄</span>
+              <div id="hpYellow" class="arena-pips"></div>
+            </div>
+            <div class="arena-health-row" data-team="red">
+              <span><i></i>赤</span>
+              <div id="hpRed" class="arena-pips"></div>
+            </div>
+          </div>
+
+          <canvas id="gameCanvas" width="430" height="760" aria-label="はね玉アリーナの試合画面"></canvas>
+
+          <div class="arena-overlay" id="titleScreen">
+            <div class="arena-panel">
+              <p class="arena-eyebrow">観戦型バトル</p>
+              <h1>はね玉アリーナ</h1>
+              <p class="arena-lead">
+                勝つ色を選んで、跳ねる玉の試合を見る。壁、障害物、危険地帯で体力が削れ、最後に残った色が勝ちです。
+              </p>
+
+              <div class="arena-pick-grid" aria-label="勝者予想">
+                <button type="button" class="arena-pick is-active" data-pick="blue">青</button>
+                <button type="button" class="arena-pick" data-pick="green">緑</button>
+                <button type="button" class="arena-pick" data-pick="yellow">黄</button>
+                <button type="button" class="arena-pick" data-pick="red">赤</button>
+              </div>
+
+              <div class="arena-actions">
+                <button type="button" class="arena-button arena-button-primary" id="startButton">試合開始</button>
+              </div>
+
+              <div class="arena-controls">
+                <div><strong>予想</strong><span>1 / 2 / 3 / 4</span></div>
+                <div><strong>波紋</strong><span>タップ</span></div>
+                <div><strong>再戦</strong><span>R</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="arena-overlay" id="resultScreen" hidden>
+            <div class="arena-panel arena-result-panel">
+              <p class="arena-eyebrow">結果</p>
+              <h2 id="resultTitle">青の勝ち</h2>
+              <p class="arena-lead" id="resultNote">予想的中。次の試合へ。</p>
+
+              <div class="arena-result-grid">
+                <div><span>獲得</span><strong id="resultGain">+0</strong></div>
+                <div><span>時間</span><strong id="resultTime">0.0s</strong></div>
+                <div><span>連勝</span><strong id="resultStreak">0</strong></div>
+              </div>
+
+              <div class="arena-actions">
+                <button type="button" class="arena-button arena-button-primary" id="retryButton">もう一戦</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="arena-footer-card">
+          <div>
+            <span>試合</span>
+            <strong id="roundValue">1</strong>
+          </div>
+          <div>
+            <span>混雑</span>
+            <strong id="chaosValue">x1.0</strong>
+          </div>
+          <div>
+            <span>状態</span>
+            <strong id="statusValue">待機</strong>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/games/bounce-arena/script.js"></script>
+  </body>
+</html>

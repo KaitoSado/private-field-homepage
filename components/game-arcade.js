@@ -7,6 +7,7 @@ import { DuckPlatformerGame } from "@/components/duck-platformer-game";
 import { TowerDefenseGame } from "@/components/tower-defense-game";
 
 const tabs = [
+  { id: "bounce", label: "はね玉" },
   { id: "sainokawara", label: "賽の河原" },
   { id: "comb", label: "くしさばき" },
   { id: "defense", label: "Tower Defense" },
@@ -88,7 +89,7 @@ const TETRIS_SHAPES = {
 };
 
 export function GameArcade() {
-  const [activeTab, setActiveTab] = useState("sainokawara");
+  const [activeTab, setActiveTab] = useState("bounce");
 
   return (
     <div className="dashboard-layout">
@@ -112,6 +113,7 @@ export function GameArcade() {
           ))}
         </div>
 
+        {activeTab === "bounce" ? <BounceArenaGame /> : null}
         {activeTab === "sainokawara" ? <SaikawaraGame /> : null}
         {activeTab === "comb" ? <CombSweepGame /> : null}
         {activeTab === "defense" ? <TowerDefenseGame /> : null}
@@ -122,6 +124,57 @@ export function GameArcade() {
         {activeTab === "reaction" ? <ReactionTapGame /> : null}
         {activeTab === "memory" ? <MemoryFlipGame /> : null}
       </section>
+    </div>
+  );
+}
+
+function BounceArenaGame() {
+  return (
+    <div className="arcade-panel-grid arcade-panel-grid-wide">
+      <div className="surface arcade-game-card arcade-feature-game">
+        <div className="section-copy">
+          <p className="eyebrow">観戦型バトル</p>
+          <h2>はね玉アリーナ</h2>
+          <p>
+            勝つ色を選んで、4色の玉が跳ね回る試合を見るゲームです。壁、障害物、危険地帯で体力が削れ、最後に残った色が勝ちます。
+          </p>
+        </div>
+
+        <div className="arcade-feature-layout">
+          <div className="arcade-feature-frame-wrap">
+            <iframe
+              src="/games/bounce-arena/index.html"
+              title="はね玉アリーナ"
+              className="arcade-feature-frame"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="surface arcade-side-card arcade-feature-side">
+            <div className="stats-grid">
+              <div className="stat-tile">
+                <strong>勝者予想</strong>
+                <span>試合前に色を選ぶ</span>
+              </div>
+              <div className="stat-tile">
+                <strong>自動バトル</strong>
+                <span>跳ね返りと接触でHPが減る</span>
+              </div>
+            </div>
+
+            <div className="arcade-feature-copy">
+              <p className="eyebrow">Controls</p>
+              <p>1 / 2 / 3 / 4 で色を選択。Enter で開始、R で再戦。試合中にタップすると中立の波紋が出ます。</p>
+            </div>
+
+            <div className="hero-actions">
+              <Link href="/games/bounce-arena/index.html" className="button button-secondary" target="_blank">
+                単独で開く
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

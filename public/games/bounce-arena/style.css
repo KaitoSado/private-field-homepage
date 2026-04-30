@@ -1,0 +1,385 @@
+:root {
+  color-scheme: dark;
+  --bg: #06080e;
+  --panel: rgba(13, 17, 28, 0.78);
+  --panel-strong: rgba(13, 17, 28, 0.92);
+  --line: rgba(216, 229, 255, 0.14);
+  --line-strong: rgba(216, 229, 255, 0.28);
+  --text: #f4f7ff;
+  --muted: rgba(244, 247, 255, 0.68);
+  --blue: #54c7ff;
+  --green: #55e286;
+  --yellow: #ffe35a;
+  --red: #ff706d;
+  --shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Avenir Next", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(86, 199, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 18% 78%, rgba(255, 112, 109, 0.14), transparent 24%),
+    linear-gradient(180deg, #111727 0%, #070a11 62%, #030407 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 92%);
+}
+
+.arena-app {
+  width: min(100vw - 20px, 520px);
+  margin: 0 auto;
+  padding: 12px 0 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.arena-hud {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.arena-hud-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.arena-hud-tile,
+.arena-button,
+.arena-panel,
+.arena-footer-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.arena-hud-tile {
+  min-height: 66px;
+  border-radius: 6px;
+  padding: 10px 11px;
+  display: grid;
+  gap: 4px;
+}
+
+.arena-hud-tile span,
+.arena-footer-card span,
+.arena-eyebrow {
+  font-size: 0.68rem;
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.arena-hud-tile strong {
+  font-size: 1.08rem;
+  line-height: 1.1;
+}
+
+.arena-button {
+  appearance: none;
+  min-height: 42px;
+  border-radius: 6px;
+  padding: 0 15px;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.arena-button:hover {
+  transform: translateY(-1px);
+  border-color: var(--line-strong);
+}
+
+.arena-button-primary {
+  background: linear-gradient(180deg, rgba(84, 199, 255, 0.32), rgba(84, 199, 255, 0.12));
+  border-color: rgba(84, 199, 255, 0.44);
+}
+
+.arena-button-ghost {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.arena-stage {
+  display: grid;
+  gap: 12px;
+}
+
+.arena-phone {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 229, 255, 0.14);
+  background: linear-gradient(180deg, rgba(6, 9, 17, 0.96), rgba(3, 4, 8, 1));
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.46);
+}
+
+.arena-health {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid rgba(216, 229, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(3, 5, 11, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+.arena-health-row {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 18px;
+}
+
+.arena-health-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: rgba(244, 247, 255, 0.8);
+}
+
+.arena-health-row i {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--blue);
+  box-shadow: 0 0 12px currentColor;
+}
+
+.arena-health-row[data-team="green"] i {
+  background: var(--green);
+}
+
+.arena-health-row[data-team="yellow"] i {
+  background: var(--yellow);
+}
+
+.arena-health-row[data-team="red"] i {
+  background: var(--red);
+}
+
+.arena-pips {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.arena-pips i {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(244, 247, 255, 0.2);
+  background: rgba(244, 247, 255, 0.04);
+}
+
+.arena-pips i.is-full {
+  border-color: transparent;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+
+#hpBlue {
+  color: var(--blue);
+}
+
+#hpGreen {
+  color: var(--green);
+}
+
+#hpYellow {
+  color: var(--yellow);
+}
+
+#hpRed {
+  color: var(--red);
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 43 / 76;
+  touch-action: none;
+}
+
+.arena-overlay {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: linear-gradient(180deg, rgba(5, 8, 14, 0.34), rgba(3, 4, 8, 0.82));
+}
+
+.arena-panel {
+  width: min(100%, 374px);
+  border-radius: 8px;
+  padding: 24px 22px;
+  display: grid;
+  gap: 16px;
+  background: var(--panel-strong);
+}
+
+.arena-panel h1,
+.arena-panel h2,
+.arena-panel p {
+  margin: 0;
+}
+
+.arena-panel h1 {
+  font-size: clamp(2rem, 7vw, 2.9rem);
+  line-height: 1;
+}
+
+.arena-panel h2 {
+  font-size: clamp(1.8rem, 6vw, 2.4rem);
+  line-height: 1.08;
+}
+
+.arena-lead {
+  color: rgba(244, 247, 255, 0.86);
+  line-height: 1.75;
+}
+
+.arena-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.arena-pick {
+  appearance: none;
+  border: 1px solid rgba(216, 229, 255, 0.14);
+  border-radius: 6px;
+  min-height: 48px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.045);
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.arena-pick[data-pick="blue"].is-active {
+  background: rgba(84, 199, 255, 0.2);
+  border-color: rgba(84, 199, 255, 0.64);
+}
+
+.arena-pick[data-pick="green"].is-active {
+  background: rgba(85, 226, 134, 0.18);
+  border-color: rgba(85, 226, 134, 0.58);
+}
+
+.arena-pick[data-pick="yellow"].is-active {
+  background: rgba(255, 227, 90, 0.18);
+  border-color: rgba(255, 227, 90, 0.58);
+}
+
+.arena-pick[data-pick="red"].is-active {
+  background: rgba(255, 112, 109, 0.18);
+  border-color: rgba(255, 112, 109, 0.58);
+}
+
+.arena-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.arena-controls,
+.arena-result-grid,
+.arena-footer-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.arena-controls div,
+.arena-result-grid div,
+.arena-footer-card div {
+  border: 1px solid rgba(216, 229, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.arena-controls strong,
+.arena-result-grid strong,
+.arena-footer-card strong {
+  font-size: 1rem;
+}
+
+.arena-controls span,
+.arena-result-grid span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.arena-footer-card {
+  border-radius: 6px;
+  padding: 10px;
+}
+
+@media (max-width: 520px) {
+  .arena-app {
+    width: min(100vw - 12px, 520px);
+    padding-top: 8px;
+  }
+
+  .arena-hud {
+    display: grid;
+  }
+
+  .arena-hud-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .arena-health {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    padding: 8px;
+  }
+
+  .arena-pips {
+    gap: 3px;
+  }
+
+  .arena-panel {
+    padding: 20px 18px;
+  }
+}
